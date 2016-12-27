@@ -1,0 +1,300 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\mruby\lib\mruby\source.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-array-ext\mrblib\array.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-array-ext\test\array.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-bin-debugger\bintest\mrdb.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-bin-debugger\bintest\print.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-bin-mirb\bintest\mirb.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-bin-mruby\bintest\mruby.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-bin-strip\bintest\mruby-strip.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-compiler\bintest\mrbc.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-compiler\core\parse.y" />
+    <None Include="..\..\mruby\mrbgems\mruby-enum-ext\mrblib\enum.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-enum-ext\test\enum.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-enum-lazy\mrblib\lazy.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-enum-lazy\test\lazy.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-enumerator\mrblib\enumerator.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-enumerator\test\enumerator.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-error\test\exception.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-eval\test\eval.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-fiber\test\fiber.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-hash-ext\mrblib\hash.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-hash-ext\test\hash.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-kernel-ext\test\kernel.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-math\test\math.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-numeric-ext\mrblib\numeric_ext.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-numeric-ext\test\numeric.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-object-ext\mrblib\object.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-object-ext\test\nil.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-object-ext\test\object.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-objectspace\test\objectspace.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-print\mrblib\print.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-proc-ext\mrblib\proc.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-proc-ext\test\proc.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-random\test\random.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-range-ext\test\range.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-sprintf\mrblib\string.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-sprintf\test\sprintf.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-string-ext\mrblib\string.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-string-ext\test\string.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-struct\mrblib\struct.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-struct\test\struct.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-symbol-ext\mrblib\symbol.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-symbol-ext\test\symbol.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-time\mrblib\time.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-time\test\time.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-toplevel-ext\mrblib\toplevel.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-toplevel-ext\test\toplevel.rb" />
+    <None Include="..\..\mruby\mrblib\array.rb" />
+    <None Include="..\..\mruby\mrblib\class.rb" />
+    <None Include="..\..\mruby\mrblib\compar.rb" />
+    <None Include="..\..\mruby\mrblib\enum.rb" />
+    <None Include="..\..\mruby\mrblib\error.rb" />
+    <None Include="..\..\mruby\mrblib\hash.rb" />
+    <None Include="..\..\mruby\mrblib\kernel.rb" />
+    <None Include="..\..\mruby\mrblib\numeric.rb" />
+    <None Include="..\..\mruby\mrblib\range.rb" />
+    <None Include="..\..\mruby\mrblib\string.rb" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-array-ext\src\array.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-bin-debugger\tools\mrdb\apibreak.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-bin-debugger\tools\mrdb\apilist.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-bin-debugger\tools\mrdb\apiprint.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-bin-debugger\tools\mrdb\cmdbreak.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-bin-debugger\tools\mrdb\cmdmisc.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-bin-debugger\tools\mrdb\cmdprint.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-bin-debugger\tools\mrdb\cmdrun.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-bin-debugger\tools\mrdb\mrdb.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-bin-mirb\tools\mirb\mirb.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-bin-mrbc\tools\mrbc\mrbc.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-bin-mruby\tools\mruby\mruby.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-bin-strip\tools\mruby-strip\mruby-strip.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-compiler\core\codegen.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-error\src\exception.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-error\test\exception.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-eval\src\eval.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-exit\src\mruby-exit.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-fiber\src\fiber.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-hash-ext\src\hash-ext.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-kernel-ext\src\kernel.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-math\src\math.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-numeric-ext\src\numeric_ext.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-object-ext\src\object.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-objectspace\src\mruby_objectspace.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-print\src\print.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-proc-ext\src\proc.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-proc-ext\test\proc.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-random\src\mt19937ar.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-random\src\random.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-range-ext\src\range.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-sprintf\src\kernel.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-sprintf\src\sprintf.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-string-ext\src\string.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-struct\src\struct.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-symbol-ext\src\symbol.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-test\driver.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-test\init_mrbtest.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-time\src\time.c" />
+    <ClCompile Include="..\..\mruby\mrblib\init_mrblib.c" />
+    <ClCompile Include="..\..\mruby\src\array.c" />
+    <ClCompile Include="..\..\mruby\src\backtrace.c" />
+    <ClCompile Include="..\..\mruby\src\class.c" />
+    <ClCompile Include="..\..\mruby\src\codedump.c" />
+    <ClCompile Include="..\..\mruby\src\compar.c" />
+    <ClCompile Include="..\..\mruby\src\crc.c" />
+    <ClCompile Include="..\..\mruby\src\debug.c" />
+    <ClCompile Include="..\..\mruby\src\dump.c" />
+    <ClCompile Include="..\..\mruby\src\enum.c" />
+    <ClCompile Include="..\..\mruby\src\error.c" />
+    <ClCompile Include="..\..\mruby\src\etc.c" />
+    <ClCompile Include="..\..\mruby\src\fmt_fp.c" />
+    <ClCompile Include="..\..\mruby\src\gc.c" />
+    <ClCompile Include="..\..\mruby\src\hash.c" />
+    <ClCompile Include="..\..\mruby\src\init.c" />
+    <ClCompile Include="..\..\mruby\src\kernel.c" />
+    <ClCompile Include="..\..\mruby\src\load.c" />
+    <ClCompile Include="..\..\mruby\src\numeric.c" />
+    <ClCompile Include="..\..\mruby\src\object.c" />
+    <ClCompile Include="..\..\mruby\src\pool.c" />
+    <ClCompile Include="..\..\mruby\src\print.c" />
+    <ClCompile Include="..\..\mruby\src\proc.c" />
+    <ClCompile Include="..\..\mruby\src\range.c" />
+    <ClCompile Include="..\..\mruby\src\state.c" />
+    <ClCompile Include="..\..\mruby\src\string.c" />
+    <ClCompile Include="..\..\mruby\src\symbol.c" />
+    <ClCompile Include="..\..\mruby\src\variable.c" />
+    <ClCompile Include="..\..\mruby\src\version.c" />
+    <ClCompile Include="..\..\mruby\src\vm.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\mruby\include\mrbconf.h" />
+    <ClInclude Include="..\..\mruby\include\mruby.h" />
+    <ClInclude Include="..\..\mruby\include\mruby\array.h" />
+    <ClInclude Include="..\..\mruby\include\mruby\boxing_nan.h" />
+    <ClInclude Include="..\..\mruby\include\mruby\boxing_no.h" />
+    <ClInclude Include="..\..\mruby\include\mruby\boxing_word.h" />
+    <ClInclude Include="..\..\mruby\include\mruby\class.h" />
+    <ClInclude Include="..\..\mruby\include\mruby\common.h" />
+    <ClInclude Include="..\..\mruby\include\mruby\compile.h" />
+    <ClInclude Include="..\..\mruby\include\mruby\data.h" />
+    <ClInclude Include="..\..\mruby\include\mruby\debug.h" />
+    <ClInclude Include="..\..\mruby\include\mruby\dump.h" />
+    <ClInclude Include="..\..\mruby\include\mruby\error.h" />
+    <ClInclude Include="..\..\mruby\include\mruby\gc.h" />
+    <ClInclude Include="..\..\mruby\include\mruby\hash.h" />
+    <ClInclude Include="..\..\mruby\include\mruby\irep.h" />
+    <ClInclude Include="..\..\mruby\include\mruby\khash.h" />
+    <ClInclude Include="..\..\mruby\include\mruby\numeric.h" />
+    <ClInclude Include="..\..\mruby\include\mruby\object.h" />
+    <ClInclude Include="..\..\mruby\include\mruby\opcode.h" />
+    <ClInclude Include="..\..\mruby\include\mruby\proc.h" />
+    <ClInclude Include="..\..\mruby\include\mruby\range.h" />
+    <ClInclude Include="..\..\mruby\include\mruby\re.h" />
+    <ClInclude Include="..\..\mruby\include\mruby\string.h" />
+    <ClInclude Include="..\..\mruby\include\mruby\throw.h" />
+    <ClInclude Include="..\..\mruby\include\mruby\value.h" />
+    <ClInclude Include="..\..\mruby\include\mruby\variable.h" />
+    <ClInclude Include="..\..\mruby\include\mruby\version.h" />
+    <ClInclude Include="..\..\mruby\mrbgems\mruby-bin-debugger\tools\mrdb\apibreak.h" />
+    <ClInclude Include="..\..\mruby\mrbgems\mruby-bin-debugger\tools\mrdb\apilist.h" />
+    <ClInclude Include="..\..\mruby\mrbgems\mruby-bin-debugger\tools\mrdb\apiprint.h" />
+    <ClInclude Include="..\..\mruby\mrbgems\mruby-bin-debugger\tools\mrdb\mrdb.h" />
+    <ClInclude Include="..\..\mruby\mrbgems\mruby-bin-debugger\tools\mrdb\mrdbconf.h" />
+    <ClInclude Include="..\..\mruby\mrbgems\mruby-bin-debugger\tools\mrdb\mrdberror.h" />
+    <ClInclude Include="..\..\mruby\mrbgems\mruby-compiler\core\node.h" />
+    <ClInclude Include="..\..\mruby\mrbgems\mruby-random\src\mt19937ar.h" />
+    <ClInclude Include="..\..\mruby\mrbgems\mruby-random\src\random.h" />
+    <ClInclude Include="..\..\mruby\src\error.h" />
+    <ClInclude Include="..\..\mruby\src\opcode.h" />
+    <ClInclude Include="..\..\mruby\src\value_array.h" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{D4378089-A3B4-4F64-980B-BF69015E30B8}</ProjectGuid>
+    <Keyword>MakeFileProj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <NMakeBuildCommandLine>PATH=%PATH%;$(ProjectDir)..\tools\bin
+cd $(ProjectDir)..\..\mruby
+ruby minirake
+cd $(ProjectDir)
+if not exist $(Configuration) mkdir $(Configuration)
+copy /B /Y ..\..\mruby\build\host\lib\$(TargetName).lib $(Configuration)\
+copy /B /Y ..\..\mruby\build\host\vc140.pdb $(Configuration)\$(TargetName).pdb
+copy /B /Y ..\..\mruby\build\host\vc140.idb $(Configuration)\$(TargetName).idb</NMakeBuildCommandLine>
+    <NMakeOutput>$(Configuration)\libmruby.lib</NMakeOutput>
+    <NMakeCleanCommandLine>PATH=%PATH%;$(ProjectDir)..\tools\bin
+cd $(ProjectDir)
+del $(Configuration)\$(TargetName).lib
+cd $(ProjectDir)..\..\mruby
+ruby minirake clean
+</NMakeCleanCommandLine>
+    <NMakeReBuildCommandLine>PATH=%PATH%;$(ProjectDir)..\tools\bin
+cd $(ProjectDir)
+del $(Configuration)\$(TargetName).lib
+cd $(ProjectDir)..\..\mruby
+ruby minirake clean all
+cd $(ProjectDir)
+if not exist $(Configuration) mkdir $(Configuration)
+copy /B /Y ..\..\mruby\build\host\lib\$(TargetName).lib $(Configuration)\
+copy /B /Y ..\..\mruby\build\host\vc140.pdb $(Configuration)\$(TargetName).pdb
+copy /B /Y ..\..\mruby\build\host\vc140.idb $(Configuration)\$(TargetName).idb</NMakeReBuildCommandLine>
+    <NMakePreprocessorDefinitions>WIN32;_DEBUG;ECHONET_CONTROLLER_EXTENTION;MRB_GC_STRESS;MRB_USE_PRESET_SYMBOLS;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <OutDir>$(ProjectDir)\</OutDir>
+    <NMakeIncludeSearchPath>..\..\mruby\include;..\..\asp\arch;..\..\asp\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <NMakeBuildCommandLine>PATH=%PATH%;$(ProjectDir)..\tools\bin
+cd $(ProjectDir)..\..\mruby
+ruby minirake
+cd $(ProjectDir)
+if not exist $(Configuration) mkdir $(Configuration)
+copy /B /Y ..\..\mruby\build\host\lib\$(TargetName).lib $(Configuration)\
+copy /B /Y ..\..\mruby\build\host\vc140.pdb $(Configuration)\$(TargetName).pdb
+copy /B /Y ..\..\mruby\build\host\vc140.idb $(Configuration)\$(TargetName).idb</NMakeBuildCommandLine>
+    <NMakeOutput>$(Configuration)\libmruby.lib</NMakeOutput>
+    <NMakeCleanCommandLine>PATH=%PATH%;$(ProjectDir)..\tools\bin
+cd $(ProjectDir)
+del $(Configuration)\$(TargetName).lib
+cd $(ProjectDir)..\..\mruby
+ruby minirake clean
+</NMakeCleanCommandLine>
+    <NMakeReBuildCommandLine>PATH=%PATH%;$(ProjectDir)..\tools\bin
+cd $(ProjectDir)
+del $(Configuration)\$(TargetName).lib
+cd $(ProjectDir)..\..\mruby
+ruby minirake clean all
+cd $(ProjectDir)
+if not exist $(Configuration) mkdir $(Configuration)
+copy /B /Y ..\..\mruby\build\host\lib\$(TargetName).lib $(Configuration)\
+copy /B /Y ..\..\mruby\build\host\vc140.pdb $(Configuration)\$(TargetName).pdb
+copy /B /Y ..\..\mruby\build\host\vc140.idb $(Configuration)\$(TargetName).idb</NMakeReBuildCommandLine>
+    <NMakePreprocessorDefinitions>WIN32;_DEBUG;ECHONET_CONTROLLER_EXTENTION;MRB_GC_STRESS;MRB_USE_PRESET_SYMBOLS;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <OutDir>$(ProjectDir)\</OutDir>
+    <NMakeIncludeSearchPath>..\..\mruby\include;..\..\asp\arch;..\..\asp\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

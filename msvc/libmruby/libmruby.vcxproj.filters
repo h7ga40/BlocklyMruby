@@ -1,0 +1,521 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="ソース ファイル">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="ヘッダー ファイル">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="リソース ファイル">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Ruby ファイル">
+      <UniqueIdentifier>{8d3600a9-166b-45c4-bbe0-01ca84838113}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\mruby\mrblib\array.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-array-ext\test\array.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-array-ext\mrblib\array.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrblib\class.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrblib\compar.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-enum-ext\mrblib\enum.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-enum-ext\test\enum.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrblib\enum.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-enumerator\mrblib\enumerator.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-enumerator\test\enumerator.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrblib\error.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-eval\test\eval.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-error\test\exception.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-fiber\test\fiber.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-hash-ext\mrblib\hash.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrblib\hash.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-hash-ext\test\hash.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrblib\kernel.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-kernel-ext\test\kernel.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-enum-lazy\mrblib\lazy.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-enum-lazy\test\lazy.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-math\test\math.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-bin-mirb\bintest\mirb.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-compiler\bintest\mrbc.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-bin-debugger\bintest\mrdb.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-bin-mruby\bintest\mruby.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-bin-strip\bintest\mruby-strip.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-object-ext\test\nil.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-numeric-ext\test\numeric.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrblib\numeric.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-numeric-ext\mrblib\numeric_ext.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-object-ext\test\object.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-object-ext\mrblib\object.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-objectspace\test\objectspace.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-compiler\core\parse.y">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-print\mrblib\print.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-bin-debugger\bintest\print.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-proc-ext\mrblib\proc.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-proc-ext\test\proc.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-random\test\random.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrblib\range.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-range-ext\test\range.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\lib\mruby\source.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-sprintf\test\sprintf.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-sprintf\mrblib\string.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-string-ext\test\string.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrblib\string.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-string-ext\mrblib\string.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-struct\mrblib\struct.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-struct\test\struct.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-symbol-ext\mrblib\symbol.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-symbol-ext\test\symbol.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-time\test\time.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-time\mrblib\time.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-toplevel-ext\test\toplevel.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-toplevel-ext\mrblib\toplevel.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-objectspace\src\mruby_objectspace.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-exit\src\mruby-exit.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-bin-strip\tools\mruby-strip\mruby-strip.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-proc-ext\src\proc.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-proc-ext\test\proc.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-bin-mirb\tools\mirb\mirb.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-print\src\print.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-range-ext\src\range.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-bin-debugger\tools\mrdb\cmdrun.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-bin-debugger\tools\mrdb\apiprint.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-bin-debugger\tools\mrdb\cmdbreak.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-bin-debugger\tools\mrdb\apilist.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-bin-debugger\tools\mrdb\mrdb.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-bin-debugger\tools\mrdb\cmdprint.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-bin-debugger\tools\mrdb\cmdmisc.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-bin-debugger\tools\mrdb\apibreak.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-bin-mrbc\tools\mrbc\mrbc.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-eval\src\eval.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-sprintf\src\sprintf.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-struct\src\struct.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-hash-ext\src\hash-ext.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-random\src\mt19937ar.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-random\src\random.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-test\driver.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-test\init_mrbtest.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-kernel-ext\src\kernel.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-array-ext\src\array.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-compiler\core\codegen.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-bin-mruby\tools\mruby\mruby.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-object-ext\src\object.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-string-ext\src\string.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-symbol-ext\src\symbol.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-time\src\time.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-error\src\exception.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-error\test\exception.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-math\src\math.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-fiber\src\fiber.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\src\print.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\src\gc.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\src\variable.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\src\version.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\src\vm.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\src\compar.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\src\pool.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\src\state.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\src\dump.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\src\numeric.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\src\proc.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\src\codedump.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\src\error.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\src\range.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\src\debug.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\src\hash.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\src\kernel.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\src\backtrace.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\src\load.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\src\array.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\src\crc.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\src\etc.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\src\fmt_fp.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\src\object.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\src\string.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\src\class.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\src\enum.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\src\init.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\src\symbol.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrblib\init_mrblib.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-numeric-ext\src\numeric_ext.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-sprintf\src\kernel.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\mruby\mrbgems\mruby-bin-debugger\tools\mrdb\apiprint.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\mrbgems\mruby-bin-debugger\tools\mrdb\apilist.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\mrbgems\mruby-bin-debugger\tools\mrdb\mrdb.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\mrbgems\mruby-bin-debugger\tools\mrdb\apibreak.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\mrbgems\mruby-bin-debugger\tools\mrdb\mrdberror.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\mrbgems\mruby-bin-debugger\tools\mrdb\mrdbconf.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\mrbgems\mruby-random\src\mt19937ar.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\mrbgems\mruby-random\src\random.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\mrbgems\mruby-compiler\core\node.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\src\error.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\src\opcode.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\include\mruby\common.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\include\mruby\compile.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\include\mruby\debug.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\include\mruby\version.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\include\mruby\boxing_nan.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\include\mruby\hash.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\include\mruby\variable.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\include\mruby\array.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\include\mruby\boxing_no.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\include\mruby\boxing_word.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\include\mruby\data.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\include\mruby\opcode.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\include\mruby\value.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\include\mruby\object.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\include\mruby\re.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\include\mruby\class.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\include\mruby\dump.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\include\mruby\proc.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\include\mruby\string.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\include\mruby\throw.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\include\mruby\irep.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\include\mruby\khash.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\include\mruby\numeric.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\include\mruby\range.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\include\mruby\gc.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\include\mruby\error.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\include\mrbconf.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\include\mruby.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\src\value_array.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
