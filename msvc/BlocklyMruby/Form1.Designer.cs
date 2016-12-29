@@ -34,6 +34,8 @@
 			this.RunBtn = new System.Windows.Forms.Button();
 			this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
 			this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+			this.ExportRubyBtn = new System.Windows.Forms.Button();
+			this.saveFileDialog2 = new System.Windows.Forms.SaveFileDialog();
 			this.flowLayoutPanel1.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -54,6 +56,7 @@
 			this.flowLayoutPanel1.Controls.Add(this.LoadBtn);
 			this.flowLayoutPanel1.Controls.Add(this.SaveBtn);
 			this.flowLayoutPanel1.Controls.Add(this.RunBtn);
+			this.flowLayoutPanel1.Controls.Add(this.ExportRubyBtn);
 			this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Top;
 			this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
 			this.flowLayoutPanel1.Name = "flowLayoutPanel1";
@@ -102,6 +105,22 @@
 			this.saveFileDialog1.FileName = "workspace.xml";
 			this.saveFileDialog1.Filter = "xml ファイル|*.xml|すべてのファイル|*.*";
 			// 
+			// ExportRubyBtn
+			// 
+			this.ExportRubyBtn.Location = new System.Drawing.Point(246, 3);
+			this.ExportRubyBtn.Name = "ExportRubyBtn";
+			this.ExportRubyBtn.Size = new System.Drawing.Size(75, 23);
+			this.ExportRubyBtn.TabIndex = 3;
+			this.ExportRubyBtn.Text = "Rubyで保存";
+			this.ExportRubyBtn.UseVisualStyleBackColor = true;
+			this.ExportRubyBtn.Click += new System.EventHandler(this.ExportRubyBtn_Click);
+			// 
+			// saveFileDialog2
+			// 
+			this.saveFileDialog2.DefaultExt = "rb";
+			this.saveFileDialog2.FileName = "workspace.rb";
+			this.saveFileDialog2.Filter = "Ruby ファイル|*.rb|すべてのファイル|*.*";
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -129,6 +148,8 @@
 		private System.Windows.Forms.Button RunBtn;
 		private System.Windows.Forms.OpenFileDialog openFileDialog1;
 		private System.Windows.Forms.SaveFileDialog saveFileDialog1;
+		private System.Windows.Forms.Button ExportRubyBtn;
+		private System.Windows.Forms.SaveFileDialog saveFileDialog2;
 	}
 }
 

@@ -51,6 +51,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App.cs" />
     <Compile Include="Block.cs" />
     <Compile Include="Blockly.cs" />
     <Compile Include="Blocks\Colour.cs" />
@@ -116,7 +117,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="js\blockly.js" />
-    <None Include="js\ja.js" />
     <None Include="index.html" />
     <None Include="icon.png" />
   </ItemGroup>

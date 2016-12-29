@@ -148,7 +148,7 @@ namespace BlocklyMruby
 		[External]
 		internal string blockToCode(Block block)
 		{
-			return instance.blockToCode(block);
+			return instance.blockToCode(block == null ? null : block.instance);
 		}
 
 		/// <summary>

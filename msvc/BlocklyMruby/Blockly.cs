@@ -1576,11 +1576,11 @@ public static class Blockly
 		/// <returns>The input being modified (to allow chaining).</returns>
 		public Input setCheck(Any<string, string[]> check)
 		{
-			var chk = check.As<string[]>();
+			var chk = check == null ? null : check.As<string[]>();
 			if (chk != null)
 				return Script.CreateInput(instance.setCheck.call(instance, Script.NewArray(check)));
 			else
-				return Script.CreateInput(instance.setCheck.call(instance, check.Value));
+				return Script.CreateInput(instance.setCheck.call(instance, (string)check));
 		}
 
 		/// <summary>

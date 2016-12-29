@@ -3582,6 +3582,11 @@ namespace BlocklyMruby
 
 			return tree;
 		}
+
+		public string to_ruby()
+		{
+			return UTF8ArrayToString(s, 0);
+		}
 #if false
 		static void printf(string format, params object[] args)
 		{

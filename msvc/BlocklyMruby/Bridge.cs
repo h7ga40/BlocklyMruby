@@ -474,6 +474,21 @@ Bridge.SetGenerator = function(generator)
 			Blockly.instance = scriptHost.blockly;
 		}
 
+		internal static void SetMessage(Type type)
+		{
+			var msg = Document.InvokeScript("eval", new object[] { "Blockly.Msg" });
+
+			foreach (var f in type.GetFields()) {
+				if (f.FieldType != typeof(string))
+					continue;
+
+				if (!f.IsPublic || !f.IsStatic || !f.IsLiteral)
+					continue;
+
+				Script.Set(msg, f.Name, f.GetValue(null));
+			}
+		}
+
 		internal static dynamic NewObject()
 		{
 			return new Microsoft.JScript.JSObject();

@@ -130,30 +130,5 @@ namespace BlocklyMruby.Properties {
                 return ResourceManager.GetString("index", resourceCulture);
             }
         }
-        
-        /// <summary>
-        ///   // This file was automatically generated.  Do not modify.
-        ///
-        ///&apos;use strict&apos;;
-        ///
-        ///goog.provide(&apos;Blockly.Msg.ja&apos;);
-        ///
-        ///goog.require(&apos;Blockly.Msg&apos;);
-        ///
-        ///Blockly.Msg.ADD_COMMENT = &quot;コメントを追加&quot;;
-        ///Blockly.Msg.CHANGE_VALUE_TITLE = &quot;値を変更します。&quot;;
-        ///Blockly.Msg.CLEAN_UP = &quot;ブロックの整理&quot;;
-        ///Blockly.Msg.COLLAPSE_ALL = &quot;ブロックを折りたたむ&quot;;
-        ///Blockly.Msg.COLLAPSE_BLOCK = &quot;ブロックを折りたたむ&quot;;
-        ///Blockly.Msg.COLOUR_BLEND_COLOUR1 = &quot;色 1&quot;;
-        ///Blockly.Msg.COLOUR_BLEND_COLOUR2 = &quot;色 2&quot;;
-        ///Blockly.Msg.COLOUR_BLEND_HELPURL = &quot;http://meyerweb.com/eric/tools/color-blend/&quot;;
-        ///Blockly.M [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
-        /// </summary>
-        internal static string ja {
-            get {
-                return ResourceManager.GetString("ja", resourceCulture);
-            }
-        }
     }
 }
