@@ -425,7 +425,7 @@ cmd_brace_block : tLBRACE_ARG
                   compstmt
                   '}'
                     {
-                      $$ = new_block($3, $4);
+                      $$ = new_block($3, $4, true);
                       local_unnest();
                     }
                 ;
@@ -1560,7 +1560,7 @@ do_block        : keyword_do_block
                   compstmt
                   keyword_end
                     {
-                      $$ = new_block($3,$4);
+                      $$ = new_block($3, $4, false);
                       local_unnest();
                     }
                 ;
@@ -1637,7 +1637,7 @@ brace_block     : '{'
                   opt_block_param
                   compstmt '}'
                     {
-                      $$ = new_block($3,$4);
+                      $$ = new_block($3, $4, true);
                       $<node>$.SET_LINENO($<int>2);
                       local_unnest();
                     }
@@ -1649,7 +1649,7 @@ brace_block     : '{'
                   opt_block_param
                   compstmt keyword_end
                     {
-                      $$ = new_block($3,$4);
+                      $$ = new_block($3, $4, false);
                       $<node>$.SET_LINENO($<int>2);
                       local_unnest();
                     }
@@ -1939,11 +1939,11 @@ var_ref         : variable
                       if (this.filename == null) {
                         this.filename = "(null)";
                       }
-                      $$ = new_str(this.filename, this.filename.Length);
+                      $$ = new_filename(this.filename);
                     }
                 | keyword__LINE__
                     {
-                      $$ = new_int(this.lineno.ToString(), 10);
+                      $$ = new_lineno(this.lineno);
                     }
                 ;
 

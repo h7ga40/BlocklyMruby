@@ -226,10 +226,17 @@ namespace BlocklyMruby
 
 		internal static string UTF8ArrayToString(Uint8Array data, int idx)
 		{
+			bool esc;
+			return UTF8ArrayToStringEsc(data, idx, out esc);
+		}
+
+		internal static string UTF8ArrayToStringEsc(Uint8Array data, int idx, out bool esc)
+		{
 			var str = "";
 			int c = 0, t = 0, end = data.Length;
 			var temp = new byte[6];
 
+			esc = false;
 			if (end > 0 && data[end - 1] == '\x0')
 				end--;
 
@@ -243,8 +250,10 @@ namespace BlocklyMruby
 						if (d >= 0x20 && d < 0x7F)
 							str += (char)d;
 						// 表示不可ならエスケープ
-						else
+						else {
+							esc = true;
 							str += escape(d);
+						}
 						continue;
 					}
 					// 2Byteコード
@@ -269,6 +278,7 @@ namespace BlocklyMruby
 					}
 					// 表示不可ならエスケープ
 					else {
+						esc = true;
 						str += escape(d);
 						continue;
 					}
@@ -278,6 +288,7 @@ namespace BlocklyMruby
 					// 表示不可ならエスケープ
 					if ((d & 0xC0) != 0x80) {
 						for (int j = 0; j < c; j++) {
+							esc = true;
 							str += escape(temp[j]);
 						}
 						t = 0;
@@ -311,6 +322,8 @@ namespace BlocklyMruby
 				}
 			}
 
+			if (c > 0)
+				esc = true;
 			for (int i = 0; i < c; i++) {
 				str += escape(temp[i]);
 			}
@@ -955,9 +968,9 @@ namespace BlocklyMruby
 		}
 
 		/* (:block arg body) */
-		block_node new_block(node a, node b)
+		block_node new_block(node a, node b, bool brace)
 		{
-			return new block_node(this, a, b);
+			return new block_node(this, a, b, brace);
 		}
 
 		/* (:lambda arg body) */
@@ -1079,6 +1092,17 @@ namespace BlocklyMruby
 		symbols_node new_symbols(node a)
 		{
 			return new symbols_node(this, a);
+		}
+
+		filename_node new_filename(string s)
+		{
+			var str = MrbParser.UTF8StringToArray(s);
+			return new filename_node(this, str, str.Length);
+		}
+
+		lineno_node new_lineno(int lineno)
+		{
+			return new lineno_node(this, lineno);
 		}
 
 		/* xxx ----------------------------- */
@@ -3115,7 +3139,7 @@ namespace BlocklyMruby
 				case '%':
 					if (IS_BEG()) {
 						c = nextc();
-						quotation(c);
+						return quotation(c);
 					}
 					for (;;) {
 						if ((c = nextc()) == '=') {
@@ -3124,8 +3148,7 @@ namespace BlocklyMruby
 							return MrbTokens.tOP_ASGN;
 						}
 						if (IS_SPCARG(c, space_seen)) {
-							quotation(c);
-							continue;
+							return quotation(c);
 						}
 						break;
 					}
@@ -3585,7 +3608,15 @@ namespace BlocklyMruby
 
 		public string to_ruby()
 		{
-			return UTF8ArrayToString(s, 0);
+			if (tree != null) {
+				var cond = new ruby_code_cond();
+				tree.to_ruby(cond);
+				return cond.ToString();
+			}
+			if (s != null)
+				return UTF8ArrayToString(s, 0);
+			else
+				return "";
 		}
 #if false
 		static void printf(string format, params object[] args)

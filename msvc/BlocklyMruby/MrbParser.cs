@@ -6847,7 +6847,7 @@ namespace BlocklyMruby
 					case 55:
 #line 427 "mrb_parse.jay"
 						{
-							yyVal = new_block(((node)yyVals[-2 + yyTop]), ((node)yyVals[-1 + yyTop]));
+							yyVal = new_block(((node)yyVals[-2 + yyTop]), ((node)yyVals[-1 + yyTop]), true);
 							local_unnest();
 						}
 						break;
@@ -8351,7 +8351,7 @@ namespace BlocklyMruby
 					case 378:
 #line 1562 "mrb_parse.jay"
 						{
-							yyVal = new_block(((node)yyVals[-2 + yyTop]), ((node)yyVals[-1 + yyTop]));
+							yyVal = new_block(((node)yyVals[-2 + yyTop]), ((node)yyVals[-1 + yyTop]), false);
 							local_unnest();
 						}
 						break;
@@ -8451,7 +8451,7 @@ namespace BlocklyMruby
 					case 393:
 #line 1639 "mrb_parse.jay"
 						{
-							yyVal = new_block(((node)yyVals[-2 + yyTop]), ((node)yyVals[-1 + yyTop]));
+							yyVal = new_block(((node)yyVals[-2 + yyTop]), ((node)yyVals[-1 + yyTop]), true);
 							((node)yyVal).SET_LINENO(((int)yyVals[-3 + yyTop]));
 							local_unnest();
 						}
@@ -8466,7 +8466,7 @@ namespace BlocklyMruby
 					case 395:
 #line 1651 "mrb_parse.jay"
 						{
-							yyVal = new_block(((node)yyVals[-2 + yyTop]), ((node)yyVals[-1 + yyTop]));
+							yyVal = new_block(((node)yyVals[-2 + yyTop]), ((node)yyVals[-1 + yyTop]), false);
 							((node)yyVal).SET_LINENO(((int)yyVals[-3 + yyTop]));
 							local_unnest();
 						}
@@ -8765,13 +8765,13 @@ namespace BlocklyMruby
 							if (this.filename == null) {
 								this.filename = "(null)";
 							}
-							yyVal = new_str(this.filename, this.filename.Length);
+							yyVal = new_filename(this.filename);
 						}
 						break;
 					case 466:
 #line 1945 "mrb_parse.jay"
 						{
-							yyVal = new_int(this.lineno.ToString(), 10);
+							yyVal = new_lineno(this.lineno);
 						}
 						break;
 					case 469:

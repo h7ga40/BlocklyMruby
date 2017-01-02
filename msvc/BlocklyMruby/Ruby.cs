@@ -300,7 +300,7 @@ namespace BlocklyMruby
 			helpers[i++] = "  end";
 			helpers[i++] = "end";
 #endif
-			var indent = "\t";
+			var indent = INDENT;
 			var allDefs = generateDefinitions(helpers);
 			allDefs = indent + allDefs.Split("\n").Join("\n" + indent);
 			return allDefs.Replace(new Regex("\n\n+", "g"), "\n\n") + "\n" + code;

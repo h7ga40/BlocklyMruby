@@ -216,6 +216,104 @@ namespace BlocklyMruby
 		{
 			doc.Clear();
 		}
+
+		internal void to_ruby(ruby_code_cond cond)
+		{
+			cond.write_line("<<" + MrbParser.UTF8ArrayToString(term, 0));
+			foreach (var d in doc) {
+				if (d is begin_node) {
+					cond.write("#{");
+					d.to_ruby(cond);
+					cond.write("}");
+				}
+				else {
+					d.to_ruby(cond);
+				}
+			}
+			cond.write_line();
+			cond.write_line(MrbParser.UTF8ArrayToString(term, 0));
+		}
+	}
+
+	public class ruby_code_cond
+	{
+		public string newline_str { get; private set; }
+		public string indent_str { get; private set; }
+		public string indent { get; private set; }
+		public int nest { get; private set; }
+
+		bool first;
+		StringBuilder _code = new StringBuilder();
+
+		public ruby_code_cond()
+		{
+			indent_str = "  ";
+			newline_str = "\r\n";
+			first = true;
+		}
+
+		public void increment_indent()
+		{
+			indent += indent_str;
+			if (!first) {
+				_code.Append(newline_str);
+				first = true;
+			}
+		}
+
+		public void decrement_indent()
+		{
+			indent = indent.Substring(0, indent.Length - indent_str.Length);
+			if (!first) {
+				_code.Append(newline_str);
+				first = true;
+			}
+		}
+
+		public void increment_nest()
+		{
+			nest++;
+		}
+
+		public void decrement_nest()
+		{
+			nest--;
+		}
+
+		public void write(string code)
+		{
+			if (first) {
+				first = false;
+				_code.Append(indent);
+			}
+			_code.Append(code);
+		}
+
+		public void write_line(string code = null)
+		{
+			if (first) {
+				first = false;
+				_code.Append(indent);
+			}
+			if (code != null) {
+				_code.Append(code);
+			}
+			_code.Append(newline_str);
+			first = true;
+		}
+
+		public override string ToString()
+		{
+			return _code.ToString();
+		}
+
+		internal void separate_line()
+		{
+			if (!first) {
+				_code.Append(newline_str);
+				first = true;
+			}
+		}
 	}
 
 	public class node
@@ -302,6 +400,16 @@ namespace BlocklyMruby
 
 			throw new NotImplementedException();
 		}
+
+		public virtual void to_ruby(ruby_code_cond cond)
+		{
+			var a = car as node;
+			if (a != null && cdr == null) {
+				a.to_ruby(cond);
+			}
+
+			throw new NotImplementedException();
+		}
 	}
 
 	/* (:scope (vars..) (prog...)) */
@@ -338,6 +446,11 @@ namespace BlocklyMruby
 				s.AppendChild(b);
 			}
 			return s;
+		}
+
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			_body.to_ruby(cond);
 		}
 
 		public override string ToString()
@@ -398,9 +511,27 @@ namespace BlocklyMruby
 			return b;
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			var i = progs.Count;
+			foreach (var v in progs) {
+				var prn = v is colon2_node;
+				if (prn) {
+					cond.increment_nest();
+					cond.write("(");
+				}
+				v.to_ruby(cond);
+				if (prn) {
+					cond.write(")");
+					cond.decrement_nest();
+				}
+				i--; if (i > 0) cond.separate_line();
+			}
+		}
+
 		public override string ToString()
 		{
-			var str = $"(:begin ";
+			var str = "(:begin ";
 			foreach (var v in progs) {
 				str += $"{v}, ";
 			}
@@ -411,8 +542,6 @@ namespace BlocklyMruby
 	/* (:rescue body rescue else) */
 	class rescue_node : node
 	{
-		private node _body;
-
 		public class rescue_t
 		{
 			public List<node> handle_classes = new List<node>();
@@ -427,9 +556,32 @@ namespace BlocklyMruby
 				}
 				return $"{exc_var} {body})";
 			}
+
+			internal void to_ruby(ruby_code_cond cond)
+			{
+				cond.write("rescue");
+				int i = handle_classes.Count;
+				if (i > 0)
+					cond.write(" ");
+				foreach (var c in handle_classes) {
+					c.to_ruby(cond);
+					i--; if (i > 0) cond.write(", ");
+				}
+				if (exc_var != null) {
+					cond.write(" => ");
+					exc_var.to_ruby(cond);
+				}
+				cond.write_line();
+				cond.increment_indent();
+				body.to_ruby(cond);
+				cond.decrement_indent();
+			}
 		}
+
+		private node _body;
 		private List<rescue_t> _rescue = new List<rescue_t>();
 		private node _else;
+		public bool ensure;
 
 		public rescue_node(MrbParser p, node body, node resq, node els)
 			: base(p, node_type.NODE_RESCUE)
@@ -463,6 +615,31 @@ namespace BlocklyMruby
 			return body.to_xml();
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			if (!ensure) {
+				cond.write_line("begin");
+				cond.increment_indent();
+			}
+			_body.to_ruby(cond);
+			cond.decrement_indent();
+			foreach (var r in _rescue) {
+				r.to_ruby(cond);
+			}
+			if (_else != null) {
+				cond.write_line("else");
+				cond.increment_indent();
+				_else.to_ruby(cond);
+				cond.decrement_indent();
+			}
+			if (!ensure) {
+				cond.write_line("end");
+			}
+			else {
+				cond.increment_indent();
+			}
+		}
+
 		public override string ToString()
 		{
 			var str = $"(:rescue {body} ";
@@ -478,12 +655,16 @@ namespace BlocklyMruby
 	{
 		private node _body;
 		private node _ensure;
+		public bool def;
 
 		public ensure_node(MrbParser p, node a, node b)
 			: base(p, node_type.NODE_ENSURE)
 		{
 			_body = a;
 			_ensure = b;
+			if (_body is rescue_node) {
+				((rescue_node)_body).ensure = true;
+			}
 		}
 
 		public node body { get { return _body; } }
@@ -492,6 +673,23 @@ namespace BlocklyMruby
 		public override Element to_xml()
 		{
 			throw new NotImplementedException();
+		}
+
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			if (!def) {
+				cond.write_line("begin");
+				cond.increment_indent();
+			}
+			_body.to_ruby(cond);
+			cond.decrement_indent();
+			cond.write_line("ensure");
+			cond.increment_indent();
+			_ensure.to_ruby(cond);
+			if (!def) {
+				cond.decrement_indent();
+				cond.write_line("end");
+			}
 		}
 
 		public override string ToString()
@@ -513,6 +711,11 @@ namespace BlocklyMruby
 			var block = Document.CreateElement("block");
 			block.SetAttribute("type", "logic_null");
 			return block;
+		}
+
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write("nil");
 		}
 
 		public override string ToString()
@@ -553,6 +756,11 @@ namespace BlocklyMruby
 			return block;
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write("true");
+		}
+
 		public override string ToString()
 		{
 			return $"(:true)";
@@ -591,6 +799,11 @@ namespace BlocklyMruby
 			return block;
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write("false");
+		}
+
 		public override string ToString()
 		{
 			return $"(:false)";
@@ -627,6 +840,11 @@ namespace BlocklyMruby
 		public override Element to_xml()
 		{
 			throw new NotImplementedException();
+		}
+
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write_line($"alias {p.sym2name(_new)} {p.sym2name(_old)}");
 		}
 
 		public override string ToString()
@@ -696,6 +914,40 @@ namespace BlocklyMruby
 			return block;
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			var _elsif = new List<Tuple<node, node>>();
+			node _else = this._else;
+
+			for (var c = _else as if_node; c != null; _else = c._else, c = _else as if_node) {
+				_elsif.Add(new Tuple<node, node>(c._cond, c._then));
+			}
+
+			cond.increment_nest();
+			cond.write("if ");
+			_cond.to_ruby(cond);
+			cond.decrement_nest();
+			cond.increment_indent();
+			_then.to_ruby(cond);
+			cond.decrement_indent();
+			foreach (var e in _elsif) {
+				cond.write("elsif ");
+				e.Item1.to_ruby(cond);
+				cond.write_line();
+				cond.increment_indent();
+				e.Item2.to_ruby(cond);
+				cond.decrement_indent();
+			}
+
+			if (_else != null) {
+				cond.write_line("else");
+				cond.increment_indent();
+				_else.to_ruby(cond);
+				cond.decrement_indent();
+			}
+			cond.write("end");
+		}
+
 		public override string ToString()
 		{
 			return $"(:if {cond} {then} {@else})";
@@ -750,6 +1002,25 @@ namespace BlocklyMruby
 			return block;
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.increment_nest();
+			cond.write("unless ");
+			_cond.to_ruby(cond);
+			cond.decrement_nest();
+			cond.increment_indent();
+			_else.to_ruby(cond);
+			cond.decrement_indent();
+
+			if (_then != null) {
+				cond.write_line("else");
+				cond.increment_indent();
+				_then.to_ruby(cond);
+				cond.decrement_indent();
+			}
+			cond.write_line("end");
+		}
+
 		public override string ToString()
 		{
 			return $"(:unless {cond} {then} {@else})";
@@ -793,6 +1064,18 @@ namespace BlocklyMruby
 			block.AppendChild(statement);
 
 			return block;
+		}
+
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.increment_nest();
+			cond.write("while ");
+			_cond.to_ruby(cond);
+			cond.decrement_nest();
+			cond.increment_indent();
+			_body.to_ruby(cond);
+			cond.decrement_indent();
+			cond.write_line("end");
 		}
 
 		public override string ToString()
@@ -840,6 +1123,18 @@ namespace BlocklyMruby
 			return block;
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.increment_nest();
+			cond.write("until ");
+			_cond.to_ruby(cond);
+			cond.decrement_nest();
+			cond.increment_indent();
+			_body.to_ruby(cond);
+			cond.decrement_indent();
+			cond.write_line("end");
+		}
+
 		public override string ToString()
 		{
 			return $"(:until {cond} {body})";
@@ -866,6 +1161,23 @@ namespace BlocklyMruby
 					str += $"{p} ";
 				}
 				return str + ")";
+			}
+
+			internal void to_ruby(ruby_code_cond cond)
+			{
+				int i = pre.Count + (rest != null ? 1 : 0) + post.Count;
+				foreach (var p in pre) {
+					p.to_ruby(cond);
+					i--; if (i > 0) cond.write(", ");
+				}
+				if (rest != null) {
+					rest.to_ruby(cond);
+					i--; if (i > 0) cond.write(", ");
+				}
+				foreach (var p in post) {
+					p.to_ruby(cond);
+					i--; if (i > 0) cond.write(", ");
+				}
 			}
 		}
 		private var_t _var;
@@ -942,6 +1254,21 @@ namespace BlocklyMruby
 			return block;
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.increment_nest();
+			cond.write("for ");
+			_var.to_ruby(cond);
+			cond.write(" in ");
+			_in.to_ruby(cond);
+			cond.write(" do");
+			cond.decrement_nest();
+			cond.increment_indent();
+			_do.to_ruby(cond);
+			cond.decrement_indent();
+			cond.write_line("end");
+		}
+
 		public override string ToString()
 		{
 			return $"(:for {var} {@in} {@do})";
@@ -951,7 +1278,6 @@ namespace BlocklyMruby
 	/* (:case a ((when ...) body) ((when...) body)) */
 	class case_node : node
 	{
-		private node _arg;
 		public class when_t
 		{
 			public List<node> value = new List<node>();
@@ -966,6 +1292,7 @@ namespace BlocklyMruby
 				return str + $"{body})";
 			}
 		}
+		private node _arg;
 		private List<when_t> _when = new List<when_t>();
 
 		public case_node(MrbParser p, node a, node b)
@@ -1044,6 +1371,36 @@ namespace BlocklyMruby
 			return block;
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.increment_nest();
+			cond.write("case ");
+			if (_arg != null)
+				_arg.to_ruby(cond);
+			cond.decrement_nest();
+			foreach (var w in _when) {
+				cond.increment_nest();
+				var count = w.value.Count;
+				if (count != 0) {
+					cond.write("when ");
+					foreach (var v in w.value) {
+						v.to_ruby(cond);
+						count--;
+						if (count > 0)
+							cond.write(", ");
+					}
+				}
+				else
+					cond.write("else");
+				cond.decrement_nest();
+
+				cond.increment_indent();
+				w.body.to_ruby(cond);
+				cond.decrement_indent();
+			}
+			cond.write_line("end");
+		}
+
 		public override string ToString()
 		{
 			var str = $"(:case {arg} ";
@@ -1072,6 +1429,13 @@ namespace BlocklyMruby
 			throw new NotImplementedException();
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write_line("END {");
+			_postexe.to_ruby(cond);
+			cond.write_line("}");
+		}
+
 		public override string ToString()
 		{
 			return $"(:postexe {postexe})";
@@ -1089,6 +1453,11 @@ namespace BlocklyMruby
 		public override Element to_xml()
 		{
 			throw new NotImplementedException();
+		}
+
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write("self");
 		}
 
 		public override string ToString()
@@ -1207,6 +1576,118 @@ namespace BlocklyMruby
 			return block;
 		}
 
+		public bool isArray(node _obj)
+		{
+			var cnst = _obj as const_node;
+			return (cnst != null) && (p.sym2name(cnst.name) == "Array");
+		}
+
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			var blk_arg = _block as block_arg_node;
+			var blk = _block;
+			if (blk_arg != null)
+				blk = null;
+			var m = p.sym2name(_method);
+			int i = _args.Count + (blk_arg != null ? 1 : 0);
+			if (_pass == (MrbTokens)1) {
+				cond.increment_nest();
+				switch (m) {
+				case "!":
+				case "~":
+					cond.write(m);
+					_obj.to_ruby(cond);
+					foreach (var a in _args) {
+						a.to_ruby(cond);
+						i--; if (i > 0) cond.write(", ");
+					}
+					if (blk_arg != null) {
+						blk_arg.to_ruby(cond);
+					}
+					break;
+				default:
+					_obj.to_ruby(cond);
+					cond.write(" " + m + " ");
+					foreach (var a in _args) {
+						a.to_ruby(cond);
+						i--; if (i > 0) cond.write(", ");
+					}
+					if (blk_arg != null) {
+						blk_arg.to_ruby(cond);
+					}
+					break;
+				}
+				cond.decrement_nest();
+			}
+			else {
+				string call_op = _pass == MrbTokens.tCOLON2 ? "::" : ".";
+				switch (m) {
+				case "[]":
+					cond.increment_nest();
+					_obj.to_ruby(cond);
+					if (isArray(_obj)) {
+						cond.write(call_op + "[]");
+						cond.write("(");
+						foreach (var a in _args) {
+							a.to_ruby(cond);
+							i--; if (i > 0) cond.write(", ");
+						}
+						cond.write(")");
+					}
+					else if (i == 0)
+						cond.write("[]");
+					else {
+						cond.write("[");
+						foreach (var a in _args) {
+							a.to_ruby(cond);
+							i--; if (i > 0) cond.write(", ");
+						}
+						cond.write("]");
+					}
+					cond.decrement_nest();
+					break;
+				case "[]=":
+					cond.increment_nest();
+					_obj.to_ruby(cond);
+					cond.write(".[]=");
+					cond.write("(");
+					foreach (var a in _args) {
+						a.to_ruby(cond);
+						i--; if (i > 0) cond.write(", ");
+					}
+					if (blk_arg != null) {
+						blk_arg.to_ruby(cond);
+					}
+					cond.write(")");
+					cond.decrement_nest();
+					break;
+				default:
+					cond.increment_nest();
+					_obj.to_ruby(cond);
+					if (i == 0)
+						cond.write(call_op + m);
+					else {
+						cond.write(call_op + m + "(");
+						foreach (var a in _args) {
+							a.to_ruby(cond);
+							i--; if (i > 0) cond.write(", ");
+						}
+						if (blk_arg != null) {
+							blk_arg.to_ruby(cond);
+						}
+						cond.write(")");
+					}
+					cond.decrement_nest();
+					break;
+				}
+			}
+			if (blk != null) {
+				blk.to_ruby(cond);
+			}
+			else if (cond.nest == 0)
+				cond.write_line();
+		}
+
 		public override string ToString()
 		{
 			var str = $"(:call {obj} {p.sym2name(method)} ";
@@ -1279,6 +1760,51 @@ namespace BlocklyMruby
 			return block;
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.increment_nest();
+			var blk_arg = _block as block_arg_node;
+			var blk = _block;
+			if (blk_arg != null)
+				blk = null;
+			var m = p.sym2name(_method);
+			int i = _args.Count + (blk_arg != null ? 1 : 0);
+			switch (m) {
+			case "include":
+			case "raise":
+				cond.write(m + " ");
+				foreach (var a in _args) {
+					a.to_ruby(cond);
+					i--; if (i > 0) cond.write(", ");
+				}
+				if (blk_arg != null) {
+					blk_arg.to_ruby(cond);
+				}
+				break;
+			default:
+				if (i == 0)
+					cond.write(m);
+				else {
+					cond.write(m + "(");
+					foreach (var a in _args) {
+						a.to_ruby(cond);
+						i--; if (i > 0) cond.write(", ");
+					}
+					if (blk_arg != null) {
+						blk_arg.to_ruby(cond);
+					}
+					cond.write(")");
+				}
+				break;
+			}
+			cond.decrement_nest();
+			if (blk != null) {
+				blk.to_ruby(cond);
+			}
+			else if (cond.nest == 0)
+				cond.write_line();
+		}
+
 		public override string ToString()
 		{
 			var str = $"(:fcall {self} {p.sym2name(method)} ";
@@ -1331,6 +1857,21 @@ namespace BlocklyMruby
 			return block;
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write("super");
+			int i = _args.Count;
+			foreach (var a in _args) {
+				a.to_ruby(cond);
+				i--; if (i > 0) cond.write(", ");
+			}
+			if (_block != null) {
+				cond.write("do");
+				_block.to_ruby(cond);
+				cond.write_line("end");
+			}
+		}
+
 		public override string ToString()
 		{
 			var str = "(:super ";
@@ -1376,6 +1917,16 @@ namespace BlocklyMruby
 			throw new NotImplementedException();
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write("super");
+			if (_block != null) {
+				cond.write("do");
+				_block.to_ruby(cond);
+				cond.write_line("end");
+			}
+		}
+
 		public override string ToString()
 		{
 			return $"(:zsuper)";
@@ -1405,6 +1956,20 @@ namespace BlocklyMruby
 		public override Element to_xml()
 		{
 			throw new NotImplementedException();
+		}
+
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write("yield");
+			int i = _args.Count;
+			if (i > 0)
+				cond.write(" ");
+			foreach (var a in _args) {
+				a.to_ruby(cond);
+				i--;
+				if (i > 0)
+					cond.write(", ");
+			}
 		}
 
 		public override string ToString()
@@ -1449,6 +2014,18 @@ namespace BlocklyMruby
 			return block;
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			if (_retval != null) {
+				cond.write("return ");
+				_retval.to_ruby(cond);
+				cond.write_line();
+			}
+			else {
+				cond.write_line("return");
+			}
+		}
+
 		public override string ToString()
 		{
 			return $"(:return . {retval})";
@@ -1479,6 +2056,18 @@ namespace BlocklyMruby
 			block.AppendChild(field);
 
 			return block;
+		}
+
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			if (_retval != null) {
+				cond.write("break ");
+				_retval.to_ruby(cond);
+				cond.write_line();
+			}
+			else {
+				cond.write_line("break");
+			}
 		}
 
 		public override string ToString()
@@ -1513,6 +2102,18 @@ namespace BlocklyMruby
 			return block;
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			if (_retval != null) {
+				cond.write("next ");
+				_retval.to_ruby(cond);
+				cond.write_line();
+			}
+			else {
+				cond.write_line("next");
+			}
+		}
+
 		public override string ToString()
 		{
 			return $"(:next . {retval})";
@@ -1532,6 +2133,11 @@ namespace BlocklyMruby
 			throw new NotImplementedException();
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write_line("redo");
+		}
+
 		public override string ToString()
 		{
 			return $"(:redo)";
@@ -1549,6 +2155,11 @@ namespace BlocklyMruby
 		public override Element to_xml()
 		{
 			throw new NotImplementedException();
+		}
+
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write_line("retry");
 		}
 
 		public override string ToString()
@@ -1579,6 +2190,13 @@ namespace BlocklyMruby
 			throw new NotImplementedException();
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			_a.to_ruby(cond);
+			cond.write("..");
+			_b.to_ruby(cond);
+		}
+
 		public override string ToString()
 		{
 			return $"(:dot2 {a} {b})";
@@ -1605,6 +2223,13 @@ namespace BlocklyMruby
 		public override Element to_xml()
 		{
 			throw new NotImplementedException();
+		}
+
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			_a.to_ruby(cond);
+			cond.write("...");
+			_b.to_ruby(cond);
 		}
 
 		public override string ToString()
@@ -1639,6 +2264,12 @@ namespace BlocklyMruby
 			return block;
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			_b.to_ruby(cond);
+			cond.write("::" + p.sym2name(_c));
+		}
+
 		public override string ToString()
 		{
 			return $"(:colon2 {b} {p.sym2name(c)})";
@@ -1661,6 +2292,11 @@ namespace BlocklyMruby
 		public override Element to_xml()
 		{
 			throw new NotImplementedException();
+		}
+
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write("::" + p.sym2name(_c));
 		}
 
 		public override string ToString()
@@ -1709,6 +2345,13 @@ namespace BlocklyMruby
 			return block;
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			_a.to_ruby(cond);
+			cond.write(" && ");
+			_b.to_ruby(cond);
+		}
+
 		public override string ToString()
 		{
 			return $"(:and {a} {b})";
@@ -1754,6 +2397,13 @@ namespace BlocklyMruby
 			return block;
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			_a.to_ruby(cond);
+			cond.write(" || ");
+			_b.to_ruby(cond);
+		}
+
 		public override string ToString()
 		{
 			return $"(:or {a} {b})";
@@ -1794,6 +2444,21 @@ namespace BlocklyMruby
 			return block;
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.increment_nest();
+			cond.write("[");
+			int i = _array.Count;
+			foreach (var item in _array) {
+				item.to_ruby(cond);
+				i--;
+				if (i > 0)
+					cond.write(", ");
+			}
+			cond.write("]");
+			cond.decrement_nest();
+		}
+
 		public override string ToString()
 		{
 			var str = $"(:array ";
@@ -1820,6 +2485,12 @@ namespace BlocklyMruby
 		public override Element to_xml()
 		{
 			throw new NotImplementedException();
+		}
+
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write("*");
+			_a.to_ruby(cond);
 		}
 
 		public override string ToString()
@@ -1862,6 +2533,17 @@ namespace BlocklyMruby
 			throw new NotImplementedException();
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write("{");
+			foreach (var kv in _kvs) {
+				kv.key.to_ruby(cond);
+				cond.write(" => ");
+				kv.value.to_ruby(cond);
+			}
+			cond.write("}");
+		}
+
 		public override string ToString()
 		{
 			var str = $"(:hash ";
@@ -1898,6 +2580,11 @@ namespace BlocklyMruby
 			return block;
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write(":" + p.sym2name(_name));
+		}
+
 		public override string ToString()
 		{
 			return $"(:sym . {p.sym2name(name)})";
@@ -1928,6 +2615,11 @@ namespace BlocklyMruby
 			block.AppendChild(field);
 
 			return block;
+		}
+
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write(p.sym2name(_name));
 		}
 
 		public override string ToString()
@@ -1962,6 +2654,11 @@ namespace BlocklyMruby
 			return block;
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write(p.sym2name(_name));
+		}
+
 		public override string ToString()
 		{
 			return $"(:gvar . {p.sym2name(name)})";
@@ -1992,6 +2689,11 @@ namespace BlocklyMruby
 			block.AppendChild(field);
 
 			return block;
+		}
+
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write(p.sym2name(_name));
 		}
 
 		public override string ToString()
@@ -2026,6 +2728,11 @@ namespace BlocklyMruby
 			return block;
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write(p.sym2name(_name));
+		}
+
 		public override string ToString()
 		{
 			return $"(:cvar . {p.sym2name(name)})";
@@ -2058,6 +2765,11 @@ namespace BlocklyMruby
 			return block;
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write(p.sym2name(_name));
+		}
+
 		public override string ToString()
 		{
 			return $"(:const . {p.sym2name(name)})";
@@ -2087,6 +2799,20 @@ namespace BlocklyMruby
 			throw new NotImplementedException();
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write("undef");
+			int i = _syms.Count;
+			if (i > 0)
+				cond.write(" ");
+			foreach (var sym in _syms) {
+				cond.write(p.sym2name(sym));
+				i--;
+				if (i > 0)
+					cond.write(", ");
+			}
+		}
+
 		public override string ToString()
 		{
 			var str = "(:undef ";
@@ -2104,6 +2830,7 @@ namespace BlocklyMruby
 		private node _type;
 		private mrb_sym _name;
 		private node _super;
+		private mrb_sym _arg;
 		private node _body;
 
 		public class_node(MrbParser p, node c, node s, node b)
@@ -2112,7 +2839,7 @@ namespace BlocklyMruby
 			if (c.car is int) {
 				var type = (int)c.car;
 				if (type == 0) {
-					_prefix = ":";
+					_prefix = ""/*":"*/;
 					_name = (mrb_sym)c.cdr;
 				}
 				else if (type == 1) {
@@ -2125,7 +2852,9 @@ namespace BlocklyMruby
 				_type = (node)c.car;
 				_name = (mrb_sym)c.cdr;
 			}
-			_super = (node)p.locals_node();
+			_super = s;
+			var a = p.locals_node();
+			_arg = (a == null) ? 0 : (mrb_sym)((node)a).car;
 			_body = b;
 		}
 
@@ -2153,6 +2882,25 @@ namespace BlocklyMruby
 			block.AppendChild(statement);
 
 			return block;
+		}
+
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write("class ");
+			if (_type != null)
+				_type.to_ruby(cond);
+			if (_prefix != null)
+				cond.write(_prefix);
+			cond.write(p.sym2name(_name) + " ");
+			if (_super != null) {
+				cond.write("< ");
+				if (_super != null)
+					_super.to_ruby(cond);
+			}
+			cond.increment_indent();
+			_body.to_ruby(cond);
+			cond.decrement_indent();
+			cond.write_line("end");
 		}
 
 		public override string ToString()
@@ -2184,6 +2932,20 @@ namespace BlocklyMruby
 			throw new NotImplementedException();
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write("class << ");
+			_obj.to_ruby(cond);
+			/*if (_super != null) {
+				cond.write(">");
+				_super.to_ruby(cond);
+			}*/
+			cond.increment_indent();
+			_body.to_ruby(cond);
+			cond.decrement_indent();
+			cond.write("end");
+		}
+
 		public override string ToString()
 		{
 			return $"(:sclass {obj} {body})";
@@ -2195,7 +2957,7 @@ namespace BlocklyMruby
 	{
 		private string _prefix;
 		private mrb_sym _name;
-		private object _type;
+		private node _type;
 		private node _super;
 		private node _body;
 
@@ -2204,18 +2966,17 @@ namespace BlocklyMruby
 		{
 			if (m.car is int) {
 				if ((int)m.car == 0) {
-					_prefix = ":";
+					_prefix = ""/*":"*/;
 					_name = (mrb_sym)m.cdr;
 				}
 				else if ((int)m.car == 1) {
 					_prefix = "::";
 					_name = (mrb_sym)m.cdr;
 				}
-				_type = m.car;
 			}
 			else {
 				_prefix = "::";
-				_type = m.car;
+				_type = (node)m.car;
 				_name = (mrb_sym)m.cdr;
 			}
 			_super = (node)p.locals_node();
@@ -2230,6 +2991,22 @@ namespace BlocklyMruby
 		public override Element to_xml()
 		{
 			throw new NotImplementedException();
+		}
+
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write("module " + p.sym2name(_name) + " ");
+			if (_super != null) {
+				if (_type != null)
+					_type.to_ruby(cond);
+				if (_prefix != null)
+					cond.write(_prefix + "::");
+				_super.to_ruby(cond);
+			}
+			cond.increment_indent();
+			_body.to_ruby(cond);
+			cond.decrement_indent();
+			cond.write_line("end");
 		}
 
 		public override string ToString()
@@ -2252,6 +3029,15 @@ namespace BlocklyMruby
 		public override string ToString()
 		{
 			return $"({p.sym2name(name)} {arg})";
+		}
+
+		internal void to_ruby(ruby_code_cond cond)
+		{
+			cond.write(p.sym2name(name));
+			if (arg != null) {
+				cond.write(" = ");
+				arg.to_ruby(cond);
+			}
 		}
 	}
 
@@ -2314,6 +3100,9 @@ namespace BlocklyMruby
 				}
 			}
 			_body = b;
+			if (_body is ensure_node) {
+				((ensure_node)_body).def = true;
+			}
 		}
 
 		public mrb_sym name { get { return _name; } }
@@ -2344,6 +3133,44 @@ namespace BlocklyMruby
 			}
 
 			return block;
+		}
+
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.increment_nest();
+			cond.write("def " + p.sym2name(_name) + "(");
+			int i = _mandatory_args.Count + _optional_args.Count
+				+ (_rest != 0 ? 1 : 0) + _post_mandatory_args.Count
+				+ (_blk != 0 ? 1 : 0);
+			if (i > 0) {
+				foreach (var a in _mandatory_args) {
+					a.to_ruby(cond);
+					i--; if (i > 0) cond.write(", ");
+				}
+				foreach (var a in _optional_args) {
+					a.to_ruby(cond);
+					i--; if (i > 0) cond.write(", ");
+				}
+				if (_rest != 0) {
+					cond.write("*");
+					if (_rest != (mrb_sym)(-1))
+						cond.write(p.sym2name(_rest));
+					i--; if (i > 0) cond.write(", ");
+					foreach (var a in _post_mandatory_args) {
+						a.to_ruby(cond);
+						i--; if (i > 0) cond.write(", ");
+					}
+				}
+				if (_blk != 0) {
+					cond.write("&" + p.sym2name(_blk));
+				}
+			}
+			cond.write(")");
+			cond.decrement_nest();
+			cond.increment_indent();
+			_body.to_ruby(cond);
+			cond.decrement_indent();
+			cond.write_line("end");
 		}
 
 		public override string ToString()
@@ -2432,6 +3259,45 @@ namespace BlocklyMruby
 			throw new NotImplementedException();
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.increment_nest();
+			cond.write("def self." + p.sym2name(_name) + "(");
+			int i = _mandatory_args.Count + _optional_args.Count
+				+ (_rest != 0 ? 1 : 0) + _post_mandatory_args.Count
+				+ (_blk != 0 ? 1 : 0);
+			if (i > 0) {
+				foreach (var a in _mandatory_args) {
+					a.to_ruby(cond);
+					i--; if (i > 0) cond.write(", ");
+				}
+				foreach (var a in _optional_args) {
+					a.to_ruby(cond);
+					i--; if (i > 0) cond.write(", ");
+				}
+				if (_rest != 0) {
+					if (_rest == (mrb_sym)(-1))
+						cond.write("*");
+					else
+						cond.write(p.sym2name(_rest));
+					i--; if (i > 0) cond.write(", ");
+					foreach (var a in _post_mandatory_args) {
+						a.to_ruby(cond);
+						i--; if (i > 0) cond.write(", ");
+					}
+				}
+				if (_blk != 0) {
+					cond.write("&" + p.sym2name(_blk));
+				}
+			}
+			cond.write(")");
+			cond.decrement_nest();
+			cond.increment_indent();
+			_body.to_ruby(cond);
+			cond.decrement_indent();
+			cond.write_line("end");
+		}
+
 		public override string ToString()
 		{
 			var str = $"(:sdef {obj} {p.sym2name(name)} (";
@@ -2468,6 +3334,11 @@ namespace BlocklyMruby
 			throw new NotImplementedException();
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write(p.sym2name(_name));
+		}
+
 		public override string ToString()
 		{
 			return $"(:arg . {p.sym2name(name)})";
@@ -2492,6 +3363,12 @@ namespace BlocklyMruby
 			throw new NotImplementedException();
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write("&");
+			_a.to_ruby(cond);
+		}
+
 		public override string ToString()
 		{
 			return $"(:block_arg . {a})";
@@ -2501,23 +3378,37 @@ namespace BlocklyMruby
 	/* (:block arg body) */
 	class block_node : node
 	{
-		private List<mrb_sym> _mandatory_args = new List<mrb_sym>();
+		private List<mrb_sym> _local_variables = new List<mrb_sym>();
+		private List<node> _mandatory_args = new List<node>();
 		private List<args_t> _optional_args = new List<args_t>();
+		private mrb_sym _rest;
+		private List<node> _post_mandatory_args = new List<node>();
+		private mrb_sym _blk;
 		private node _body;
+		private bool _brace;
 
-		public block_node(MrbParser p, node a, node b)
+		public block_node(MrbParser p, node a, node b, bool brace)
 			: base(p, node_type.NODE_BLOCK)
 		{
-			var t = (node)p.locals_node();
-			if (t != null) {
-				node n = t;
+			var n2 = (node)p.locals_node();
 
-				while (n != null) {
-					_mandatory_args.Add((mrb_sym)n.car);
-					n = (node)n.cdr;
+			if (n2 != null && (n2.car != null || n2.cdr != null)) {
+				while (n2 != null) {
+					if ((mrb_sym)n2.car != 0) {
+						_local_variables.Add((mrb_sym)n2.car);
+					}
+					n2 = (node)n2.cdr;
 				}
-				if (a != null) {
-					var n2 = (node)a.car;
+			}
+			if (a != null) {
+				node n = a;
+
+				if (n.car != null) {
+					dump_recur(_mandatory_args, (node)n.car);
+				}
+				n = (node)n.cdr;
+				if (n.car != null) {
+					n2 = (node)n.car;
 
 					while (n2 != null) {
 						var arg = new args_t(p);
@@ -2527,12 +3418,31 @@ namespace BlocklyMruby
 						n2 = (node)n2.cdr;
 					}
 				}
+				n = (node)n.cdr;
+				if (n.car != null) {
+					_rest = (mrb_sym)n.car;
+				}
+				n = (node)n.cdr;
+				if (n.car != null) {
+					dump_recur(_post_mandatory_args, (node)n.car);
+				}
+				if (n.cdr != null) {
+					_blk = (mrb_sym)n.cdr;
+				}
 			}
 			_body = b;
+			if (_body is ensure_node) {
+				((ensure_node)_body).def = true;
+			}
+			_brace = brace;
 		}
 
-		public List<mrb_sym> mandatory_args { get { return _mandatory_args; } }
+		public List<mrb_sym> local_variables { get { return _local_variables; } }
+		public List<node> mandatory_args { get { return _mandatory_args; } }
 		internal List<args_t> optional_args { get { return _optional_args; } }
+		public mrb_sym rest { get { return _rest; } }
+		public List<node> post_mandatory_args { get { return _post_mandatory_args; } }
+		public mrb_sym blk { get { return _blk; } }
 		public node body { get { return _body; } }
 
 		public override Element to_xml()
@@ -2540,11 +3450,60 @@ namespace BlocklyMruby
 			throw new NotImplementedException();
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			string beg, end;
+			if (_brace) {
+				beg = "{";
+				end = "}";
+			}
+			else {
+				beg = "do";
+				end = "end";
+			}
+
+			cond.increment_nest();
+			cond.write(beg);
+			int i = _mandatory_args.Count + _optional_args.Count
+				+ (_rest != 0 ? 1 : 0) + _post_mandatory_args.Count
+				+ (_blk != 0 ? 1 : 0);
+			if (i > 0) {
+				cond.write(" |");
+				foreach (var a in _mandatory_args) {
+					a.to_ruby(cond);
+					i--; if (i > 0) cond.write(", ");
+				}
+				foreach (var a in _optional_args) {
+					a.to_ruby(cond);
+					i--; if (i > 0) cond.write(", ");
+				}
+				if (_rest != 0) {
+					cond.write("*");
+					if (_rest != (mrb_sym)(-1))
+						cond.write(p.sym2name(_rest));
+					i--; if (i > 0) cond.write(", ");
+					foreach (var a in _post_mandatory_args) {
+						a.to_ruby(cond);
+						i--; if (i > 0) cond.write(", ");
+					}
+				}
+				if (_blk != 0) {
+					cond.write("&" + p.sym2name(_blk));
+				}
+				cond.write("|");
+			}
+			cond.decrement_nest();
+			cond.increment_indent();
+			_body.to_ruby(cond);
+			cond.decrement_indent();
+			cond.write_line(end);
+		}
+
 		public override string ToString()
 		{
 			var str = $"(:block ";
 			foreach (var n in mandatory_args) {
-				str += $"{p.sym2name(n)}, ";
+				str += $"{n}, ";
 			}
 			foreach (var n in optional_args) {
 				str += $"{n}, ";
@@ -2556,23 +3515,36 @@ namespace BlocklyMruby
 	/* (:lambda arg body) */
 	class lambda_node : node
 	{
-		private List<mrb_sym> _mandatory_args = new List<mrb_sym>();
+		private List<mrb_sym> _local_variables = new List<mrb_sym>();
+		private List<node> _mandatory_args = new List<node>();
 		private List<args_t> _optional_args = new List<args_t>();
+		private mrb_sym _rest;
+		private List<node> _post_mandatory_args = new List<node>();
+		private mrb_sym _blk;
 		private node _body;
 
 		public lambda_node(MrbParser p, node a, node b)
 			: base(p, node_type.NODE_LAMBDA)
 		{
-			var t = (node)p.locals_node();
-			if (t != null) {
-				node n = t;
+			var n2 = (node)p.locals_node();
 
-				while (n != null) {
-					_mandatory_args.Add((mrb_sym)n.car);
-					n = (node)n.cdr;
+			if (n2 != null && (n2.car != null || n2.cdr != null)) {
+				while (n2 != null) {
+					if ((mrb_sym)n2.car != 0) {
+						_local_variables.Add((mrb_sym)n2.car);
+					}
+					n2 = (node)n2.cdr;
 				}
-				if (a != null) {
-					var n2 = (node)a.car;
+			}
+			if (a != null) {
+				node n = a;
+
+				if (n.car != null) {
+					dump_recur(_mandatory_args, (node)n.car);
+				}
+				n = (node)n.cdr;
+				if (n.car != null) {
+					n2 = (node)n.car;
 
 					while (n2 != null) {
 						var arg = new args_t(p);
@@ -2582,17 +3554,74 @@ namespace BlocklyMruby
 						n2 = (node)n2.cdr;
 					}
 				}
+				n = (node)n.cdr;
+				if (n.car != null) {
+					_rest = (mrb_sym)n.car;
+				}
+				n = (node)n.cdr;
+				if (n.car != null) {
+					dump_recur(_post_mandatory_args, (node)n.car);
+				}
+				if (n.cdr != null) {
+					_blk = (mrb_sym)n.cdr;
+				}
 			}
 			_body = b;
+			if (_body is ensure_node) {
+				((ensure_node)_body).def = true;
+			}
 		}
 
-		public List<mrb_sym> mandatory_args { get { return _mandatory_args; } }
+		public List<mrb_sym> local_variables { get { return _local_variables; } }
+		public List<node> mandatory_args { get { return _mandatory_args; } }
 		internal List<args_t> optional_args { get { return _optional_args; } }
+		public mrb_sym rest { get { return _rest; } }
+		public List<node> post_mandatory_args { get { return _post_mandatory_args; } }
+		public mrb_sym blk { get { return _blk; } }
 		public node body { get { return _body; } }
 
 		public override Element to_xml()
 		{
 			throw new NotImplementedException();
+		}
+
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.increment_nest();
+			cond.write("{");
+			int i = _mandatory_args.Count + _optional_args.Count
+				+ (_rest != 0 ? 1 : 0) + _post_mandatory_args.Count
+				+ (_blk != 0 ? 1 : 0);
+			if (i > 0) {
+				cond.write(" |");
+				foreach (var a in _mandatory_args) {
+					a.to_ruby(cond);
+					i--; if (i > 0) cond.write(", ");
+				}
+				foreach (var a in _optional_args) {
+					a.to_ruby(cond);
+					i--; if (i > 0) cond.write(", ");
+				}
+				if (_rest != 0) {
+					cond.write("*");
+					if (_rest != (mrb_sym)(-1))
+						cond.write(p.sym2name(_rest));
+					i--; if (i > 0) cond.write(", ");
+					foreach (var a in _post_mandatory_args) {
+						a.to_ruby(cond);
+						i--; if (i > 0) cond.write(", ");
+					}
+				}
+				if (_blk != 0) {
+					cond.write("&" + p.sym2name(_blk));
+				}
+				cond.write("|");
+			}
+			cond.decrement_nest();
+			cond.increment_indent();
+			_body.to_ruby(cond);
+			cond.decrement_indent();
+			cond.write_line("}");
 		}
 
 		public override string ToString()
@@ -2660,6 +3689,16 @@ namespace BlocklyMruby
 			return block;
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.increment_nest();
+			_lhs.to_ruby(cond);
+			cond.write(" = ");
+			_rhs.to_ruby(cond);
+			cond.decrement_nest();
+			cond.write_line();
+		}
+
 		public override string ToString()
 		{
 			return $"(:asgn {lhs} {rhs})";
@@ -2673,6 +3712,7 @@ namespace BlocklyMruby
 		{
 			public List<node> pre = new List<node>();
 			public node rest;
+			public bool rest_empty;
 			public List<node> post = new List<node>();
 
 			public override string ToString()
@@ -2686,6 +3726,23 @@ namespace BlocklyMruby
 					str += $"{p} ";
 				}
 				return str + ")";
+			}
+
+			internal void to_ruby(ruby_code_cond cond)
+			{
+				int i = pre.Count + (rest != null ? 1 : 0) + post.Count;
+				foreach (var p in pre) {
+					p.to_ruby(cond);
+					i--; if (i > 0) cond.write(", ");
+				}
+				if (rest != null) {
+					rest.to_ruby(cond);
+					i--; if (i > 0) cond.write(", ");
+				}
+				foreach (var p in post) {
+					p.to_ruby(cond);
+					i--; if (i > 0) cond.write(", ");
+				}
 			}
 		}
 		private mlhs_t _mlhs;
@@ -2706,6 +3763,7 @@ namespace BlocklyMruby
 					if (n2.car != null) {
 						if (n2.car is int && (int)n2.car == -1) {
 							_mlhs.rest = null; //(empty)?
+							_mlhs.rest_empty = true;
 						}
 						else {
 							_mlhs.rest = (node)n2.car;
@@ -2730,9 +3788,53 @@ namespace BlocklyMruby
 			throw new NotImplementedException();
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			_mlhs.to_ruby(cond);
+			cond.write(" = ");
+			if (_mrhs != null)
+				_mrhs.to_ruby(cond);
+		}
+
 		public override string ToString()
 		{
 			return $"(:masgn {mlhs} {mrhs})";
+		}
+
+		internal bool remove(List<mrb_sym> args)
+		{
+			bool m = false;
+			foreach (var a in _mlhs.pre) {
+				var arg = a as arg_node;
+				if (arg != null)
+					m = args.Remove(arg.name);
+				else {
+					var masgn = a as masgn_node;
+					m = masgn.remove(args);
+				}
+				if (m)
+					return true;
+			}
+			if (_mlhs.rest != null) {
+				var rest = _mlhs.rest as arg_node;
+				if (rest != null) {
+					m = args.Remove(rest.name);
+					if (m)
+						return true;
+				}
+			}
+			foreach (var a in _mlhs.post) {
+				var arg = a as arg_node;
+				if (arg != null)
+					m = args.Remove(arg.name);
+				else {
+					var masgn = a as masgn_node;
+					m = masgn.remove(args);
+				}
+				if (m)
+					return true;
+			}
+			return m;
 		}
 	}
 
@@ -2785,6 +3887,16 @@ namespace BlocklyMruby
 			return block;
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.increment_nest();
+			_lhs.to_ruby(cond);
+			cond.write(" " + p.sym2name(_op) + "= ");
+			_rhs.to_ruby(cond);
+			cond.decrement_nest();
+			cond.write_line();
+		}
+
 		public override string ToString()
 		{
 			return $"(:asgn {lhs} {p.sym2name(op)} {rhs})";
@@ -2821,6 +3933,12 @@ namespace BlocklyMruby
 			return block;
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write("-");
+			_n.to_ruby(cond);
+		}
+
 		public override string ToString()
 		{
 			return $"(:nagete {n})";
@@ -2854,6 +3972,24 @@ namespace BlocklyMruby
 			block.AppendChild(field);
 
 			return block;
+		}
+
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			switch (_base) {
+			case 2:
+				cond.write("0b" + MrbParser.UTF8ArrayToString(_s, 0));
+				break;
+			case 8:
+				cond.write("0o" + MrbParser.UTF8ArrayToString(_s, 0));
+				break;
+			case 16:
+				cond.write("0x" + MrbParser.UTF8ArrayToString(_s, 0));
+				break;
+			default:
+				cond.write(MrbParser.UTF8ArrayToString(_s, 0));
+				break;
+			}
 		}
 
 		public override string ToString()
@@ -3013,6 +4149,11 @@ namespace BlocklyMruby
 			return block;
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write(MrbParser.UTF8ArrayToString(_s, 0));
+		}
+
 		public override string ToString()
 		{
 			return $"(:float . {num})";
@@ -3130,6 +4271,16 @@ namespace BlocklyMruby
 			return block;
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			bool esc;
+			var str = MrbParser.UTF8ArrayToStringEsc(_str, 0, out esc);
+			if (esc)
+				cond.write("\"" + str + "\"");
+			else
+				cond.write("'" + str + "'");
+		}
+
 		public override string ToString()
 		{
 			return $"(:str . ('{str}' . {len}))";
@@ -3206,6 +4357,25 @@ namespace BlocklyMruby
 			throw new NotImplementedException();
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.increment_nest();
+			cond.write("\"");
+			foreach (var i in _a) {
+				var s = i as str_node;
+				if (s != null) {
+					cond.write(MrbParser.UTF8ArrayToString(s.str, 0));
+				}
+				else {
+					cond.write("#{");
+					i.to_ruby(cond);
+					cond.write("}");
+				}
+			}
+			cond.write("\"");
+			cond.decrement_nest();
+		}
+
 		public override string ToString()
 		{
 			var str = $"(:dstr . ";
@@ -3237,6 +4407,13 @@ namespace BlocklyMruby
 			throw new NotImplementedException();
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write("%x(");
+			cond.write(MrbParser.UTF8ArrayToString(_str, 0));
+			cond.write(")");
+		}
+
 		public override string ToString()
 		{
 			return $"(:str . ({str} . {len}))";
@@ -3259,6 +4436,13 @@ namespace BlocklyMruby
 		public override Element to_xml()
 		{
 			throw new NotImplementedException();
+		}
+
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			foreach (var i in _a) {
+				i.to_ruby(cond);
+			}
 		}
 
 		public override string ToString()
@@ -3287,6 +4471,12 @@ namespace BlocklyMruby
 		public override Element to_xml()
 		{
 			throw new NotImplementedException();
+		}
+
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write(":");
+			_a.to_ruby(cond);
 		}
 
 		public override string ToString()
@@ -3319,6 +4509,14 @@ namespace BlocklyMruby
 			throw new NotImplementedException();
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write("/" + MrbParser.UTF8ArrayToString(_pattern, 0));
+			cond.write("/" + MrbParser.UTF8ArrayToString(_flags, 0));
+			cond.write("/" + MrbParser.UTF8ArrayToString(_encp, 0));
+			cond.write("/");
+		}
+
 		public override string ToString()
 		{
 			return $"(:regx . ({pattern} . {flags} . {encp}))";
@@ -3349,6 +4547,15 @@ namespace BlocklyMruby
 			throw new NotImplementedException();
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			foreach (var i in _a) {
+				i.to_ruby(cond);
+			}
+			cond.write(MrbParser.UTF8ArrayToString(_opt, 0));
+			cond.write(MrbParser.UTF8ArrayToString(_tail, 0));
+		}
+
 		public override string ToString()
 		{
 			var str = $"(:dregx . ";
@@ -3377,6 +4584,11 @@ namespace BlocklyMruby
 			throw new NotImplementedException();
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write(n.ToString());
+		}
+
 		public override string ToString()
 		{
 			return $"(:backref . {n})";
@@ -3399,6 +4611,11 @@ namespace BlocklyMruby
 		public override Element to_xml()
 		{
 			throw new NotImplementedException();
+		}
+
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write(n.ToString());
 		}
 
 		public override string ToString()
@@ -3433,6 +4650,11 @@ namespace BlocklyMruby
 			return block;
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			_info.to_ruby(cond);
+		}
+
 		public override string ToString()
 		{
 			return $"(:heredoc . {info})";
@@ -3451,6 +4673,10 @@ namespace BlocklyMruby
 			throw new NotImplementedException();
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+		}
+
 		public override string ToString()
 		{
 			return $"(:literal_delim)";
@@ -3460,19 +4686,28 @@ namespace BlocklyMruby
 	/* (:words . a) */
 	class words_node : node
 	{
-		private node _a;
+		private List<node> _a = new List<node>();
 
 		public words_node(MrbParser p, node a)
 			: base(p, node_type.NODE_WORDS)
 		{
-			_a = a;
+			dump_recur(_a, a);
 		}
 
-		public node a { get { return _a; } }
+		public List<node> a { get { return _a; } }
 
 		public override Element to_xml()
 		{
 			throw new NotImplementedException();
+		}
+
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write("%w(");
+			foreach (var i in _a) {
+				i.to_ruby(cond);
+			}
+			cond.write(")");
 		}
 
 		public override string ToString()
@@ -3484,24 +4719,59 @@ namespace BlocklyMruby
 	/* (:symbols . a) */
 	class symbols_node : node
 	{
-		private node _a;
+		private List<node> _a = new List<node>();
 
 		public symbols_node(MrbParser p, node a)
 			: base(p, node_type.NODE_SYMBOLS)
 		{
-			_a = a;
+			dump_recur(_a, a);
 		}
 
-		public node a { get { return _a; } }
+		public List<node> a { get { return _a; } }
 
 		public override Element to_xml()
 		{
 			throw new NotImplementedException();
 		}
 
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write("%i{");
+			foreach (var i in _a) {
+				i.to_ruby(cond);
+			}
+			cond.write("}");
+		}
+
 		public override string ToString()
 		{
 			return $"(:symbols . {a})";
+		}
+	}
+
+	class filename_node : str_node
+	{
+		public filename_node(MrbParser p, Uint8Array s, int len)
+			: base(p, s, len)
+		{
+		}
+
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write("__FILE__");
+		}
+	}
+
+	class lineno_node : int_node
+	{
+		public lineno_node(MrbParser p, int lineno)
+			: base(p, MrbParser.UTF8StringToArray(lineno.ToString()), 10)
+		{
+		}
+
+		public override void to_ruby(ruby_code_cond cond)
+		{
+			cond.write("__LINE__");
 		}
 	}
 }

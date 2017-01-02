@@ -1113,8 +1113,8 @@ public class Msg
 	public const string CONTROLS_REPEAT_TOOLTIP = "いくつかのステートメントを数回行います。";
 	public const string CONTROLS_WHILEUNTIL_HELPURL = "https://github.com/google/blockly/wiki/Loops#repeat";  // untranslated
 	public const string CONTROLS_WHILEUNTIL_INPUT_DO = CONTROLS_REPEAT_INPUT_DO;
-	public const string CONTROLS_WHILEUNTIL_OPERATOR_UNTIL = "までを繰り返します";
-	public const string CONTROLS_WHILEUNTIL_OPERATOR_WHILE = "つつその間、繰り返す4";
+	public const string CONTROLS_WHILEUNTIL_OPERATOR_UNTIL = "次になるまで繰り返す";
+	public const string CONTROLS_WHILEUNTIL_OPERATOR_WHILE = "次の間、繰り返す";
 	public const string CONTROLS_WHILEUNTIL_TOOLTIP_UNTIL = "値は false の間、いくつかのステートメントを行います。";
 	public const string CONTROLS_WHILEUNTIL_TOOLTIP_WHILE = "値は true の間、いくつかのステートメントを行います。";
 	public const string DELETE_ALL_BLOCKS = "%1件のすべてのブロックを消しますか？";
