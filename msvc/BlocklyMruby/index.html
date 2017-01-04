@@ -373,9 +373,11 @@
 			external.EventsEnable = Blockly.Events.enable;
 			external.EventsDisable = Blockly.Events.disable;
 			external.EventsSetGroup = Blockly.Events.setGroup;
+			external.EventsGetRecordUndo = function () { return Blockly.Events.recordUndo; }
+			external.EventsSetRecordUndo = function (value) { Blockly.Events.recordUndo = value; }
+			external.EventsFire = Blockly.Events.fire;
 			external.ContextMenuCallbackFactory = Blockly.ContextMenu.callbackFactory;
 			external.WorkspaceGetById = Blockly.Workspace.getById;
-			external.NamesEquals = Blockly.Names.equals;
 			external.MutatorReconnect = Blockly.Mutator.reconnect;
 		}
 		function start_blockly() {

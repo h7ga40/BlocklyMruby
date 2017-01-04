@@ -33,7 +33,7 @@ using System.Runtime.InteropServices;
 namespace BlocklyMruby
 {
 	[ComVisible(true)]
-	public class ProceduresBlock : Block
+	public class ProcedureDefBlock : Block
 	{
 		/**
 		 * Common HSV hue for all blocks in this category.
@@ -46,9 +46,14 @@ namespace BlocklyMruby
 		internal List<string> arguments_;
 		public Blockly.Connection statementConnection_;
 
-		public ProceduresBlock(string type)
+		public ProcedureDefBlock(string type)
 			: base(type)
 		{
+		}
+
+		public virtual object[] getProcedureDef()
+		{
+			return null;
 		}
 
 		/**
@@ -268,7 +273,7 @@ namespace BlocklyMruby
 		{
 			var change = false;
 			for (var i = 0; i < this.arguments_.Count; i++) {
-				if (Blockly.Names.equals(oldName, this.arguments_[i])) {
+				if (Names.equals(oldName, this.arguments_[i])) {
 					this.arguments_[i] = newName;
 					change = true;
 				}
@@ -281,7 +286,7 @@ namespace BlocklyMruby
 					Block block;
 					for (var i = 0; (block = blocks[i]) != null; i++) {
 						if (block.type == ProceduresMutatorargBlock.type_name &&
-							Blockly.Names.equals(oldName, block.getFieldValue("NAME"))) {
+							Names.equals(oldName, block.getFieldValue("NAME"))) {
 							block.setFieldValue(newName, "NAME");
 						}
 					}
@@ -330,7 +335,7 @@ namespace BlocklyMruby
 	}
 
 	[ComVisible(true)]
-	public class ProceduresDefnoreturnBlock : ProceduresBlock
+	public class ProceduresDefnoreturnBlock : ProcedureDefBlock
 	{
 		public const string type_name = "procedures_defnoreturn";
 
@@ -361,7 +366,7 @@ namespace BlocklyMruby
 				!String.IsNullOrEmpty(Msg.PROCEDURES_DEFNORETURN_COMMENT)) {
 				this.setCommentText(Msg.PROCEDURES_DEFNORETURN_COMMENT);
 			}
-			this.setColour(ProceduresBlock.HUE);
+			this.setColour(ProcedureDefBlock.HUE);
 			this.setTooltip(Msg.PROCEDURES_DEFNORETURN_TOOLTIP);
 			this.setHelpUrl(Msg.PROCEDURES_DEFNORETURN_HELPURL);
 			this.arguments_ = new List<string>();
@@ -377,14 +382,14 @@ namespace BlocklyMruby
 		 *     - that it DOES NOT have a return value.
 		 * @this Blockly.Block
 		 */
-		public object[] getProcedureDef()
+		public override object[] getProcedureDef()
 		{
 			return new object[] { this.getFieldValue("NAME"), this.arguments_.ToArray(), false };
 		}
 	}
 
 	[ComVisible(true)]
-	public class ProceduresDefreturnBlock : ProceduresBlock
+	public class ProceduresDefreturnBlock : ProcedureDefBlock
 	{
 		public const string type_name = "procedures_defreturn";
 
@@ -418,7 +423,7 @@ namespace BlocklyMruby
 				!String.IsNullOrEmpty(Msg.PROCEDURES_DEFRETURN_COMMENT)) {
 				this.setCommentText(Msg.PROCEDURES_DEFRETURN_COMMENT);
 			}
-			this.setColour(ProceduresBlock.HUE);
+			this.setColour(ProcedureDefBlock.HUE);
 			this.setTooltip(Msg.PROCEDURES_DEFRETURN_TOOLTIP);
 			this.setHelpUrl(Msg.PROCEDURES_DEFRETURN_HELPURL);
 			this.arguments_ = new List<string>();
@@ -434,7 +439,7 @@ namespace BlocklyMruby
 		 *     - that it DOES have a return value.
 		 * @this Blockly.Block
 		 */
-		public object[] getProcedureDef()
+		public override object[] getProcedureDef()
 		{
 			return new object[] { this.getFieldValue("NAME"), this.arguments_.ToArray(), true };
 		}
@@ -462,7 +467,7 @@ namespace BlocklyMruby
 			this.appendDummyInput("STATEMENT_INPUT")
 				.appendField(Msg.PROCEDURES_ALLOW_STATEMENTS)
 				.appendField(new Blockly.FieldCheckbox("TRUE"), "STATEMENTS");
-			this.setColour(ProceduresBlock.HUE);
+			this.setColour(ProcedureDefBlock.HUE);
 			this.setTooltip(Msg.PROCEDURES_MUTATORCONTAINER_TOOLTIP);
 			this.contextMenu = false;
 		}
@@ -491,7 +496,7 @@ namespace BlocklyMruby
 				.appendField(field, "NAME");
 			this.setPreviousStatement(true);
 			this.setNextStatement(true);
-			this.setColour(ProceduresBlock.HUE);
+			this.setColour(ProcedureDefBlock.HUE);
 			this.setTooltip(Msg.PROCEDURES_MUTATORARG_TOOLTIP);
 			this.contextMenu = false;
 
@@ -534,7 +539,7 @@ namespace BlocklyMruby
 	}
 
 	[ComVisible(true)]
-	public class ProceduresCall : Block
+	public class ProcedureCallBlock : Block
 	{
 		internal List<string> arguments_;
 		protected Dictionary<string, Blockly.Connection> quarkConnections_;
@@ -542,7 +547,7 @@ namespace BlocklyMruby
 		protected bool rendered;
 		protected string defType_;
 
-		public ProceduresCall(string type)
+		public ProcedureCallBlock(string type)
 			: base(type)
 		{
 		}
@@ -567,7 +572,7 @@ namespace BlocklyMruby
 		 */
 		public void renameProcedure(string oldName, string newName)
 		{
-			if (Blockly.Names.equals(oldName, this.getProcedureCall())) {
+			if (Names.equals(oldName, this.getProcedureCall())) {
 				this.setFieldValue(newName, "NAME");
 				this.setTooltip(
 					(this.outputConnection != null ? Msg.PROCEDURES_CALLRETURN_TOOLTIP :
@@ -731,7 +736,7 @@ namespace BlocklyMruby
 		 * @return {!Element} XML storage element.
 		 * @this Blockly.Block
 		 */
-		public Element mutationToDom(bool opt_paramIds)
+		public Element mutationToDom(bool opt_paramIds = false)
 		{
 			var container = Document.CreateElement("mutation");
 			container.SetAttribute("name", this.getProcedureCall());
@@ -774,7 +779,7 @@ namespace BlocklyMruby
 		public void renameVar(string oldName, string newName)
 		{
 			for (var i = 0; i < this.arguments_.Count; i++) {
-				if (Blockly.Names.equals(oldName, this.arguments_[i])) {
+				if (Names.equals(oldName, this.arguments_[i])) {
 					this.arguments_[i] = newName;
 					this.getField("ARGNAME" + i).setValue(newName);
 				}
@@ -800,7 +805,7 @@ namespace BlocklyMruby
 				var name = this.getProcedureCall();
 				var def = Blockly.Procedures.getDefinition(name, this.workspace);
 				if (def != null && (def.type != this.defType_ ||
-					JSON.Stringify(((ProceduresBlock)def).arguments_.ToArray()) != JSON.Stringify(this.arguments_.ToArray()))) {
+					JSON.Stringify(((ProcedureDefBlock)def).arguments_.ToArray()) != JSON.Stringify(this.arguments_.ToArray()))) {
 					// The signatures don"t match.
 					def = null;
 				}
@@ -852,7 +857,7 @@ namespace BlocklyMruby
 	}
 
 	[ComVisible(true)]
-	public class ProceduresCallnoreturnBlock : ProceduresCall
+	public class ProceduresCallnoreturnBlock : ProcedureCallBlock
 	{
 		public const string type_name = "procedures_callnoreturn";
 
@@ -872,7 +877,7 @@ namespace BlocklyMruby
 				.appendField(this.id, "NAME");
 			this.setPreviousStatement(true);
 			this.setNextStatement(true);
-			this.setColour(ProceduresBlock.HUE);
+			this.setColour(ProcedureDefBlock.HUE);
 			// Tooltip is set in renameProcedure.
 			this.setHelpUrl(Msg.PROCEDURES_CALLNORETURN_HELPURL);
 			this.arguments_ = new List<string>();
@@ -901,7 +906,7 @@ namespace BlocklyMruby
 	}
 
 	[ComVisible(true)]
-	public class ProceduresCallreturnBlock : ProceduresCall
+	public class ProceduresCallreturnBlock : ProcedureCallBlock
 	{
 		public const string type_name = "procedures_callreturn";
 
@@ -920,7 +925,7 @@ namespace BlocklyMruby
 			this.appendDummyInput("TOPROW")
 				.appendField("", "NAME");
 			this.setOutput(true);
-			this.setColour(ProceduresBlock.HUE);
+			this.setColour(ProcedureDefBlock.HUE);
 			// Tooltip is set in domToMutation.
 			this.setHelpUrl(Msg.PROCEDURES_CALLRETURN_HELPURL);
 			this.arguments_ = new List<string>();
@@ -954,7 +959,7 @@ namespace BlocklyMruby
 			this.setInputsInline(true);
 			this.setPreviousStatement(true);
 			this.setNextStatement(true);
-			this.setColour(ProceduresBlock.HUE);
+			this.setColour(ProcedureDefBlock.HUE);
 			this.setTooltip(Msg.PROCEDURES_IFRETURN_TOOLTIP);
 			this.setHelpUrl(Msg.PROCEDURES_IFRETURN_HELPURL);
 			this.hasReturnValue_ = true;

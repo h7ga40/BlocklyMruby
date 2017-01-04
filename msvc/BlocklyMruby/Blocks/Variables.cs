@@ -31,14 +31,6 @@ using Bridge.Html5;
 
 namespace BlocklyMruby
 {
-	public class Variables
-	{
-		/**
-		 * Common HSV hue for all blocks in this category.
-		 */
-		public static int HUE = 330;
-	}
-
 	[ComVisible(true)]
 	public class VariablesGetBlock : Block
 	{
@@ -57,7 +49,7 @@ namespace BlocklyMruby
 		public void init()
 		{
 			this.setHelpUrl(Msg.VARIABLES_GET_HELPURL);
-			this.setColour(Variables.HUE);
+			this.setColour(Blockly.Variables.HUE);
 			this.appendDummyInput()
 				.appendField(new Blockly.FieldVariable(
 				Msg.VARIABLES_DEFAULT_NAME), "VAR");
@@ -117,7 +109,7 @@ namespace BlocklyMruby
 				},
 				previousStatement = (Any<string, string[]>)null,
 				nextStatement = (Any<string, string[]>)null,
-				colour = Variables.HUE,
+				colour = Blockly.Variables.HUE,
 				tooltip = Msg.VARIABLES_SET_TOOLTIP,
 				helpUrl = Msg.VARIABLES_SET_HELPURL
 

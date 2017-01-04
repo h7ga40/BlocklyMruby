@@ -30,7 +30,7 @@ using BlocklyMruby;
  * @author fraser@google.com (Neil Fraser)
  */
 [External]
-public static class Blockly
+public static partial class Blockly
 {
 	internal static dynamic instance;
 
@@ -220,35 +220,9 @@ public static class Blockly
 	public static Block selected { get { return Script.CreateBlock(instance.selected); } }
 
 	[Name(false), FieldProperty]
-	public static Variables Variables { get { return new Variables(instance.Variables); } }
-	[Name(false), FieldProperty]
-	public static Ruby Ruby { get { return (Ruby)instance.Ruby.instance; } }
+	public static Ruby Ruby;
 	[Name(false), FieldProperty]
 	public static object Blocks { get { return instance.Blocks; } }
-
-	public static class Procedures
-	{
-		[Name(false), FieldProperty]
-		public static string NAME_TYPE { get { return instance.Procedures.NAME_TYPE; } }
-
-		public static string rename(Field field, string name)
-		{
-			return instance.Procedures.rename.call(field.instance, name);
-		}
-
-		internal static void mutateCallers(Block block)
-		{
-			Script.ProceduresMutateCallers(block.instance);
-		}
-
-		internal static Block getDefinition(string name, Workspace workspace)
-		{
-			var ret = Script.ProceduresGetDefinition(name, workspace.instance);
-			if ((ret == null) || (ret is DBNull))
-				return null;
-			return Script.CreateBlock(ret);
-		}
-	}
 
 	public static class Xml
 	{
@@ -371,7 +345,17 @@ public static class Blockly
 		/// that are not currently in use.
 		/// </summary>
 		[FieldProperty]
-		public string[] variableList { get { return instance.variableList; } }
+		public string[] variableList {
+			get {
+				var ret = instance.variableList;
+				int len = Script.Get(ret, "length");
+				var result = new List<string>(len);
+				for (int i = 0; i < len; i++) {
+					result.Add(Script.Get<string>(ret, i.ToString()));
+				}
+				return result.ToArray();
+			}
+		}
 
 		/// <summary>
 		/// Workspaces may be headless.
@@ -572,7 +556,7 @@ public static class Blockly
 		/// <param name="event">Event to fire.</param>
 		public void fireChangeListener(Events.Abstract @event)
 		{
-			instance.fireChangeListener.call(instance, @event);
+			instance.fireChangeListener.call(instance, @event.instance);
 		}
 
 		/// <summary>
@@ -598,14 +582,26 @@ public static class Blockly
 			return Script.WorkspaceGetById(id);
 		}
 
-		/**
-		 * Create a variable with the given name.
-		 * TODO: #468
-		 * @param {string} name The new variable's name.
-		 */
-		public void createVariable(string newText)
+		/// <summary>
+		/// Create a variable with the given name.
+		/// TODO: #468
+		/// </summary>
+		/// <param name="name">The new variable's name.</param>
+		public void createVariable(string name)
 		{
-			instance.createVariable.call(instance, newText);
+			instance.createVariable.call(instance, name);
+		}
+
+		/// <summary>
+		/// Check whether a variable exists with the given name.  The check is
+		/// case-insensitive.
+		/// </summary>
+		/// <param name="name">The name to check for.</param>
+		/// <returns>The index of the name in the variable list, or -1 if it is
+		/// not present.</returns>
+		internal int variableIndexOf(string name)
+		{
+			return instance.variableIndexOf.call(instance, name);
 		}
 	}
 
@@ -1018,6 +1014,11 @@ public static class Blockly
 		[Name(false)]
 		public const string UI = "ui";
 
+		public static bool recordUndo {
+			get { return Script.EventsGetRecordUndo(); }
+			set { Script.EventsSetRecordUndo(value); }
+		}
+
 		private static string[] getDescendantIds_(Block block)
 		{
 			var ret = Script.EventsGetDescendantIds_(block.instance);
@@ -1202,16 +1203,17 @@ public static class Blockly
 			/// <param name="name">Name of input or field affected, or null.</param>
 			/// <param name="oldValue">Previous value of element.</param>
 			/// <param name="newValue">New value of element.</param>
-			public void construct(Block block, string element, string name, string oldValue, string newValue)
+			public static Change construct(Block block, string element, string name, string oldValue, string newValue)
 			{
-				instance = Script.New("Blockly.Events.Change", new object[] { block, CHANGE });
+				var instance = Script.New("Blockly.Events.Change", new object[] { block, CHANGE });
 				if (block == null) {
-					return;  // Blank event to be populated by fromJson.
+					return null;  // Blank event to be populated by fromJson.
 				}
 				instance.element = element;
 				instance.name = name;
 				instance.oldValue = oldValue;
 				instance.newValue = newValue;
+				return new Change(instance);
 			}
 		}
 
@@ -1343,6 +1345,11 @@ public static class Blockly
 		{
 			Script.EventsSetGroup(group);
 		}
+
+		internal static void fire(Abstract ev)
+		{
+			Script.EventsFire(ev.instance);
+		}
 	}
 
 	public class Options
@@ -1356,95 +1363,6 @@ public static class Blockly
 		public Options(object instance)
 		{
 			this.instance = instance;
-		}
-	}
-
-	public class Names
-	{
-		internal dynamic instance;
-		public Func<string, string, string> addLocalVariable;
-		public Action popScope;
-		public Names localVarsDB;
-		public Func<string, string, string> getRubyName;
-		public BlocklyMruby.LocalVars localVars;
-		public Action pushScope;
-		public Names chain;
-
-		/// <summary>
-		/// Class for a database of entity names (variables, functions, etc).
-		/// </summary>
-		/// <param name="reservedWords">A comma-separated string of words that are
-		/// illegal for use as names in a language(e.g. 'new,if,this,...').</param>
-		/// <param name="opt_variablePrefix">Some languages need a '$' or a namespace
-		/// before all variable names.</param>
-		public Names(string reservedWords, string opt_variablePrefix = null)
-		{
-			instance = Script.New("Blockly.Names", new object[] { reservedWords, opt_variablePrefix });
-		}
-
-		/// <summary>
-		/// Empty the database and start from scratch.  The reserved words are kept.
-		/// </summary>
-		public void reset()
-		{
-			instance.reset.call(instance);
-		}
-
-		/// <summary>
-		/// Convert a Blockly entity name to a legal exportable entity name.
-		/// </summary>
-		/// <param name="name">The Blockly entity name (no constraints).</param>
-		/// <param name="type">The type of entity in Blockly
-		/// ('VARIABLE', 'PROCEDURE', 'BUILTIN', etc...).</param>
-		/// <returns>An entity name legal for the exported language.</returns>
-		public string getName(string name, string type)
-		{
-			var ret = instance.getName.call(instance, name, type);
-			if ((ret == null) || (ret is DBNull))
-				return null;
-			return ret;
-		}
-
-		/// <summary>
-		/// Convert a Blockly entity name to a legal exportable entity name.
-		/// Ensure that this is a new name not overlapping any previously defined name.
-		/// Also check against list of reserved words for the current language and
-		/// ensure name doesn't collide.
-		/// </summary>
-		/// <param name="name">The Blockly entity name (no constraints).</param>
-		/// <param name="type">The type of entity in Blockly
-		/// ('VARIABLE', 'PROCEDURE', 'BUILTIN', etc...).</param>
-		/// <returns></returns>
-		public string getDistinctName(string name, string type)
-		{
-			var ret = instance.getDistinctName.call(instance, name, type);
-			if ((ret == null) || (ret is DBNull))
-				return null;
-			return ret;
-		}
-
-		/// <summary>
-		/// Given a proposed entity name, generate a name that conforms to the
-		/// [_A-Za-z][_A-Za-z0-9]* format that most languages consider legal for
-		/// variables.
-		/// </summary>
-		/// <param name="name">Potentially illegal entity name.</param>
-		/// <returns>Safe entity name.</returns>
-		public string safeName_(string name)
-		{
-			return instance.safeName_.call(instance, name);
-		}
-
-		/// <summary>
-		/// Do the given two entity names refer to the same entity?
-		/// Blockly names are case-insensitive.
-		/// </summary>
-		/// <param name="name1">First name.</param>
-		/// <param name="name2">Second name.</param>
-		/// <returns>True if names are the same.</returns>
-		public static bool equals(string name1, string name2)
-		{
-			return Script.NamesEquals(name1, name2);
 		}
 	}
 
@@ -1763,6 +1681,7 @@ public static class Blockly
 	{
 		internal dynamic instance;
 
+		public string text_ { get { return instance.text_; } }
 		public Block sourceBlock_ { get { return Script.CreateBlock(instance.sourceBlock_); } }
 
 		public Field(object instance)
@@ -2336,7 +2255,17 @@ public static class Blockly
 		/// <summary>
 		/// CSS for date picker.  See css.js for use.
 		/// </summary>
-		public string[] CSS { get { return instance.CSS; } }
+		public string[] CSS {
+			get {
+				var ret = instance.CSS;
+				int len = Script.Get(ret, "length");
+				var result = new List<string>(len);
+				for (int i = 0; i < len; i++) {
+					result.Add(Script.Get<string>(ret, i.ToString()));
+				}
+				return result.ToArray();
+			}
+		}
 	}
 
 	public class FieldColour : Field
@@ -2740,6 +2669,24 @@ public static class Blockly
 	}
 
 	/// <summary>
+	/// Register a callback function associated with a given key, for clicks on
+	/// buttons and labels in the flyout.
+	/// For instance, a button specified by the XML
+	/// <button text="create variable" callbackKey="CREATE_VARIABLE"></button>
+	/// should be matched by a call to
+	/// registerButtonCallback("CREATE_VARIABLE", yourCallbackFunction).
+	/// </summary>
+	/// <param name="key">The name to use to look up this function.</param>
+	/// <param name="func">The function to call when the
+	/// given button is clicked.</param>
+	internal static void registerButtonCallback(string key, Action<FlyoutButton> func)
+	{
+		instance.registerButtonCallback.call(instance, key, Script.NewFunc(new Action<object>((btn) => {
+			func(FlyoutButton.Create(btn));
+		})));
+	}
+
+	/// <summary>
 	/// Convert a hue (HSV model) into an RGB hex triplet.
 	/// </summary>
 	/// <param name="hue">Hue on a colour wheel (0-360).</param>
@@ -2813,6 +2760,31 @@ public static class Blockly
 	public static WorkspaceSvg getMainWorkspace()
 	{
 		return mainWorkspace;
+	}
+
+	/// <summary>
+	/// Wrapper to window.alert() that app developers may override to
+	/// provide alternatives to the modal browser window.
+	/// </summary>
+	/// <param name="message">The message to display to the user.</param>
+	/// <param name="opt_callback">The callback when the alert is dismissed.</param>
+	internal static void alert(string message, Action opt_callback = null)
+	{
+		instance.alert.call(instance, message, opt_callback == null ? null : Script.NewFunc(opt_callback));
+	}
+
+	/// <summary>
+	/// Wrapper to window.prompt() that app developers may override to provide
+	/// alternatives to the modal browser window. Built-in browser prompts are
+	/// often used for better text input experience on mobile device. We strongly
+	/// recommend testing mobile when overriding this.
+	/// </summary>
+	/// <param name="message">The message to display to the user.</param>
+	/// <param name="defaultValue">The value to initialize the prompt with.</param>
+	/// <param name="callback">The callback for handling user reponse.</param>
+	internal static void prompt(string message, string defaultValue, Action<string> callback)
+	{
+		instance.prompt.call(instance, message, defaultValue, Script.NewFunc(callback));
 	}
 
 	/// <summary>
@@ -2985,40 +2957,27 @@ public static class Blockly
 			return Script.ContextMenuCallbackFactory(block.instance, xml.instance);
 		}
 	}
-}
 
-[External]
-public class Variables
-{
-	internal dynamic instance;
-
-	[Name(false), FieldProperty]
-	public string NAME_TYPE { get { return instance.NAME_TYPE; } }
-
-	public Variables(object instance)
+	internal class FlyoutButton
 	{
-		this.instance = instance;
-	}
+		internal dynamic instance;
 
-	/// <summary>
-	/// Find all user-created variables.
-	/// </summary>
-	/// <param name="block">root Root block or workspace.</param>
-	/// <returns>Array of variable names.</returns>
-	public string[] allVariables(Any<Block, Blockly.Workspace> block_workspace)
-	{
-		dynamic ret;
-		var block = block_workspace.As<Block>();
-		if (block != null)
-			ret = instance.allVariables.call(instance, block.instance);
-		else
-			ret = instance.allVariables.call(instance, ((Blockly.Workspace)block_workspace).instance);
-		int len = ret.length;
-		var names = new List<string>(len);
-		for (int i = 0; i < len; i++) {
-			names.Add(Script.Get(ret, i.ToString()));
+		public FlyoutButton(object instance)
+		{
+			this.instance = instance;
 		}
-		return names.ToArray();
+
+		public static FlyoutButton Create(dynamic instance)
+		{
+			if ((instance == null) || (instance is DBNull))
+				return null;
+			return new FlyoutButton(instance);
+		}
+
+		internal Workspace getTargetWorkspace()
+		{
+			return WorkspaceSvg.Create(instance.getTargetWorkspace.call(instance));
+		}
 	}
 }
 
@@ -3091,11 +3050,52 @@ public static class goog
 		}
 	}
 
-	public class array
+	public static class @string
+	{
+		public class CaseInsensitiveCompare : IComparer<string>
+		{
+			public int Compare(string x, string y)
+			{
+				return x.ToLower().CompareTo(y.ToLower());
+			}
+		}
+
+		public static CaseInsensitiveCompare caseInsensitiveCompare = new CaseInsensitiveCompare();
+	}
+
+	public static class array
 	{
 		internal static bool equals(Array a, Array b)
 		{
 			return Script.goog_array_equals(a, b);
+		}
+	}
+
+	public static class asserts
+	{
+		internal static void assert(bool cond, string format, params string[] args)
+		{
+			if (!cond) throw new NotImplementedException();
+		}
+
+		internal static void assertArray(object array, string format, params string[] args)
+		{
+			assert(array is Array, format, args);
+		}
+
+		internal static void assertFunction(object func, string format, params string[] args)
+		{
+			assert(func is System.Reflection.MethodInfo, format, args);
+		}
+
+		internal static void assertString(object str, string format, params string[] args)
+		{
+			assert(str is String, format, args);
+		}
+
+		internal static void fail(string format, params string[] args)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

@@ -75,6 +75,8 @@
     <Compile Include="MrbParser.cs" />
     <Compile Include="MrbScanner.cs" />
     <Compile Include="Mruby.cs" />
+    <Compile Include="Names.cs" />
+    <Compile Include="Procedures.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Ruby.cs" />
@@ -88,6 +90,7 @@
     <Compile Include="Ruby\Variables.cs" />
     <Compile Include="SwitchCaseBlock.cs" />
     <Compile Include="Uint8Array.cs" />
+    <Compile Include="Variables.cs" />
     <Compile Include="yyDebug.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>

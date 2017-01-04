@@ -38,12 +38,12 @@ namespace BlocklyMruby
 
 		private string FunctionNamePlaceholder()
 		{
-			return instance.FUNCTION_NAME_PLACEHOLDER_;
+			return FUNCTION_NAME_PLACEHOLDER_;
 		}
 
 		private string ReservedWords()
 		{
-			return instance.RESERVED_WORDS_;
+			return RESERVED_WORDS_;
 		}
 
 		/**
@@ -92,7 +92,7 @@ namespace BlocklyMruby
 		/**
 		 * Initialise the database of variable names.
 		 */
-		public void init(Blockly.Workspace workspace)
+		public override void init(Blockly.Workspace workspace)
 		{
 			// Create a dictionary of definitions to be printed before the code.
 			definitions_ = new Dictionary<string, string>();
@@ -100,56 +100,13 @@ namespace BlocklyMruby
 			// to actual function names (to avoid collisions with user functions).
 			functionNames_ = new Dictionary<string, string>();
 
-			if (Blockly.Variables != null) {
+			if (true/*Blockly.Variables != null*/) {
 				if (variableDB_ == null) {
 
-					variableDB_ = new Blockly.Names(ReservedWords());
+					variableDB_ = new Names(ReservedWords());
 
 					variableDB_.localVars = null;
 					variableDB_.localVarsDB = null;
-
-					variableDB_.getRubyName = (string name, string type) => {
-
-						if (type == Blockly.Variables.NAME_TYPE) {
-
-							var scope = variableDB_.localVars;
-
-							while (scope != null) {
-								string localVar;
-								if (scope.TryGetValue(name, out localVar)) {
-									return localVar;
-								}
-
-								scope = scope.chain;
-							}
-
-							return "@" + variableDB_.getName(name, type);
-						}
-						else {
-							return variableDB_.getName(name, type);
-						}
-					};
-
-					variableDB_.pushScope = () => {
-						var previousLV = variableDB_.localVars;
-						var previousDB = variableDB_.localVarsDB;
-
-						variableDB_.localVars = new LocalVars();
-						variableDB_.localVarsDB = new Blockly.Names(ReservedWords());
-
-						variableDB_.localVars.chain = previousLV;
-						variableDB_.localVarsDB.chain = previousDB;
-					};
-
-					variableDB_.addLocalVariable = (name, type) => {
-						variableDB_.localVars[name] = variableDB_.localVarsDB.getName(name, Blockly.Variables.NAME_TYPE);
-						return variableDB_.localVars[name];
-					};
-
-					variableDB_.popScope = () => {
-						variableDB_.localVars = variableDB_.localVars.chain;
-						variableDB_.localVarsDB = variableDB_.localVarsDB.chain;
-					};
 				}
 				else {
 					variableDB_.reset();
@@ -218,7 +175,7 @@ namespace BlocklyMruby
 		 * @param {string} code Generated code.
 		 * @return {string} Completed code.
 		 */
-		public string finish(string code)
+		public override string finish(string code)
 		{
 			// need some helper functions to conform to Blockly's behavior
 			var helpers = new string[0];
@@ -312,7 +269,7 @@ namespace BlocklyMruby
 		 * @param {string} line Line of generated code.
 		 * @return {string} Legal line of code.
 		 */
-		public string scrubNakedValue(string line)
+		public override string scrubNakedValue(string line)
 		{
 			return line + "\n";
 		}
@@ -352,7 +309,7 @@ namespace BlocklyMruby
 		 * @this {Blockly.CodeGenerator}
 		 * @private
 		 */
-		public string scrub_(Block block, string code)
+		public override string scrub_(Block block, string code)
 
 		{
 			if (code == null) {
@@ -389,10 +346,5 @@ namespace BlocklyMruby
 
 			return commentCode + code + nextCode;
 		}
-	}
-
-	public class LocalVars : Dictionary<string, string>
-	{
-		public LocalVars chain;
 	}
 }

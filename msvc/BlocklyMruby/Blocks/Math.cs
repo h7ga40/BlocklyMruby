@@ -408,7 +408,7 @@ namespace BlocklyMruby
 				},
 				previousStatement = (Any<string, string[]>)null,
 				nextStatement = (Any<string, string[]>)null,
-				colour = Variables.HUE,
+				colour = Blockly.Variables.HUE,
 				helpUrl = Msg.MATH_CHANGE_HELPURL
 			});
 			// Assign "this" to a variable for use in the tooltip closure below.

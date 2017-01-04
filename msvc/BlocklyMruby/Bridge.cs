@@ -38,10 +38,15 @@ namespace Bridge
 		public dynamic EventsEnable;
 		public dynamic EventsDisable;
 		public dynamic EventsSetGroup;
+		public dynamic EventsGetRecordUndo;
+		public dynamic EventsSetRecordUndo;
+		public dynamic EventsFire;
 		public dynamic ContextMenuCallbackFactory;
 		public dynamic WorkspaceGetById;
 		public dynamic NamesEquals;
 		public dynamic MutatorReconnect;
+		public dynamic procedures;
+		public dynamic variables;
 
 		public bool isDefined(object obj, string name)
 		{
@@ -100,7 +105,7 @@ namespace Bridge
 		public Block ToBlock(dynamic block)
 		{
 			var instance = Script.Get(block, "instance");
-			if (instance != null)
+			if ((instance != null) && !(instance is DBNull))
 				return (Block)instance;
 			return Script.CreateBlock(block);
 		}
@@ -209,30 +214,6 @@ namespace Bridge
 			block.renameVar((string)oldName, (string)newName);
 		}
 
-		public void init(object generator_, object workspace)
-		{
-			dynamic generator = (Generator)generator_;
-			generator.init(ToWorkspace(workspace));
-		}
-
-		public string finish(object generator_, object code)
-		{
-			dynamic generator = (Generator)generator_;
-			return generator.finish((string)code);
-		}
-
-		public string scrubNakedValue(object generator_, object line)
-		{
-			dynamic generator = (Generator)generator_;
-			return generator.scrubNakedValue((string)line);
-		}
-
-		public string scrub_(object generator_, object block, object code)
-		{
-			dynamic generator = (Generator)generator_;
-			return generator.scrub_(ToBlock(block), (string)code);
-		}
-
 		public void console_log(object text)
 		{
 			Console.WriteLine(text.ToString());
@@ -275,6 +256,68 @@ namespace Bridge
 		{
 			return ((text == null) || (text is DBNull)) ? "null" : text.ToString();
 		}
+
+		public bool names_equals(object name1, object name2)
+		{
+			return Names.equals((string)name1, (string)name2);
+		}
+
+		public object procedures_flyoutCategory(object workspace_)
+		{
+			var workspace = ToWorkspace(workspace_);
+			var ret = Blockly.Procedures.flyoutCategory(workspace);
+			var result = Script.NewArray();
+			foreach (var e in ret) {
+				Script.Push(result, e.instance);
+			}
+			return result;
+		}
+
+		public object variables_flyoutCategory(object workspace_)
+		{
+			var workspace = ToWorkspace(workspace_);
+			var ret = Blockly.Variables.flyoutCategory(workspace);
+			var result = Script.NewArray();
+			foreach (var e in ret) {
+				Script.Push(result, e.instance);
+			}
+			return result;
+		}
+
+		public object variables_allUsedVariablesBlock(object block_)
+		{
+			var block = ToBlock(block_);
+			var ret = Blockly.Variables.allUsedVariables(block);
+			var result = Script.NewArray();
+			foreach (var s in ret) {
+				Script.Push(result, s);
+			}
+			return result;
+		}
+
+		public object variables_allUsedVariablesWorkspace(object workspace_)
+		{
+			var workspace = ToWorkspace(workspace_);
+			var ret = Blockly.Variables.allUsedVariables(workspace);
+			var result = Script.NewArray();
+			foreach (var s in ret) {
+				Script.Push(result, s);
+			}
+			return result;
+		}
+
+		public string variables_generateUniqueName(object workspace_)
+		{
+			var workspace = ToWorkspace(workspace_);
+			return Blockly.Variables.generateUniqueName(workspace);
+		}
+
+		public void variables_promptName(object promptText, object defaultText, object callback)
+		{
+			Blockly.Variables.promptName(promptText.ToString(), defaultText.ToString(), (a) => {
+				((dynamic)callback).call(callback, a);
+			});
+		}
 	}
 
 	public class Script
@@ -311,6 +354,9 @@ Bridge.ParseInt = function(value, radix) {
 Bridge.ParseFloat = function(value) {
 	return parseFloat(value);
 }
+Bridge.IsNaN = function(num) {
+	return isNaN(num);
+}
 Bridge.Get = function(scope, name) {
 	return scope[name];
 }
@@ -332,6 +378,8 @@ Bridge.CreateTextNode = function(text) {
 }
 Bridge.Stringify = function(value) { return JSON.stringify(value); }
 Bridge.Parse = function(text) { return JSON.parse(text); }
+Bridge.EncodeURI = function(url) { return encodeURI(url); }
+Bridge.DecodeURI = function(url) { return decodeURI(url); }
 Bridge.NewRegExp = function(patern, flag) { return new RegExp(patern, flag); }
 Bridge.goog_getMsg = function(str, opt_values) {
 	return goog.getMsg(str, opt_values);
@@ -440,28 +488,38 @@ Bridge.NewGenerator = function(name)
 {
 	return new Blockly.Generator(name);
 }
-Bridge.SetGenerator = function(generator)
-{
-	var i;
-	var g = {
-		instance: generator,
-		init: function(workspace) {
-			Bridge.instance.init(this.instance, workspace);
-		},
-		finish: function(code) {
-			return Bridge.instance.finish(this.instance, code);
-		},
-		scrubNakedValue: function(line) {
-			return Bridge.instance.scrubNakedValue(this.instance, line);
-		},
-		scrub_: function(block, code) {
-			return Bridge.instance.scrub_(this.instance, block, code);
-		},
-	};
-	var o = generator.instance;
-	for (i in g) o[i] = g[i];
-	Blockly[o.name_] = o;
-	return o;
+Blockly.Names = {
+	equals: function(name1, name2) {
+		return Bridge.instance.names_equals(name1, name2);
+	},
+}
+Blockly.Procedures = {
+	flyoutCategory: function(workspace) {
+		return Bridge.instance.procedures_flyoutCategory(workspace);
+	},
+}
+Blockly.Variables = {
+	flyoutCategory: function(workspace) {
+		return Bridge.instance.variables_flyoutCategory(workspace);
+	},
+	allUsedVariables: function(root) {
+		var blocks;
+		if (root instanceof Blockly.Block) {
+			// Root is Block.
+			return Bridge.instance.variables_allUsedVariablesBlock(root);
+		} else if (root.getAllBlocks) {
+			// Root is Workspace.
+			return Bridge.instance.variables_allUsedVariablesWorkspace(root);
+		} else {
+			throw 'Not Block or Workspace: ' + root;
+		}
+	},
+	generateUniqueName: function(workspace) {
+		return Bridge.instance.variables_generateUniqueName(workspace);
+	},
+	promptName: function(promptText, defaultText, callback) {
+		Bridge.instance.variables_promptName(promptText, defaultText, callback);
+	},
 }
 ";
 
@@ -533,6 +591,11 @@ Bridge.SetGenerator = function(generator)
 			return (double)Bridge.ParseFloat(value);
 		}
 
+		internal static bool IsNaN(object num)
+		{
+			return (bool)Bridge.IsNaN(num);
+		}
+
 		internal static object Get(object scope, string name)
 		{
 			return Bridge.Get(scope, name);
@@ -590,9 +653,13 @@ Bridge.SetGenerator = function(generator)
 			return Bridge.NewGenerator(name);
 		}
 
-		internal static void SetGenerator(Generator generator)
+		internal static void SetGenerator(Ruby generator)
 		{
-			Bridge.SetGenerator(generator);
+			Blockly.Ruby = generator;
+			ScriptHost.procedures = Script.Get(ScriptHost.blockly, "Procedures");
+			ScriptHost.variables = Script.Get(ScriptHost.blockly, "Variables");
+			Script.Set(ScriptHost.procedures, "NAME_TYPE", Blockly.Procedures.NAME_TYPE);
+			Script.Set(ScriptHost.variables, "NAME_TYPE", Blockly.Variables.NAME_TYPE);
 		}
 
 		internal static string Replace(string str, dynamic instance, string dst)
@@ -633,6 +700,16 @@ Bridge.SetGenerator = function(generator)
 		internal static object Parse(string text)
 		{
 			return Bridge.Parse(text);
+		}
+
+		internal static string EncodeURI(string url)
+		{
+			return Bridge.EncodeURI(url);
+		}
+
+		internal static string dncodeURI(string url)
+		{
+			return Bridge.DncodeURI(url);
 		}
 
 		internal static dynamic NewRegExp(string pattern, string flag)
@@ -823,6 +900,21 @@ Bridge.SetGenerator = function(generator)
 			ScriptHost.EventsSetGroup(group);
 		}
 
+		internal static bool EventsGetRecordUndo()
+		{
+			return ScriptHost.EventsGetRecordUndo.call(null);
+		}
+
+		internal static void EventsSetRecordUndo(bool value)
+		{
+			ScriptHost.EventsSetRecordUndo.call(null, value);
+		}
+
+		internal static void EventsFire(object ev)
+		{
+			ScriptHost.EventsFire(ev);
+		}
+
 		internal static dynamic ContextMenuCallbackFactory(dynamic block, dynamic xml)
 		{
 			return ScriptHost.ContextMenuCallbackFactory(block, xml);
@@ -887,6 +979,16 @@ Bridge.SetGenerator = function(generator)
 			var field = new Blockly.Field(ret);
 			Script.Set(ret, "instance", field);
 			return field;
+		}
+
+		public static void console_log(string text)
+		{
+			ScriptHost.console_log(text);
+		}
+
+		public static void console_warn(string text)
+		{
+			ScriptHost.console_warn(text);
 		}
 	}
 
@@ -1000,9 +1102,17 @@ Bridge.SetGenerator = function(generator)
 			return Script.Replace(str, regex.instance, dst);
 		}
 
-		public static object Match(this string str, Text.RegularExpressions.Regex regex)
+		public static string[] Match(this string str, Text.RegularExpressions.Regex regex)
 		{
-			return Script.Match(str, regex.instance);
+			var ret = Script.Match(str, regex.instance);
+			if ((ret == null) || (ret is DBNull))
+				return null;
+			int len = Script.Get(ret, "length");
+			var result = new List<string>(len);
+			for (int i = 0; i < len; i++) {
+				result.Add(Script.Get<string>(ret, i.ToString()));
+			}
+			return result.ToArray();
 		}
 
 		public static string Join(this string[] str, string sep)
@@ -1018,6 +1128,16 @@ Bridge.SetGenerator = function(generator)
 		public static string[] Split(this string str, string sep)
 		{
 			return str.Split(new string[] { sep }, StringSplitOptions.None);
+		}
+
+		public static string Substr(this string str, int start)
+		{
+			return str.Substring(start);
+		}
+
+		public static int LocaleCompare(this string str, string b)
+		{
+			return str.CompareTo(b);
 		}
 	}
 

@@ -11,7 +11,7 @@ namespace BlocklyMruby
 {
 	partial class Ruby
 	{
-		public object[] procedures_defreturn(ProceduresBlock block)
+		public object[] procedures_defreturn(ProcedureDefBlock block)
 		{
 			Blockly.Ruby.variableDB_.pushScope();
 

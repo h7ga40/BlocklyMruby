@@ -395,7 +395,7 @@ namespace BlocklyMruby
 			var ret = new List<string>();
 			int len = vars.length;
 			for (int i = 0; i < len; i++) {
-				ret.Add(vars[i]);
+				ret.Add(Script.Get(vars, i.ToString()));
 			}
 			return ret.ToArray();
 		}
