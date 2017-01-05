@@ -632,6 +632,9 @@ namespace BlocklyMruby
 				}
 				else {
 					this.quarkIds_ = new List<string>();
+					for(int i = 0; i < this.arguments_.Count; i++) {
+						this.quarkIds_.Add(i.ToString());
+					}
 				}
 			}
 			// Switch off rendering while the block is rebuilt.
@@ -666,7 +669,7 @@ namespace BlocklyMruby
 					if (this.quarkConnections_.TryGetValue(quarkId, out connection)) {
 						if (!Blockly.Mutator.reconnect(connection, this, "ARG" + i)) {
 							// Block no longer exists or has been attached elsewhere.
-							Script.Delete(this.quarkConnections_[quarkId]);
+							this.quarkConnections_.Remove(quarkId);
 						}
 					}
 				}
@@ -763,7 +766,9 @@ namespace BlocklyMruby
 			for (var i = 0; (childNode = (dynamic)xmlElement.ChildNodes[i]) != null; i++) {
 				if (childNode.NodeName.ToLowerCase() == "arg") {
 					args.Add(childNode.GetAttribute("name"));
-					paramIds.Add(childNode.GetAttribute("paramId"));
+					var paramId = childNode.GetAttribute("paramId");
+					if (paramId == null) paramId = i.ToString();
+					paramIds.Add(paramId);
 				}
 			}
 			this.setProcedureParameters_(args, paramIds);

@@ -150,7 +150,7 @@ namespace BlocklyMruby
 			if (dropdown_property == "PRIME") {
 				var functionName = Blockly.Ruby.provideFunction_(
 					"is_prime",
-					new string[] { "def " + Blockly.Ruby.FunctionNamePlaceholder() + " n",
+					new string[] { "def " + Blockly.Ruby.FUNCTION_NAME_PLACEHOLDER_ + " n",
 					 "  return false if n < 0",
 					 "  (2..Math.sqrt(n)).each { |i| return false if n % i == 0}",
 					 "  true",
@@ -233,25 +233,18 @@ namespace BlocklyMruby
 				// Mode of [3, "x", "x", 1, 1, 2, "3"] -> ["x", 1].
 				var functionName = Blockly.Ruby.provideFunction_(
 					"math_modes",
-					new string[] { "def " + Blockly.Ruby.FunctionNamePlaceholder() + "(some_list)",
+					new string[] { "def " + Blockly.Ruby.FUNCTION_NAME_PLACEHOLDER_ + "(some_list)",
 					 "  groups = some_list.group_by{|v| v}",
-					 "  ",
 					 "  groups = groups.sort {|a,b| b[1].size <=> a[1].size}",
-					 "  ",
 					 "  max_size = groups[0][1].size",
-					 "  ",
 					 "  modes = []",
 					 "  ",
 					 "  groups.each do |group|",
-					 "    ",
 					 "    break if group[1].size != max_size",
-					 "    ",
 					 "    modes << group[0]",
-					 "    ",
 					 "  end",
 					 "  ",
 					 "  modes",
-					 "",
 					 "end" });
 				code = functionName + "(" + list + ")";
 				break;

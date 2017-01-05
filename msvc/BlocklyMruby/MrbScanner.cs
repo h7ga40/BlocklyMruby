@@ -689,9 +689,9 @@ namespace BlocklyMruby
 		}
 
 		/* (:if cond then else) */
-		if_node new_if(node a, node b, node c)
+		if_node new_if(node a, node b, node c, bool inline = false)
 		{
-			return new if_node(this, a, b, c);
+			return new if_node(this, a, b, c, inline);
 		}
 
 		/* (:unless cond then else) */

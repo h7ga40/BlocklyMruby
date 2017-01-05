@@ -94,7 +94,7 @@ namespace BlocklyMruby
 					"for_loop",
 					new string[] { "# loops though all numbers from +params[:from]+ to +params[:to]+ by the step",
 					 "# value +params[:by]+ and calls the given block passing the numbers",
-					 "def ' + Blockly.Ruby.FUNCTION_NAME_PLACEHOLDER_() + ' params",
+					 "def " + Blockly.Ruby.FUNCTION_NAME_PLACEHOLDER_ + " params",
 					 "",
 					 "  from = params[:from] #.to_f",
 					 "  to = params[:to] #.to_f",

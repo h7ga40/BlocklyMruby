@@ -114,9 +114,10 @@ namespace BlocklyMruby
 			while (this.dbReverse_.ContainsKey(safeName + ((i == 0) ? "" : i.ToString())) ||
 				   this.reservedDict_.ContainsKey(safeName + i.ToString())) {
 				// Collision with existing name.  Create a unique name.
-				i = (i == 0) ? i + 1 : 2;
+				i++;
 			}
-			safeName += i;
+			if (i > 0)
+				safeName += i;
 			this.dbReverse_[safeName] = true;
 			var prefix = (type == Blockly.Variables.NAME_TYPE) ?
 				this.variablePrefix_ : "";

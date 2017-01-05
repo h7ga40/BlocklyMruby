@@ -7550,7 +7550,7 @@ namespace BlocklyMruby
 					case 227:
 #line 905 "mrb_parse.jay"
 						{
-							yyVal = new_if(cond(((node)yyVals[-5 + yyTop])), ((node)yyVals[-3 + yyTop]), ((node)yyVals[0 + yyTop]));
+							yyVal = new_if(cond(((node)yyVals[-5 + yyTop])), ((node)yyVals[-3 + yyTop]), ((node)yyVals[0 + yyTop]), true);
 						}
 						break;
 					case 228:

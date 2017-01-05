@@ -164,7 +164,7 @@ namespace BlocklyMruby
 				if (mode == "GET") {
 					var functionName = Blockly.Ruby.provideFunction_(
 						"lists_random_item",
-						new string[] { "def " + Blockly.Ruby.FunctionNamePlaceholder() + "(myList)",
+						new string[] { "def " + Blockly.Ruby.FUNCTION_NAME_PLACEHOLDER_ + "(myList)",
 						 "  myList[rand(myList.size)]",
 						 "end" });
 					var code = functionName + "(" + list + ")";
@@ -173,7 +173,7 @@ namespace BlocklyMruby
 				else {
 					var functionName = Blockly.Ruby.provideFunction_(
 						"lists_remove_random_item",
-						new string[] { "def " + Blockly.Ruby.FunctionNamePlaceholder() + "(myList)",
+						new string[] { "def " + Blockly.Ruby.FUNCTION_NAME_PLACEHOLDER_ + "(myList)",
 						 "  myList.delete_at(rand(myList.size))",
 						 "end" });
 					var code = functionName + "(" + list + ")";
@@ -272,8 +272,8 @@ namespace BlocklyMruby
 				if (mode == "SET") {
 					var functionName = Blockly.Ruby.provideFunction_(
 						"lists_set_random_item",
-						new string[] { "def " + Blockly.Ruby.FunctionNamePlaceholder() + "(myList, value)",
-						 "  myList[rand(myList.size)] = " + value,
+						new string[] { "def " + Blockly.Ruby.FUNCTION_NAME_PLACEHOLDER_ + "(myList, value)",
+						 "  myList[rand(myList.size)] = value",
 						 "end"});
 					var code = functionName + "(" + list + ", " + value + ")\n";
 					return code;
@@ -281,8 +281,8 @@ namespace BlocklyMruby
 				else if (mode == "INSERT") {
 					var functionName = Blockly.Ruby.provideFunction_(
 						"lists_insert_random_item",
-						new string[] { "def " + Blockly.Ruby.FunctionNamePlaceholder() + "(myList, value)",
-						 "  myList.insert(rand(myList.size), " + value + ")",
+						new string[] { "def " + Blockly.Ruby.FUNCTION_NAME_PLACEHOLDER_ + "(myList, value)",
+						 "  myList.insert(rand(myList.size), value)",
 						 "end" });
 					var code = functionName + "(" + list + ", " + value + ")\n";
 					return code;
@@ -295,7 +295,7 @@ namespace BlocklyMruby
 		{
 			var functionName = Blockly.Ruby.provideFunction_(
 				"lists_sublist",
-				new string[] { "def " + Blockly.Ruby.FunctionNamePlaceholder() + "(myList, range)",
+				new string[] { "def " + Blockly.Ruby.FUNCTION_NAME_PLACEHOLDER_ + "(myList, range)",
 				 "  myList[range] || []",
 				 "end" });
 			// Get sublist.

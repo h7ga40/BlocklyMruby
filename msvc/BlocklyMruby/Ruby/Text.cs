@@ -134,7 +134,7 @@ namespace BlocklyMruby
 			case "FROM_START":
 				functionName = Blockly.Ruby.provideFunction_(
 					"text_get_from_start",
-					new string[] { "def " + Blockly.Ruby.FunctionNamePlaceholder() + " (text, index)",
+					new string[] { "def " + Blockly.Ruby.FUNCTION_NAME_PLACEHOLDER_ + " (text, index)",
 					 "  return \"\" if index < 0",
 					 "  text[index] || \"\"",
 					 "end" });
@@ -143,7 +143,7 @@ namespace BlocklyMruby
 			case "FROM_END":
 				functionName = Blockly.Ruby.provideFunction_(
 					"text_get_from_end",
-					new string[] { "def " + Blockly.Ruby.FunctionNamePlaceholder() + " (text, index)",
+					new string[] { "def " + Blockly.Ruby.FUNCTION_NAME_PLACEHOLDER_ + " (text, index)",
 					 "  return \"\" if index < 0",
 					 "  text[-index-1] || \"\"'",
 					 "end" });
@@ -152,7 +152,7 @@ namespace BlocklyMruby
 			case "RANDOM":
 				functionName = Blockly.Ruby.provideFunction_(
 					"text_random_letter",
-					new string[] { "def " + Blockly.Ruby.FunctionNamePlaceholder() + " (text)",
+					new string[] { "def " + Blockly.Ruby.FUNCTION_NAME_PLACEHOLDER_ + " (text)",
 					 "  text[rand(text.size)]",
 					 "end" });
 				code = functionName + "(" + text + ")";
@@ -240,7 +240,7 @@ namespace BlocklyMruby
 				// Title case is not a native Ruby function. Define one.
 				var functionName = Blockly.Ruby.provideFunction_(
 					"text_to_title_case",
-					new string[] { "def " + Blockly.Ruby.FunctionNamePlaceholder() + "(str)",
+					new string[] { "def " + Blockly.Ruby.FUNCTION_NAME_PLACEHOLDER_ + "(str)",
 					  "  str.gsub(/\\S+/) {|txt| txt.capitalize}",
 					  "end" });
 				var argument0 = Blockly.Ruby.valueToCode(block, "TEXT",
@@ -282,7 +282,7 @@ namespace BlocklyMruby
 			// Prompt function.
 			var functionName = Blockly.Ruby.provideFunction_(
 				"text_prompt",
-				new string[] { "def " + Blockly.Ruby.FunctionNamePlaceholder() + "(msg):",
+				new string[] { "def " + Blockly.Ruby.FUNCTION_NAME_PLACEHOLDER_ + "(msg):",
 				 "    print (msg)",
 				 "    $stdin.gets" });
 			var msg = Blockly.Ruby.quote_(block.getFieldValue("TEXT"));

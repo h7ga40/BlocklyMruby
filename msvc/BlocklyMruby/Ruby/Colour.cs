@@ -30,7 +30,7 @@ namespace BlocklyMruby
 			// Compose a colour from RGB components expressed as percentages.
 			var functionName = Blockly.Ruby.provideFunction_(
 				"colour_rgb",
-				new string[] { "def " + Blockly.Ruby.FunctionNamePlaceholder() + "(r, g, b)",
+				new string[] { "def " + Blockly.Ruby.FUNCTION_NAME_PLACEHOLDER_ + "(r, g, b)",
 				  "  r = (2.55 * [100, [0, r].max].min).round",
 				  "  g = (2.55 * [100, [0, g].max].min).round",
 				  "  b = (2.55 * [100, [0, b].max].min).round",
@@ -51,7 +51,7 @@ namespace BlocklyMruby
 			// Blend two colours together.
 			var functionName = Blockly.Ruby.provideFunction_(
 				"colour_blend",
-				new string[] { "def " + Blockly.Ruby.FunctionNamePlaceholder() +
+				new string[] { "def " + Blockly.Ruby.FUNCTION_NAME_PLACEHOLDER_ +
 				  "(colour1, colour2, ratio) ",
 				  "  _, r1, g1, b1 = colour1.unpack('A1A2A2A2').map {|x| x.to_i(16)}",
 				  "  _, r2, g2, b2 = colour2.unpack('A1A2A2A2').map {|x| x.to_i(16)}",

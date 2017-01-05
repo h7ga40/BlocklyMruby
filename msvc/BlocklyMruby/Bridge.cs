@@ -614,11 +614,6 @@ Blockly.Variables = {
 			Bridge.Set(scope, name, value);
 		}
 
-		internal static void Delete(Blockly.Connection connection)
-		{
-			Bridge.Delete(connection);
-		}
-
 		static Dictionary<string, Type> m_BlockTypes = new Dictionary<string, Type>();
 
 		internal static void SetBlocks(Block block)

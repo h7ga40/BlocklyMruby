@@ -36,16 +36,6 @@ namespace BlocklyMruby
 			escapeChars_.Add("\"", "\\\"");
 		}
 
-		private string FunctionNamePlaceholder()
-		{
-			return FUNCTION_NAME_PLACEHOLDER_;
-		}
-
-		private string ReservedWords()
-		{
-			return RESERVED_WORDS_;
-		}
-
 		/**
 		 * Order of operation ENUMs.
 		 * http://phrogz.net/programmingruby/language.html
@@ -103,7 +93,7 @@ namespace BlocklyMruby
 			if (true/*Blockly.Variables != null*/) {
 				if (variableDB_ == null) {
 
-					variableDB_ = new Names(ReservedWords());
+					variableDB_ = new Names(RESERVED_WORDS_);
 
 					variableDB_.localVars = null;
 					variableDB_.localVarsDB = null;

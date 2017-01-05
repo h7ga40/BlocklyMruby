@@ -243,6 +243,7 @@ namespace BlocklyMruby
 		public int nest { get; private set; }
 
 		bool first;
+		bool space;
 		StringBuilder _code = new StringBuilder();
 
 		public ruby_code_cond()
@@ -250,6 +251,7 @@ namespace BlocklyMruby
 			indent_str = "  ";
 			newline_str = "\r\n";
 			first = true;
+			space = false;
 		}
 
 		public void increment_indent()
@@ -258,6 +260,7 @@ namespace BlocklyMruby
 			if (!first) {
 				_code.Append(newline_str);
 				first = true;
+				space = false;
 			}
 		}
 
@@ -267,6 +270,7 @@ namespace BlocklyMruby
 			if (!first) {
 				_code.Append(newline_str);
 				first = true;
+				space = false;
 			}
 		}
 
@@ -278,6 +282,7 @@ namespace BlocklyMruby
 		public void decrement_nest()
 		{
 			nest--;
+			System.Diagnostics.Debug.Assert(nest >= 0);
 		}
 
 		public void write(string code)
@@ -287,19 +292,28 @@ namespace BlocklyMruby
 				_code.Append(indent);
 			}
 			_code.Append(code);
+			space = code.EndsWith(" ");
 		}
 
 		public void write_line(string code = null)
 		{
-			if (first) {
-				first = false;
-				_code.Append(indent);
+			if (nest != 0 && !first && !space) {
+				_code.Append(" ");
+				space = true;
 			}
 			if (code != null) {
+				if (first) {
+					first = false;
+					_code.Append(indent);
+				}
 				_code.Append(code);
+				space = code.EndsWith(" ");
 			}
-			_code.Append(newline_str);
-			first = true;
+			if (nest == 0) {
+				_code.Append(newline_str);
+				space = false;
+				first = true;
+			}
 		}
 
 		public override string ToString()
@@ -559,6 +573,7 @@ namespace BlocklyMruby
 
 			internal void to_ruby(ruby_code_cond cond)
 			{
+				cond.increment_nest();
 				cond.write("rescue");
 				int i = handle_classes.Count;
 				if (i > 0)
@@ -571,6 +586,7 @@ namespace BlocklyMruby
 					cond.write(" => ");
 					exc_var.to_ruby(cond);
 				}
+				cond.decrement_nest();
 				cond.write_line();
 				cond.increment_indent();
 				body.to_ruby(cond);
@@ -859,13 +875,15 @@ namespace BlocklyMruby
 		private node _cond;
 		private node _then;
 		private node _else;
+		bool _inline;
 
-		public if_node(MrbParser p, node a, node b, node c)
+		public if_node(MrbParser p, node a, node b, node c, bool inline)
 			: base(p, node_type.NODE_IF)
 		{
 			_cond = a;
 			_then = b;
 			_else = c;
+			_inline = inline;
 		}
 
 		public node cond { get { return _cond; } }
@@ -916,36 +934,50 @@ namespace BlocklyMruby
 
 		public override void to_ruby(ruby_code_cond cond)
 		{
-			var _elsif = new List<Tuple<node, node>>();
-			node _else = this._else;
-
-			for (var c = _else as if_node; c != null; _else = c._else, c = _else as if_node) {
-				_elsif.Add(new Tuple<node, node>(c._cond, c._then));
-			}
-
-			cond.increment_nest();
-			cond.write("if ");
-			_cond.to_ruby(cond);
-			cond.decrement_nest();
-			cond.increment_indent();
-			_then.to_ruby(cond);
-			cond.decrement_indent();
-			foreach (var e in _elsif) {
-				cond.write("elsif ");
-				e.Item1.to_ruby(cond);
-				cond.write_line();
-				cond.increment_indent();
-				e.Item2.to_ruby(cond);
-				cond.decrement_indent();
-			}
-
-			if (_else != null) {
-				cond.write_line("else");
-				cond.increment_indent();
+			if (_inline) {
+				cond.increment_nest();
+				cond.write("(");
+				_cond.to_ruby(cond);
+				cond.write(" ? ");
+				_then.to_ruby(cond);
+				cond.write(" : ");
 				_else.to_ruby(cond);
-				cond.decrement_indent();
+				cond.decrement_nest();
 			}
-			cond.write("end");
+			else {
+				var _elsif = new List<Tuple<node, node>>();
+				node _else = this._else;
+
+				for (var c = _else as if_node; c != null; _else = c._else, c = _else as if_node) {
+					_elsif.Add(new Tuple<node, node>(c._cond, c._then));
+				}
+
+				cond.increment_nest();
+				cond.write("if ");
+				_cond.to_ruby(cond);
+				cond.decrement_nest();
+				cond.increment_indent();
+				_then.to_ruby(cond);
+				cond.decrement_indent();
+				foreach (var e in _elsif) {
+					cond.increment_nest();
+					cond.write("elsif ");
+					e.Item1.to_ruby(cond);
+					cond.decrement_nest();
+					cond.write_line();
+					cond.increment_indent();
+					e.Item2.to_ruby(cond);
+					cond.decrement_indent();
+				}
+
+				if (_else != null) {
+					cond.write_line("else");
+					cond.increment_indent();
+					_else.to_ruby(cond);
+					cond.decrement_indent();
+				}
+				cond.write_line("end");
+			}
 		}
 
 		public override string ToString()
@@ -2016,6 +2048,7 @@ namespace BlocklyMruby
 
 		public override void to_ruby(ruby_code_cond cond)
 		{
+			cond.increment_nest();
 			if (_retval != null) {
 				cond.write("return ");
 				_retval.to_ruby(cond);
@@ -2024,6 +2057,7 @@ namespace BlocklyMruby
 			else {
 				cond.write_line("return");
 			}
+			cond.decrement_nest();
 		}
 
 		public override string ToString()
@@ -2060,6 +2094,7 @@ namespace BlocklyMruby
 
 		public override void to_ruby(ruby_code_cond cond)
 		{
+			cond.increment_nest();
 			if (_retval != null) {
 				cond.write("break ");
 				_retval.to_ruby(cond);
@@ -2068,6 +2103,7 @@ namespace BlocklyMruby
 			else {
 				cond.write_line("break");
 			}
+			cond.decrement_nest();
 		}
 
 		public override string ToString()
@@ -2104,6 +2140,7 @@ namespace BlocklyMruby
 
 		public override void to_ruby(ruby_code_cond cond)
 		{
+			cond.increment_nest();
 			if (_retval != null) {
 				cond.write("next ");
 				_retval.to_ruby(cond);
@@ -2112,6 +2149,7 @@ namespace BlocklyMruby
 			else {
 				cond.write_line("next");
 			}
+			cond.decrement_nest();
 		}
 
 		public override string ToString()
@@ -2535,13 +2573,21 @@ namespace BlocklyMruby
 
 		public override void to_ruby(ruby_code_cond cond)
 		{
-			cond.write("{");
+			if (cond.nest != 0)
+				cond.write("{");
+			else
+				cond.write_line("{");
+			int i = _kvs.Count;
 			foreach (var kv in _kvs) {
 				kv.key.to_ruby(cond);
 				cond.write(" => ");
 				kv.value.to_ruby(cond);
+				i--; if (i > 0) cond.write(", ");
 			}
-			cond.write("}");
+			if (cond.nest != 0)
+				cond.write("}");
+			else
+				cond.write_line("}");
 		}
 
 		public override string ToString()
@@ -2943,7 +2989,7 @@ namespace BlocklyMruby
 			cond.increment_indent();
 			_body.to_ruby(cond);
 			cond.decrement_indent();
-			cond.write("end");
+			cond.write_line("end");
 		}
 
 		public override string ToString()
@@ -3454,11 +3500,11 @@ namespace BlocklyMruby
 		{
 			string beg, end;
 			if (_brace) {
-				beg = "{";
+				beg = " {";
 				end = "}";
 			}
 			else {
-				beg = "do";
+				beg = " do";
 				end = "end";
 			}
 

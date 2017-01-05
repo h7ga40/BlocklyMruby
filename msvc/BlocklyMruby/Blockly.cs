@@ -18,7 +18,6 @@
  * limitations under the License.
  */
 using System;
-
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Bridge;
@@ -1205,7 +1204,7 @@ public static partial class Blockly
 			/// <param name="newValue">New value of element.</param>
 			public static Change construct(Block block, string element, string name, string oldValue, string newValue)
 			{
-				var instance = Script.New("Blockly.Events.Change", new object[] { block, CHANGE });
+				var instance = Script.New("Blockly.Events.Change", new object[] { block.instance, CHANGE });
 				if (block == null) {
 					return null;  // Blank event to be populated by fromJson.
 				}
