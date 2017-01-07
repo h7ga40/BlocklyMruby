@@ -97,8 +97,10 @@ MRuby::Build.new('host-debug') do |conf|
   # include the default GEMs
   conf.gembox 'default'
 
+  conf.gem '../mrbgems/mruby-blockly'
+
   # C compiler settings
-  conf.cc.defines = %w(MRB_ENABLE_DEBUG_HOOK)
+  conf.cc.defines = %w(MRB_ENABLE_DEBUG_HOOK abort=mrdb_abort)
 
   # Generate mruby debugger command (require mruby-eval)
   conf.gem :core => "mruby-bin-debugger"

@@ -4,31 +4,202 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace BlocklyMruby
 {
-	public static class Mruby
+	public class Mruby
 	{
-		[DllImport("mruby.dll")]
-		extern static int mruby_main(int argc, [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPStr, SizeParamIndex = 0)]string[] argv);
-		[DllImport("mruby.dll")]
-		extern static int mrbc_main(int argc, [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPStr, SizeParamIndex = 0)]string[] argv);
+		[UnmanagedFunctionPointer(CallingConvention.StdCall)]
+		delegate void clearerr_t(int fno);
+		[UnmanagedFunctionPointer(CallingConvention.StdCall)]
+		delegate int feof_t(int fno);
+		[UnmanagedFunctionPointer(CallingConvention.StdCall)]
+		delegate int getc_t(int fno);
+		[UnmanagedFunctionPointer(CallingConvention.StdCall)]
+		delegate int fwrite_t([MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1), In]byte[] buffer, int len, int fno);
+		[UnmanagedFunctionPointer(CallingConvention.StdCall)]
+		delegate int fflush_t(int fno);
+		[UnmanagedFunctionPointer(CallingConvention.StdCall)]
+		delegate void abort_t();
 
-		public static int mruby(params string[] args_)
+		[DllImport("mruby.dll")]
+		extern static int mruby_main(int argc, [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr, SizeParamIndex = 0), In]string[] argv);
+		[DllImport("mruby.dll")]
+		extern static int mrbc_main(int argc, [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr, SizeParamIndex = 0), In]string[] argv);
+		[DllImport("mruby.dll")]
+		extern static int mrdb_main(int argc, [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr, SizeParamIndex = 0), In]string[] argv);
+		[DllImport("mruby.dll")]
+		extern static void set_func(clearerr_t pclearerr, feof_t pfeof, getc_t pgetc, fwrite_t pfwrite, fflush_t pfflush, abort_t pabort);
+		[DllImport("mruby.dll")]
+		extern static void clear_func();
+
+		clearerr_t _clearerr;
+		feof_t _feof;
+		getc_t _getc;
+		fwrite_t _fwrite;
+		fflush_t _fflush;
+		abort_t _abort;
+		public event EventHandler<StdioEventArgs> Stdio;
+
+		public Mruby()
 		{
-			var args = new List<string>();
-			args.Add("mruby");
-			args.AddRange(args_);
-			return mruby_main(args.Count, args.ToArray());
+			_clearerr = clearerr;
+			_feof = feof;
+			_getc = getc;
+			_fwrite = fwrite;
+			_fflush = fflush;
+			_abort = abort;
+
+			set_func(_clearerr, _feof, _getc, _fwrite, _fflush, _abort);
 		}
 
-		public static int mrbc(params string[] args_)
+		private void WriteStdout(StdioType type, string text)
 		{
-			var args = new List<string>();
-			args.Add("mrbc");
-			args.AddRange(args_);
-			return mrbc_main(args.Count, args.ToArray());
+			Stdio?.Invoke(this, new StdioEventArgs(type, text));
+		}
+
+		public void mruby(string[] args, Action<int> callback)
+		{
+			int ret = -1;
+			var temp = new List<string>();
+			temp.Add("mruby");
+			temp.AddRange(args);
+			args = temp.ToArray();
+
+			var thread = new Thread(() => {
+				WriteStdout(StdioType.Out, String.Join(" ", args) + "\n");
+				try {
+					ret = mruby_main(temp.Count, args);
+				}
+				catch (Exception) {
+					ret = -1;
+				}
+				WriteStdout(StdioType.Out, $"exit {ret}\n");
+				callback(ret);
+			});
+			thread.Start();
+		}
+
+		public void mrbc(string[] args, Action<int> callback)
+		{
+			int ret = -1;
+			var temp = new List<string>();
+			temp.Add("mrbc");
+			temp.AddRange(args);
+			args = temp.ToArray();
+
+			var thread = new Thread(() => {
+				WriteStdout(StdioType.Out, String.Join(" ", args) + "\n");
+				try {
+					ret = mrbc_main(temp.Count, args);
+				}
+				catch (Exception) {
+					ret = -1;
+				}
+				WriteStdout(StdioType.Out, $"exit {ret}\n");
+				callback(ret);
+			});
+			thread.Start();
+		}
+
+		public void mrdb(string[] args, Action<int> callback)
+		{
+			int ret = -1;
+			var temp = new List<string>();
+			temp.Add("mrdb");
+			temp.AddRange(args);
+			args = temp.ToArray();
+
+			var thread = new Thread(() => {
+				WriteStdout(StdioType.Out, String.Join(" ", args) + "\n");
+				try {
+					ret = mrdb_main(temp.Count, args);
+				}
+				catch (Exception) {
+					ret = -1;
+				}
+				WriteStdout(StdioType.Out, $"exit {ret}\n");
+				callback(ret);
+			});
+			thread.Start();
+		}
+
+		Queue<byte> _StdinBuf = new Queue<byte>();
+		AutoResetEvent _Event = new AutoResetEvent(false);
+
+		internal void WriteStdin(string data)
+		{
+			var str = Encoding.UTF8.GetBytes(data);
+			lock (_StdinBuf) {
+				foreach (var c in str)
+					_StdinBuf.Enqueue(c);
+			}
+			_Event.Set();
+		}
+
+		public void clearerr(int fno)
+		{
+		}
+
+		public int feof(int fno)
+		{
+			lock (_StdinBuf) {
+				if (_StdinBuf.Count == 0)
+					return -1/*EOF*/;
+				return 0;
+			}
+		}
+
+		public int getc(int fno)
+		{
+			lock (_StdinBuf) {
+				if (_StdinBuf.Count > 0)
+					return _StdinBuf.Dequeue();
+			}
+			_Event.WaitOne();
+			lock (_StdinBuf) {
+				if (_StdinBuf.Count > 0)
+					return _StdinBuf.Dequeue();
+			}
+			return -1/*EOF*/;
+		}
+
+		public int fflush(int fno)
+		{
+			return 0;
+		}
+
+		public int fwrite([MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1), In]byte[] buffer, int len, int fno)
+		{
+			WriteStdout((StdioType)fno, Encoding.UTF8.GetString(buffer, 0, len));
+			return len;
+		}
+
+		public void abort()
+		{
+			WriteStdout(StdioType.Out, "abort!\n");
+			throw new Exception();
+		}
+	}
+
+	public enum StdioType
+	{
+		In,
+		Out,
+		Error,
+	}
+
+	public class StdioEventArgs : EventArgs
+	{
+		public StdioType Type { get; private set; }
+		public string Text { get; private set; }
+
+		public StdioEventArgs(StdioType type, string text)
+		{
+			Type = type;
+			Text = text.Replace("\n", "\r\n");
 		}
 	}
 }

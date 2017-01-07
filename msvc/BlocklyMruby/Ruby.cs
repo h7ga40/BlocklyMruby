@@ -105,7 +105,7 @@ namespace BlocklyMruby
 				var defvars = new List<string>();
 				var variables = Blockly.Variables.allVariables(workspace);
 				for (var x = 0; x < variables.Length; x++) {
-					defvars.Add("@" +
+					defvars.Add("$" +
 						variableDB_.getName(variables[x], Blockly.Variables.NAME_TYPE) +
 						" = nil");
 				}
@@ -169,84 +169,6 @@ namespace BlocklyMruby
 		{
 			// need some helper functions to conform to Blockly's behavior
 			var helpers = new string[0];
-#if false
-			var i = 0;
-			helpers[i++] = "def blockly_puts x";
-			helpers[i++] = "  if x.is_a?(Array)";
-			helpers[i++] = "    puts x.join(',')";
-			helpers[i++] = "  else";
-			helpers[i++] = "    puts x";
-			helpers[i++] = "  end";
-			helpers[i++] = "end";
-
-			helpers[i++] = "";
-
-			helpers[i++] = "class Array";
-			helpers[i++] = "  def find_first v";
-			helpers[i++] = "    i = self.index(v)";
-			helpers[i++] = "    i ? i + 1 : 0";
-			helpers[i++] = "  end";
-			helpers[i++] = "";
-			helpers[i++] = "  def find_last v";
-			helpers[i++] = "    i = self.rindex(v)";
-			helpers[i++] = "    i ? i + 1 : 0";
-			helpers[i++] = "  end";
-			helpers[i++] = "";
-			helpers[i++] = "  def numbers";
-			helpers[i++] = "    self.delete_if {|v| !v.is_a?(Numeric)}";
-			helpers[i++] = "  end";
-			helpers[i++] = "";
-			helpers[i++] = "  def sum";
-			helpers[i++] = "    self.numbers.inject(0) {|sum, v| sum + v}";
-			helpers[i++] = "  end";
-			helpers[i++] = "";
-			helpers[i++] = "  def average";
-			helpers[i++] = "    x = self.numbers";
-			helpers[i++] = "    x.sum / x.size.to_f";
-			helpers[i++] = "  end";
-			helpers[i++] = "";
-			helpers[i++] = "  def standard_deviation";
-			helpers[i++] = "    x = self.numbers";
-			helpers[i++] = "    return 0 if x.empty?";
-			helpers[i++] = "    mean = x.average";
-			helpers[i++] = "    variance = x.map {|v| (v - mean) ** 2}.sum / x.size";
-			helpers[i++] = "    Math.sqrt(variance)";
-			helpers[i++] = "  end";
-			helpers[i++] = "";
-			helpers[i++] = "  def median";
-			helpers[i++] = "    x = self.numbers";
-			helpers[i++] = "    x.sort!";
-			helpers[i++] = "    index  = x.size / 2";
-			helpers[i++] = "    x.size.odd? ? x[index] : ((x[index - 1] + x[index]) / 2.0)";
-			helpers[i++] = "  end";
-			helpers[i++] = "end";
-
-			helpers[i++] = "";
-
-			helpers[i++] = "class String";
-			helpers[i++] = "  def find_first v";
-			helpers[i++] = "    i = self.index(v)";
-			helpers[i++] = "    i ? i + 1 : 0";
-			helpers[i++] = "  end";
-			helpers[i++] = "";
-			helpers[i++] = "  def find_last v";
-			helpers[i++] = "    i = self.rindex(v)";
-			helpers[i++] = "    i ? i + 1 : 0";
-			helpers[i++] = "  end";
-			helpers[i++] = "end";
-
-			helpers[i++] = "";
-
-			helpers[i++] = "class Float";
-			helpers[i++] = "  def even?";
-			helpers[i++] = "    false";
-			helpers[i++] = "  end";
-			helpers[i++] = "";
-			helpers[i++] = "  def odd?";
-			helpers[i++] = "    false";
-			helpers[i++] = "  end";
-			helpers[i++] = "end";
-#endif
 			var indent = INDENT;
 			var allDefs = generateDefinitions(helpers);
 			allDefs = indent + allDefs.Split("\n").Join("\n" + indent);
@@ -300,7 +222,6 @@ namespace BlocklyMruby
 		 * @private
 		 */
 		public override string scrub_(Block block, string code)
-
 		{
 			if (code == null) {
 				// Block has handled code generation itself.

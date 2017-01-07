@@ -238,9 +238,9 @@ cd $(ProjectDir)..\..\mruby
 ruby minirake
 cd $(ProjectDir)
 if not exist $(Configuration) mkdir $(Configuration)
-copy /B /Y ..\..\mruby\build\host\lib\$(TargetName).lib $(Configuration)\
-copy /B /Y ..\..\mruby\build\host\vc140.pdb $(Configuration)\$(TargetName).pdb
-copy /B /Y ..\..\mruby\build\host\vc140.idb $(Configuration)\$(TargetName).idb</NMakeBuildCommandLine>
+copy /B /Y ..\..\mruby\build\host-debug\lib\$(TargetName).lib $(Configuration)\
+copy /B /Y ..\..\mruby\build\host-debug\vc140.pdb $(Configuration)\$(TargetName).pdb
+copy /B /Y ..\..\mruby\build\host-debug\vc140.idb $(Configuration)\$(TargetName).idb</NMakeBuildCommandLine>
     <NMakeOutput>$(Configuration)\libmruby.lib</NMakeOutput>
     <NMakeCleanCommandLine>PATH=%PATH%;$(ProjectDir)..\tools\bin
 cd $(ProjectDir)
@@ -255,9 +255,9 @@ cd $(ProjectDir)..\..\mruby
 ruby minirake clean all
 cd $(ProjectDir)
 if not exist $(Configuration) mkdir $(Configuration)
-copy /B /Y ..\..\mruby\build\host\lib\$(TargetName).lib $(Configuration)\
-copy /B /Y ..\..\mruby\build\host\vc140.pdb $(Configuration)\$(TargetName).pdb
-copy /B /Y ..\..\mruby\build\host\vc140.idb $(Configuration)\$(TargetName).idb</NMakeReBuildCommandLine>
+copy /B /Y ..\..\mruby\build\host-debug\lib\$(TargetName).lib $(Configuration)\
+copy /B /Y ..\..\mruby\build\host-debug\vc140.pdb $(Configuration)\$(TargetName).pdb
+copy /B /Y ..\..\mruby\build\host-debug\vc140.idb $(Configuration)\$(TargetName).idb</NMakeReBuildCommandLine>
     <NMakePreprocessorDefinitions>WIN32;_DEBUG;ECHONET_CONTROLLER_EXTENTION;MRB_GC_STRESS;MRB_USE_PRESET_SYMBOLS;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <OutDir>$(ProjectDir)\</OutDir>
     <NMakeIncludeSearchPath>..\..\mruby\include;..\..\asp\arch;..\..\asp\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
@@ -268,9 +268,9 @@ cd $(ProjectDir)..\..\mruby
 ruby minirake
 cd $(ProjectDir)
 if not exist $(Configuration) mkdir $(Configuration)
-copy /B /Y ..\..\mruby\build\host\lib\$(TargetName).lib $(Configuration)\
-copy /B /Y ..\..\mruby\build\host\vc140.pdb $(Configuration)\$(TargetName).pdb
-copy /B /Y ..\..\mruby\build\host\vc140.idb $(Configuration)\$(TargetName).idb</NMakeBuildCommandLine>
+copy /B /Y ..\..\mruby\build\host-debug\lib\$(TargetName).lib $(Configuration)\
+copy /B /Y ..\..\mruby\build\host-debug\vc140.pdb $(Configuration)\$(TargetName).pdb
+copy /B /Y ..\..\mruby\build\host-debug\vc140.idb $(Configuration)\$(TargetName).idb</NMakeBuildCommandLine>
     <NMakeOutput>$(Configuration)\libmruby.lib</NMakeOutput>
     <NMakeCleanCommandLine>PATH=%PATH%;$(ProjectDir)..\tools\bin
 cd $(ProjectDir)
@@ -285,9 +285,9 @@ cd $(ProjectDir)..\..\mruby
 ruby minirake clean all
 cd $(ProjectDir)
 if not exist $(Configuration) mkdir $(Configuration)
-copy /B /Y ..\..\mruby\build\host\lib\$(TargetName).lib $(Configuration)\
-copy /B /Y ..\..\mruby\build\host\vc140.pdb $(Configuration)\$(TargetName).pdb
-copy /B /Y ..\..\mruby\build\host\vc140.idb $(Configuration)\$(TargetName).idb</NMakeReBuildCommandLine>
+copy /B /Y ..\..\mruby\build\host-debug\lib\$(TargetName).lib $(Configuration)\
+copy /B /Y ..\..\mruby\build\host-debug\vc140.pdb $(Configuration)\$(TargetName).pdb
+copy /B /Y ..\..\mruby\build\host-debug\vc140.idb $(Configuration)\$(TargetName).idb</NMakeReBuildCommandLine>
     <NMakePreprocessorDefinitions>WIN32;_DEBUG;ECHONET_CONTROLLER_EXTENTION;MRB_GC_STRESS;MRB_USE_PRESET_SYMBOLS;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <OutDir>$(ProjectDir)\</OutDir>
     <NMakeIncludeSearchPath>..\..\mruby\include;..\..\asp\arch;..\..\asp\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>

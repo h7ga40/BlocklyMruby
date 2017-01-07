@@ -88,27 +88,8 @@ namespace BlocklyMruby
 					'"' + block.id + '"') + branch;
 			}
 
-			// Helper function
-			Func<string> forLoop = () => {
-				return Blockly.Ruby.provideFunction_(
-					"for_loop",
-					new string[] { "# loops though all numbers from +params[:from]+ to +params[:to]+ by the step",
-					 "# value +params[:by]+ and calls the given block passing the numbers",
-					 "def " + Blockly.Ruby.FUNCTION_NAME_PLACEHOLDER_ + " params",
-					 "",
-					 "  from = params[:from] #.to_f",
-					 "  to = params[:to] #.to_f",
-					 "  by = params[:by].abs #.to_f",
-					 "",
-					 "  from.step(to, (from > to) ? -1 * by : by) do |value|",
-					 "    yield value",
-					 "  end",
-					 "",
-					 "end" });
-			};
-
 			Func<string, string, string, string> generateForLoop = (_fromVal, _toVal, _increment) => {
-				return forLoop() + " from: (" + _fromVal + "), "
+				return "for_loop from: (" + _fromVal + "), "
 								 + "to: (" + _toVal + "), "
 								 + "by: (" + _increment + ")";
 			};

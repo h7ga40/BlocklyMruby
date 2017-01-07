@@ -120,6 +120,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="js\blockly.js" />
+    <Content Include="xterm.html" />
+    <Content Include="xterm\addons\fit\fit.js" />
+    <Content Include="xterm\src\xterm.css" />
+    <Content Include="xterm\src\xterm.js" />
     <None Include="index.html" />
     <None Include="icon.png" />
   </ItemGroup>

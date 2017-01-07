@@ -162,21 +162,11 @@ namespace BlocklyMruby
 			}
 			else if (where == "RANDOM") {
 				if (mode == "GET") {
-					var functionName = Blockly.Ruby.provideFunction_(
-						"lists_random_item",
-						new string[] { "def " + Blockly.Ruby.FUNCTION_NAME_PLACEHOLDER_ + "(myList)",
-						 "  myList[rand(myList.size)]",
-						 "end" });
-					var code = functionName + "(" + list + ")";
+					var code = "lists_random_item(" + list + ")";
 					return new object[] { code, ORDER_FUNCTION_CALL };
 				}
 				else {
-					var functionName = Blockly.Ruby.provideFunction_(
-						"lists_remove_random_item",
-						new string[] { "def " + Blockly.Ruby.FUNCTION_NAME_PLACEHOLDER_ + "(myList)",
-						 "  myList.delete_at(rand(myList.size))",
-						 "end" });
-					var code = functionName + "(" + list + ")";
+					var code = "lists_remove_random_item(" + list + ")";
 					if (mode == "GET_REMOVE") {
 						return new object[] { code, ORDER_FUNCTION_CALL };
 					}
@@ -270,21 +260,11 @@ namespace BlocklyMruby
 			}
 			else if (where == "RANDOM") {
 				if (mode == "SET") {
-					var functionName = Blockly.Ruby.provideFunction_(
-						"lists_set_random_item",
-						new string[] { "def " + Blockly.Ruby.FUNCTION_NAME_PLACEHOLDER_ + "(myList, value)",
-						 "  myList[rand(myList.size)] = value",
-						 "end"});
-					var code = functionName + "(" + list + ", " + value + ")\n";
+					var code = "lists_set_random_item(" + list + ", " + value + ")\n";
 					return code;
 				}
 				else if (mode == "INSERT") {
-					var functionName = Blockly.Ruby.provideFunction_(
-						"lists_insert_random_item",
-						new string[] { "def " + Blockly.Ruby.FUNCTION_NAME_PLACEHOLDER_ + "(myList, value)",
-						 "  myList.insert(rand(myList.size), value)",
-						 "end" });
-					var code = functionName + "(" + list + ", " + value + ")\n";
+					var code = "lists_insert_random_item(" + list + ", " + value + ")\n";
 					return code;
 				}
 			}
@@ -293,11 +273,6 @@ namespace BlocklyMruby
 
 		public object[] lists_getSublist(ListsGetSublistBlock block)
 		{
-			var functionName = Blockly.Ruby.provideFunction_(
-				"lists_sublist",
-				new string[] { "def " + Blockly.Ruby.FUNCTION_NAME_PLACEHOLDER_ + "(myList, range)",
-				 "  myList[range] || []",
-				 "end" });
 			// Get sublist.
 			var list = Blockly.Ruby.valueToCode(block, "LIST",
 				Blockly.Ruby.ORDER_MEMBER);
@@ -349,7 +324,7 @@ namespace BlocklyMruby
 					at2 = "-" + at2 + ".to_i";
 				}
 			}
-			var code = functionName + "(" + list + ", " + at1 + ".." + at2 + ")";
+			var code = "lists_sublist(" + list + ", " + at1 + ".." + at2 + ")";
 			return new object[] { code, ORDER_FUNCTION_CALL };
 		}
 	}

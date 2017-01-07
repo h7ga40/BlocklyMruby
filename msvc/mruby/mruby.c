@@ -1,7 +1,5 @@
 #include "stdafx.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+
 #include "mruby.h"
 #include "mruby/array.h"
 #include "mruby/compile.h"
@@ -24,17 +22,17 @@ p(mrb_state *mrb, mrb_value obj)
 struct _args
 {
 	FILE *rfp;
-	char* cmdline;
+	wchar_t* cmdline;
 	mrb_bool fname : 1;
 	mrb_bool mrbfile : 1;
 	mrb_bool check_syntax : 1;
 	mrb_bool verbose : 1;
 	int argc;
-	char** argv;
+	wchar_t** argv;
 };
 
 static void
-usage(const char *name)
+usage(const wchar_t *name)
 {
 	static const char *const usage_msg[] = {
 		"switches:",
@@ -49,24 +47,24 @@ usage(const char *name)
 	};
 	const char *const *p = usage_msg;
 
-	printf("Usage: %s [switches] programfile\n", name);
+	fprintf(stdout, "Usage: %ls [switches] programfile\n", name);
 	while (*p)
-		printf("  %s\n", *p++);
+		fprintf(stdout, "  %s\n", *p++);
 }
 
 static int
-parse_args(mrb_state *mrb, int argc, char **argv, struct _args *args)
+parse_args(mrb_state *mrb, int argc, wchar_t **argv, struct _args *args)
 {
-	char **origargv = argv;
+	wchar_t **origargv = argv;
 	static const struct _args args_zero = { 0 };
 
 	*args = args_zero;
 
 	for (argc--, argv++; argc > 0; argc--, argv++) {
-		char *item;
+		wchar_t *item;
 		if (argv[0][0] != '-') break;
 
-		if (strlen(*argv) <= 1) {
+		if (wcslen(*argv) <= 1) {
 			argc--; argv++;
 			args->rfp = stdin;
 			break;
@@ -74,13 +72,13 @@ parse_args(mrb_state *mrb, int argc, char **argv, struct _args *args)
 
 		item = argv[0] + 1;
 		switch (*item++) {
-		case 'b':
+		case L'b':
 			args->mrbfile = TRUE;
 			break;
-		case 'c':
+		case L'c':
 			args->check_syntax = TRUE;
 			break;
-		case 'e':
+		case L'e':
 			if (item[0]) {
 				goto append_cmdline;
 			}
@@ -90,10 +88,10 @@ parse_args(mrb_state *mrb, int argc, char **argv, struct _args *args)
 			append_cmdline:
 				if (!args->cmdline) {
 					size_t buflen;
-					char *buf;
+					wchar_t *buf;
 
-					buflen = strlen(item) + 1;
-					buf = (char *)mrb_malloc(mrb, buflen);
+					buflen = (wcslen(item) + 1) * sizeof(wchar_t);
+					buf = (wchar_t *)mrb_malloc(mrb, buflen);
 					memcpy(buf, item, buflen);
 					args->cmdline = buf;
 				}
@@ -101,33 +99,33 @@ parse_args(mrb_state *mrb, int argc, char **argv, struct _args *args)
 					size_t cmdlinelen;
 					size_t itemlen;
 
-					cmdlinelen = strlen(args->cmdline);
-					itemlen = strlen(item);
+					cmdlinelen = wcslen(args->cmdline);
+					itemlen = wcslen(item);
 					args->cmdline =
-						(char *)mrb_realloc(mrb, args->cmdline, cmdlinelen + itemlen + 2);
-					args->cmdline[cmdlinelen] = '\n';
-					memcpy(args->cmdline + cmdlinelen + 1, item, itemlen + 1);
+						(wchar_t *)mrb_realloc(mrb, args->cmdline, (cmdlinelen + itemlen + 2) * sizeof(wchar_t));
+					args->cmdline[cmdlinelen] = L'\n';
+					memcpy(args->cmdline + cmdlinelen + 1, item, (itemlen + 1) * sizeof(wchar_t));
 				}
 			}
 			else {
-				printf("%s: No code specified for -e\n", *origargv);
+				fprintf(stdout, "%ls: No code specified for -e\n", *origargv);
 				return EXIT_SUCCESS;
 			}
 			break;
-		case 'v':
+		case L'v':
 			if (!args->verbose) mrb_show_version(mrb);
 			args->verbose = TRUE;
 			break;
-		case '-':
-			if (strcmp((*argv) + 2, "version") == 0) {
+		case L'-':
+			if (wcscmp((*argv) + 2, L"version") == 0) {
 				mrb_show_version(mrb);
 				exit(EXIT_SUCCESS);
 			}
-			else if (strcmp((*argv) + 2, "verbose") == 0) {
+			else if (wcscmp((*argv) + 2, L"verbose") == 0) {
 				args->verbose = TRUE;
 				break;
 			}
-			else if (strcmp((*argv) + 2, "copyright") == 0) {
+			else if (wcscmp((*argv) + 2, L"copyright") == 0) {
 				mrb_show_copyright(mrb);
 				exit(EXIT_SUCCESS);
 			}
@@ -139,9 +137,9 @@ parse_args(mrb_state *mrb, int argc, char **argv, struct _args *args)
 	if (args->rfp == NULL && args->cmdline == NULL) {
 		if (*argv == NULL) args->rfp = stdin;
 		else {
-			fopen_s(&args->rfp, argv[0], args->mrbfile ? "rb" : "r");
+			_wfopen_s(&args->rfp, argv[0], args->mrbfile ? L"rb" : L"r");
 			if (args->rfp == NULL) {
-				printf("%s: Cannot open program file. (%s)\n", *origargv, *argv);
+				fprintf(stdout, "%ls: Cannot open program file. (%ls)\n", *origargv, *argv);
 				return EXIT_FAILURE;
 			}
 			args->fname = TRUE;
@@ -149,8 +147,8 @@ parse_args(mrb_state *mrb, int argc, char **argv, struct _args *args)
 			argc--; argv++;
 		}
 	}
-	args->argv = (char **)mrb_realloc(mrb, args->argv, sizeof(char*) * (argc + 1));
-	memcpy(args->argv, argv, (argc + 1) * sizeof(char*));
+	args->argv = (wchar_t **)mrb_realloc(mrb, args->argv, sizeof(wchar_t*) * (argc + 1));
+	memcpy(args->argv, argv, (argc + 1) * sizeof(wchar_t*));
 	args->argc = argc;
 
 	return EXIT_SUCCESS;
@@ -167,9 +165,29 @@ cleanup(mrb_state *mrb, struct _args *args)
 	mrb_close(mrb);
 }
 
-extern "C" {
+char*
+mrb_utf8_from_wchar(const wchar_t *wcsp, size_t wcssize)
+{
+	char* mbsp;
+	size_t mbssize;
+
+	if (wcssize == 0)
+		return _strdup("");
+	if (wcssize == -1)
+		wcssize = wcslen(wcsp);
+
+	mbssize = WideCharToMultiByte(CP_UTF8, 0, (LPCWSTR)wcsp, -1, NULL, 0, NULL, NULL);
+	mbsp = (char*)malloc((mbssize + 1));
+	if (!mbsp)
+		return NULL;
+
+	mbssize = WideCharToMultiByte(CP_UTF8, 0, (LPCWSTR)wcsp, -1, mbsp, mbssize, NULL, NULL);
+	mbsp[mbssize] = 0;
+	return mbsp;
+}
+
 __declspec(dllexport) int _stdcall
-	mruby_main(int argc, char **argv)
+mruby_main(int argc, wchar_t **argv)
 {
 	mrb_state *mrb = mrb_open();
 	int n = -1;
@@ -194,7 +212,7 @@ __declspec(dllexport) int _stdcall
 
 	ARGV = mrb_ary_new_capa(mrb, args.argc);
 	for (i = 0; i < args.argc; i++) {
-		char* utf8 = mrb_utf8_from_locale(args.argv[i], -1);
+		char* utf8 = mrb_utf8_from_wchar(args.argv[i], -1);
 		if (utf8) {
 			mrb_ary_push(mrb, ARGV, mrb_str_new_cstr(mrb, utf8));
 			mrb_utf8_free(utf8);
@@ -211,10 +229,16 @@ __declspec(dllexport) int _stdcall
 	/* Set $0 */
 	zero_sym = mrb_intern_lit(mrb, "$0");
 	if (args.rfp) {
+		char *utf8 = NULL;
 		const char *cmdline;
-		cmdline = args.cmdline ? args.cmdline : "-";
+		if (args.cmdline != NULL)
+			cmdline = utf8 = mrb_utf8_from_wchar(args.cmdline, -1);
+		else
+			cmdline = "-";
 		mrbc_filename(mrb, c, cmdline);
 		mrb_gv_set(mrb, zero_sym, mrb_str_new_cstr(mrb, cmdline));
+		if (utf8 != NULL)
+			mrb_utf8_free(utf8);
 	}
 	else {
 		mrbc_filename(mrb, c, "-e");
@@ -229,7 +253,7 @@ __declspec(dllexport) int _stdcall
 		v = mrb_load_file_cxt(mrb, args.rfp, c);
 	}
 	else {
-		char* utf8 = mrb_utf8_from_locale(args.cmdline, -1);
+		char* utf8 = mrb_utf8_from_wchar(args.cmdline, -1);
 		if (!utf8) abort();
 		v = mrb_load_string_cxt(mrb, utf8, c);
 		mrb_utf8_free(utf8);
@@ -243,10 +267,9 @@ __declspec(dllexport) int _stdcall
 		n = -1;
 	}
 	else if (args.check_syntax) {
-		printf("Syntax OK\n");
+		fprintf(stdout, "Syntax OK\n");
 	}
 	cleanup(mrb, &args);
 
 	return n == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
-}
 }

@@ -132,30 +132,13 @@ namespace BlocklyMruby
 				code = text + "[-1]";
 				return new object[] { code, ORDER_MEMBER };
 			case "FROM_START":
-				functionName = Blockly.Ruby.provideFunction_(
-					"text_get_from_start",
-					new string[] { "def " + Blockly.Ruby.FUNCTION_NAME_PLACEHOLDER_ + " (text, index)",
-					 "  return \"\" if index < 0",
-					 "  text[index] || \"\"",
-					 "end" });
-				code = functionName + "(" + text + ", " + at + ")";
+				code = "text_get_from_start(" + text + ", " + at + ")";
 				return new object[] { code, ORDER_FUNCTION_CALL };
 			case "FROM_END":
-				functionName = Blockly.Ruby.provideFunction_(
-					"text_get_from_end",
-					new string[] { "def " + Blockly.Ruby.FUNCTION_NAME_PLACEHOLDER_ + " (text, index)",
-					 "  return \"\" if index < 0",
-					 "  text[-index-1] || \"\"'",
-					 "end" });
-				code = functionName + "(" + text + ", " + at + ")";
+				code = "text_get_from_end(" + text + ", " + at + ")";
 				return new object[] { code, ORDER_FUNCTION_CALL };
 			case "RANDOM":
-				functionName = Blockly.Ruby.provideFunction_(
-					"text_random_letter",
-					new string[] { "def " + Blockly.Ruby.FUNCTION_NAME_PLACEHOLDER_ + " (text)",
-					 "  text[rand(text.size)]",
-					 "end" });
-				code = functionName + "(" + text + ")";
+				code = "text_random_letter(" + text + ")";
 				return new object[] { code, ORDER_FUNCTION_CALL };
 			}
 			throw new Exception("Unhandled option (text_charAt).");
@@ -238,15 +221,10 @@ namespace BlocklyMruby
 			}
 			else {
 				// Title case is not a native Ruby function. Define one.
-				var functionName = Blockly.Ruby.provideFunction_(
-					"text_to_title_case",
-					new string[] { "def " + Blockly.Ruby.FUNCTION_NAME_PLACEHOLDER_ + "(str)",
-					  "  str.gsub(/\\S+/) {|txt| txt.capitalize}",
-					  "end" });
 				var argument0 = Blockly.Ruby.valueToCode(block, "TEXT",
 					Blockly.Ruby.ORDER_NONE);
 				if (String.IsNullOrEmpty(argument0)) argument0 = "\'\'";
-				code = functionName + "(" + argument0 + ")";
+				code = "text_to_title_case(" + argument0 + ")";
 			}
 
 			return new object[] { code, ORDER_MEMBER };
@@ -280,13 +258,8 @@ namespace BlocklyMruby
 		public object[] text_prompt(TextPromptBlock block)
 		{
 			// Prompt function.
-			var functionName = Blockly.Ruby.provideFunction_(
-				"text_prompt",
-				new string[] { "def " + Blockly.Ruby.FUNCTION_NAME_PLACEHOLDER_ + "(msg):",
-				 "    print (msg)",
-				 "    $stdin.gets" });
 			var msg = Blockly.Ruby.quote_(block.getFieldValue("TEXT"));
-			var code = functionName + "(" + msg + ")";
+			var code = "text_prompt(" + msg + ")";
 			var toNumber = block.getFieldValue("TYPE") == "NUMBER";
 			if (toNumber) {
 				code = code + ".to_f";

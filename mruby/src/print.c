@@ -13,10 +13,6 @@ static void
 printstr(mrb_value obj, FILE *stream)
 {
   if (mrb_string_p(obj)) {
-    if (stream == stderr) {
-      extern void __stdcall OutputDebugStringA(const char *text);
-      OutputDebugStringA(RSTRING_PTR(obj));
-    }
     fwrite(RSTRING_PTR(obj), RSTRING_LEN(obj), 1, stream);
     putc('\n', stream);
   }

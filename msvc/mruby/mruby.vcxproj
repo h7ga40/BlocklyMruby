@@ -90,7 +90,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;MRUBY_DLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;MRUBY_DLL_EXPORTS;MRB_ENABLE_DEBUG_HOOK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>..\..\mruby\include</AdditionalIncludeDirectories>
     </ClCompile>
@@ -150,11 +150,24 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="apibreak.h" />
+    <ClInclude Include="apilist.h" />
+    <ClInclude Include="apiprint.h" />
+    <ClInclude Include="mrdb.h" />
+    <ClInclude Include="mrdbconf.h" />
+    <ClInclude Include="mrdberror.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="dllmain.cpp">
+    <ClCompile Include="apibreak.c" />
+    <ClCompile Include="apilist.c" />
+    <ClCompile Include="apiprint.c" />
+    <ClCompile Include="cmdbreak.c" />
+    <ClCompile Include="cmdmisc.c" />
+    <ClCompile Include="cmdprint.c" />
+    <ClCompile Include="cmdrun.c" />
+    <ClCompile Include="dllmain.c">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </PrecompiledHeader>
@@ -168,9 +181,10 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="mrbc.cpp" />
-    <ClCompile Include="mruby.cpp" />
-    <ClCompile Include="stdafx.cpp">
+    <ClCompile Include="mrbc.c" />
+    <ClCompile Include="mrdb.c" />
+    <ClCompile Include="mruby.c" />
+    <ClCompile Include="stdafx.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

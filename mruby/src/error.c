@@ -205,13 +205,17 @@ exc_debug_info(mrb_state *mrb, struct RObject *exc)
 MRB_API mrb_noreturn void
 mrb_exc_raise(mrb_state *mrb, mrb_value exc)
 {
+  static int in_raise = 0;
   mrb->exc = mrb_obj_ptr(exc);
-  if (!mrb->gc.out_of_memory) {
+  if ((!mrb->gc.out_of_memory) && (!in_raise)) {
+    in_raise = 1;
     exc_debug_info(mrb, mrb->exc);
   }
   if (!mrb->jmp) {
-    if (!mrb->gc.out_of_memory)
+    if ((!mrb->gc.out_of_memory) && (!in_raise)) {
+      in_raise = 1;
       mrb_p(mrb, exc);
+    }
     abort();
   }
   MRB_THROW(mrb->jmp);

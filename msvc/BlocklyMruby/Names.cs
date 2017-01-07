@@ -173,7 +173,7 @@ namespace BlocklyMruby
 					scope = scope.chain;
 				}
 
-				return "@" + this.getName(name, type);
+				return "$" + this.getName(name, type);
 			}
 			else {
 				return this.getName(name, type);

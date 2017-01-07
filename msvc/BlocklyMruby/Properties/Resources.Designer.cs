@@ -78,11 +78,34 @@ namespace BlocklyMruby.Properties {
         ///};
         ///goog.define = function (a, b) {
         ///	var c = b;
-        ///	COMP [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
+        ///	COMPILED || (goog.glo [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
         /// </summary>
-        internal static string blockly {
+        internal static string blockly_js {
             get {
-                return ResourceManager.GetString("blockly", resourceCulture);
+                return ResourceManager.GetString("blockly_js", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   /*
+        /// *  Fit terminal columns and rows to the dimensions of its
+        /// *  DOM element.
+        /// *
+        /// *  Approach:
+        /// *    - Rows: Truncate the division of the terminal parent element height
+        /// *            by the terminal row height
+        /// *
+        /// *    - Columns: Truncate the division of the terminal parent element width by
+        /// *               the terminal character width (apply display: inline at the
+        /// *               terminal row and truncate its width with the current number
+        /// *               of columns)
+        /// */
+        ///(function (fit) {
+        ///  [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string fit_js {
+            get {
+                return ResourceManager.GetString("fit_js", resourceCulture);
             }
         }
         
@@ -125,9 +148,69 @@ namespace BlocklyMruby.Properties {
         ///			height: 100%;
         ///		 [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
         /// </summary>
-        internal static string index {
+        internal static string index_html {
             get {
-                return ResourceManager.GetString("index", resourceCulture);
+                return ResourceManager.GetString("index_html", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   /**
+        /// * xterm.js: xterm, in the browser
+        /// * Copyright (c) 2014, sourceLair Limited (www.sourcelair.com (MIT License)
+        /// * Copyright (c) 2012-2013, Christopher Jeffrey (MIT License)
+        /// * https://github.com/chjj/term.js
+        /// *
+        /// * Permission is hereby granted, free of charge, to any person obtaining a copy
+        /// * of this software and associated documentation files (the &quot;Software&quot;), to deal
+        /// * in the Software without restriction, including without limitation the rights
+        /// * to use, copy, modify, merge, publish, distri [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string xterm_css {
+            get {
+                return ResourceManager.GetString("xterm_css", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   &lt;!doctype html&gt;
+        ///&lt;html lang=&quot;ja-jp&quot;&gt;
+        ///&lt;head&gt;
+        ///	&lt;meta charset=&quot;utf-8&quot; /&gt;
+        ///	&lt;meta http-equiv=&quot;X-UA-Compatible&quot; content=&quot;IE=edge&quot;&gt;
+        ///	&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;
+        ///	&lt;title&gt;Terminal&lt;/title&gt;
+        ///	&lt;link rel=&quot;stylesheet&quot; href=&quot;bower_components/xterm.js/dist/xterm.css&quot; /&gt;
+        ///	&lt;script src=&quot;bower_components/xterm.js/dist/xterm.js&quot;&gt;&lt;/script&gt;
+        ///&lt;/head&gt;
+        ///&lt;body&gt;
+        ///	&lt;div id=&quot;terminal&quot;&gt;&lt;/div&gt;
+        ///	&lt;script&gt;
+        ///		var term = new Terminal();
+        ///		term.open(document.getElementById(&apos;#terminal&apos;));
+        ///		term [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string xterm_html {
+            get {
+                return ResourceManager.GetString("xterm_html", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   /**
+        /// * xterm.js: xterm, in the browser
+        /// * Copyright (c) 2014, sourceLair Limited (www.sourcelair.com (MIT License)
+        /// * Copyright (c) 2012-2013, Christopher Jeffrey (MIT License)
+        /// * https://github.com/chjj/term.js
+        /// *
+        /// * Permission is hereby granted, free of charge, to any person obtaining a copy
+        /// * of this software and associated documentation files (the &quot;Software&quot;), to deal
+        /// * in the Software without restriction, including without limitation the rights
+        /// * to use, copy, modify, merge, publish, distri [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string xterm_js {
+            get {
+                return ResourceManager.GetString("xterm_js", resourceCulture);
             }
         }
     }
