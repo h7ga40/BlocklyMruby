@@ -745,7 +745,70 @@ main(int argc, char **argv)
   return 0;
 }
 
-void mrdb_abort()
+#undef clearerr
+#undef feof
+#undef fflush
+#undef fprintf
+#undef fputs
+#undef fwrite
+#undef getc
+#undef putc
+#undef fread
+
+#include <stdio.h>
+#include <stdarg.h>
+
+void clearerr_rd(FILE* stream)
+{
+	clearerr(stream);
+}
+
+int feof_rd(FILE* stream)
+{
+	return feof(stream);
+}
+
+int fflush_rd(FILE* stream)
+{
+	return fflush(stream);
+}
+
+int fprintf_rd(FILE* const stream, char const* const format, ...)
+{
+	int len;
+	va_list args;
+	va_start(args, format);
+	len = vfprintf(stream, format, args);
+	va_end(args);
+	return len;
+}
+
+int fputs_rd(char const* buffer, FILE* stream)
+{
+	return fputs(buffer, stream);
+}
+
+size_t fwrite_rd(void const* buffer, size_t elementSize, size_t elementCount, FILE* stream)
+{
+	return fwrite(buffer, elementSize, elementCount, stream);
+}
+
+int putc_rd(int character, FILE* stream)
+{
+	return putc(character, stream);
+}
+
+int getc_rd(FILE* stream)
+{
+	return getc(stream);
+}
+
+size_t fread_rd(void *buffer, size_t size, size_t count, FILE *stream)
+{
+	return fread(buffer, size, count, stream);
+}
+
+void abort_rd()
 {
   abort();
 }

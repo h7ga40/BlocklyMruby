@@ -57,6 +57,7 @@ __declspec(dllexport) void __stdcall clear_func()
 #undef fwrite
 #undef getc
 #undef putc
+#undef fread
 
 int get_fno(FILE* stream)
 {
@@ -135,6 +136,15 @@ size_t fwrite_rd(void const* buffer, size_t elementSize, size_t elementCount, FI
 	return fwrite(buffer, elementSize, elementCount, stream);
 }
 
+int putc_rd(int character, FILE* stream)
+{
+	char ch = character;
+	int fno = get_fno(stream);
+	if (fno >= 0)
+		return fwrite_ptr(&ch, 1, fno);
+	return putc(character, stream);
+}
+
 int getc_rd(FILE* stream)
 {
 	int fno = get_fno(stream);
@@ -149,16 +159,24 @@ int getc_rd(FILE* stream)
 	return getc(stream);
 }
 
-int putc_rd(int character, FILE* stream)
+size_t fread_rd(void *buffer, size_t size, size_t count, FILE *stream)
 {
-	char ch = character;
 	int fno = get_fno(stream);
-	if (fno >= 0)
-		return fwrite_ptr(&ch, 1, fno);
-	return putc(character, stream);
+	if (fno >= 0) {
+		size_t len = size * count;
+		char *pos = (char *)buffer;
+		for(size_t i = 0; i < len; i++) {
+			int ret = getc_rd(stream);
+			if (ret < 0)
+				break;
+			*pos = ret;
+		}
+		return (size_t)pos - (size_t)buffer;
+	}
+	return fread(buffer, size, count, stream);
 }
 
-void mrdb_abort()
+void abort_rd()
 {
 	if (abort_ptr != NULL)
 		abort_ptr();

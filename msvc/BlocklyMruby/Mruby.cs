@@ -42,6 +42,11 @@ namespace BlocklyMruby
 		fflush_t _fflush;
 		abort_t _abort;
 		public event EventHandler<StdioEventArgs> Stdio;
+		Thread _Thread;
+		Queue<byte> _StdinBuf = new Queue<byte>();
+		AutoResetEvent _Event = new AutoResetEvent(false);
+
+		public bool IsRunning { get { return _Thread != null; } }
 
 		public Mruby()
 		{
@@ -60,15 +65,18 @@ namespace BlocklyMruby
 			Stdio?.Invoke(this, new StdioEventArgs(type, text));
 		}
 
-		public void mruby(string[] args, Action<int> callback)
+		public bool mruby(string[] args, Action<int> callback)
 		{
-			int ret = -1;
+			if (IsRunning)
+				return false;
+
 			var temp = new List<string>();
 			temp.Add("mruby");
 			temp.AddRange(args);
 			args = temp.ToArray();
 
-			var thread = new Thread(() => {
+			_Thread = new Thread(() => {
+				int ret = -1;
 				WriteStdout(StdioType.Out, String.Join(" ", args) + "\n");
 				try {
 					ret = mruby_main(temp.Count, args);
@@ -77,20 +85,26 @@ namespace BlocklyMruby
 					ret = -1;
 				}
 				WriteStdout(StdioType.Out, $"exit {ret}\n");
+				_Thread = null;
 				callback(ret);
 			});
-			thread.Start();
+			_Thread.Start();
+
+			return true;
 		}
 
-		public void mrbc(string[] args, Action<int> callback)
+		public bool mrbc(string[] args, Action<int> callback)
 		{
-			int ret = -1;
+			if (IsRunning)
+				return false;
+
 			var temp = new List<string>();
 			temp.Add("mrbc");
 			temp.AddRange(args);
 			args = temp.ToArray();
 
-			var thread = new Thread(() => {
+			_Thread = new Thread(() => {
+				int ret = -1;
 				WriteStdout(StdioType.Out, String.Join(" ", args) + "\n");
 				try {
 					ret = mrbc_main(temp.Count, args);
@@ -99,20 +113,26 @@ namespace BlocklyMruby
 					ret = -1;
 				}
 				WriteStdout(StdioType.Out, $"exit {ret}\n");
+				_Thread = null;
 				callback(ret);
 			});
-			thread.Start();
+			_Thread.Start();
+
+			return true;
 		}
 
-		public void mrdb(string[] args, Action<int> callback)
+		public bool mrdb(string[] args, Action<int> callback)
 		{
-			int ret = -1;
+			if (IsRunning)
+				return false;
+
 			var temp = new List<string>();
 			temp.Add("mrdb");
 			temp.AddRange(args);
 			args = temp.ToArray();
 
-			var thread = new Thread(() => {
+			_Thread = new Thread(() => {
+				int ret = -1;
 				WriteStdout(StdioType.Out, String.Join(" ", args) + "\n");
 				try {
 					ret = mrdb_main(temp.Count, args);
@@ -121,13 +141,13 @@ namespace BlocklyMruby
 					ret = -1;
 				}
 				WriteStdout(StdioType.Out, $"exit {ret}\n");
+				_Thread = null;
 				callback(ret);
 			});
-			thread.Start();
-		}
+			_Thread.Start();
 
-		Queue<byte> _StdinBuf = new Queue<byte>();
-		AutoResetEvent _Event = new AutoResetEvent(false);
+			return true;
+		}
 
 		internal void WriteStdin(string data)
 		{

@@ -113,4 +113,34 @@
 # define TRUE 1
 #endif
 
+#ifdef MRB_ENABLE_DEBUG_HOOK
+#include <stdlib.h>
+
+void clearerr_rd(FILE* stream);
+int feof_rd(FILE* stream);
+int fflush_rd(FILE* stream);
+int getc_rd(FILE* stream);
+size_t fread_rd(void *buffer, size_t size, size_t count, FILE *stream);
+int putc_rd(int character, FILE* stream);
+int fputs_rd(char const* buffer, FILE* stream);
+int fprintf_rd(FILE* const stream, char const* const format, ...);
+size_t fwrite_rd(void const* buffer, size_t elementSize, size_t elementCount, FILE* stream);
+void abort_rd(void);
+
+#define clearerr clearerr_rd
+#define feof feof_rd
+#define fflush fflush_rd
+#define getc getc_rd
+#define fgetc getc_rd
+#define fread fread_rd
+#define putc putc_rd
+#define fputc putc_rd
+#define fputs fputs_rd
+#define puts(...) fputs_rd(__VA_ARGS__, stdout)
+#define fprintf fprintf_rd
+#define printf(...) fprintf_rd(stdout, __VA_ARGS__)
+#define fwrite fwrite_rd
+#define abort abort_rd
+#endif
+
 #endif  /* MRUBYCONF_H */

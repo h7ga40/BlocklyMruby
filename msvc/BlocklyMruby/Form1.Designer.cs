@@ -40,7 +40,7 @@
 			this.tabPage1 = new System.Windows.Forms.TabPage();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
 			this.webBrowser2 = new System.Windows.Forms.WebBrowser();
-			this.debugBtn = new System.Windows.Forms.Button();
+			this.DebugBtn = new System.Windows.Forms.Button();
 			this.flowLayoutPanel1.SuspendLayout();
 			this.tabControl1.SuspendLayout();
 			this.tabPage1.SuspendLayout();
@@ -64,7 +64,7 @@
 			this.flowLayoutPanel1.Controls.Add(this.LoadBtn);
 			this.flowLayoutPanel1.Controls.Add(this.SaveBtn);
 			this.flowLayoutPanel1.Controls.Add(this.RunBtn);
-			this.flowLayoutPanel1.Controls.Add(this.debugBtn);
+			this.flowLayoutPanel1.Controls.Add(this.DebugBtn);
 			this.flowLayoutPanel1.Controls.Add(this.ExportRubyBtn);
 			this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Top;
 			this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
@@ -175,13 +175,13 @@
 			// 
 			// debugBtn
 			// 
-			this.debugBtn.Location = new System.Drawing.Point(246, 3);
-			this.debugBtn.Name = "debugBtn";
-			this.debugBtn.Size = new System.Drawing.Size(75, 23);
-			this.debugBtn.TabIndex = 4;
-			this.debugBtn.Text = "デバッグ";
-			this.debugBtn.UseVisualStyleBackColor = true;
-			this.debugBtn.Click += new System.EventHandler(this.debugBtn_Click);
+			this.DebugBtn.Location = new System.Drawing.Point(246, 3);
+			this.DebugBtn.Name = "debugBtn";
+			this.DebugBtn.Size = new System.Drawing.Size(75, 23);
+			this.DebugBtn.TabIndex = 4;
+			this.DebugBtn.Text = "デバッグ";
+			this.DebugBtn.UseVisualStyleBackColor = true;
+			this.DebugBtn.Click += new System.EventHandler(this.debugBtn_Click);
 			// 
 			// Form1
 			// 
@@ -219,7 +219,7 @@
 		private System.Windows.Forms.TabPage tabPage1;
 		private System.Windows.Forms.TabPage tabPage2;
 		private System.Windows.Forms.WebBrowser webBrowser2;
-		private System.Windows.Forms.Button debugBtn;
+		private System.Windows.Forms.Button DebugBtn;
 	}
 }
 

@@ -48,6 +48,12 @@ namespace BlocklyMruby
 
 		private void Form1_FormClosing(object sender, FormClosingEventArgs e)
 		{
+			if (_Mruby.IsRunning) {
+				MessageBox.Show("実行中です。停止してください。");
+				e.Cancel = true;
+				return;
+			}
+
 			_Mruby.Stdio -= Mruby_Stdio;
 			//var appName = Path.GetFileNameWithoutExtension(Application.ExecutablePath).ToLower();
 			//var regkey = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(FEATURE_BROWSER_EMULATION);
@@ -127,28 +133,35 @@ namespace BlocklyMruby
 			var workspace = Blockly.getMainWorkspace();
 			var code = Blockly.Ruby.workspaceToCode(workspace);
 
-			var generator = new MrbParser(false);
-			generator.mrb_parse_nstring("temporary.rb", MrbParser.UTF8StringToArray(code));
-			var scope = generator.tree as scope_node;
-			if (scope == null) {
-				return;
-			}
-
 			var rubyfile = Path.ChangeExtension(Path.GetTempFileName(), "rb");
-			using (var fs = new StreamWriter(rubyfile, false, Encoding.UTF8)) {
+			using (var fs = new StreamWriter(rubyfile, false, new UTF8Encoding(false))) {
 				fs.Write(code);
 			}
 
-			var mrbfile = Path.ChangeExtension(rubyfile, "mrb");
-			_Mruby.mrbc(new string[] { "-e", "-o", mrbfile, rubyfile }, (ret) => {
-				if (ret != 0)
-					return;
+			SetRunning(true);
 
-				_Mruby.mruby(new string[] { "-b", mrbfile }, (ret1) => {
-					if (ret1 != 0)
+			var mrbfile = Path.ChangeExtension(rubyfile, "mrb");
+			var run = _Mruby.mrbc(new string[] { "-e", "-o", mrbfile, rubyfile }, (ret) => {
+				if (ret != 0) {
+					BeginInvoke(new Action<bool>(SetRunning), false);
+					return;
+				}
+
+				var run1 = _Mruby.mruby(new string[] { "-b", mrbfile }, (ret1) => {
+					if (ret != 0) {
+						BeginInvoke(new Action<bool>(SetRunning), false);
 						return;
+					}
+
+					BeginInvoke(new Action<bool>(SetRunning), false);
 				});
+
+				if (!run1)
+					BeginInvoke(new Action<bool>(SetRunning), false);
 			});
+
+			if (!run)
+				SetRunning(false);
 		}
 
 		private void debugBtn_Click(object sender, EventArgs e)
@@ -156,28 +169,41 @@ namespace BlocklyMruby
 			var workspace = Blockly.getMainWorkspace();
 			var code = Blockly.Ruby.workspaceToCode(workspace);
 
-			var generator = new MrbParser(false);
-			generator.mrb_parse_nstring("temporary.rb", MrbParser.UTF8StringToArray(code));
-			var scope = generator.tree as scope_node;
-			if (scope == null) {
-				return;
-			}
-
 			var rubyfile = Path.ChangeExtension(Path.GetTempFileName(), "rb");
-			using (var fs = new StreamWriter(rubyfile, false, Encoding.UTF8)) {
+			using (var fs = new StreamWriter(rubyfile, false, new UTF8Encoding(false))) {
 				fs.Write(code);
 			}
 
-			var mrbfile = Path.ChangeExtension(rubyfile, "mrb");
-			_Mruby.mrbc(new string[] { "-e", "-g", "-o", mrbfile, rubyfile }, (ret) => {
-				if (ret != 0)
-					return;
+			SetRunning(true);
 
-				_Mruby.mrdb(new string[] { "-b", mrbfile }, (ret1) => {
-					if (ret1 != 0)
+			var mrbfile = Path.ChangeExtension(rubyfile, "mrb");
+			var run = _Mruby.mrbc(new string[] { "-e", "-o", mrbfile, rubyfile }, (ret) => {
+				if (ret != 0) {
+					BeginInvoke(new Action<bool>(SetRunning), false);
+					return;
+				}
+
+				var run1 = _Mruby.mrdb(new string[] { "-b", mrbfile }, (ret1) => {
+					if (ret != 0) {
+						BeginInvoke(new Action<bool>(SetRunning), false);
 						return;
+					}
+
+					BeginInvoke(new Action<bool>(SetRunning), false);
 				});
+
+				if (!run1)
+					BeginInvoke(new Action<bool>(SetRunning), false);
 			});
+
+			if (!run)
+				SetRunning(false);
+		}
+
+		private void SetRunning(bool running)
+		{
+			RunBtn.Enabled = !running;
+			DebugBtn.Enabled = !running;
 		}
 
 		private void ExportRubyBtn_Click(object sender, EventArgs e)
@@ -195,16 +221,20 @@ namespace BlocklyMruby
 				code = generator.to_ruby();
 			}
 
-			using (var fs = new StreamWriter(saveFileDialog2.FileName, false, Encoding.UTF8)) {
+			using (var fs = new StreamWriter(saveFileDialog2.FileName, false, new UTF8Encoding(false))) {
 				fs.Write(code);
 			}
 		}
+
+		System.Threading.AutoResetEvent _Event = new System.Threading.AutoResetEvent(false);
 
 		private void Mruby_Stdio(object sender, StdioEventArgs e)
 		{
 			BeginInvoke(new MethodInvoker(() => {
 				webBrowser2.Document.InvokeScript("on_term_data", new object[] { e.Text });
+				_Event.Set();
 			}));
+			_Event.WaitOne();
 		}
 	}
 
