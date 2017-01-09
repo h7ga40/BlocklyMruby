@@ -5,6 +5,15 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Terminal</title>
+	<style type="text/css" media="screen">
+		#terminal {
+			position: absolute;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			left: 0;
+		}
+	</style>
 </head>
 <body>
 	<div id="terminal"> </div>
@@ -22,11 +31,11 @@
 			term.on("data", function (data) {
 				external.on_data(data);
 			});
-			//var onresize = function (e) {
-				//term.fit();
-			//}
-			//window.addEventListener('resize', onresize, false); onresize();
-			//term.fit();
+			var onresize = function (e) {
+				term.fit();
+			}
+			window.addEventListener('resize', onresize, false); onresize();
+			term.fit();
 		}
 
 		function on_term_data(str) {

@@ -5,24 +5,7 @@ namespace BlocklyMruby
 {
 	class App
 	{
-		public class Terminal
-		{
-			StringBuilder log = new StringBuilder();
-
-			internal void flush()
-			{
-				System.Console.Write(log.ToString());
-				if (log.Length != 0)
-					log.Clear();
-			}
-
-			internal void write(string text)
-			{
-				log.Append(text);
-			}
-		}
-
-		public static Terminal Term = new Terminal();
+		public static TerminalHost Term;
 
 		internal static void Init()
 		{

@@ -1,0 +1,46 @@
+﻿<!doctype html>
+<html lang="ja-jp">
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Ruby Editor</title>
+	<style type="text/css" media="screen">
+		#text-editor {
+			position: absolute;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			left: 0;
+		}
+	</style>
+</head>
+<body>
+	<div class="ace_editor ace-clouds" id="text-editor"><textarea style="opacity: 0;" spellcheck="false" class="ace_text-input" nowrap></textarea><div class="ace_gutter"><div class="ace_layer ace_gutter-layer ace_folding-enabled"></div><div class="ace_gutter-active-line"></div></div><div class="ace_scroller"><div class="ace_content"><div class="ace_layer ace_print-margin-layer"><div style="left: 4px; visibility: visible;" class="ace_print-margin"></div></div><div class="ace_layer ace_marker-layer"></div><div style="padding: 0px 4px;" class="ace_layer ace_text-layer"></div><div class="ace_layer ace_marker-layer"></div><div class="ace_layer ace_cursor-layer ace_hidden-cursors"><div class="ace_cursor"></div></div></div></div><div style="height: auto; width: auto; top: -100px; left: -100px; visibility: hidden; position: fixed; overflow: visible; white-space: nowrap;">XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX</div><div style="width: 22px; display: none; overflow-y: scroll;" class="ace_scrollbar"><div style="width: 22px;" class="ace_scrollbar-inner"></div></div><div style="height: 22px; display: none; overflow-x: scroll;" class="ace_scrollbar-h"><div style="height: 22px;" class="ace_scrollbar-inner"></div></div></div>
+	<script>
+		function start_ace() {
+			var textEditor = ace.edit("text-editor");
+			external.editor = textEditor;
+			textEditor.setTheme("ace/theme/twilight");
+			textEditor.setShowInvisibles(true);
+			textEditor.gotoLine(0, 0);
+			textEditor.on("change", function () {
+				external.on_change();
+			});
+			var session = textEditor.getSession();
+			session.setMode("ace/mode/ruby");
+			session.setTabSize(2);
+			session.setUseSoftTabs(false);
+		}
+		function set_text(text) {
+			var textEditor = external.editor;
+			textEditor.setValue(text);
+			textEditor.moveCursorTo(0, 0);
+		}
+		function focus_editor() {
+			var textEditor = external.editor;
+			textEditor.focus();
+		}
+	</script>
+</body>
+</html>

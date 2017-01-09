@@ -119,6 +119,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="ace.html" />
+    <Content Include="ace\ace.js" />
+    <Content Include="ace\mode-ruby.js" />
+    <Content Include="ace\theme-twilight.js" />
     <Content Include="js\blockly.js" />
     <Content Include="xterm.html" />
     <Content Include="xterm\addons\fit\fit.js" />

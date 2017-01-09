@@ -11,7 +11,7 @@ namespace BlocklyMruby
 	{
 		Mruby _Mruby;
 		ScriptHost _ScriptHost;
-		TerminalHost _TerminalHost;
+		EditorHost _EditorHost;
 		const string FEATURE_BROWSER_EMULATION = @"Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_BROWSER_EMULATION";
 
 		public Form1()
@@ -26,22 +26,25 @@ namespace BlocklyMruby
 
 			InitializeComponent();
 
-			webBrowser1.DocumentTitleChanged += webBrowser1_DocumentTitleChanged;
+			BlocklyWb.DocumentTitleChanged += webBrowser1_DocumentTitleChanged;
 		}
 
 		private void Form1_Load(object sender, EventArgs e)
 		{
 			_ScriptHost = new ScriptHost();
-			webBrowser1.ObjectForScripting = _ScriptHost;
-			webBrowser1.DocumentText = Resources.index_html;
-			_TerminalHost = new TerminalHost(_Mruby);
-			webBrowser2.ObjectForScripting = _TerminalHost;
-			webBrowser2.DocumentText = Resources.xterm_html;//.Replace("/*%%term_css%%*/", Resources.xterm_css);
+			BlocklyWb.ObjectForScripting = _ScriptHost;
+			BlocklyWb.DocumentText = Resources.index_html;
+			App.Term = new TerminalHost(_Mruby);
+			ConsoleWb.ObjectForScripting = App.Term;
+			ConsoleWb.DocumentText = Resources.xterm_html;
+			_EditorHost = new EditorHost(_Mruby);
+			RubyEditorWb.ObjectForScripting = _EditorHost;
+			RubyEditorWb.DocumentText = Resources.ace_html;
 		}
 
 		private void webBrowser1_DocumentTitleChanged(object sender, EventArgs e)
 		{
-			string text = webBrowser1.DocumentTitle;
+			string text = BlocklyWb.DocumentTitle;
 			if (text != "")
 				Text = text;
 		}
@@ -79,24 +82,33 @@ namespace BlocklyMruby
 			head.InsertAdjacentElement(HtmlElementInsertionOrientation.AfterEnd, style);
 		}
 
-		private void webBrowser1_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
+		private void BlocklyPage_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
 		{
-			AddScript(webBrowser1, Resources.blockly_js);
-			AddScript(webBrowser1, Script.runtime);
-			webBrowser1.Document.InvokeScript("load_blockly");
-			Script.SetDocument(webBrowser1.Document, _ScriptHost);
+			AddScript(BlocklyWb, Resources.blockly_js);
+			AddScript(BlocklyWb, Script.runtime);
+			BlocklyWb.Document.InvokeScript("load_blockly");
+			Script.SetDocument(BlocklyWb.Document, _ScriptHost);
 			App.Init();
-			webBrowser1.Document.InvokeScript("start_blockly");
+			BlocklyWb.Document.InvokeScript("start_blockly");
 			App.Init2();
 		}
 
-		private void webBrowser2_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
+		private void ConsolePage_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
 		{
-			AddStyle(webBrowser2, Resources.xterm_css);
-			AddScript(webBrowser2, Resources.xterm_js);
-			AddScript(webBrowser2, Resources.fit_js);
-			webBrowser2.Document.InvokeScript("start_xterm");
+			AddStyle(ConsoleWb, Resources.xterm_css);
+			AddScript(ConsoleWb, Resources.xterm_js);
+			AddScript(ConsoleWb, Resources.fit_js);
+			ConsoleWb.Document.InvokeScript("start_xterm");
 			_Mruby.Stdio += Mruby_Stdio;
+		}
+
+		private void RubyEditorPage_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
+		{
+			AddScript(RubyEditorWb, Resources.ace_js);
+			AddScript(RubyEditorWb, Resources.theme_twilight_js);
+			AddScript(RubyEditorWb, Resources.mode_ruby_js);
+			RubyEditorWb.Document.InvokeScript("start_ace");
+			RubyEditorWb.Document.InvokeScript("focus_editor");
 		}
 
 		private void LoadBtn_Click(object sender, EventArgs e)
@@ -177,7 +189,7 @@ namespace BlocklyMruby
 			SetRunning(true);
 
 			var mrbfile = Path.ChangeExtension(rubyfile, "mrb");
-			var run = _Mruby.mrbc(new string[] { "-e", "-o", mrbfile, rubyfile }, (ret) => {
+			var run = _Mruby.mrbc(new string[] { "-e", "-g", "-o", mrbfile, rubyfile }, (ret) => {
 				if (ret != 0) {
 					BeginInvoke(new Action<bool>(SetRunning), false);
 					return;
@@ -231,10 +243,36 @@ namespace BlocklyMruby
 		private void Mruby_Stdio(object sender, StdioEventArgs e)
 		{
 			BeginInvoke(new MethodInvoker(() => {
-				webBrowser2.Document.InvokeScript("on_term_data", new object[] { e.Text });
+				ConsoleWb.Document.InvokeScript("on_term_data", new object[] { e.Text });
 				_Event.Set();
 			}));
 			_Event.WaitOne();
+		}
+
+		private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			if (tabControl1.SelectedTab == RubyTabPage) {
+				var workspace = Blockly.getMainWorkspace();
+				var code = Blockly.Ruby.workspaceToCode(workspace);
+				RubyEditorWb.Document.InvokeScript("set_text", new object[] { code });
+			}
+		}
+	}
+
+	[System.Runtime.InteropServices.ComVisible(true)]
+	public class EditorHost
+	{
+		Mruby _Mruby;
+		public dynamic editor;
+
+		public EditorHost(Mruby mruby)
+		{
+			_Mruby = mruby;
+		}
+
+		public void on_change()
+		{
+
 		}
 	}
 
@@ -243,6 +281,7 @@ namespace BlocklyMruby
 	{
 		Mruby _Mruby;
 		public object term;
+		StringBuilder log = new StringBuilder();
 
 		public TerminalHost(Mruby mruby)
 		{
@@ -252,6 +291,18 @@ namespace BlocklyMruby
 		public void on_data(object data)
 		{
 			_Mruby.WriteStdin(((string)data).Replace("\r", "\n"));
+		}
+
+		internal void flush()
+		{
+			System.Console.Write(log.ToString());
+			if (log.Length != 0)
+				log.Clear();
+		}
+
+		internal void write(string text)
+		{
+			log.Append(text);
 		}
 	}
 }
