@@ -414,8 +414,7 @@ namespace BlocklyMruby
 			// Assign "this" to a variable for use in the tooltip closure below.
 			var thisBlock = this;
 			this.setTooltip(new Func<string>(() => {
-				return Msg.MATH_CHANGE_TOOLTIP.Replace("%1",
-					thisBlock.getFieldValue("VAR"));
+				return Msg.MATH_CHANGE_TOOLTIP.Replace("%1", thisBlock.getFieldValue("VAR"));
 			}));
 		}
 	}

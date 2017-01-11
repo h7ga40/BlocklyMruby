@@ -11,47 +11,44 @@ namespace BlocklyMruby
 {
 	partial class Ruby
 	{
-		public object[] colour_picker(ColourPickerBlock block)
+		public node colour_picker(ColourPickerBlock block)
 		{
 			// Colour picker.
-			var code = "\'" + block.getFieldValue("COLOUR") + "\'";
-			return new object[] { code, ORDER_ATOMIC };
+			var value_colour = block.getFieldValue("COLOUR");
+			return new str_node(this, value_colour);
 		}
 
-		public object[] colour_random(ColourRandomBlock block)
+		public node colour_random(ColourRandomBlock block)
 		{
 			// Generate a random colour.
-			var code = "\'#%06x\' % rand(2**24 - 1)";
-			return new object[] { code, ORDER_FUNCTION_CALL };
+			var p = new List<node>();
+			return new fcall_node(this, intern("colour_random"), p, null);
 		}
 
-		public object[] colour_rgb(ColourRGBBlock block)
+		public node colour_rgb(ColourRGBBlock block)
 		{
 			// Compose a colour from RGB components expressed as percentages.
-			var r = Blockly.Ruby.valueToCode(block, "RED", Blockly.Ruby.ORDER_NONE);
-			if (String.IsNullOrEmpty(r)) r = "0";
-			var g = Blockly.Ruby.valueToCode(block, "GREEN", Blockly.Ruby.ORDER_NONE);
-			if (String.IsNullOrEmpty(g)) g = "0";
-			var b = Blockly.Ruby.valueToCode(block, "BLUE", Blockly.Ruby.ORDER_NONE);
-			if (String.IsNullOrEmpty(b)) b = "0";
-			var code = "colour_rgb(" + r + ", " + g + ", " + b + ")";
-			return new object[] { code, ORDER_FUNCTION_CALL };
+			var r = valueToCode(block, "RED");
+			if (r == null) r = new int_node(this, 0);
+			var g = valueToCode(block, "GREEN");
+			if (g == null) g = new int_node(this, 0);
+			var b = valueToCode(block, "BLUE");
+			if (b == null) b = new int_node(this, 0);
+			var p = new List<node>() { r, g, b };
+			return new fcall_node(this, intern("colour_rgb"), p, null);
 		}
 
-		public object[] colour_blend(ColourBlendBlock block)
+		public node colour_blend(ColourBlendBlock block)
 		{
 			// Blend two colours together.
-			var colour1 = Blockly.Ruby.valueToCode(block, "COLOUR1",
-				Blockly.Ruby.ORDER_NONE);
-			if (String.IsNullOrEmpty(colour1)) colour1 = "\'#000000\'";
-			var colour2 = Blockly.Ruby.valueToCode(block, "COLOUR2",
-				Blockly.Ruby.ORDER_NONE);
-			if (String.IsNullOrEmpty(colour2)) colour2 = "\'#000000\'";
-			var ratio = Blockly.Ruby.valueToCode(block, "RATIO",
-				Blockly.Ruby.ORDER_NONE);
-			if (String.IsNullOrEmpty(ratio)) ratio = "0";
-			var code = "colour_blend(" + colour1 + ", " + colour2 + ", " + ratio + ")";
-			return new object[] { code, ORDER_FUNCTION_CALL };
+			var colour1 = valueToCode(block, "COLOUR1");
+			if (colour1 == null) colour1 = new str_node(this, "#000000");
+			var colour2 = valueToCode(block, "COLOUR2");
+			if (colour2 == null) colour2 = new str_node(this, "#000000");
+			var ratio = valueToCode(block, "RATIO");
+			if (ratio == null) ratio = new int_node(this, 0);
+			var p = new List<node>() { colour1, colour2, ratio };
+			return new fcall_node(this, intern("colour_blend"), p, null);
 		}
 	}
 }

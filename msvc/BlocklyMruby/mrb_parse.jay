@@ -182,7 +182,7 @@ namespace BlocklyMruby
 
 program         :   {
                       this.lstate = mrb_lex_state_enum.EXPR_BEG;
-                      if (this.locals == null) this.locals = cons(null, null);
+                      if (this.locals == null) this.locals = new locals_node(null);
                     }
                   top_compstmt
                     {
@@ -219,12 +219,12 @@ top_stmts       : none
 top_stmt        : stmt
                 | keyword_BEGIN
                     {
-                      $$ = (node)local_switch();
+                      $$ = local_switch();
                     }
                   '{' top_compstmt '}'
                     {
                       yyError("BEGIN not supported");
-                      local_resume($<node>2);
+                      local_resume($<locals_node>2);
                       $$ = null;
                     }
                 ;
@@ -1226,14 +1226,14 @@ primary         : literal
                     {
                       if (this.in_def != 0 || this.in_single != 0)
                         yyError("class definition in method body");
-                      $$ = (node)local_switch();
+                      $$ = local_switch();
                     }
                   bodystmt
                   keyword_end
                     {
                       $$ = new_class($2, $3, $5);
                       $<node>$.SET_LINENO($1);
-                      local_resume($<node>4);
+                      local_resume($<locals_node>4);
                     }
                 | keyword_class
                   tLSHFT expr
@@ -1243,7 +1243,7 @@ primary         : literal
                     }
                   term
                     {
-                      $$ = (node)cons(local_switch(), (int)(this.in_single));
+                      $$ = cons(local_switch(), this.in_single);
                       this.in_single = 0;
                     }
                   bodystmt
@@ -1251,7 +1251,7 @@ primary         : literal
                     {
                       $$ = new_sclass($3, $7);
                       $<node>$.SET_LINENO($1);
-                      local_resume((node)$<node>6.car);
+                      local_resume((locals_node)$<node>6.car);
                       this.in_def = $<int>4;
                       this.in_single = (int)($<node>6.cdr);
                     }
@@ -1260,14 +1260,14 @@ primary         : literal
                     {
                       if (this.in_def != 0 || this.in_single != 0)
                         yyError("module definition in method body");
-                      $$ = (node)local_switch();
+                      $$ = local_switch();
                     }
                   bodystmt
                   keyword_end
                     {
                       $$ = new_module($2, $4);
                       $<node>$.SET_LINENO($1);
-                      local_resume($<node>3);
+                      local_resume($<locals_node>3);
                     }
                 | keyword_def fname
                     {
@@ -1276,7 +1276,7 @@ primary         : literal
                     }
                     {
                       this.in_def++;
-                      $$ = (node)local_switch();
+                      $$ = local_switch();
                     }
                   f_arglist
                   bodystmt
@@ -1284,7 +1284,7 @@ primary         : literal
                     {
                       $$ = new_def($2, $5, $6);
                       $<node>$.SET_LINENO($1);
-                      local_resume($<node>4);
+                      local_resume($<locals_node>4);
                       this.in_def--;
                       this.cmdarg_stack = $<stack_type>3;
                     }
@@ -1298,7 +1298,7 @@ primary         : literal
                     {
                       this.in_single++;
                       this.lstate = mrb_lex_state_enum.EXPR_ENDFN; /* force for args */
-                      $$ = (node)local_switch();
+                      $$ = local_switch();
                     }
                   f_arglist
                   bodystmt
@@ -1306,7 +1306,7 @@ primary         : literal
                     {
                       $$ = new_sdef($2, $5, $7, $8);
                       $<node>$.SET_LINENO($1);
-                      local_resume($<node>6);
+                      local_resume($<locals_node>6);
                       this.in_single--;
                       this.cmdarg_stack = $<stack_type>4;
                     }
@@ -1937,7 +1937,7 @@ var_ref         : variable
                 | keyword__FILE__
                     {
                       if (this.filename == null) {
-                        this.filename = "(null)";
+                        this.mrb_parser_set_filename("(null)");
                       }
                       $$ = new_filename(this.filename);
                     }

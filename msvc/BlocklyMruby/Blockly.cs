@@ -219,8 +219,6 @@ public static partial class Blockly
 	public static Block selected { get { return Script.CreateBlock(instance.selected); } }
 
 	[Name(false), FieldProperty]
-	public static Ruby Ruby;
-	[Name(false), FieldProperty]
 	public static object Blocks { get { return instance.Blocks; } }
 
 	public static class Xml

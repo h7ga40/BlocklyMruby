@@ -73,6 +73,10 @@ class Float
   end
 end
 
+def colour_random()
+  '#%06x' % rand(2**24 - 1)
+end
+
 def colour_rgb(r, g, b)
   r = (2.55 * [100, [0, r].max].min).round
   g = (2.55 * [100, [0, g].max].min).round

@@ -11,23 +11,20 @@ namespace BlocklyMruby
 {
 	partial class Ruby
 	{
-		public object[] variables_get(VariablesGetBlock block)
+		public node variables_get(VariablesGetBlock block)
 		{
 			// Variable getter.
-			var code = Blockly.Ruby.variableDB_.getRubyName(block.getFieldValue("VAR"),
-				Blockly.Variables.NAME_TYPE);
-			return new object[] { code, ORDER_ATOMIC };
+			var code = get_var_name(block.getFieldValue("VAR"));
+			return new_var_node(code);
 		}
 
-		public string variables_set(VariablesSetBlock block)
+		public node variables_set(VariablesSetBlock block)
 		{
 			// Variable setter.
-			var argument0 = Blockly.Ruby.valueToCode(block, "VALUE",
-				Blockly.Ruby.ORDER_NONE);
-			if (String.IsNullOrEmpty(argument0)) argument0 = "0";
-			var varName = Blockly.Ruby.variableDB_.getRubyName(block.getFieldValue("VAR"),
-				Blockly.Variables.NAME_TYPE);
-			return varName + " = " + argument0 + "\n";
+			var argument0 = valueToCode(block, "VALUE");
+			if (argument0 == null) argument0 = new int_node(this, 0);
+			var varName = get_var_name(block.getFieldValue("VAR"));
+			return new asgn_node(this, new_var_node(varName), argument0);
 		}
 	}
 }

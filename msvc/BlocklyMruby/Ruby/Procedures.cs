@@ -11,95 +11,76 @@ namespace BlocklyMruby
 {
 	partial class Ruby
 	{
-		public object[] procedures_defreturn(ProcedureDefBlock block)
+		public node procedures_defreturn(ProcedureDefBlock block)
 		{
-			Blockly.Ruby.variableDB_.pushScope();
+			var lv = local_switch();
 
-			var args = new List<string>();
+			var args = new List<arg_node>();
 			for (var x = 0; x < block.arguments_.Count; x++) {
-				args.Add(Blockly.Ruby.variableDB_.addLocalVariable(block.arguments_[x],
-					Blockly.Variables.NAME_TYPE));
+				args.Add(new arg_node(this, local_add_f(block.arguments_[x])));
 			}
-			var funcName = Blockly.Ruby.variableDB_.getRubyName(block.getFieldValue("NAME"),
-				Blockly.Procedures.NAME_TYPE);
-			var branch = Blockly.Ruby.statementToCode(block, "STACK");
-			if (Blockly.Ruby.INFINITE_LOOP_TRAP != null) {
-				branch = Blockly.Ruby.INFINITE_LOOP_TRAP.Replace(new Regex("%1", "g"),
-					"\"" + block.id + "\"") + branch;
+			var funcName = intern(block.getFieldValue("NAME"));
+			var branch = statementToCode(block, "STACK");
+			var returnValue = valueToCode(block, "RETURN");
+			if (returnValue == null) {
+				returnValue = new return_node(this, returnValue);
 			}
-			var returnValue = Blockly.Ruby.valueToCode(block, "RETURN",
-				Blockly.Ruby.ORDER_NONE);
-			if (String.IsNullOrEmpty(returnValue)) {
-				returnValue = "\n  return " + returnValue + "\n";
-			}
-			var code = "def " + funcName + "(" + String.Join(", ", args) + ")\n" +
-				branch + returnValue + "end";
-			code = Blockly.Ruby.scrub_(block, code);
-			Blockly.Ruby.definitions_[funcName] = code;
+			((begin_node)branch).progs.Add(returnValue);
+			var code = new def_node(this, funcName, args, branch);
 
-			Blockly.Ruby.variableDB_.popScope();
+			local_resume(lv);
 
-			return null;
+			return code;
 		}
 
 		// Defining a procedure without a return value uses the same generator as
 		// a procedure with a return value.
-		public object[] procedures_defnoreturn(ProceduresDefnoreturnBlock block)
+		public node procedures_defnoreturn(ProceduresDefnoreturnBlock block)
 		{
-			return Blockly.Ruby.procedures_defreturn(block);
+			return procedures_defreturn(block);
 		}
 
-		public object[] procedures_callreturn(ProceduresCallreturnBlock block)
+		public node procedures_callreturn(ProceduresCallreturnBlock block)
 		{
 			// Call a procedure with a return value.
-			var funcName = Blockly.Ruby.variableDB_.getRubyName(block.getFieldValue("NAME"),
-				Blockly.Procedures.NAME_TYPE);
-			var args = new string[0];
+			var funcName = intern(block.getFieldValue("NAME"));
+			var args = new List<node>();
 			for (var x = 0; x < block.arguments_.Count; x++) {
-				args[x] = Blockly.Ruby.valueToCode(block, "ARG" + x,
-					Blockly.Ruby.ORDER_NONE);
-				if (String.IsNullOrEmpty(args[x]))
-					args[x] = "None";
+				args.Add(valueToCode(block, "ARG" + x));
+				if (args[x] == null)
+					args[x] = new nil_node(this);
 			}
-
-			var code = funcName + "(" + args.Join(", ") + ")";
-			return new object[] { code, ORDER_FUNCTION_CALL };
+			return new fcall_node(this, funcName, args, null);
 		}
 
-		public string procedures_callnoreturn(ProceduresCallnoreturnBlock block)
+		public node procedures_callnoreturn(ProceduresCallnoreturnBlock block)
 		{
 			// Call a procedure with no return value.
-			var funcName = Blockly.Ruby.variableDB_.getRubyName(block.getFieldValue("NAME"),
-				Blockly.Procedures.NAME_TYPE);
-			var args = new List<string>();
+			var funcName = intern(block.getFieldValue("NAME"));
+			var args = new List<node>();
 			for (var x = 0; x < block.arguments_.Count; x++) {
-				args.Add(Blockly.Ruby.valueToCode(block, "ARG" + x, Blockly.Ruby.ORDER_NONE));
-				if (String.IsNullOrEmpty(args[x]))
-					args[x] = "None";
+				args.Add(valueToCode(block, "ARG" + x));
+				if (args[x] == null)
+					args[x] = new nil_node(this);
 			}
-			var code = funcName + "(" + String.Join(", ", args) + ")\n";
-			return code;
+			return new fcall_node(this, funcName, args, null);
 		}
 
-		public string procedures_ifreturn(ProceduresIfreturnBlock block)
+		public node procedures_ifreturn(ProceduresIfreturnBlock block)
 		{
 			// Conditionally return value from a procedure.
-			var condition = Blockly.Ruby.valueToCode(block, "CONDITION",
-				Blockly.Ruby.ORDER_NONE);
-			if (String.IsNullOrEmpty(condition)) condition = "False";
-			var code = "if " + condition + "\n";
+			var condition = valueToCode(block, "CONDITION");
+			if (condition == null) condition = new false_node(this);
+			node code = null;
 			if (block.hasReturnValue_) {
-				var value = Blockly.Ruby.valueToCode(block, "VALUE",
-					Blockly.Ruby.ORDER_NONE);
-				if (String.IsNullOrEmpty(value)) value = "None";
-				code += "\n  return " + value + "\n";
+				var value = valueToCode(block, "VALUE");
+				if (value == null) value = new nil_node(this);
+				code = new return_node(this, value);
 			}
 			else {
-				code += "\n  return\n";
+				code = new return_node(this, null);
 			}
-			code += "end\n";
-
-			return code;
+			return new if_node(this, condition, code, null, false);
 		}
 	}
 }

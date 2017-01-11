@@ -35,9 +35,6 @@ namespace BlocklyMruby
 		Dictionary<string, bool> reservedDict_;
 		Dictionary<string, string> db_;
 		Dictionary<string, bool> dbReverse_;
-		public Names localVarsDB;
-		public LocalVars localVars;
-		public Names chain;
 
 		/// <summary>
 		/// Class for a database of entity names (variables, functions, etc).
@@ -159,54 +156,5 @@ namespace BlocklyMruby
 		{
 			return name1.ToLowerCase() == name2.ToLowerCase();
 		}
-
-		public string getRubyName(string name, string type)
-		{
-			if (type == Blockly.Variables.NAME_TYPE) {
-				var scope = this.localVars;
-
-				while (scope != null) {
-					string localVar;
-					if (scope.TryGetValue(name, out localVar)) {
-						return localVar;
-					}
-					scope = scope.chain;
-				}
-
-				return "$" + this.getName(name, type);
-			}
-			else {
-				return this.getName(name, type);
-			}
-		}
-
-		public void pushScope()
-		{
-			var previousLV = this.localVars;
-			var previousDB = this.localVarsDB;
-
-			this.localVars = new LocalVars();
-			this.localVarsDB = new Names(Blockly.Ruby.RESERVED_WORDS_);
-
-			this.localVars.chain = previousLV;
-			this.localVarsDB.chain = previousDB;
-		}
-
-		public string addLocalVariable(string name, string type)
-		{
-			this.localVars[name] = this.localVarsDB.getName(name, Blockly.Variables.NAME_TYPE);
-			return this.localVars[name];
-		}
-
-		public void popScope()
-		{
-			this.localVars = this.localVars.chain;
-			this.localVarsDB = this.localVarsDB.chain;
-		}
-	}
-
-	public class LocalVars : Dictionary<string, string>
-	{
-		public LocalVars chain;
 	}
 }

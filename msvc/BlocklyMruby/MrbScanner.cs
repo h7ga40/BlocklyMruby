@@ -67,7 +67,7 @@ namespace BlocklyMruby
 		}
 	}
 
-	public partial class MrbParser : MrbParser.yyInput, MrbParser.yyConsoleOut
+	public partial class MrbParser : IMrbParser, MrbParser.yyInput, MrbParser.yyConsoleOut
 	{
 		const int MRB_PARSER_TOKBUF_MAX = 65536;
 		const int MRB_PARSER_TOKBUF_SIZE = 256;
@@ -76,9 +76,16 @@ namespace BlocklyMruby
 		Uint8Array s;
 		int sp;
 		Stream f;
-		string filename;
-		internal int lineno;
-		int column;
+		public string filename {
+			get {
+				if (current_filename_index < filename_table.Count)
+					return filename_table[current_filename_index];
+				else
+					return "(null)";
+			}
+		}
+		public int lineno { get; set; }
+		public int column { get; set; }
 		internal bool verbose;
 
 		mrb_lex_state_enum lstate;
@@ -90,7 +97,7 @@ namespace BlocklyMruby
 		int lpar_beg;
 		int in_def, in_single;
 		bool cmd_start;
-		node locals;
+		locals_node locals;
 
 		node pb;
 		Uint8Array buf = new Uint8Array(MRB_PARSER_TOKBUF_SIZE);
@@ -107,7 +114,7 @@ namespace BlocklyMruby
 
 		List<string> filename_table = new List<string>();
 		int filename_table_length { get { return filename_table.Count; } }
-		internal int current_filename_index;
+		public int current_filename_index;
 
 		internal partial_hook_t partial_hook;
 		internal object partial_data;
@@ -571,42 +578,38 @@ namespace BlocklyMruby
 
 		/* xxx ----------------------------- */
 
-		node local_switch()
+		locals_node local_switch()
 		{
-			node prev = this.locals;
-
-			this.locals = cons(null, null);
+			var prev = this.locals;
+			this.locals = new locals_node(null);
 			return prev;
 		}
 
-		void local_resume(node prev)
+		void local_resume(locals_node prev)
 		{
 			this.locals = prev;
 		}
 
 		void local_nest()
 		{
-			this.locals = cons(null, this.locals);
+			this.locals = new locals_node(this.locals);
 		}
 
 		void local_unnest()
 		{
 			if (this.locals != null) {
-				this.locals = (node)this.locals.cdr;
+				this.locals = this.locals.cdr;
 			}
 		}
 
 		bool local_var_p(mrb_sym sym)
 		{
-			node l = this.locals;
+			locals_node l = this.locals;
 
 			while (l != null) {
-				var n = l.car;
-				while (n != null) {
-					if (n is mrb_sym && (mrb_sym)n == sym) return true;
-					n = ((node)n).cdr;
-				}
-				l = (node)l.cdr;
+				if (l.symList.Contains(sym))
+					return true;
+				l = l.cdr;
 			}
 			return false;
 		}
@@ -614,7 +617,7 @@ namespace BlocklyMruby
 		void local_add_f(mrb_sym sym)
 		{
 			if (this.locals != null) {
-				this.locals.car = push((node)this.locals.car, sym);
+				this.locals.push(sym);
 			}
 		}
 
@@ -625,9 +628,9 @@ namespace BlocklyMruby
 			}
 		}
 
-		public object locals_node()
+		public List<mrb_sym> locals_node()
 		{
-			return this.locals != null ? this.locals.car : null;
+			return this.locals != null ? this.locals.symList : null;
 		}
 
 		/* (:scope (vars..) (prog...)) */
@@ -3493,7 +3496,6 @@ namespace BlocklyMruby
 		{
 			int i;
 
-			this.filename = f;
 			this.lineno = (this.filename_table_length > 0) ? 0 : 1;
 
 			for (i = 0; i < this.filename_table_length; ++i) {
@@ -3509,7 +3511,7 @@ namespace BlocklyMruby
 
 		public void mrb_parse_file(string filename, Stream f)
 		{
-			this.filename = filename;
+			mrb_parser_set_filename(filename);
 			this.s = null;
 			this.sp = 0;
 			this.f = f;
@@ -3519,7 +3521,7 @@ namespace BlocklyMruby
 
 		public void mrb_parse_nstring(string filename, Uint8Array s)
 		{
-			this.filename = filename;
+			mrb_parser_set_filename(filename);
 			this.s = s;
 			this.sp = 0;
 			this.f = null;

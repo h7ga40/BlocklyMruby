@@ -6,6 +6,16 @@ using Bridge.Html5;
 
 namespace BlocklyMruby
 {
+	public interface IMrbParser
+	{
+		int lineno { get; set; }
+		int column { get; set; }
+		string filename { get; }
+		string sym2name(mrb_sym sym);
+		List<mrb_sym> locals_node();
+		void yyError(string message, params object[] expected);
+	}
+
 	public enum node_type
 	{
 		NODE_METHOD = 1,
@@ -238,18 +248,21 @@ namespace BlocklyMruby
 	public class ruby_code_cond
 	{
 		public string newline_str { get; private set; }
-		public string indent_str { get; private set; }
+		public string indent_str { get; set; }
 		public string indent { get; private set; }
 		public int nest { get; private set; }
 
 		bool first;
 		bool space;
 		StringBuilder _code = new StringBuilder();
+		int lineno;
+		int column;
 
-		public ruby_code_cond()
+		public ruby_code_cond(string indent_str = "  ")
 		{
-			indent_str = "  ";
+			this.indent_str = indent_str;
 			newline_str = "\r\n";
+			lineno = 1;
 			first = true;
 			space = false;
 		}
@@ -258,17 +271,23 @@ namespace BlocklyMruby
 		{
 			indent += indent_str;
 			if (!first) {
-				_code.Append(newline_str);
+				new_line();
 				first = true;
 				space = false;
 			}
+		}
+
+		private void new_line()
+		{
+			_code.Append(newline_str);
+			lineno++;
 		}
 
 		public void decrement_indent()
 		{
 			indent = indent.Substring(0, indent.Length - indent_str.Length);
 			if (!first) {
-				_code.Append(newline_str);
+				new_line(); 
 				first = true;
 				space = false;
 			}
@@ -310,7 +329,7 @@ namespace BlocklyMruby
 				space = code.EndsWith(" ");
 			}
 			if (nest == 0) {
-				_code.Append(newline_str);
+				new_line();
 				space = false;
 				first = true;
 			}
@@ -324,7 +343,7 @@ namespace BlocklyMruby
 		internal void separate_line()
 		{
 			if (!first) {
-				_code.Append(newline_str);
+				new_line();
 				first = true;
 			}
 		}
@@ -335,7 +354,7 @@ namespace BlocklyMruby
 		object _car;
 		object _cdr;
 
-		public MrbParser p { get; private set; }
+		public IMrbParser p { get; private set; }
 		public object car {
 			get { return _car; }
 			set {
@@ -351,14 +370,16 @@ namespace BlocklyMruby
 			}
 		}
 		public int lineno { get; protected set; }
-		public int filename_index { get; protected set; }
+		public int column { get; protected set; }
+		public string filename { get; protected set; }
 
-		protected node(MrbParser p, node_type car)
+		protected node(IMrbParser p, node_type car)
 		{
 			this.p = p;
 			_car = car;
 			lineno = p.lineno;
-			filename_index = p.current_filename_index;
+			column = p.column;
+			filename = p.filename;
 		}
 
 		public override string ToString()
@@ -373,12 +394,13 @@ namespace BlocklyMruby
 		public void NODE_LINENO(node n)
 		{
 			if (n != null) {
-				filename_index = n.filename_index;
+				filename = n.filename;
 				lineno = n.lineno;
+				column = n.column;
 			}
 		}
 
-		public static node cons(MrbParser p, object car, object cdr)
+		public static node cons(IMrbParser p, object car, object cdr)
 		{
 			var result = new node(p, 0);
 			result.car = car;
@@ -426,25 +448,32 @@ namespace BlocklyMruby
 		}
 	}
 
+	public class locals_node
+	{
+		public List<mrb_sym> symList = new List<mrb_sym>();
+		public locals_node cdr;
+
+		public locals_node(locals_node cdr)
+		{
+			this.cdr = cdr;
+		}
+
+		internal void push(mrb_sym sym)
+		{
+			symList.Add(sym);
+		}
+	}
+
 	/* (:scope (vars..) (prog...)) */
 	class scope_node : node
 	{
 		private List<mrb_sym> _local_variables = new List<mrb_sym>();
 		private node _body;
 
-		public scope_node(MrbParser p, node body)
+		public scope_node(IMrbParser p, node body)
 			: base(p, node_type.NODE_SCOPE)
 		{
-			var n2 = (node)p.locals_node();
-
-			if (n2 != null && (n2.car != null || n2.cdr != null)) {
-				do {
-					if (n2.car != null) {
-						_local_variables.Add((mrb_sym)n2.car);
-					}
-					n2 = (node)n2.cdr;
-				} while (n2 != null);
-			}
+			_local_variables.AddRange(p.locals_node());
 			_body = body;
 		}
 
@@ -481,17 +510,19 @@ namespace BlocklyMruby
 	class begin_node : node
 	{
 		private List<node> _progs = new List<node>();
+		bool _parentheses;
 
-		public begin_node(MrbParser p, node body)
+		public begin_node(IMrbParser p, node body, bool parentheses = false)
 			: base(p, node_type.NODE_BEGIN)
 		{
 			while (body != null) {
 				_progs.Add(body);
 				body = (node)body.cdr;
 			}
+			_parentheses = parentheses;
 		}
 
-		public begin_node(MrbParser p, List<node> progs)
+		public begin_node(IMrbParser p, List<node> progs)
 			: base(p, node_type.NODE_BEGIN)
 		{
 			_progs.AddRange(progs);
@@ -529,7 +560,7 @@ namespace BlocklyMruby
 		{
 			var i = progs.Count;
 			foreach (var v in progs) {
-				var prn = v is colon2_node;
+				var prn = _parentheses || (v is dot2_node);
 				if (prn) {
 					cond.increment_nest();
 					cond.write("(");
@@ -599,7 +630,7 @@ namespace BlocklyMruby
 		private node _else;
 		public bool ensure;
 
-		public rescue_node(MrbParser p, node body, node resq, node els)
+		public rescue_node(IMrbParser p, node body, node resq, node els)
 			: base(p, node_type.NODE_RESCUE)
 		{
 			_body = body;
@@ -673,7 +704,7 @@ namespace BlocklyMruby
 		private node _ensure;
 		public bool def;
 
-		public ensure_node(MrbParser p, node a, node b)
+		public ensure_node(IMrbParser p, node a, node b)
 			: base(p, node_type.NODE_ENSURE)
 		{
 			_body = a;
@@ -717,7 +748,7 @@ namespace BlocklyMruby
 	/* (:nil) */
 	class nil_node : node, IEvaluatable
 	{
-		public nil_node(MrbParser p)
+		public nil_node(IMrbParser p)
 			: base(p, node_type.NODE_NIL)
 		{
 		}
@@ -754,7 +785,7 @@ namespace BlocklyMruby
 	/* (:true) */
 	class true_node : node, IEvaluatable
 	{
-		public true_node(MrbParser p)
+		public true_node(IMrbParser p)
 			: base(p, node_type.NODE_TRUE)
 		{
 		}
@@ -797,7 +828,7 @@ namespace BlocklyMruby
 	/* (:false) */
 	class false_node : node, IEvaluatable
 	{
-		public false_node(MrbParser p)
+		public false_node(IMrbParser p)
 			: base(p, node_type.NODE_FALSE)
 		{
 		}
@@ -843,7 +874,7 @@ namespace BlocklyMruby
 		private mrb_sym _new;
 		private mrb_sym _old;
 
-		public alias_node(MrbParser p, mrb_sym a, mrb_sym b)
+		public alias_node(IMrbParser p, mrb_sym a, mrb_sym b)
 			: base(p, node_type.NODE_ALIAS)
 		{
 			_new = a;
@@ -877,12 +908,12 @@ namespace BlocklyMruby
 		private node _else;
 		bool _inline;
 
-		public if_node(MrbParser p, node a, node b, node c, bool inline)
+		public if_node(IMrbParser p, node cond, node then, node @else, bool inline)
 			: base(p, node_type.NODE_IF)
 		{
-			_cond = a;
-			_then = b;
-			_else = c;
+			_cond = cond;
+			_then = then;
+			_else = @else;
 			_inline = inline;
 		}
 
@@ -993,7 +1024,7 @@ namespace BlocklyMruby
 		private node _then;
 		private node _else;
 
-		public unless_node(MrbParser p, node a, node b, node c)
+		public unless_node(IMrbParser p, node a, node b, node c)
 			: base(p, node_type.NODE_IF)
 		{
 			_cond = a;
@@ -1065,7 +1096,7 @@ namespace BlocklyMruby
 		private node _cond;
 		private node _body;
 
-		public while_node(MrbParser p, node a, node b)
+		public while_node(IMrbParser p, node a, node b)
 			: base(p, node_type.NODE_WHILE)
 		{
 			_cond = a;
@@ -1122,7 +1153,7 @@ namespace BlocklyMruby
 		private node _cond;
 		private node _body;
 
-		public until_node(MrbParser p, node a, node b)
+		public until_node(IMrbParser p, node a, node b)
 			: base(p, node_type.NODE_UNTIL)
 		{
 			_cond = a;
@@ -1216,7 +1247,7 @@ namespace BlocklyMruby
 		private node _in;
 		private node _do;
 
-		public for_node(MrbParser p, node v, node o, node b)
+		public for_node(IMrbParser p, node v, node o, node b)
 			: base(p, node_type.NODE_FOR)
 		{
 			_var = new var_t();
@@ -1327,7 +1358,7 @@ namespace BlocklyMruby
 		private node _arg;
 		private List<when_t> _when = new List<when_t>();
 
-		public case_node(MrbParser p, node a, node b)
+		public case_node(IMrbParser p, node a, node b)
 			: base(p, node_type.NODE_CASE)
 		{
 			_arg = a;
@@ -1338,6 +1369,13 @@ namespace BlocklyMruby
 				_when.Add(w);
 				b = (node)b.cdr;
 			}
+		}
+
+		public case_node(IMrbParser p, node a, List<when_t> b)
+			: base(p, node_type.NODE_CASE)
+		{
+			_arg = a;
+			_when.AddRange(b);
 		}
 
 		public node arg { get { return _arg; } }
@@ -1448,7 +1486,7 @@ namespace BlocklyMruby
 	{
 		private node _postexe;
 
-		public postexe_node(MrbParser p, node a)
+		public postexe_node(IMrbParser p, node a)
 			: base(p, node_type.NODE_POSTEXE)
 		{
 			_postexe = a;
@@ -1477,7 +1515,7 @@ namespace BlocklyMruby
 	/* (:self) */
 	class self_node : node
 	{
-		public self_node(MrbParser p)
+		public self_node(IMrbParser p)
 			: base(p, node_type.NODE_SELF)
 		{
 		}
@@ -1507,7 +1545,7 @@ namespace BlocklyMruby
 		private node _block;
 		private MrbTokens _pass;
 
-		public call_node(MrbParser p, node a, mrb_sym b, node c, MrbTokens pass)
+		public call_node(IMrbParser p, node a, mrb_sym b, node c, MrbTokens pass)
 			: base(p, pass != 0 ? node_type.NODE_CALL : node_type.NODE_SCALL)
 		{
 			_pass = pass;
@@ -1523,13 +1561,24 @@ namespace BlocklyMruby
 			}
 		}
 
-		public call_node(MrbParser p, node a, mrb_sym b, List<node> args, node block)
+		public call_node(IMrbParser p, node a, mrb_sym b, List<node> args = null, node block = null)
 			: base(p, node_type.NODE_CALL)
 		{
 			_obj = a;
 			_method = b;
-			_args.AddRange(args);
+			if (args != null)
+				_args.AddRange(args);
 			_block = block;
+		}
+
+		public call_node(IMrbParser p, node a, mrb_sym b, node arg)
+			: base(p, node_type.NODE_CALL)
+		{
+			_obj = a;
+			_method = b;
+			if (arg != null)
+				_args.Add(arg);
+			_pass = (MrbTokens)1;
 		}
 
 		public node obj { get { return _obj; } }
@@ -1628,6 +1677,18 @@ namespace BlocklyMruby
 				case "!":
 				case "~":
 					cond.write(m);
+					_obj.to_ruby(cond);
+					foreach (var a in _args) {
+						a.to_ruby(cond);
+						i--; if (i > 0) cond.write(", ");
+					}
+					if (blk_arg != null) {
+						blk_arg.to_ruby(cond);
+					}
+					break;
+				case "+@":
+				case "-@":
+					cond.write(m.Substring(0, 1));
 					_obj.to_ruby(cond);
 					foreach (var a in _args) {
 						a.to_ruby(cond);
@@ -1738,10 +1799,10 @@ namespace BlocklyMruby
 		private List<node> _args = new List<node>();
 		private node _block;
 
-		public fcall_node(MrbParser p, mrb_sym b, node c)
+		public fcall_node(IMrbParser p, mrb_sym b, node c)
 			: base(p, node_type.NODE_FCALL)
 		{
-			node n = p.new_self();
+			node n = new self_node(p);
 			n.NODE_LINENO(c);
 			NODE_LINENO(c);
 
@@ -1753,6 +1814,15 @@ namespace BlocklyMruby
 					_block = (node)c.cdr;
 				}
 			}
+		}
+
+		public fcall_node(IMrbParser p, mrb_sym b, List<node> args, node block)
+			: base(p, node_type.NODE_FCALL)
+		{
+			_self = new self_node(p);
+			_method = b;
+			_args.AddRange(args);
+			_block = block;
 		}
 
 		public node self { get { return _self; } }
@@ -1853,7 +1923,7 @@ namespace BlocklyMruby
 		private List<node> _args = new List<node>();
 		private node _block;
 
-		public super_node(MrbParser p, node c)
+		public super_node(IMrbParser p, node c)
 			: base(p, node_type.NODE_SUPER)
 		{
 			if (c != null) {
@@ -1929,7 +1999,7 @@ namespace BlocklyMruby
 	{
 		private node _block; // 必要?
 
-		public zsuper_node(MrbParser p)
+		public zsuper_node(IMrbParser p)
 			: base(p, node_type.NODE_ZSUPER)
 		{
 		}
@@ -1970,7 +2040,7 @@ namespace BlocklyMruby
 	{
 		private List<node> _args = new List<node>();
 
-		public yield_node(MrbParser p, node c)
+		public yield_node(IMrbParser p, node c)
 			: base(p, node_type.NODE_YIELD)
 		{
 			if (c != null) {
@@ -2019,7 +2089,7 @@ namespace BlocklyMruby
 	{
 		private node _retval;
 
-		public return_node(MrbParser p, node c)
+		public return_node(IMrbParser p, node c)
 			: base(p, node_type.NODE_RETURN)
 		{
 			_retval = c;
@@ -2071,7 +2141,7 @@ namespace BlocklyMruby
 	{
 		private node _retval;
 
-		public break_node(MrbParser p, node c)
+		public break_node(IMrbParser p, node c)
 			: base(p, node_type.NODE_BREAK)
 		{
 			_retval = c;
@@ -2117,7 +2187,7 @@ namespace BlocklyMruby
 	{
 		private node _retval;
 
-		public next_node(MrbParser p, node c)
+		public next_node(IMrbParser p, node c)
 			: base(p, node_type.NODE_NEXT)
 		{
 			_retval = c;
@@ -2161,7 +2231,7 @@ namespace BlocklyMruby
 	/* (:redo) */
 	class redo_node : node
 	{
-		public redo_node(MrbParser p)
+		public redo_node(IMrbParser p)
 			: base(p, node_type.NODE_REDO)
 		{
 		}
@@ -2185,7 +2255,7 @@ namespace BlocklyMruby
 	/* (:retry) */
 	class retry_node : node
 	{
-		public retry_node(MrbParser p)
+		public retry_node(IMrbParser p)
 			: base(p, node_type.NODE_RETRY)
 		{
 		}
@@ -2212,7 +2282,7 @@ namespace BlocklyMruby
 		private node _a;
 		private node _b;
 
-		public dot2_node(MrbParser p, node a, node b)
+		public dot2_node(IMrbParser p, node a, node b)
 			: base(p, node_type.NODE_DOT2)
 		{
 			_a = a;
@@ -2247,7 +2317,7 @@ namespace BlocklyMruby
 		private node _a;
 		private node _b;
 
-		public dot3_node(MrbParser p, node a, node b)
+		public dot3_node(IMrbParser p, node a, node b)
 			: base(p, node_type.NODE_DOT3)
 		{
 			_a = a;
@@ -2282,7 +2352,7 @@ namespace BlocklyMruby
 		private node _b;
 		private mrb_sym _c;
 
-		public colon2_node(MrbParser p, node b, mrb_sym c)
+		public colon2_node(IMrbParser p, node b, mrb_sym c)
 			: base(p, node_type.NODE_COLON2)
 		{
 			_b = b;
@@ -2319,7 +2389,7 @@ namespace BlocklyMruby
 	{
 		private mrb_sym _c;
 
-		public colon3_node(MrbParser p, mrb_sym c)
+		public colon3_node(IMrbParser p, mrb_sym c)
 			: base(p, node_type.NODE_COLON3)
 		{
 			_c = c;
@@ -2349,7 +2419,7 @@ namespace BlocklyMruby
 		private node _a;
 		private node _b;
 
-		public and_node(MrbParser p, node a, node b)
+		public and_node(IMrbParser p, node a, node b)
 			: base(p, node_type.NODE_AND)
 		{
 			_a = a;
@@ -2402,7 +2472,7 @@ namespace BlocklyMruby
 		private node _a;
 		private node _b;
 
-		public or_node(MrbParser p, node a, node b)
+		public or_node(IMrbParser p, node a, node b)
 			: base(p, node_type.NODE_OR)
 		{
 			_a = a;
@@ -2453,11 +2523,18 @@ namespace BlocklyMruby
 	{
 		private List<node> _array = new List<node>();
 
-		public array_node(MrbParser p, node a)
+		public array_node(IMrbParser p, node a)
 			: base(p, node_type.NODE_ARRAY)
 		{
 			dump_recur(_array, a);
 		}
+
+		public array_node(IMrbParser p, List<node> a)
+			: base(p, node_type.NODE_ARRAY)
+		{
+			_array.AddRange(a);
+		}
+
 
 		public List<node> array { get { return _array; } }
 
@@ -2501,7 +2578,7 @@ namespace BlocklyMruby
 		{
 			var str = $"(:array ";
 			foreach (var n in array) {
-				str += $"{n.car} ";
+				str += $"{n} ";
 			}
 			return str + ")";
 		}
@@ -2512,7 +2589,7 @@ namespace BlocklyMruby
 	{
 		private node _a;
 
-		public splat_node(MrbParser p, node a)
+		public splat_node(IMrbParser p, node a)
 			: base(p, node_type.NODE_SPLAT)
 		{
 			_a = a;
@@ -2545,6 +2622,12 @@ namespace BlocklyMruby
 			public node key;
 			public node value;
 
+			public kv_t(node key, node value)
+			{
+				this.key = key;
+				this.value = value;
+			}
+
 			public override string ToString()
 			{
 				return $"({key} . {value})";
@@ -2552,16 +2635,20 @@ namespace BlocklyMruby
 		}
 		List<kv_t> _kvs = new List<kv_t>();
 
-		public hash_node(MrbParser p, node a)
+		public hash_node(IMrbParser p, node a)
 			: base(p, node_type.NODE_HASH)
 		{
 			while (a != null) {
-				var kv = new kv_t();
-				kv.key = (node)((node)a.car).car;
-				kv.value = (node)((node)a.car).cdr;
+				var kv = new kv_t((node)((node)a.car).car, (node)((node)a.car).cdr);
 				_kvs.Add(kv);
 				a = (node)a.cdr;
 			}
+		}
+
+		public hash_node(IMrbParser p, List<kv_t> items)
+			: base(p, node_type.NODE_HASH)
+		{
+			_kvs.AddRange(items);
 		}
 
 		public List<kv_t> kvs { get { return _kvs; } }
@@ -2605,7 +2692,7 @@ namespace BlocklyMruby
 	{
 		private mrb_sym _name;
 
-		public sym_node(MrbParser p, mrb_sym sym)
+		public sym_node(IMrbParser p, mrb_sym sym)
 			: base(p, node_type.NODE_SYM)
 		{
 			_name = sym;
@@ -2642,7 +2729,7 @@ namespace BlocklyMruby
 	{
 		private mrb_sym _name;
 
-		public lvar_node(MrbParser p, mrb_sym sym)
+		public lvar_node(IMrbParser p, mrb_sym sym)
 			: base(p, node_type.NODE_LVAR)
 		{
 			_name = sym;
@@ -2679,7 +2766,7 @@ namespace BlocklyMruby
 	{
 		private mrb_sym _name;
 
-		public gvar_node(MrbParser p, mrb_sym sym)
+		public gvar_node(IMrbParser p, mrb_sym sym)
 			: base(p, node_type.NODE_GVAR)
 		{
 			_name = sym;
@@ -2716,7 +2803,7 @@ namespace BlocklyMruby
 	{
 		private mrb_sym _name;
 
-		public ivar_node(MrbParser p, mrb_sym sym)
+		public ivar_node(IMrbParser p, mrb_sym sym)
 			: base(p, node_type.NODE_IVAR)
 		{
 			_name = sym;
@@ -2753,7 +2840,7 @@ namespace BlocklyMruby
 	{
 		private mrb_sym _name;
 
-		public cvar_node(MrbParser p, mrb_sym sym)
+		public cvar_node(IMrbParser p, mrb_sym sym)
 			: base(p, node_type.NODE_CVAR)
 		{
 			_name = sym;
@@ -2790,7 +2877,7 @@ namespace BlocklyMruby
 	{
 		private mrb_sym _name;
 
-		public const_node(MrbParser p, mrb_sym sym)
+		public const_node(IMrbParser p, mrb_sym sym)
 			: base(p, node_type.NODE_CONST)
 		{
 			_name = sym;
@@ -2827,7 +2914,7 @@ namespace BlocklyMruby
 	{
 		private List<mrb_sym> _syms = new List<mrb_sym>();
 
-		public undef_node(MrbParser p, mrb_sym sym)
+		public undef_node(IMrbParser p, mrb_sym sym)
 			: base(p, node_type.NODE_UNDEF)
 		{
 			_syms.Add(sym);
@@ -2879,7 +2966,7 @@ namespace BlocklyMruby
 		private mrb_sym _arg;
 		private node _body;
 
-		public class_node(MrbParser p, node c, node s, node b)
+		public class_node(IMrbParser p, node c, node s, node b)
 			: base(p, node_type.NODE_CLASS)
 		{
 			if (c.car is int) {
@@ -2900,7 +2987,7 @@ namespace BlocklyMruby
 			}
 			_super = s;
 			var a = p.locals_node();
-			_arg = (a == null) ? 0 : (mrb_sym)((node)a).car;
+			_arg = (a.Count == 0) ? 0 : a[0];
 			_body = b;
 		}
 
@@ -2959,14 +3046,14 @@ namespace BlocklyMruby
 	class sclass_node : node
 	{
 		private node _obj;
-		private node _super;
+		private List<mrb_sym> _super;
 		private node _body;
 
-		public sclass_node(MrbParser p, node o, node b)
+		public sclass_node(IMrbParser p, node o, node b)
 			: base(p, node_type.NODE_SCLASS)
 		{
 			_obj = o;
-			_super = (node)p.locals_node();
+			_super = p.locals_node();
 			_body = b;
 		}
 
@@ -3004,10 +3091,10 @@ namespace BlocklyMruby
 		private string _prefix;
 		private mrb_sym _name;
 		private node _type;
-		private node _super;
+		private List<mrb_sym> _super;
 		private node _body;
 
-		public module_node(MrbParser p, node m, node b)
+		public module_node(IMrbParser p, node m, node b)
 			: base(p, node_type.NODE_MODULE)
 		{
 			if (m.car is int) {
@@ -3025,7 +3112,7 @@ namespace BlocklyMruby
 				_type = (node)m.car;
 				_name = (mrb_sym)m.cdr;
 			}
-			_super = (node)p.locals_node();
+			_super = p.locals_node();
 			_body = b;
 		}
 
@@ -3045,9 +3132,11 @@ namespace BlocklyMruby
 			if (_super != null) {
 				if (_type != null)
 					_type.to_ruby(cond);
-				if (_prefix != null)
-					cond.write(_prefix + "::");
-				_super.to_ruby(cond);
+				foreach (var s in _super) {
+					if (_prefix != null)
+						cond.write(_prefix + "::");
+					cond.write(p.sym2name(s));
+				}
 			}
 			cond.increment_indent();
 			_body.to_ruby(cond);
@@ -3063,11 +3152,11 @@ namespace BlocklyMruby
 
 	public class args_t
 	{
-		MrbParser p;
+		IMrbParser p;
 		public mrb_sym name;
 		public node arg;
 
-		public args_t(MrbParser p)
+		public args_t(IMrbParser p)
 		{
 			this.p = p;
 		}
@@ -3099,22 +3188,11 @@ namespace BlocklyMruby
 		private mrb_sym _blk;
 		private node _body;
 
-		public def_node(MrbParser p, mrb_sym m, node a, node b)
+		public def_node(IMrbParser p, mrb_sym m, node a, node b)
 			: base(p, node_type.NODE_DEF)
 		{
 			_name = m;
-			{
-				var n2 = (node)p.locals_node();
-
-				if (n2 != null && (n2.car != null || n2.cdr != null)) {
-					while (n2 != null) {
-						if ((mrb_sym)n2.car != 0) {
-							_local_variables.Add((mrb_sym)n2.car);
-						}
-						n2 = (node)n2.cdr;
-					}
-				}
-			}
+			_local_variables.AddRange(p.locals_node());
 			if (a != null) {
 				node n = a;
 
@@ -3149,6 +3227,14 @@ namespace BlocklyMruby
 			if (_body is ensure_node) {
 				((ensure_node)_body).def = true;
 			}
+		}
+
+		public def_node(IMrbParser p, mrb_sym m, List<arg_node> a, node b)
+			: base(p, node_type.NODE_DEF)
+		{
+			_name = m;
+			_mandatory_args.AddRange(a);
+			_body = b;
 		}
 
 		public mrb_sym name { get { return _name; } }
@@ -3246,7 +3332,7 @@ namespace BlocklyMruby
 	{
 		private node _obj;
 		private mrb_sym _name;
-		private node _lv;
+		private List<mrb_sym> _lv;
 		private List<arg_node> _mandatory_args = new List<arg_node>();
 		private List<args_t> _optional_args = new List<args_t>();
 		private mrb_sym _rest;
@@ -3254,12 +3340,12 @@ namespace BlocklyMruby
 		private mrb_sym _blk;
 		private node _body;
 
-		public sdef_node(MrbParser p, node o, mrb_sym m, node a, node b)
+		public sdef_node(IMrbParser p, node o, mrb_sym m, node a, node b)
 			: base(p, node_type.NODE_SDEF)
 		{
 			_obj = o;
 			_name = m;
-			_lv = (node)p.locals_node();
+			_lv = p.locals_node();
 			if (a != null) {
 				node n = a;
 
@@ -3367,7 +3453,7 @@ namespace BlocklyMruby
 	{
 		private mrb_sym _name;
 
-		public arg_node(MrbParser p, mrb_sym sym)
+		public arg_node(IMrbParser p, mrb_sym sym)
 			: base(p, node_type.NODE_ARG)
 		{
 			_name = sym;
@@ -3396,7 +3482,7 @@ namespace BlocklyMruby
 	{
 		private node _a;
 
-		public block_arg_node(MrbParser p, node a)
+		public block_arg_node(IMrbParser p, node a)
 			: base(p, node_type.NODE_BLOCK_ARG)
 		{
 			_a = a;
@@ -3433,19 +3519,10 @@ namespace BlocklyMruby
 		private node _body;
 		private bool _brace;
 
-		public block_node(MrbParser p, node a, node b, bool brace)
+		public block_node(IMrbParser p, node a, node b, bool brace)
 			: base(p, node_type.NODE_BLOCK)
 		{
-			var n2 = (node)p.locals_node();
-
-			if (n2 != null && (n2.car != null || n2.cdr != null)) {
-				while (n2 != null) {
-					if ((mrb_sym)n2.car != 0) {
-						_local_variables.Add((mrb_sym)n2.car);
-					}
-					n2 = (node)n2.cdr;
-				}
-			}
+			_local_variables.AddRange(p.locals_node());
 			if (a != null) {
 				node n = a;
 
@@ -3454,7 +3531,7 @@ namespace BlocklyMruby
 				}
 				n = (node)n.cdr;
 				if (n.car != null) {
-					n2 = (node)n.car;
+					var n2 = (node)n.car;
 
 					while (n2 != null) {
 						var arg = new args_t(p);
@@ -3477,6 +3554,17 @@ namespace BlocklyMruby
 				}
 			}
 			_body = b;
+			if (_body is ensure_node) {
+				((ensure_node)_body).def = true;
+			}
+			_brace = brace;
+		}
+
+		public block_node(IMrbParser p, List<node> args, node body, bool brace)
+			: base(p, node_type.NODE_BLOCK)
+		{
+			_mandatory_args.AddRange(args);
+			_body = body;
 			if (_body is ensure_node) {
 				((ensure_node)_body).def = true;
 			}
@@ -3569,19 +3657,10 @@ namespace BlocklyMruby
 		private mrb_sym _blk;
 		private node _body;
 
-		public lambda_node(MrbParser p, node a, node b)
+		public lambda_node(IMrbParser p, node a, node b)
 			: base(p, node_type.NODE_LAMBDA)
 		{
-			var n2 = (node)p.locals_node();
-
-			if (n2 != null && (n2.car != null || n2.cdr != null)) {
-				while (n2 != null) {
-					if ((mrb_sym)n2.car != 0) {
-						_local_variables.Add((mrb_sym)n2.car);
-					}
-					n2 = (node)n2.cdr;
-				}
-			}
+			_local_variables.AddRange(p.locals_node());
 			if (a != null) {
 				node n = a;
 
@@ -3590,7 +3669,7 @@ namespace BlocklyMruby
 				}
 				n = (node)n.cdr;
 				if (n.car != null) {
-					n2 = (node)n.car;
+					var n2 = (node)n.car;
 
 					while (n2 != null) {
 						var arg = new args_t(p);
@@ -3689,7 +3768,7 @@ namespace BlocklyMruby
 		private node _lhs;
 		private node _rhs;
 
-		public asgn_node(MrbParser p, node a, node b)
+		public asgn_node(IMrbParser p, node a, node b)
 			: base(p, node_type.NODE_ASGN)
 		{
 			_lhs = a;
@@ -3794,7 +3873,7 @@ namespace BlocklyMruby
 		private mlhs_t _mlhs;
 		private node _mrhs;
 
-		public masgn_node(MrbParser p, node a, node b)
+		public masgn_node(IMrbParser p, node a, node b)
 			: base(p, node_type.NODE_MASGN)
 		{
 			_mlhs = new mlhs_t();
@@ -3891,7 +3970,7 @@ namespace BlocklyMruby
 		private mrb_sym _op;
 		private node _rhs;
 
-		public op_asgn_node(MrbParser p, node lhs, mrb_sym op, node rhs)
+		public op_asgn_node(IMrbParser p, node lhs, mrb_sym op, node rhs)
 			: base(p, node_type.NODE_OP_ASGN)
 		{
 			_lhs = lhs;
@@ -3953,7 +4032,7 @@ namespace BlocklyMruby
 	{
 		node _n;
 
-		public negate_node(MrbParser p, node n)
+		public negate_node(IMrbParser p, node n)
 			: base(p, node_type.NODE_NEGATE)
 		{
 			this._n = n;
@@ -3997,11 +4076,18 @@ namespace BlocklyMruby
 		private Uint8Array _s;
 		private int _base;
 
-		public int_node(MrbParser p, Uint8Array s, int @base)
+		public int_node(IMrbParser p, Uint8Array s, int @base)
 			: base(p, node_type.NODE_INT)
 		{
 			_s = MrbParser.strdup(s, 0);
 			_base = @base;
+		}
+
+		public int_node(IMrbParser p, int i)
+			: base(p, node_type.NODE_INT)
+		{
+			_s = MrbParser.UTF8StringToArray(i.ToString());
+			_base = 10;
 		}
 
 		public Uint8Array num { get { return _s; } }
@@ -4174,10 +4260,16 @@ namespace BlocklyMruby
 	{
 		private Uint8Array _s;
 
-		public float_node(MrbParser p, Uint8Array s)
+		public float_node(IMrbParser p, Uint8Array s)
 			: base(p, node_type.NODE_FLOAT)
 		{
 			_s = MrbParser.strdup(s, 0);
+		}
+
+		public float_node(IMrbParser p, double f)
+			: base(p, node_type.NODE_FLOAT)
+		{
+			_s = MrbParser.UTF8StringToArray(f.ToString());
 		}
 
 		public Uint8Array num { get { return _s; } }
@@ -4294,11 +4386,18 @@ namespace BlocklyMruby
 		private Uint8Array _str;
 		private int _len;
 
-		public str_node(MrbParser p, Uint8Array s, int len)
+		public str_node(IMrbParser p, Uint8Array s, int len)
 			: base(p, node_type.NODE_STR)
 		{
 			_str = MrbParser.strndup(s, 0, len);
 			_len = len;
+		}
+
+		public str_node(IMrbParser p, string s)
+			: base(p, node_type.NODE_STR)
+		{
+			_str = MrbParser.UTF8StringToArray(s);
+			_len = _str.Length;
 		}
 
 		public Uint8Array str { get { return _str; } }
@@ -4390,7 +4489,7 @@ namespace BlocklyMruby
 	{
 		private List<node> _a = new List<node>();
 
-		public dstr_node(MrbParser p, node a)
+		public dstr_node(IMrbParser p, node a)
 			: base(p, node_type.NODE_DSTR)
 		{
 			dump_recur(_a, a);
@@ -4438,7 +4537,7 @@ namespace BlocklyMruby
 		private Uint8Array _str;
 		private int _len;
 
-		public xstr_node(MrbParser p, Uint8Array s, int len)
+		public xstr_node(IMrbParser p, Uint8Array s, int len)
 			: base(p, node_type.NODE_XSTR)
 		{
 			_str = MrbParser.strndup(s, 0, len);
@@ -4471,7 +4570,7 @@ namespace BlocklyMruby
 	{
 		private List<node> _a = new List<node>();
 
-		public dxstr_node(MrbParser p, node a)
+		public dxstr_node(IMrbParser p, node a)
 			: base(p, node_type.NODE_DXSTR)
 		{
 			dump_recur(_a, a);
@@ -4506,10 +4605,10 @@ namespace BlocklyMruby
 	{
 		private dstr_node _a;
 
-		public dsym_node(MrbParser p, node a)
+		public dsym_node(IMrbParser p, node a)
 			: base(p, node_type.NODE_DSYM)
 		{
-			_a = p.new_dstr(a);
+			_a = new dstr_node(p, a);
 		}
 
 		public List<node> a { get { return _a.a; } }
@@ -4538,7 +4637,7 @@ namespace BlocklyMruby
 		Uint8Array _flags;
 		Uint8Array _encp;
 
-		public regx_node(MrbParser p, Uint8Array pattern, Uint8Array flags, Uint8Array encp)
+		public regx_node(IMrbParser p, Uint8Array pattern, Uint8Array flags, Uint8Array encp)
 			: base(p, node_type.NODE_REGX)
 		{
 			_pattern = pattern;
@@ -4576,7 +4675,7 @@ namespace BlocklyMruby
 		private Uint8Array _opt;
 		private Uint8Array _tail;
 
-		public dregx_node(MrbParser p, node a, node b)
+		public dregx_node(IMrbParser p, node a, node b)
 			: base(p, node_type.NODE_DREGX)
 		{
 			dump_recur(_a, a);
@@ -4617,7 +4716,7 @@ namespace BlocklyMruby
 	{
 		private int _n;
 
-		public back_ref_node(MrbParser p, int n)
+		public back_ref_node(IMrbParser p, int n)
 			: base(p, node_type.NODE_BACK_REF)
 		{
 			_n = n;
@@ -4646,7 +4745,7 @@ namespace BlocklyMruby
 	{
 		private int _n;
 
-		public nth_ref_node(MrbParser p, int n)
+		public nth_ref_node(IMrbParser p, int n)
 			: base(p, node_type.NODE_NTH_REF)
 		{
 			_n = n;
@@ -4675,7 +4774,7 @@ namespace BlocklyMruby
 	{
 		private parser_heredoc_info _info;
 
-		public heredoc_node(MrbParser p)
+		public heredoc_node(IMrbParser p)
 			: base(p, node_type.NODE_HEREDOC)
 		{
 			_info = new parser_heredoc_info();
@@ -4709,7 +4808,7 @@ namespace BlocklyMruby
 
 	class literal_delim_node : node
 	{
-		public literal_delim_node(MrbParser p)
+		public literal_delim_node(IMrbParser p)
 			: base(p, node_type.NODE_LITERAL_DELIM)
 		{
 		}
@@ -4734,7 +4833,7 @@ namespace BlocklyMruby
 	{
 		private List<node> _a = new List<node>();
 
-		public words_node(MrbParser p, node a)
+		public words_node(IMrbParser p, node a)
 			: base(p, node_type.NODE_WORDS)
 		{
 			dump_recur(_a, a);
@@ -4767,7 +4866,7 @@ namespace BlocklyMruby
 	{
 		private List<node> _a = new List<node>();
 
-		public symbols_node(MrbParser p, node a)
+		public symbols_node(IMrbParser p, node a)
 			: base(p, node_type.NODE_SYMBOLS)
 		{
 			dump_recur(_a, a);
@@ -4797,7 +4896,7 @@ namespace BlocklyMruby
 
 	class filename_node : str_node
 	{
-		public filename_node(MrbParser p, Uint8Array s, int len)
+		public filename_node(IMrbParser p, Uint8Array s, int len)
 			: base(p, s, len)
 		{
 		}
@@ -4810,7 +4909,7 @@ namespace BlocklyMruby
 
 	class lineno_node : int_node
 	{
-		public lineno_node(MrbParser p, int lineno)
+		public lineno_node(IMrbParser p, int lineno)
 			: base(p, MrbParser.UTF8StringToArray(lineno.ToString()), 10)
 		{
 		}

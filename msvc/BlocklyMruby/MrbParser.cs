@@ -6561,7 +6561,7 @@ namespace BlocklyMruby
 #line 183 "mrb_parse.jay"
 						{
 							this.lstate = mrb_lex_state_enum.EXPR_BEG;
-							if (this.locals == null) this.locals = cons(null, null);
+							if (this.locals == null) this.locals = new locals_node(null);
 						}
 						break;
 					case 2:
@@ -6605,14 +6605,14 @@ namespace BlocklyMruby
 					case 9:
 #line 221 "mrb_parse.jay"
 						{
-							yyVal = (node)local_switch();
+							yyVal = local_switch();
 						}
 						break;
 					case 10:
 #line 225 "mrb_parse.jay"
 						{
 							yyError("BEGIN not supported");
-							local_resume(((node)yyVals[-3 + yyTop]));
+							local_resume(((locals_node)yyVals[-3 + yyTop]));
 							yyVal = null;
 						}
 						break;
@@ -7956,7 +7956,7 @@ namespace BlocklyMruby
 						{
 							if (this.in_def != 0 || this.in_single != 0)
 								yyError("class definition in method body");
-							yyVal = (node)local_switch();
+							yyVal = local_switch();
 						}
 						break;
 					case 306:
@@ -7964,7 +7964,7 @@ namespace BlocklyMruby
 						{
 							yyVal = new_class(((node)yyVals[-4 + yyTop]), ((node)yyVals[-3 + yyTop]), ((node)yyVals[-1 + yyTop]));
 							((node)yyVal).SET_LINENO(((int)yyVals[-5 + yyTop]));
-							local_resume(((node)yyVals[-2 + yyTop]));
+							local_resume(((locals_node)yyVals[-2 + yyTop]));
 						}
 						break;
 					case 307:
@@ -7977,7 +7977,7 @@ namespace BlocklyMruby
 					case 308:
 #line 1245 "mrb_parse.jay"
 						{
-							yyVal = (node)cons(local_switch(), (int)(this.in_single));
+							yyVal = cons(local_switch(), this.in_single);
 							this.in_single = 0;
 						}
 						break;
@@ -7986,7 +7986,7 @@ namespace BlocklyMruby
 						{
 							yyVal = new_sclass(((node)yyVals[-5 + yyTop]), ((node)yyVals[-1 + yyTop]));
 							((node)yyVal).SET_LINENO(((int)yyVals[-7 + yyTop]));
-							local_resume((node)((node)yyVals[-2 + yyTop]).car);
+							local_resume((locals_node)((node)yyVals[-2 + yyTop]).car);
 							this.in_def = ((int)yyVals[-4 + yyTop]);
 							this.in_single = (int)(((node)yyVals[-2 + yyTop]).cdr);
 						}
@@ -7996,7 +7996,7 @@ namespace BlocklyMruby
 						{
 							if (this.in_def != 0 || this.in_single != 0)
 								yyError("module definition in method body");
-							yyVal = (node)local_switch();
+							yyVal = local_switch();
 						}
 						break;
 					case 311:
@@ -8004,7 +8004,7 @@ namespace BlocklyMruby
 						{
 							yyVal = new_module(((node)yyVals[-3 + yyTop]), ((node)yyVals[-1 + yyTop]));
 							((node)yyVal).SET_LINENO(((int)yyVals[-4 + yyTop]));
-							local_resume(((node)yyVals[-2 + yyTop]));
+							local_resume(((locals_node)yyVals[-2 + yyTop]));
 						}
 						break;
 					case 312:
@@ -8018,7 +8018,7 @@ namespace BlocklyMruby
 #line 1277 "mrb_parse.jay"
 						{
 							this.in_def++;
-							yyVal = (node)local_switch();
+							yyVal = local_switch();
 						}
 						break;
 					case 314:
@@ -8026,7 +8026,7 @@ namespace BlocklyMruby
 						{
 							yyVal = new_def(((mrb_sym)yyVals[-5 + yyTop]), ((node)yyVals[-2 + yyTop]), ((node)yyVals[-1 + yyTop]));
 							((node)yyVal).SET_LINENO(((int)yyVals[-6 + yyTop]));
-							local_resume(((node)yyVals[-3 + yyTop]));
+							local_resume(((locals_node)yyVals[-3 + yyTop]));
 							this.in_def--;
 							this.cmdarg_stack = ((stack_type)yyVals[-4 + yyTop]);
 						}
@@ -8044,7 +8044,7 @@ namespace BlocklyMruby
 						{
 							this.in_single++;
 							this.lstate = mrb_lex_state_enum.EXPR_ENDFN; /* force for args */
-							yyVal = (node)local_switch();
+							yyVal = local_switch();
 						}
 						break;
 					case 317:
@@ -8052,7 +8052,7 @@ namespace BlocklyMruby
 						{
 							yyVal = new_sdef(((node)yyVals[-7 + yyTop]), ((mrb_sym)yyVals[-4 + yyTop]), ((node)yyVals[-2 + yyTop]), ((node)yyVals[-1 + yyTop]));
 							((node)yyVal).SET_LINENO(((int)yyVals[-8 + yyTop]));
-							local_resume(((node)yyVals[-3 + yyTop]));
+							local_resume(((locals_node)yyVals[-3 + yyTop]));
 							this.in_single--;
 							this.cmdarg_stack = ((stack_type)yyVals[-5 + yyTop]);
 						}
@@ -8763,7 +8763,7 @@ namespace BlocklyMruby
 #line 1938 "mrb_parse.jay"
 						{
 							if (this.filename == null) {
-								this.filename = "(null)";
+								this.mrb_parser_set_filename("(null)");
 							}
 							yyVal = new_filename(this.filename);
 						}

@@ -11,34 +11,25 @@ namespace BlocklyMruby
 {
 	partial class Ruby
 	{
-		public string controls_if(ControlsIfBlock block)
+		public node controls_if(ControlsIfBlock block)
 		{
 			// If/elseif/else condition.
-			var n = 0;
-			var argument = Blockly.Ruby.valueToCode(block, "IF" + n,
-				Blockly.Ruby.ORDER_NONE);
-			if (String.IsNullOrEmpty(argument)) argument = "false";
-			var branch = Blockly.Ruby.statementToCode(block, "DO" + n);
-			if (String.IsNullOrEmpty(branch)) branch = "\n";
-			var code = "if " + argument + "\n" + branch;
-			for (n = 1; n <= block.elseifCount_; n++) {
-				argument = Blockly.Ruby.valueToCode(block, "IF" + n,
-					Blockly.Ruby.ORDER_NONE);
-				if (String.IsNullOrEmpty(argument)) argument = "false";
-				branch = Blockly.Ruby.statementToCode(block, "DO" + n);
-				if (String.IsNullOrEmpty(branch)) branch = "\n";
-				code += "elsif " + argument + "\n" + branch;
-			}
+			node code = null;
 			if (block.elseCount_ != 0) {
-				branch = Blockly.Ruby.statementToCode(block, "ELSE");
-				if (String.IsNullOrEmpty(branch)) branch = "\n";
-				code += "else\n" + branch;
+				code = statementToCode(block, "ELSE");
+				if (code == null) code = new nil_node(this);
 			}
-			code += "end\n";
+			for (var n = block.elseifCount_; n >= 0; n--) {
+				var argument = valueToCode(block, "IF" + n);
+				if (argument == null) argument = new false_node(this);
+				var branch = statementToCode(block, "DO" + n);
+				if (branch == null) branch = new nil_node(this);
+				code = new if_node(this, argument, branch, code, false);
+			}
 			return code;
 		}
 
-		public object[] logic_compare(LogicCompareBlock block)
+		public node logic_compare(LogicCompareBlock block)
 		{
 			// Comparison operator.
 			var OPERATORS = new Dictionary<string, string>();
@@ -49,79 +40,70 @@ namespace BlocklyMruby
 			OPERATORS.Add("GT", ">");
 			OPERATORS.Add("GTE", ">=");
 			var @operator = OPERATORS[block.getFieldValue("OP")];
-			var order = Blockly.Ruby.ORDER_RELATIONAL;
-			var argument0 = Blockly.Ruby.valueToCode(block, "A", order);
-			if (String.IsNullOrEmpty(argument0)) argument0 = "0";
-			var argument1 = Blockly.Ruby.valueToCode(block, "B", order);
-			if (String.IsNullOrEmpty(argument1)) argument1 = "0";
-			var code = argument0 + " " + @operator + " " + argument1;
-			return new object[] { code, order };
+			var argument0 = valueToCode(block, "A");
+			if (argument0 == null) argument0 = new int_node(this, 0);
+			var argument1 = valueToCode(block, "B");
+			if (argument1 == null) argument1 = new int_node(this, 0);
+			return new call_node(this, argument0, intern(@operator), argument1);
 		}
 
-		public object[] logic_operation(LogicOperationBlock block)
+		public node logic_operation(LogicOperationBlock block)
 		{
 			// Operations 'and', 'or'.
 			var @operator = (block.getFieldValue("OP") == "AND") ? "&&" : "||";
-			var order = (@operator == "&&") ? Blockly.Ruby.ORDER_LOGICAL_AND :
-				Blockly.Ruby.ORDER_LOGICAL_OR;
-			var argument0 = Blockly.Ruby.valueToCode(block, "A", order);
-			var argument1 = Blockly.Ruby.valueToCode(block, "B", order);
-			if (String.IsNullOrEmpty(argument0) && String.IsNullOrEmpty(argument1)) {
+			var argument0 = valueToCode(block, "A");
+			var argument1 = valueToCode(block, "B");
+			if (argument0 == null && argument1 == null) {
 				// If there are no arguments, then the return value is false.
-				argument0 = "false";
-				argument1 = "false";
+				argument0 = new false_node(this);
+				argument1 = new false_node(this);
 			}
 			else {
 				// Single missing arguments have no effect on the return value.
-				var defaultArgument = (@operator == "&&") ? "true" : "false";
-				if (String.IsNullOrEmpty(argument0)) {
+				var defaultArgument = (@operator == "&&") ? (node)new true_node(this) : (node)new false_node(this);
+				if (argument0 == null) {
 					argument0 = defaultArgument;
 				}
-				if (String.IsNullOrEmpty(argument1)) {
+				if (argument1 == null) {
 					argument1 = defaultArgument;
 				}
 			}
-			var code = argument0 + ' ' + @operator + ' ' + argument1;
-			return new object[] { code, order };
+			if (@operator == "&&")
+				return new and_node(this, argument0, argument1);
+			else
+				return new or_node(this, argument0, argument1);
 		}
 
-		public object[] logic_negate(LogicNegateBlock block)
+		public node logic_negate(LogicNegateBlock block)
 		{
 			// Negation.
-			var argument0 = Blockly.Ruby.valueToCode(block, "BOOL",
-				Blockly.Ruby.ORDER_LOGICAL_NOT);
-			if (String.IsNullOrEmpty(argument0)) argument0 = "true";
-			var code = "! " + argument0;
-			return new object[] { code, ORDER_LOGICAL_NOT };
+			var argument0 = valueToCode(block, "BOOL");
+			if (argument0 == null) argument0 = new true_node(this);
+			return new negate_node(this, argument0);
 		}
 
-		public object[] logic_boolean(LogicBooleanBlock block)
+		public node logic_boolean(LogicBooleanBlock block)
 		{
 			// Boolean values true and false.
-			var code = (block.getFieldValue("BOOL") == "TRUE") ? "true" : "false";
-			return new object[] { code, ORDER_ATOMIC };
+			return (block.getFieldValue("BOOL") == "TRUE") ? (node)new true_node(this) : (node)new false_node(this);
 		}
 
-		public object[] logic_null(LogicNullBlock block)
+		public node logic_null(LogicNullBlock block)
 		{
 			// Null data type.
-			return new object[] { "nil", ORDER_ATOMIC };
+			return new nil_node(this);
 		}
 
-		public object[] logic_ternary(LogicTernaryBlock block)
+		public node logic_ternary(LogicTernaryBlock block)
 		{
 			// Ternary operator.
-			var value_if = Blockly.Ruby.valueToCode(block, "IF",
-				Blockly.Ruby.ORDER_CONDITIONAL);
-			if (String.IsNullOrEmpty(value_if)) value_if = "false";
-			var value_then = Blockly.Ruby.valueToCode(block, "THEN",
-				Blockly.Ruby.ORDER_CONDITIONAL);
-			if (String.IsNullOrEmpty(value_then)) value_then = "nil";
-			var value_else = Blockly.Ruby.valueToCode(block, "ELSE",
-				Blockly.Ruby.ORDER_CONDITIONAL);
-			if (String.IsNullOrEmpty(value_else)) value_else = "nil";
-			var code = value_if + " ? " + value_then + " : " + value_else;
-			return new object[] { code, ORDER_CONDITIONAL };
+			var value_if = valueToCode(block, "IF");
+			if (value_if == null) value_if = new false_node(this);
+			var value_then = valueToCode(block, "THEN");
+			if (value_then == null) value_then = new nil_node(this);
+			var value_else = valueToCode(block, "ELSE");
+			if (value_else == null) value_else = new nil_node(this);
+			return new if_node(this, value_if, value_then, value_else, true);
 		}
 	}
 }

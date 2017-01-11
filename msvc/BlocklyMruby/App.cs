@@ -90,7 +90,7 @@ namespace BlocklyMruby
 			Script.SetBlocks(new TextPromptBlock());
 			Script.SetBlocks(new VariablesGetBlock());
 			Script.SetBlocks(new VariablesSetBlock());
-			Script.SetGenerator(new Ruby());
+			Script.SetGenerator();
 		}
 
 		internal static void Init2()

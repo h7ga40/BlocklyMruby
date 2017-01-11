@@ -142,8 +142,9 @@ namespace BlocklyMruby
 
 		private void RunBtn_Click(object sender, EventArgs e)
 		{
+			var generator = new Ruby();
 			var workspace = Blockly.getMainWorkspace();
-			var code = Blockly.Ruby.workspaceToCode(workspace);
+			var code = generator.workspaceToCode(workspace);
 
 			var rubyfile = Path.ChangeExtension(Path.GetTempFileName(), "rb");
 			using (var fs = new StreamWriter(rubyfile, false, new UTF8Encoding(false))) {
@@ -178,8 +179,9 @@ namespace BlocklyMruby
 
 		private void debugBtn_Click(object sender, EventArgs e)
 		{
+			var generator = new Ruby();
 			var workspace = Blockly.getMainWorkspace();
-			var code = Blockly.Ruby.workspaceToCode(workspace);
+			var code = generator.workspaceToCode(workspace);
 
 			var rubyfile = Path.ChangeExtension(Path.GetTempFileName(), "rb");
 			using (var fs = new StreamWriter(rubyfile, false, new UTF8Encoding(false))) {
@@ -223,14 +225,15 @@ namespace BlocklyMruby
 			if (saveFileDialog2.ShowDialog() != DialogResult.OK)
 				return;
 
+			var generator = new Ruby();
 			var workspace = Blockly.getMainWorkspace();
-			var code = Blockly.Ruby.workspaceToCode(workspace);
+			var code = generator.workspaceToCode(workspace);
 
-			var generator = new MrbParser(false);
-			generator.mrb_parse_nstring(saveFileDialog2.FileName, MrbParser.UTF8StringToArray(code));
-			var scope = generator.tree as scope_node;
+			var parser = new MrbParser(false);
+			parser.mrb_parse_nstring(saveFileDialog2.FileName, MrbParser.UTF8StringToArray(code));
+			var scope = parser.tree as scope_node;
 			if (scope != null) {
-				code = generator.to_ruby();
+				code = parser.to_ruby();
 			}
 
 			using (var fs = new StreamWriter(saveFileDialog2.FileName, false, new UTF8Encoding(false))) {
@@ -252,8 +255,9 @@ namespace BlocklyMruby
 		private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
 		{
 			if (tabControl1.SelectedTab == RubyTabPage) {
+				var generator = new Ruby();
 				var workspace = Blockly.getMainWorkspace();
-				var code = Blockly.Ruby.workspaceToCode(workspace);
+				var code = generator.workspaceToCode(workspace);
 				RubyEditorWb.Document.InvokeScript("set_text", new object[] { code });
 			}
 		}

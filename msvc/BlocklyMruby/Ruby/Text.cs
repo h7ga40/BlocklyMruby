@@ -11,260 +11,237 @@ namespace BlocklyMruby
 {
 	partial class Ruby
 	{
-		public object[] text(TextBlock block)
+		public node text(TextBlock block)
 		{
 			// Text value.
-			var code = Blockly.Ruby.quote_(block.getFieldValue("TEXT"));
-			return new object[] { code, ORDER_ATOMIC };
+			return new str_node(this, block.getFieldValue("TEXT"));
 		}
 
-		public object[] text_join(TextJoinBlock block)
+		public node text_join(TextJoinBlock block)
 		{
 			// Create a string made up of any number of elements of any type.
-			string code;
 			if (block.itemCount_ == 0) {
-				return new object[] { "\'\'", ORDER_ATOMIC };
+				return new str_node(this, "");
 			}
 			else if (block.itemCount_ == 1) {
-				var argument0 = Blockly.Ruby.valueToCode(block, "ADD0",
-					Blockly.Ruby.ORDER_NONE);
-				if (String.IsNullOrEmpty(argument0)) argument0 = "\'\'";
-				code = argument0 + ".to_s";
-				return new object[] { code, ORDER_FUNCTION_CALL };
-			}
-			else if (block.itemCount_ == 2) {
-				var argument0 = Blockly.Ruby.valueToCode(block, "ADD0",
-					Blockly.Ruby.ORDER_NONE);
-				if (String.IsNullOrEmpty(argument0)) argument0 = "\'\'";
-				var argument1 = Blockly.Ruby.valueToCode(block, "ADD1",
-					Blockly.Ruby.ORDER_NONE);
-				if (String.IsNullOrEmpty(argument1)) argument1 = "\'\'";
-				code = argument0 + ".to_s + " + argument1 + ".to_s";
-				return new object[] { code, ORDER_UNARY_SIGN };
+				var argument0 = valueToCode(block, "ADD0");
+				if (argument0 == null) argument0 = new str_node(this, "");
+				return new call_node(this, argument0, intern("to_s"), new List<node>(), null);
 			}
 			else {
-				var codes = new string[0];
-				for (var n = 0; n < block.itemCount_; n++) {
-					var temp = Blockly.Ruby.valueToCode(block, "ADD" + n,
-						Blockly.Ruby.ORDER_NONE);
-					if (String.IsNullOrEmpty(temp)) temp = "\'\'";
-					codes[n] = temp + ".to_s";
+				var argument0 = valueToCode(block, "ADD0");
+				if (argument0 == null)
+					argument0 = new str_node(this, "");
+				else
+					argument0 = new call_node(this, argument0, intern("to_s"), new List<node>(), null);
+				for (var n = 1; n < block.itemCount_; n++) {
+					var argument1 = valueToCode(block, "ADD" + n);
+					if (argument1 == null)
+						argument1 = new str_node(this, "");
+					else
+						argument1 = new call_node(this, argument1, intern("to_s"), new List<node>(), null);
+					argument0 = new call_node(this, argument0, intern("+"), argument1);
 				}
-				code = codes.Join(" + ");
-				return new object[] { code, ORDER_FUNCTION_CALL };
+				return argument0;
 			}
 		}
 
-		public string text_append(TextAppendBlock block)
+		public node text_append(TextAppendBlock block)
 		{
 			// Append to a variable in place.
-			var varName = Blockly.Ruby.variableDB_.getRubyName(block.getFieldValue("VAR"),
-				Blockly.Variables.NAME_TYPE);
-			var argument0 = Blockly.Ruby.valueToCode(block, "TEXT",
-				Blockly.Ruby.ORDER_NONE);
-			if (String.IsNullOrEmpty(argument0)) argument0 = "\'\'";
-			return varName + " = " + varName + ".to_s + (" + argument0 + ").to_s\n";
+			var varName = get_var_name(block.getFieldValue("VAR"));
+			var argument0 = valueToCode(block, "TEXT");
+			if (argument0 == null)
+				argument0 = new str_node(this, "");
+			else
+				argument0 = new call_node(this, argument0, intern("to_s"), new List<node>(), null);
+			var code = new call_node(this, new_var_node(varName), intern("to_s"), new List<node>(), null);
+			code = new call_node(this, code, intern("+"), argument0);
+			return new asgn_node(this, new_var_node(varName), code);
 		}
 
-		public object[] text_length(TextLengthBlock block)
+		public node text_length(TextLengthBlock block)
 		{
 			// String length.
-			var argument0 = Blockly.Ruby.valueToCode(block, "VALUE",
-				Blockly.Ruby.ORDER_NONE);
-			if (String.IsNullOrEmpty(argument0)) argument0 = "\'\'";
-			return new object[] { argument0 + ".size", ORDER_FUNCTION_CALL };
+			var argument0 = valueToCode(block, "VALUE");
+			if (argument0 == null) argument0 = new str_node(this, "");
+			return new call_node(this, argument0, intern("size"), new List<node>(), null);
 		}
 
-		public object[] text_isEmpty(TextIsEmptyBlock block)
+		public node text_isEmpty(TextIsEmptyBlock block)
 		{
 			// Is the string null?
-			var argument0 = Blockly.Ruby.valueToCode(block, "VALUE",
-				Blockly.Ruby.ORDER_NONE);
-			if (String.IsNullOrEmpty(argument0)) argument0 = "\'\'";
-			var code = argument0 + ".empty?";
-			return new object[] { code, ORDER_FUNCTION_CALL };
+			var argument0 = valueToCode(block, "VALUE");
+			if (argument0 == null) argument0 = new str_node(this, "");
+			return new call_node(this, argument0, intern("empty?"), new List<node>(), null);
 		}
 
-		public object[] text_indexOf(TextIndexOfBlock block)
+		public node text_indexOf(TextIndexOfBlock block)
 		{
 			// Search the text for a substring.
 			// Should we allow for non-case sensitive???
-			var finder = block.getFieldValue("END") == "FIRST" ? ".find_first" : ".find_last";
-			var search = Blockly.Ruby.valueToCode(block, "FIND",
-				Blockly.Ruby.ORDER_NONE);
-			if (String.IsNullOrEmpty(search)) search = "\'\'";
-			var text = Blockly.Ruby.valueToCode(block, "VALUE",
-				Blockly.Ruby.ORDER_MEMBER);
-			if (String.IsNullOrEmpty(text)) text = "\'\'";
-			var code = text + finder + "(" + search + ")";
-			return new object[] { code, ORDER_FUNCTION_CALL };
+			var finder = block.getFieldValue("END") == "FIRST" ? "find_first" : "find_last";
+			var search = valueToCode(block, "FIND");
+			if (search == null) search = new str_node(this, "");
+			var text = valueToCode(block, "VALUE");
+			if (text == null) text = new str_node(this, "");
+			return new call_node(this, text, intern(finder), new List<node>() { search }, null);
 		}
 
-		public object[] text_charAt(TextCharAtBlock block)
+		public node text_charAt(TextCharAtBlock block)
 		{
 			// Get letter at index.
 			// Note: Until January 2013 this block did not have the WHERE input.
 			var where = block.getFieldValue("WHERE");
 			if (String.IsNullOrEmpty(where)) where = "FROM_START";
-			var at = Blockly.Ruby.valueToCode(block, "AT",
-				Blockly.Ruby.ORDER_UNARY_SIGN);
-			if (String.IsNullOrEmpty(at)) at = "1";
-			var text = Blockly.Ruby.valueToCode(block, "VALUE",
-				Blockly.Ruby.ORDER_MEMBER);
-			if (String.IsNullOrEmpty(text)) text = "\'\'";
+			var at = valueToCode(block, "AT");
+			if (at == null) at = new int_node(this, 1);
+			var text = valueToCode(block, "VALUE");
+			if (text == null) text = new str_node(this, "");
 
 			// Blockly uses one-based indicies.
-			if (Blockly.isNumber(at)) {
+			if (at is int_node) {
 				// If the index is a naked number, decrement it right now.
-				at = (Script.ParseInt(at, 10) - 1).ToString();
+				at = new int_node(this, (int)(((int_node)at).to_i() - 1));
 			}
 			else {
 				// If the index is dynamic, decrement it in code.
-				at = at + ".to_i - 1";
+				at = new call_node(this, at, intern("to_i"), new List<node>(), null);
+				at = new call_node(this, at, intern("-"), new int_node(this, 1));
 			}
 
-			string code, functionName;
 			switch (where) {
 			case "FIRST":
-				code = text + "[0]";
-				return new object[] { code, ORDER_MEMBER };
+				return new call_node(this, text, intern("[]"), new List<node>() { new int_node(this, 0) }, null);
 			case "LAST":
-				code = text + "[-1]";
-				return new object[] { code, ORDER_MEMBER };
+				return new call_node(this, text, intern("[]"), new List<node>() { new int_node(this, -1) }, null);
 			case "FROM_START":
-				code = "text_get_from_start(" + text + ", " + at + ")";
-				return new object[] { code, ORDER_FUNCTION_CALL };
+				return new fcall_node(this, intern("text_get_from_start"), new List<node>() { text, at }, null);
 			case "FROM_END":
-				code = "text_get_from_end(" + text + ", " + at + ")";
-				return new object[] { code, ORDER_FUNCTION_CALL };
+				return new fcall_node(this, intern("text_get_from_end"), new List<node>() { text, at }, null);
 			case "RANDOM":
-				code = "text_random_letter(" + text + ")";
-				return new object[] { code, ORDER_FUNCTION_CALL };
+				return new fcall_node(this, intern("text_random_letter"), new List<node>() { text }, null);
 			}
 			throw new Exception("Unhandled option (text_charAt).");
 		}
 
-		public object[] text_getSubstring(TextGetSubstringBlock block)
+		public node text_getSubstring(TextGetSubstringBlock block)
 		{
 			// Get substring.
-			var text = Blockly.Ruby.valueToCode(block, "STRING",
-				Blockly.Ruby.ORDER_MEMBER);
-			if (String.IsNullOrEmpty(text)) text = "\'\'";
+			var text = valueToCode(block, "STRING");
+			if (text == null) text = new str_node(this, "");
 			var where1 = block.getFieldValue("WHERE1");
 			var where2 = block.getFieldValue("WHERE2");
-			var at1 = Blockly.Ruby.valueToCode(block, "AT1",
-				Blockly.Ruby.ORDER_NONE);
-			if (String.IsNullOrEmpty(at1)) at1 = "1";
-			var at2 = Blockly.Ruby.valueToCode(block, "AT2",
-				Blockly.Ruby.ORDER_NONE);
-			if (String.IsNullOrEmpty(at2)) at2 = "1";
-			if (where1 == "FIRST" || (where1 == "FROM_START" && at1 == "1")) {
-				at1 = "0";
+			var at1 = valueToCode(block, "AT1");
+			if (at1 == null) at1 = new int_node(this, 1);
+			var at2 = valueToCode(block, "AT2");
+			if (at2 == null) at2 = new int_node(this, 1);
+			if (where1 == "FIRST" || (where1 == "FROM_START" && at1 is int_node && ((int_node)at1).to_i() == 1)) {
+				at1 = new int_node(this, 0);
 			}
 			else if (where1 == "FROM_START") {
 				// Blockly uses one-based indicies.
-				if (Blockly.isNumber(at1)) {
+				if (at1 is int_node) {
 					// If the index is a naked number, decrement it right now.
-					at1 = (Script.ParseInt(at1, 10) - 1).ToString();
+					at1 = new int_node(this, (int)(((int_node)at1).to_i() - 1));
 				}
 				else {
 					// If the index is dynamic, decrement it in code.
-					at1 = at1 + ".to_i - 1";
+					at1 = new call_node(this, at1, intern("to_i"), new List<node>(), null);
+					at1 = new call_node(this, at1, intern("-"), new int_node(this, 1));
 				}
 			}
 			else if (where1 == "FROM_END") {
-				if (Blockly.isNumber(at1)) {
-					at1 = (-Script.ParseInt(at1, 10)).ToString();
+				if (at1 is int_node) {
+					at1 = new int_node(this, (int)(-((int_node)at1).to_i()));
 				}
 				else {
-					at1 = "-" + at1 + ".to_i";
+					at1 = new call_node(this, at1, intern("-@"), (node)null);
+					at1 = new call_node(this, at1, intern("to_i"), new List<node>(), null);
 				}
 			}
-			if (where2 == "LAST" || (where2 == "FROM_END" && at2 == "1")) {
-				at2 = "-1";
+			if (where2 == "LAST" || (where2 == "FROM_END" && at2 is int_node && ((int_node)at2).to_i() == 1)) {
+				at2 = new int_node(this, -1);
 			}
 			else if (where2 == "FROM_START") {
-				if (Blockly.isNumber(at2)) {
-					at2 = (Script.ParseInt(at2, 10) - 1).ToString();
+				if (at2 is int_node) {
+					at2 = new int_node(this, (int)(((int_node)at2).to_i() - 1));
 				}
 				else {
-					at2 = at2 + ".to_i - 1";
+					at2 = new call_node(this, at2, intern("to_i"), new List<node>(), null);
+					at2 = new call_node(this, at2, intern("-"), new int_node(this, 1));
 				}
 			}
 			else if (where2 == "FROM_END") {
-				if (Blockly.isNumber(at2)) {
-					at2 = (-Script.ParseInt(at2, 10)).ToString();
+				if (at2 is int_node) {
+					at2 = new int_node(this, (int)(-((int_node)at2).to_i()));
 				}
 				else {
-					at2 = at2 + ".to_i";
+					at2 = new call_node(this, at2, intern("-@"), (node)null);
+					at2 = new call_node(this, at2, intern("to_i"), new List<node>(), null);
 				}
 			}
-			var code = text + "[" + at1 + ".." + at2 + "]";
-			return new object[] { code, ORDER_MEMBER };
+			var code = new dot2_node(this, at1, at2);
+			return new call_node(this, text, intern("[]"), new List<node>() { code }, null);
 		}
 
-		public object[] text_changeCase(TextChangeCaseBlock block)
+		public node text_changeCase(TextChangeCaseBlock block)
 		{
 			// Change capitalization.
-			var OPERATORS = new Dictionary<string, string>();
-			OPERATORS.Add("UPPERCASE", ".upcase");
-			OPERATORS.Add("LOWERCASE", ".downcase");
-			OPERATORS.Add("TITLECASE", null);
-			string code;
+			var OPERATORS = new Dictionary<string, string>() {
+				{ "UPPERCASE", "upcase" },
+				{ "LOWERCASE", "downcase"},
+				{ "TITLECASE", null }
+			};
+			node code;
 			var @operator = OPERATORS[block.getFieldValue("CASE")];
 			if (!String.IsNullOrEmpty(@operator)) {
 				@operator = OPERATORS[block.getFieldValue("CASE")];
-				var argument0 = Blockly.Ruby.valueToCode(block, "TEXT",
-					Blockly.Ruby.ORDER_MEMBER);
-				if (String.IsNullOrEmpty(argument0)) argument0 = "\'\'";
-				code = argument0 + @operator;
+				var argument0 = valueToCode(block, "TEXT");
+				if (argument0 == null) argument0 = new str_node(this, "");
+				code = new call_node(this, argument0, intern(@operator), new List<node>(), null);
 			}
 			else {
 				// Title case is not a native Ruby function. Define one.
-				var argument0 = Blockly.Ruby.valueToCode(block, "TEXT",
-					Blockly.Ruby.ORDER_NONE);
-				if (String.IsNullOrEmpty(argument0)) argument0 = "\'\'";
-				code = "text_to_title_case(" + argument0 + ")";
+				var argument0 = valueToCode(block, "TEXT");
+				if (argument0 == null) argument0 = new str_node(this, "");
+				code = new fcall_node(this, intern("text_to_title_case"), new List<node>() { argument0 }, null);
 			}
-
-			return new object[] { code, ORDER_MEMBER };
+			return code;
 		}
 
-		public object[] text_trim(TextTrimBlock block)
+		public node text_trim(TextTrimBlock block)
 		{
 			// Trim spaces.
-			var OPERATORS = new Dictionary<string, string>();
-			OPERATORS.Add("LEFT", ".lstrip");
-			OPERATORS.Add("RIGHT", ".rstrip");
-			OPERATORS.Add("BOTH", ".strip");
+			var OPERATORS = new Dictionary<string, string>() {
+				{ "LEFT", ".lstrip" },
+				{ "RIGHT", ".rstrip"},
+				{ "BOTH", ".strip" }
+			};
 			var @operator = OPERATORS[block.getFieldValue("MODE")];
-			var argument0 = Blockly.Ruby.valueToCode(block, "TEXT",
-				Blockly.Ruby.ORDER_MEMBER);
-			if (String.IsNullOrEmpty(argument0)) argument0 = "\'\'";
-			var code = argument0 + @operator;
-			return new object[] { code, ORDER_MEMBER };
+			var argument0 = valueToCode(block, "TEXT");
+			if (argument0 == null) argument0 = new str_node(this, "");
+			return new call_node(this, argument0, intern(@operator), new List<node>(), null);
 		}
 
-		public string text_print(TextPrintBlock block)
-
+		public node text_print(TextPrintBlock block)
 		{
 			// Print statement.
-			var argument0 = Blockly.Ruby.valueToCode(block, "TEXT",
-				Blockly.Ruby.ORDER_NONE);
-			if (String.IsNullOrEmpty(argument0)) argument0 = "\'\'";
-			return "blockly_puts(" + argument0 + ")\n";
+			var argument0 = valueToCode(block, "TEXT");
+			if (argument0 == null) argument0 = new str_node(this, "");
+			return new fcall_node(this, intern("blockly_puts"), new List<node>() { argument0 }, null);
 		}
 
-		public object[] text_prompt(TextPromptBlock block)
+		public node text_prompt(TextPromptBlock block)
 		{
 			// Prompt function.
-			var msg = Blockly.Ruby.quote_(block.getFieldValue("TEXT"));
-			var code = "text_prompt(" + msg + ")";
+			var msg = new str_node(this, block.getFieldValue("TEXT"));
+			node code = new fcall_node(this, intern("text_prompt"), new List<node>() { msg }, null);
 			var toNumber = block.getFieldValue("TYPE") == "NUMBER";
 			if (toNumber) {
-				code = code + ".to_f";
+				code = new call_node(this, code, intern("to_f"), new List<node>(), null);
 			}
-			return new object[] { code, ORDER_FUNCTION_CALL };
+			return code;
 		}
 	}
 }

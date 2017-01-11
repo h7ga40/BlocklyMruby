@@ -484,10 +484,6 @@ Bridge.SetBlocks = function(instance)
 	Blockly.Blocks[template.type] = template;
 	return template;
 }
-Bridge.NewGenerator = function(name)
-{
-	return new Blockly.Generator(name);
-}
 Blockly.Names = {
 	equals: function(name1, name2) {
 		return Bridge.instance.names_equals(name1, name2);
@@ -643,14 +639,8 @@ Blockly.Variables = {
 			return block;
 		}
 
-		internal static dynamic NewGenerator(string name)
+		internal static void SetGenerator()
 		{
-			return Bridge.NewGenerator(name);
-		}
-
-		internal static void SetGenerator(Ruby generator)
-		{
-			Blockly.Ruby = generator;
 			ScriptHost.procedures = Script.Get(ScriptHost.blockly, "Procedures");
 			ScriptHost.variables = Script.Get(ScriptHost.blockly, "Variables");
 			Script.Set(ScriptHost.procedures, "NAME_TYPE", Blockly.Procedures.NAME_TYPE);

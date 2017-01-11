@@ -11,280 +11,289 @@ namespace BlocklyMruby
 {
 	partial class Ruby
 	{
-		public object[] math_number(MathNumberBlock block)
+		public node math_number(MathNumberBlock block)
 		{
 			// Numeric value.
-			var code = Script.ParseFloat(block.getFieldValue("NUM"));
-			var order = code < 0 ? Blockly.Ruby.ORDER_UNARY_SIGN :
-						Blockly.Ruby.ORDER_ATOMIC;
-			return new object[] { code.ToString(), order };
+			var num = block.getFieldValue("NUM");
+			return new_num_node(num);
 		}
 
-		public object[] math_arithmetic(MathArithmeticBlock block)
+		static Dictionary<string, string> ARITHMETIC_OPERATORS = new Dictionary<string, string>() {
+			{ "ADD", "+" },
+			{ "MINUS", "-" },
+			{ "MULTIPLY", "*" },
+			{ "DIVIDE", "/" },
+			{ "POWER", "**" }
+		};
+
+		public node math_arithmetic(MathArithmeticBlock block)
 		{
 			// Basic arithmetic operators, and power.
-			var OPERATORS = new Dictionary<string, object[]>();
-			OPERATORS.Add("ADD", new object[] { " + ", Blockly.Ruby.ORDER_ADDITIVE });
-			OPERATORS.Add("MINUS", new object[] { " - ", Blockly.Ruby.ORDER_ADDITIVE });
-			OPERATORS.Add("MULTIPLY", new object[] { " * ", Blockly.Ruby.ORDER_MULTIPLICATIVE });
-			OPERATORS.Add("DIVIDE", new object[] { " / ", Blockly.Ruby.ORDER_MULTIPLICATIVE });
-			OPERATORS.Add("POWER", new object[] { " ** ", Blockly.Ruby.ORDER_EXPONENTIATION });
-			var tuple = OPERATORS[block.getFieldValue("OP")];
-			var @operator = tuple[0];
-			var order = (int)tuple[1];
-			var argument0 = Blockly.Ruby.valueToCode(block, "A", order);
-			if (String.IsNullOrEmpty(argument0)) argument0 = "0";
-			var argument1 = Blockly.Ruby.valueToCode(block, "B", order);
-			if (String.IsNullOrEmpty(argument1)) argument1 = "0";
+			var @operator = ARITHMETIC_OPERATORS[block.getFieldValue("OP")];
+			var argument0 = valueToCode(block, "A");
+			if (argument0 == null) argument0 = new int_node(this, 0);
+			var argument1 = valueToCode(block, "B");
+			if (argument1 == null) argument1 = new int_node(this, 0);
 			var code = argument0 + @operator + argument1;
-			return new object[] { code, order };
+			return new call_node(this, argument0, intern(@operator), argument1);
 		}
 
-		public object[] math_single(Block block)
+		public node math_single(Block block)
 		{
 			// Math operators with single operand.
 			var @operator = block.getFieldValue("OP");
-			string code = null;
-			string arg;
+			node code = null;
+			node arg;
 			if (@operator == "NEG") {
 				// Negation is a special case given its different operator precedence.
-				code = Blockly.Ruby.valueToCode(block, "NUM",
-					Blockly.Ruby.ORDER_UNARY_SIGN);
-				if (String.IsNullOrEmpty(code)) code = "0";
-				return new object[] { "-" + code, ORDER_UNARY_SIGN };
+				code = valueToCode(block, "NUM");
+				if (code == null) code = new int_node(this, 0);
+				return new call_node(this, code, intern("-@"), (node)null);
 			}
 			if (@operator == "SIN" || @operator == "COS" || @operator == "TAN") {
-				arg = "(" + Blockly.Ruby.valueToCode(block, "NUM",
-					Blockly.Ruby.ORDER_MULTIPLICATIVE) + ")";
-				if (String.IsNullOrEmpty(arg)) arg = "0";
+				arg = valueToCode(block, "NUM");
+				if (arg == null) arg = new int_node(this, 0);
 			}
 			else {
-				arg = "(" + Blockly.Ruby.valueToCode(block, "NUM",
-					Blockly.Ruby.ORDER_NONE) + ")";
-				if (String.IsNullOrEmpty(arg)) arg = "0";
+				arg = valueToCode(block, "NUM");
+				if (arg == null) arg = new int_node(this, 0);
 			}
 			// First, handle cases which generate values that don't need parentheses
 			// wrapping the code.
+			var math = new const_node(this, intern("Math"));
 			switch (@operator) {
 			case "ABS":
-				code = arg + ".abs";
+				code = new call_node(this, arg, intern("abs"), new List<node>(), null);
 				break;
 			case "ROOT":
-				code = "Math.sqrt(" + arg + ")";
+				code = new call_node(this, math, intern("sqrt"), new List<node>() { arg }, null);
 				break;
 			case "LN":
-				code = "Math.log(" + arg + ")";
+				code = new call_node(this, math, intern("log"), new List<node>() { arg }, null);
 				break;
 			case "LOG10":
-				code = "Math.log10(" + arg + ")";
+				code = new call_node(this, math, intern("log10"), new List<node>() { arg }, null);
 				break;
 			case "EXP":
-				code = "Math.exp(" + arg + ")";
+				code = new call_node(this, math, intern("exp"), new List<node>() { arg }, null);
 				break;
 			case "POW10":
-				code = "(10 ** " + arg + ")";
+				code = new call_node(this, new int_node(this, 10), intern("exp"), new List<node>() { arg }, null);
 				break;
 			case "ROUND":
-				code = arg + ".round";
+				code = new call_node(this, arg, intern("round"), new List<node>(), null);
 				break;
 			case "ROUNDUP":
-				code = arg + ".ceil";
+				code = new call_node(this, arg, intern("ceil"), new List<node>(), null);
 				break;
 			case "ROUNDDOWN":
-				code = arg + ".floor";
+				code = new call_node(this, arg, intern("floor"), new List<node>(), null);
 				break;
 			case "SIN":
-				code = "Math.sin(" + arg + " / 180.0 * Math::PI)";
+				arg = new call_node(this, arg, intern("/"), new float_node(this, 180.0));
+				arg = new call_node(this, arg, intern("*"), new colon2_node(this, math, intern("PI")));
+				code = new call_node(this, math, intern("sin"), new List<node>() { arg }, null);
 				break;
 			case "COS":
-				code = "Math.cos(" + arg + " / 180.0 * Math::PI)";
+				arg = new call_node(this, arg, intern("/"), new float_node(this, 180.0));
+				arg = new call_node(this, arg, intern("*"), new colon2_node(this, math, intern("PI")));
+				code = new call_node(this, math, intern("cos"), new List<node>() { arg }, null);
 				break;
 			case "TAN":
-				code = "Math.tan(" + arg + " / 180.0 * Math::PI)";
+				arg = new call_node(this, arg, intern("/"), new float_node(this, 180.0));
+				arg = new call_node(this, arg, intern("*"), new colon2_node(this, math, intern("PI")));
+				code = new call_node(this, math, intern("tan"), new List<node>() { arg }, null);
 				break;
 			}
-			if (!String.IsNullOrEmpty(code)) {
-				return new object[] { code, ORDER_FUNCTION_CALL };
+			if (code != null) {
+				return code;
 			}
 			// Second, handle cases which generate values that may need parentheses
 			// wrapping the code.
 			switch (@operator) {
 			case "ASIN":
-				code = "Math.asin(" + arg + ") / Math::PI * 180";
+				code = new call_node(this, math, intern("asin"), new List<node>() { arg }, null);
+				code = new call_node(this, code, intern("/"), new colon2_node(this, math, intern("PI")));
+				code = new call_node(this, code, intern("*"), new float_node(this, 180.0));
 				break;
 			case "ACOS":
-				code = "Math.acos(" + arg + ") / Math::PI * 180";
+				code = new call_node(this, math, intern("acos"), new List<node>() { arg }, null);
+				code = new call_node(this, code, intern("/"), new colon2_node(this, math, intern("PI")));
+				code = new call_node(this, code, intern("*"), new float_node(this, 180.0));
 				break;
 			case "ATAN":
-				code = "Math.atan(" + arg + ") / Math::PI * 180";
+				code = new call_node(this, math, intern("atan"), new List<node>() { arg }, null);
+				code = new call_node(this, code, intern("/"), new colon2_node(this, math, intern("PI")));
+				code = new call_node(this, code, intern("*"), new float_node(this, 180.0));
 				break;
 			default:
 				throw new Exception("Unknown math operator: " + @operator);
 			}
-			return new object[] { code, ORDER_MULTIPLICATIVE };
+			return new begin_node(this, code, true);
 		}
 
-		public object[] math_constant(MathConstantBlock block)
+		public node math_constant(MathConstantBlock block)
 		{
 			// Constants: PI, E, the Golden Ratio, sqrt(2), 1/sqrt(2), INFINITY.
-			var CONSTANTS = new Dictionary<string, object[]>();
-			CONSTANTS.Add("PI", new object[] { "Math::PI", Blockly.Ruby.ORDER_MEMBER });
-			CONSTANTS.Add("E", new object[] { "Math::E", Blockly.Ruby.ORDER_MEMBER });
-			CONSTANTS.Add("GOLDEN_RATIO", new object[] { "(1 + Math.sqrt(5)) / 2", Blockly.Ruby.ORDER_MULTIPLICATIVE });
-			CONSTANTS.Add("SQRT2", new object[] { "Math.sqrt(2)", Blockly.Ruby.ORDER_MEMBER });
-			CONSTANTS.Add("SQRT1_2", new object[] { "Math.sqrt(1.0 / 2)", Blockly.Ruby.ORDER_MEMBER });
-			CONSTANTS.Add("INFINITY", new object[] { "1/0.0", Blockly.Ruby.ORDER_ATOMIC });
 			var constant = block.getFieldValue("CONSTANT");
-			return CONSTANTS[constant];
+			var math = new const_node(this, intern("Math"));
+			node code;
+			switch (constant) {
+			case "PI":
+				return new colon2_node(this, math, intern("PI"));
+			case "E":
+				return new colon2_node(this, math, intern("E"));
+			case "GOLDEN_RATIO":
+				code = new call_node(this, math, intern("sqrt"), new List<node>() { new float_node(this, 5) }, null);
+				code = new call_node(this, new float_node(this, 1), intern("+"), code);
+				code = new call_node(this, new begin_node(this, code, true), intern("/"), new float_node(this, 2));
+				return code;
+			case "SQRT2":
+				return new call_node(this, math, intern("sqrt"), new List<node>() { new float_node(this, 2) }, null);
+			case "SQRT1_2":
+				code = new call_node(this, new float_node(this, 1), intern("/"), new float_node(this, 2));
+				return new call_node(this, math, intern("sqrt"), new List<node>() { code }, null);
+			case "INFINITY":
+				return new call_node(this, new float_node(this, 1), intern("/"), new float_node(this, 0));
+			}
+			return null;
 		}
 
-		public object[] math_number_property(MathNumberPropertyBlock block)
+		public node math_number_property(MathNumberPropertyBlock block)
 		{
 			// Check if a number is even, odd, prime, whole, positive, or negative
 			// or if it is divisible by certain number. Returns true or false.
-			var number_to_check = Blockly.Ruby.valueToCode(block, "NUMBER_TO_CHECK",
-				Blockly.Ruby.ORDER_MULTIPLICATIVE);
-			if (String.IsNullOrEmpty(number_to_check)) number_to_check = "0";
+			var number_to_check = valueToCode(block, "NUMBER_TO_CHECK");
+			if (number_to_check == null) number_to_check = new int_node(this, 0);
 			var dropdown_property = block.getFieldValue("PROPERTY");
-			string code = null;
+			node code = null;
 			if (dropdown_property == "PRIME") {
-				code = "is_prime(" + number_to_check + ")";
-				return new object[] { code, ORDER_FUNCTION_CALL };
+				return new fcall_node(this, intern("is_prime"), new List<node>() { number_to_check }, null);
 			}
 			switch (dropdown_property) {
 			case "EVEN":
-				code = number_to_check + ".even?";
-				break;
+				return new call_node(this, number_to_check, intern("even?"), new List<node>(), null);
 			case "ODD":
-				code = number_to_check + ".odd?";
-				break;
+				return new call_node(this, number_to_check, intern("odd?"), new List<node>(), null);
 			case "WHOLE":
-				code = number_to_check + " % 1 == 0";
-				break;
+				code = new call_node(this, number_to_check, intern("%"), new int_node(this, 1));
+				return new call_node(this, code, intern("=="), new int_node(this, 0));
 			case "POSITIVE":
-				code = number_to_check + " > 0";
-				break;
+				return new call_node(this, number_to_check, intern(">"), new List<node>() { new int_node(this, 0) }, null);
 			case "NEGATIVE":
-				code = number_to_check + " < 0";
-				break;
+				return new call_node(this, number_to_check, intern("<"), new List<node>() { new int_node(this, 0) }, null);
 			case "DIVISIBLE_BY":
-				var divisor = Blockly.Ruby.valueToCode(block, "DIVISOR",
-					Blockly.Ruby.ORDER_MULTIPLICATIVE);
+				var divisor = valueToCode(block, "DIVISOR");
 				// If "divisor" is some code that evals to 0, Ruby will raise an error.
-				if (String.IsNullOrEmpty(divisor) || divisor == "0") {
-					return new object[] { "false", ORDER_ATOMIC };
+				if (divisor == null || (divisor is int_node && ((int_node)divisor).to_i() == 0)
+					 || (divisor is float_node && ((float_node)divisor).to_f() == 0.0)) {
+					return new false_node(this);
 				}
-				code = number_to_check + " % " + divisor + " == 0";
-				break;
+				code = new call_node(this, number_to_check, intern("%"), divisor);
+				return new call_node(this, code, intern("=="), new int_node(this, 0));
 			}
-			return new object[] { code, ORDER_RELATIONAL };
+			return null;
 		}
 
-		public string math_change(MathChangeBlock block)
+		public node math_change(MathChangeBlock block)
 		{
 			// Add to a variable in place.
-			var argument0 = Blockly.Ruby.valueToCode(block, "DELTA",
-				Blockly.Ruby.ORDER_ADDITIVE);
-			if (String.IsNullOrEmpty(argument0)) argument0 = "0";
-			var varName = Blockly.Ruby.variableDB_.getRubyName(block.getFieldValue("VAR"),
-				Blockly.Variables.NAME_TYPE);
-			return varName + " += " + argument0 + "\n";
+			var argument0 = valueToCode(block, "DELTA");
+			if (argument0 == null) argument0 = new int_node(this, 0);
+			var varName = get_var_name(block.getFieldValue("VAR"));
+			return new op_asgn_node(this, new_var_node(varName), intern("+"), argument0);
 		}
 
 		// Rounding functions have a single operand.
-		public object[] math_round(MathRoundBlock block) { return math_single(block); }
+		public node math_round(MathRoundBlock block) { return math_single(block); }
 		// Trigonometry functions have a single operand.
-		public object[] math_trig(MathTrigBlock block) { return math_single(block); }
+		public node math_trig(MathTrigBlock block) { return math_single(block); }
 
-		public object[] math_on_list(MathOnListBlock block)
+		public node math_on_list(MathOnListBlock block)
 		{
 			// Math functions for lists.
 			var func = block.getFieldValue("OP");
-			var list = Blockly.Ruby.valueToCode(block, "LIST",
-				Blockly.Ruby.ORDER_NONE);
-			if (String.IsNullOrEmpty(list)) list = "[]";
-			string code;
+			var list = valueToCode(block, "LIST");
+			if (list == null) list = new array_node(this, new List<node>());
+			node code;
 			switch (func) {
 			case "SUM":
-				code = list + ".sum";
+				code = new call_node(this, list, intern("sum"), new List<node>(), null);
 				break;
 			case "MIN":
-				code = list + ".numbers.min";
+				code = new call_node(this, list, intern("numbers"), new List<node>(), null);
+				code = new call_node(this, code, intern("min"), new List<node>(), null);
 				break;
 			case "MAX":
-				code = list + ".numbers.max";
+				code = new call_node(this, list, intern("numbers"), new List<node>(), null);
+				code = new call_node(this, code, intern("max"), new List<node>(), null);
 				break;
 			case "AVERAGE":
-				code = list + ".average";
+				code = new call_node(this, list, intern("average"), new List<node>(), null);
 				break;
 			case "MEDIAN":
-				code = list + ".median";
+				code = new call_node(this, list, intern("median"), new List<node>(), null);
 				break;
 			case "MODE":
 				// As a list of numbers can contain more than one mode,
 				// the returned result is provided as an array.
 				// Mode of [3, "x", "x", 1, 1, 2, "3"] -> ["x", 1].
-				code = "math_modes(" + list + ")";
+				code = new fcall_node(this, intern("math_modes"), new List<node>() { list }, null);
 				break;
 			case "STD_DEV":
-				code = list + ".standard_deviation";
+				code = new call_node(this, list, intern("standard_deviation"), new List<node>(), null);
 				break;
 			case "RANDOM":
-				code = list + "[rand(" + list + ".size)]";
+				code = new call_node(this, list, intern("size"), new List<node>(), null);
+				code = new fcall_node(this, intern("rand"), new List<node>() { code }, null);
+				code = new call_node(this, list, intern("[]"), new List<node>() { code }, null);
 				break;
 			default:
 				throw new Exception("Unknown operator: " + func);
 			}
-			return new object[] { code, ORDER_FUNCTION_CALL };
+			return code;
 		}
 
-		public object[] math_modulo(MathModuloBlock block)
+		public node math_modulo(MathModuloBlock block)
 		{
 			// Remainder computation.
-			var argument0 = Blockly.Ruby.valueToCode(block, "DIVIDEND",
-				Blockly.Ruby.ORDER_MULTIPLICATIVE);
-			if (String.IsNullOrEmpty(argument0)) argument0 = "0";
-			var argument1 = Blockly.Ruby.valueToCode(block, "DIVISOR",
-				Blockly.Ruby.ORDER_MULTIPLICATIVE);
-			if (String.IsNullOrEmpty(argument1)) argument1 = "0";
-			var code = argument0 + " % " + argument1;
-			return new object[] { code, ORDER_MULTIPLICATIVE };
+			var argument0 = valueToCode(block, "DIVIDEND");
+			if (argument0 == null) argument0 = new int_node(this, 0);
+			var argument1 = valueToCode(block, "DIVISOR");
+			if (argument1 == null) argument1 = new int_node(this, 0);
+			return new call_node(this, argument0, intern("%"), argument1);
 		}
 
-		public object[] math_constrain(MathConstrainBlock block)
+		public node math_constrain(MathConstrainBlock block)
 		{
 			// Constrain a number between two limits.
-			var argument0 = Blockly.Ruby.valueToCode(block, "VALUE",
-				Blockly.Ruby.ORDER_NONE);
-			if (String.IsNullOrEmpty(argument0)) argument0 = "0";
-			var argument1 = Blockly.Ruby.valueToCode(block, "LOW",
-				Blockly.Ruby.ORDER_NONE);
-			if (String.IsNullOrEmpty(argument1)) argument1 = "0";
-			var argument2 = Blockly.Ruby.valueToCode(block, "HIGH",
-				Blockly.Ruby.ORDER_NONE);
-			if (String.IsNullOrEmpty(argument2)) argument2 = "float(\'inf\')";
-			var code = "[[" + argument0 + ", " + argument1 + "].max, " +
-				argument2 + "].min";
-			return new object[] { code, ORDER_FUNCTION_CALL };
+			var argument0 = valueToCode(block, "VALUE");
+			if (argument0 == null) argument0 = new int_node(this, 0);
+			var argument1 = valueToCode(block, "LOW");
+			if (argument1 == null) argument1 = new int_node(this, 0);
+			var argument2 = valueToCode(block, "HIGH");
+			if (argument2 == null) argument2 = new fcall_node(this, intern("Float"), new List<node>() { new str_node(this, "inf") }, null);
+			node code = new array_node(this, new List<node>() { argument0, argument1 });
+			code = new call_node(this, code, intern("max"), new List<node>(), null);
+			code = new array_node(this, new List<node>() { code, argument2 });
+			return new call_node(this, code, intern("min"), new List<node>(), null);
 		}
 
-		public object[] math_random_int(MathRandomIntBlock block)
+		public node math_random_int(MathRandomIntBlock block)
 		{
 			// Random integer between [X] and [Y].
-			var argument0 = Blockly.Ruby.valueToCode(block, "FROM",
-				Blockly.Ruby.ORDER_NONE);
-			if (String.IsNullOrEmpty(argument0)) argument0 = "0";
-			var argument1 = Blockly.Ruby.valueToCode(block, "TO",
-				Blockly.Ruby.ORDER_NONE);
-			if (String.IsNullOrEmpty(argument1)) argument1 = "0";
-			var code = "rand(" + argument0 + ".." + argument1 + ")";
-			return new object[] { code, ORDER_FUNCTION_CALL };
+			var argument0 = valueToCode(block, "FROM");
+			if (argument0 == null) argument0 = new int_node(this, 0);
+			var argument1 = valueToCode(block, "TO");
+			if (argument1 == null) argument1 = new int_node(this, 0);
+			var code = new dot2_node(this, argument0, argument1);
+			return new fcall_node(this, intern("rand"), new List<node>() { code }, null);
 		}
 
-		public object[] math_random_float(MathRandomFloatBlock block)
+		public node math_random_float(MathRandomFloatBlock block)
 		{
 			// Random fraction between 0 and 1.
-			return new object[] { "rand", ORDER_FUNCTION_CALL };
+			return new fcall_node(this, intern("rand"), new List<node>(), null);
 		}
 	}
 }

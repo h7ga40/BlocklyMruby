@@ -11,15 +11,9 @@ using System.Runtime.InteropServices;
 namespace BlocklyMruby
 {
 	[ComVisible(true)]
-	public partial class Ruby : Generator
+	public partial class Ruby : Generator, IMrbParser
 	{
-		internal Ruby(object instance)
-			: base(instance)
-		{
-		}
-
-		public Ruby()
-			: base("Ruby")
+		static Ruby()
 		{
 			/**
 			 * List of illegal variable names.
@@ -36,128 +30,21 @@ namespace BlocklyMruby
 			escapeChars_.Add("\"", "\\\"");
 		}
 
-		/**
-		 * Order of operation ENUMs.
-		 * http://phrogz.net/programmingruby/language.html
-		 * http://www.techotopia.com/index.php/Ruby_Operator_Precedence
-		 * http://www.tutorialspoint.com/ruby/ruby_operators.htm
-		 */
-		[Name(false)]
-		public int ORDER_ATOMIC = 0;            // 0 "" ...
-		[Name(false)]
-		public int ORDER_MEMBER = 2;            // . []
-		[Name(false)]
-		public int ORDER_FUNCTION_CALL = 2;     // ()
-		[Name(false)]
-		public int ORDER_EXPONENTIATION = 3;    // **
-		[Name(false)]
-		public int ORDER_LOGICAL_NOT = 4;      // !
-		[Name(false)]
-		public int ORDER_UNARY_SIGN = 4;        // + -
-		[Name(false)]
-		public int ORDER_BITWISE_NOT = 4;       // ~
-		[Name(false)]
-		public int ORDER_MULTIPLICATIVE = 5;    // * / // %
-		[Name(false)]
-		public int ORDER_ADDITIVE = 6;          // + -
-		[Name(false)]
-		public int ORDER_BITWISE_SHIFT = 7;     // << >>
-		[Name(false)]
-		public int ORDER_BITWISE_AND = 8;       // &
-		[Name(false)]
-		public int ORDER_BITWISE_XOR = 9;       // ^
-		[Name(false)]
-		public int ORDER_BITWISE_OR = 9;        // |
-		[Name(false)]
-		public int ORDER_RELATIONAL = 11;       // <, <=, >, >=, <>, !=, ==
-		[Name(false)]
-		public int ORDER_LOGICAL_AND = 13;      // &&
-		[Name(false)]
-		public int ORDER_LOGICAL_OR = 14;       // ||
-		[Name(false)]
-		public int ORDER_CONDITIONAL = 15;      // if unless while until
-		[Name(false)]
-		public int ORDER_NONE = 99;             // (...)
+		node tree;
+		locals_node locals;
+
+		public Ruby()
+			: base("Ruby")
+		{
+			filename = "blockly.rb";
+		}
 
 		/**
 		 * Initialise the database of variable names.
 		 */
 		public override void init(Blockly.Workspace workspace)
 		{
-			// Create a dictionary of definitions to be printed before the code.
-			definitions_ = new Dictionary<string, string>();
-			// Create a dictionary mapping desired function names in definitions_
-			// to actual function names (to avoid collisions with user functions).
-			functionNames_ = new Dictionary<string, string>();
-
-			if (true/*Blockly.Variables != null*/) {
-				if (variableDB_ == null) {
-
-					variableDB_ = new Names(RESERVED_WORDS_);
-
-					variableDB_.localVars = null;
-					variableDB_.localVarsDB = null;
-				}
-				else {
-					variableDB_.reset();
-				}
-
-				var defvars = new List<string>();
-				var variables = Blockly.Variables.allVariables(workspace);
-				for (var x = 0; x < variables.Length; x++) {
-					defvars.Add("$" +
-						variableDB_.getName(variables[x], Blockly.Variables.NAME_TYPE) +
-						" = nil");
-				}
-				var code = String.Join("\n", defvars);
-				definitions_["variables"] = code;
-			}
-		}
-
-		string validName(string name)
-		{
-			return variableDB_.safeName_(name);
-		}
-
-		/**
-		 * Returns the string containing all definitions
-		 * @return {string} Definitions code.
-		 */
-		string generateDefinitions(string[] helpers)
-		{
-			var requires = new List<string>();
-			var prepares = new List<string>();
-			var definitions = new List<string>();
-			foreach (var name in definitions_.Keys) {
-				var def = definitions_[name];
-				if (def == null)
-					continue;
-
-				if (name.Match(new Regex("^require__")) != null) {
-					requires.Add(def);
-				}
-				else if (name.Match(new Regex("^prepare__")) != null) {
-					prepares.Add(def);
-				}
-				else
-					definitions.Add(def);
-			}
-
-			string allDefs = "";
-
-			if (requires.Count > 0)
-				allDefs += String.Join("\n", requires) + "\n\n";
-
-			if (helpers.Length > 0)
-				allDefs += String.Join("\n", helpers) + "\n\n";
-
-			if (prepares.Count > 0)
-				allDefs += String.Join("\n", prepares) + "\n\n";
-
-			if (definitions.Count > 0) {
-				allDefs += String.Join("\n", definitions) + "\n\n";
-			}
-			return allDefs;
+			locals = new locals_node(null);
 		}
 
 		/**
@@ -165,14 +52,14 @@ namespace BlocklyMruby
 		 * @param {string} code Generated code.
 		 * @return {string} Completed code.
 		 */
-		public override string finish(string code)
+		public override string finish(List<node> codes)
 		{
-			// need some helper functions to conform to Blockly's behavior
-			var helpers = new string[0];
-			var indent = INDENT;
-			var allDefs = generateDefinitions(helpers);
-			allDefs = indent + allDefs.Split("\n").Join("\n" + indent);
-			return allDefs.Replace(new Regex("\n\n+", "g"), "\n\n") + "\n" + code;
+			tree = new scope_node(this, new begin_node(this, codes));
+
+			var cond = new ruby_code_cond();
+			cond.indent_str = INDENT;
+			tree.to_ruby(cond);
+			return cond.ToString();
 		}
 
 		/**
@@ -181,12 +68,12 @@ namespace BlocklyMruby
 		 * @param {string} line Line of generated code.
 		 * @return {string} Legal line of code.
 		 */
-		public override string scrubNakedValue(string line)
+		public override List<node> scrubNakedValue(List<node> line)
 		{
-			return line + "\n";
+			return line;
 		}
 
-		Dictionary<string, string> escapeChars_ = new Dictionary<string, string>();
+		static Dictionary<string, string> escapeChars_ = new Dictionary<string, string>();
 
 		/**
 		 * Encode a string as a properly escaped Ruby string, complete with quotes.
@@ -221,12 +108,8 @@ namespace BlocklyMruby
 		 * @this {Blockly.CodeGenerator}
 		 * @private
 		 */
-		public override string scrub_(Block block, string code)
+		public override void scrub_(Block block, List<node> code)
 		{
-			if (code == null) {
-				// Block has handled code generation itself.
-				return "";
-			}
 			var commentCode = "";
 			// Only collect comments for blocks that aren't inline.
 			if (block.outputConnection == null || block.outputConnection.targetConnection == null) {
@@ -254,8 +137,175 @@ namespace BlocklyMruby
 			if (block.nextConnection != null)
 				nextBlock = block.nextConnection.targetBlock();
 			var nextCode = blockToCode(nextBlock);
+			if (nextCode != null)
+				code.AddRange(nextCode);
+		}
 
-			return commentCode + code + nextCode;
+		public int lineno { get; set; }
+		public int column { get; set; }
+		public string filename { get; }
+
+		List<string> syms = new List<string>();
+
+		private mrb_sym get_sym(string str)
+		{
+			int i = syms.IndexOf(str);
+			if (i < 0) {
+				i = syms.Count;
+				syms.Add(str);
+			}
+			return (mrb_sym)(i + 1);
+		}
+
+		public string sym2name(mrb_sym sym)
+		{
+			int i = (int)sym - 1;
+			if ((i < 0) || (i >= syms.Count))
+				return ((int)sym).ToString();
+			return syms[i];
+		}
+
+		mrb_sym intern(string str)
+		{
+			return get_sym(str);
+		}
+
+		mrb_sym get_var_name(string str)
+		{
+			int i = syms.IndexOf(str);
+
+			// ローカル変数なら登録されているはずなので、
+			if (i < 0)
+				// グローバル変数とする
+				return get_sym("$" + str);
+
+			var sym = (mrb_sym)(i + 1);
+
+			// ローカル変数でなければ、
+			if (!local_var_p(sym))
+				// グローバル変数とする
+				return get_sym("$" + str);
+
+			return sym;
+		}
+
+		node new_var_node(mrb_sym sym)
+		{
+			var name = sym2name(sym);
+			if (name.StartsWith("$")) {
+				return new gvar_node(this, sym);
+			}
+			else if (name.StartsWith("@@")) {
+				return new cvar_node(this, sym);
+			}
+			else if (name.StartsWith("@")) {
+				return new ivar_node(this, sym);
+			}
+			else {
+				return new lvar_node(this, sym);
+			}
+		}
+
+		node new_num_node(string num)
+		{
+			var result = MrbParser.parse(num);
+			var begin = result as begin_node;
+			if ((begin != null) && (begin.progs.Count == 1))
+				return begin.progs[0];
+			return result;
+		}
+
+		locals_node local_switch()
+		{
+			var prev = this.locals;
+			this.locals = new locals_node(null);
+			return prev;
+		}
+
+		void local_resume(locals_node prev)
+		{
+			this.locals = prev;
+		}
+
+		void local_nest()
+		{
+			this.locals = new locals_node(this.locals);
+		}
+
+		void local_unnest()
+		{
+			if (this.locals != null) {
+				this.locals = this.locals.cdr;
+			}
+		}
+
+		bool local_var_p(mrb_sym sym)
+		{
+			locals_node l = this.locals;
+
+			while (l != null) {
+				if (l.symList.Contains(sym))
+					return true;
+				l = l.cdr;
+			}
+			return false;
+		}
+
+		void local_add_f(mrb_sym sym)
+		{
+			if (this.locals != null) {
+				this.locals.push(sym);
+			}
+		}
+
+		mrb_sym local_add_f(string name)
+		{
+			var sym = intern(name);
+			local_add_f(sym);
+			return sym;
+		}
+
+		void local_add(mrb_sym sym)
+		{
+			if (!local_var_p(sym)) {
+				local_add_f(sym);
+			}
+		}
+
+		public List<mrb_sym> locals_node()
+		{
+			return this.locals != null ? this.locals.symList : null;
+		}
+
+		void assignable(node lhs)
+		{
+			var lvar = lhs as lvar_node;
+			if (lvar != null) {
+				local_add(lvar.name);
+			}
+		}
+
+		node var_reference(node lhs)
+		{
+			node n;
+
+			var lvar = lhs as lvar_node;
+			if (lvar != null) {
+				if (!local_var_p(lvar.name)) {
+					n = new fcall_node(this, lvar.name, null);
+					return n;
+				}
+			}
+
+			return lhs;
+		}
+
+		public void yyError(string message, params object[] expected)
+		{
+			if (App.Term == null)
+				return;
+
+			App.Term.write($"{filename}({lineno},{column}): error {String.Format(message, expected)}\r\n");
 		}
 	}
 }

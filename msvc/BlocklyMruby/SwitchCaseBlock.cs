@@ -763,66 +763,76 @@ namespace BlocklyMruby
 
 	partial class Ruby
 	{
-		internal string switch_case_number(SwitchCaseNumberBlock block)
+		internal node switch_case_number(SwitchCaseNumberBlock block)
 		{
 			// case/when/else condition.
-			var argument = Blockly.Ruby.valueToCode(block, "SWITCH",
-				Blockly.Ruby.ORDER_NONE);
-			if (String.IsNullOrEmpty(argument)) argument = "-1";
-			var code = "case " + argument + "\n";
+			var argument0 = valueToCode(block, "SWITCH");
+			if (argument0 == null) argument0 = new int_node(this, -1);
+			List<case_node.when_t> code = new List<case_node.when_t>();
 			for (int n = 0; n <= block.cases_.Count; n++) {
-				var branch = Blockly.Ruby.statementToCode(block, "DO" + n);
-				if (String.IsNullOrEmpty(branch)) branch = "\n";
-				argument = block.getFieldValue("CONST" + n);
-				if (argument != null) {
-					code += "when " + argument + "\n" + branch;
+				var branch = statementToCode(block, "DO" + n);
+				if (branch == null) branch = new nil_node(this);
+				var argument1 = block.getFieldValue("CONST" + n);
+				if (argument1 != null) {
+					var when = new case_node.when_t() { body = branch };
+					when.value.Add(new int_node(this, Script.ParseInt(argument1, 10)));
+					code.Add(when);
 				}
 				else {
 					var min = block.getFieldValue("RANGE_MIN" + n);
 					var max = block.getFieldValue("RANGE_MAX" + n);
 					if ((min != null) && (max != null)) {
-						code += "when " + min + ".." + max + "\n" + branch;
+						var when = new case_node.when_t() { body = branch };
+						when.value.Add(new dot2_node(this,
+							new int_node(this, Script.ParseInt(min, 10)),
+							new int_node(this, Script.ParseInt(max, 10))));
+						code.Add(when);
 					}
 				}
 			}
 			if (block.defaultCount_ != 0) {
-				var branch = Blockly.Ruby.statementToCode(block, "DEFAULT_DO");
-				if (String.IsNullOrEmpty(branch)) branch = "\n";
-				code += "else\n" + branch;
+				var branch = statementToCode(block, "DEFAULT_DO");
+				if (branch != null) {
+					var when = new case_node.when_t() { body = branch };
+					code.Add(when);
+				}
 			}
-			code += "end\n";
-			return code;
+			return new case_node(this, argument0, code);
 		}
 
-		internal string switch_case_text(SwitchCaseTextBlock block)
+		internal node switch_case_text(SwitchCaseTextBlock block)
 		{
 			// case/when/else condition.
-			var argument = Blockly.Ruby.valueToCode(block, "SWITCH",
-				Blockly.Ruby.ORDER_NONE);
-			if (String.IsNullOrEmpty(argument)) argument = "-1";
-			var code = "case " + argument + "\n";
+			var argument0 = valueToCode(block, "SWITCH");
+			if (argument0 == null) argument0 = new str_node(this, "");
+			List<case_node.when_t> code = new List<case_node.when_t>();
 			for (int n = 0; n <= block.cases_.Count; n++) {
-				var branch = Blockly.Ruby.statementToCode(block, "DO" + n);
-				if (String.IsNullOrEmpty(branch)) branch = "\n";
-				argument = block.getFieldValue("CONST" + n);
-				if (argument != null) {
-					code += "when " + argument + "\n" + branch;
+				var branch = statementToCode(block, "DO" + n);
+				if (branch == null) branch = new nil_node(this);
+				var argument1 = block.getFieldValue("CONST" + n);
+				if (argument1 != null) {
+					var when = new case_node.when_t() { body = branch };
+					when.value.Add(new str_node(this, argument1));
+					code.Add(when);
 				}
 				else {
 					var min = block.getFieldValue("RANGE_MIN" + n);
 					var max = block.getFieldValue("RANGE_MAX" + n);
 					if ((min != null) && (max != null)) {
-						code += "when " + min + ".." + max + "\n" + branch;
+						var when = new case_node.when_t() { body = branch };
+						when.value.Add(new dot2_node(this, new str_node(this, min), new str_node(this, max)));
+						code.Add(when);
 					}
 				}
 			}
 			if (block.defaultCount_ != 0) {
-				var branch = Blockly.Ruby.statementToCode(block, "DEFAULT_DO");
-				if (String.IsNullOrEmpty(branch)) branch = "\n";
-				code += "else\n" + branch;
+				var branch = statementToCode(block, "DEFAULT_DO");
+				if (branch != null) {
+					var when = new case_node.when_t() { body = branch };
+					code.Add(when);
+				}
 			}
-			code += "end\n";
-			return code;
+			return new case_node(this, argument0, code);
 		}
 	}
 }

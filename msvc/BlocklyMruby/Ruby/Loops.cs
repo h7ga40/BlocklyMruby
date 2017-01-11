@@ -11,153 +11,110 @@ namespace BlocklyMruby
 {
 	partial class Ruby
 	{
-		public string controls_repeat(ControlsRepeatBlock block)
+		public node controls_repeat(ControlsRepeatBlock block)
 		{
 			// Repeat n times (internal number).
-			var repeats = Script.ParseInt(block.getFieldValue("TIMES"), 10);
-			var branch = Blockly.Ruby.statementToCode(block, "DO");
-			if (String.IsNullOrEmpty(branch)) branch = "end\n";
-			if (Blockly.Ruby.INFINITE_LOOP_TRAP != null) {
-				branch = Blockly.Ruby.INFINITE_LOOP_TRAP.Replace(new Regex("%1", "g"),
-					"\'" + block.id + "\'") + branch;
-			}
-			var code = repeats + ".times do\n" + branch + "end\n";
-			return code;
+			var repeats = new int_node(this, Script.ParseInt(block.getFieldValue("TIMES"), 10));
+			var branch = statementToCode(block, "DO");
+			if (branch == null) branch = new nil_node(this);
+			return new call_node(this, repeats, intern("times"), new List<node>(), new block_node(this, new List<node>(), branch, false));
 		}
 
-		public string controls_repeat_ext(ControlsRepeatExtBlock block)
+		public node controls_repeat_ext(ControlsRepeatExtBlock block)
 		{
 			// Repeat n times (external number).
-			var repeats = Blockly.Ruby.valueToCode(block, "TIMES",
-				Blockly.Ruby.ORDER_NONE);
-			if (String.IsNullOrEmpty(repeats)) repeats = "0";
-			if (Blockly.isNumber(repeats)) {
-				repeats = Script.ParseInt(repeats, 10).ToString();
+			var repeats = valueToCode(block, "TIMES");
+			if (repeats == null) repeats = new int_node(this, 0);
+			if (repeats is int_node) {
 			}
 			else {
-				repeats = repeats + ".to_i";
+				repeats = new call_node(this, repeats, intern("to_i"), new List<node>(), null);
 			}
-			var branch = Blockly.Ruby.statementToCode(block, "DO");
-			if (String.IsNullOrEmpty(branch)) branch = "end\n";
-			if (Blockly.Ruby.INFINITE_LOOP_TRAP != null) {
-				branch = Blockly.Ruby.INFINITE_LOOP_TRAP.Replace(new Regex("%1", "g"),
-					"\'" + block.id + "\'") + branch;
-			}
-			var code = repeats + ".times do\n" + branch + "end\n";
-			return code;
+			var branch = statementToCode(block, "DO");
+			if (branch == null) branch = new nil_node(this);
+			return new call_node(this, repeats, intern("times"), new List<node>(), new block_node(this, new List<node>(), branch, false));
 		}
 
-		public string controls_whileUntil(ControlsWhileUntilBlock block)
+		public node controls_whileUntil(ControlsWhileUntilBlock block)
 		{
 			// Do while/until loop.
 			var until = block.getFieldValue("MODE") == "UNTIL";
-			var argument0 = Blockly.Ruby.valueToCode(block, "BOOL",
-				until ? Blockly.Ruby.ORDER_LOGICAL_NOT :
-				Blockly.Ruby.ORDER_NONE);
-			if (String.IsNullOrEmpty(argument0)) argument0 = "false";
-			var branch = Blockly.Ruby.statementToCode(block, "DO");
-			if (String.IsNullOrEmpty(branch)) branch = "end\n";
-			if (Blockly.Ruby.INFINITE_LOOP_TRAP != null) {
-				branch = Blockly.Ruby.INFINITE_LOOP_TRAP.Replace(new Regex("%1", "g"),
-					"\"" + block.id + "\"") + branch;
-			}
-			var mode = until ? "until " : "while ";
-			return mode + argument0 + " do\n" + branch + "end\n";
+			var argument0 = valueToCode(block, "BOOL");
+			if (argument0 == null) argument0 = new false_node(this);
+			var branch = statementToCode(block, "DO");
+			if (branch == null) branch = new nil_node(this);
+			if (until)
+				return new until_node(this, argument0, branch);
+			else
+				return new while_node(this, argument0, branch);
 		}
 
-		public string controls_for(ControlsForBlock block)
+		public node controls_for(ControlsForBlock block)
 		{
 			// For loop.
-			Blockly.Ruby.variableDB_.pushScope();
+			var lv = local_switch();
 
-			var loopVar = Blockly.Ruby.variableDB_.addLocalVariable(
-				block.getFieldValue("VAR"), Blockly.Variables.NAME_TYPE);
-			var fromVal = Blockly.Ruby.valueToCode(block, "FROM",
-				Blockly.Ruby.ORDER_NONE);
-			if (String.IsNullOrEmpty(fromVal)) fromVal = "0";
-			var toVal = Blockly.Ruby.valueToCode(block, "TO",
-				Blockly.Ruby.ORDER_NONE);
-			if (String.IsNullOrEmpty(toVal)) toVal = "0";
-			var increment = Blockly.Ruby.valueToCode(block, "BY",
-				Blockly.Ruby.ORDER_NONE);
-			if (String.IsNullOrEmpty(increment)) increment = null;
-			var branch = Blockly.Ruby.statementToCode(block, "DO");
-			if (String.IsNullOrEmpty(branch)) branch = "";
-			if (Blockly.Ruby.INFINITE_LOOP_TRAP != null) {
-				branch = Blockly.Ruby.INFINITE_LOOP_TRAP.Replace(new Regex("%1", "g"),
-					'"' + block.id + '"') + branch;
-			}
+			var loopVar = local_add_f(block.getFieldValue("VAR"));
+			var fromVal = valueToCode(block, "FROM");
+			if (fromVal == null) fromVal = new int_node(this, 0);
+			var toVal = valueToCode(block, "TO");
+			if (toVal == null) toVal = new int_node(this, 0);
+			var increment = valueToCode(block, "BY");
+			var branch = statementToCode(block, "DO");
+			if (branch == null) branch = new nil_node(this);
 
-			Func<string, string, string, string> generateForLoop = (_fromVal, _toVal, _increment) => {
-				return "for_loop from: (" + _fromVal + "), "
-								 + "to: (" + _toVal + "), "
-								 + "by: (" + _increment + ")";
-			};
+			if (fromVal is int_node && toVal is int_node &&
+				(increment == null || increment is int_node)) {
 
-			var code = "";
-			string _forLoop;
-
-			if (Blockly.isNumber(fromVal) && Blockly.isNumber(toVal) &&
-				(increment == null || Blockly.isNumber(increment))) {
-
-				if (increment == null) increment = "1";
+				if (increment == null) increment = new int_node(this, 1);
 
 				// All parameters are simple numbers.
-				fromVal = Script.ParseFloat(fromVal).ToString();
-				toVal = Script.ParseFloat(toVal).ToString();
-				increment = Script.ParseFloat(increment).ToString();
-
-				_forLoop = generateForLoop(fromVal, toVal, increment);
 			}
 			else {
-				if (increment == null) {
-					increment = "1";
-				}
-				else {
-					increment = "(" + increment + ").to_f";
-				}
-
-				_forLoop = generateForLoop(fromVal + ".to_f", toVal + ".to_f", increment);
+				fromVal = new call_node(this, fromVal, intern("to_f"), new List<node>(), null);
+				toVal = new call_node(this, toVal, intern("to_f"), new List<node>(), null);
+				if (increment == null)
+					increment = new float_node(this, 1);
+				else
+					increment = new call_node(this, increment, intern("to_f"), new List<node>(), null);
 			}
 
-			Blockly.Ruby.variableDB_.popScope();
+			local_resume(lv);
 
-			code += _forLoop + " do |" + loopVar + "|\n" + branch + "end\n";
-
-			return code;
+			var arg = new hash_node(this, new List<hash_node.kv_t>() {
+				new hash_node.kv_t(new sym_node(this, intern("from")), fromVal),
+				new hash_node.kv_t(new sym_node(this, intern("to")), toVal),
+				new hash_node.kv_t(new sym_node(this, intern("by")), increment),
+			});
+			var exec = new block_node(this, new List<node>() { new arg_node(this, loopVar) }, branch, false);
+			return new fcall_node(this, intern("for_loop"), new List<node>() { arg }, exec);
 		}
 
-		public string controls_forEach(ControlsForEachBlock block)
+		public node controls_forEach(ControlsForEachBlock block)
 		{
 			// For each loop.
-			Blockly.Ruby.variableDB_.pushScope();
+			var lv = local_switch();
 
-			var loopVar = Blockly.Ruby.variableDB_.addLocalVariable(
-				block.getFieldValue("VAR"), Blockly.Variables.NAME_TYPE);
-			var argument0 = Blockly.Ruby.valueToCode(block, "LIST",
-				Blockly.Ruby.ORDER_RELATIONAL);
-			if (String.IsNullOrEmpty(argument0)) argument0 = "[]";
-			var branch = Blockly.Ruby.statementToCode(block, "DO");
-			if (String.IsNullOrEmpty(branch)) branch = "end\n";
-			if (Blockly.Ruby.INFINITE_LOOP_TRAP != null) {
-				branch = Blockly.Ruby.INFINITE_LOOP_TRAP.Replace(new Regex("%1", "g"),
-					"\"" + block.id + "\"") + branch;
-			}
+			var loopVar = local_add_f(block.getFieldValue("VAR"));
+			var argument0 = valueToCode(block, "LIST");
+			if (argument0 == null) argument0 = new array_node(this, new List<node>());
+			var branch = statementToCode(block, "DO");
+			if (branch == null) branch = new nil_node(this);
 
-			Blockly.Ruby.variableDB_.popScope();
+			local_resume(lv);
 
-			var code = argument0 + ".each do |" + loopVar + "|\n" + branch + "end\n";
-			return code;
+			var exec = new block_node(this, new List<node>() { new arg_node(this, loopVar) }, branch, false);
+			return new call_node(this, argument0, intern("each"), new List<node>(), exec);
 		}
 
-		public string controls_flow_statements(ControlsFlowStatementsBlock block)
+		public node controls_flow_statements(ControlsFlowStatementsBlock block)
 		{
 			// Flow statements: continue, break.
 			switch (block.getFieldValue("FLOW")) {
 			case "BREAK":
-				return "break\n";
+				return new break_node(this, null);
 			case "CONTINUE":
-				return "next\n";
+				return new next_node(this, null);
 			}
 			throw new Exception("Unknown flow statement.");
 		}

@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\mrbgems\mruby-blockly\mrblib\blockly.rb" />
     <None Include="..\..\mruby\lib\mruby\source.rb" />
     <None Include="..\..\mruby\mrbgems\mruby-array-ext\mrblib\array.rb" />
     <None Include="..\..\mruby\mrbgems\mruby-array-ext\test\array.rb" />
