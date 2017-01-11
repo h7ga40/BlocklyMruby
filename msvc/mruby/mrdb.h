@@ -134,7 +134,7 @@ typedef struct mrdb_state {
   uint8_t wcnt;
   uint8_t pi;
   char *words[MAX_COMMAND_WORD];
-  const char *srcpath;
+  const wchar_t *srcpath;
   uint32_t print_no;
 
   mrb_debug_context *dbg;

@@ -8,6 +8,8 @@
 #include "apilist.h"
 #include "mruby/compile.h"
 
+wchar_t *mrb_wchar_from_utf8(const char *mbsp, size_t mbssize);
+
 typedef struct help_msg {
   const char *cmd1;
   const char *cmd2;
@@ -123,7 +125,7 @@ typedef struct listcmd_parser_state {
   mrb_bool parse_error;
   mrb_bool has_line_min;
   mrb_bool has_line_max;
-  char *filename;
+  wchar_t *filename;
   uint16_t line_min;
   uint16_t line_max;
 } listcmd_parser_state;
@@ -211,6 +213,7 @@ parse_filename(mrb_state *mrb, char **sp, listcmd_parser_state *st)
 {
   char *p;
   int len;
+  wchar_t *wp;
 
   if (st->filename != NULL) {
     mrb_free(mrb, st->filename);
@@ -225,9 +228,11 @@ parse_filename(mrb_state *mrb, char **sp, listcmd_parser_state *st)
   }
 
   if (len > 0) {
-    st->filename = (char *)mrb_malloc(mrb, len + 1);
-    strncpy_s(st->filename, len + 1, *sp, len);
-    st->filename[len] = '\0';
+    st->filename = (wchar_t *)mrb_malloc(mrb, (len + 1) * sizeof(wchar_t));
+    wp = mrb_wchar_from_utf8(*sp, len);
+    wcsncpy_s(st->filename, len + 1, wp, len);
+    mrb_utf8_free(wp);
+    st->filename[len] = L'\0';
     *sp += len;
     return TRUE;
   }
@@ -236,29 +241,32 @@ parse_filename(mrb_state *mrb, char **sp, listcmd_parser_state *st)
   }
 }
 
-char*
-replace_ext(mrb_state *mrb, const char *filename, const char *ext)
+wchar_t*
+replace_ext(mrb_state *mrb, const char *cfilename, const wchar_t *ext)
 {
+  wchar_t*filename;
   size_t len;
-  const char *p;
-  char *s;
+  const wchar_t *p;
+  wchar_t *s;
 
-  if (filename == NULL) {
+  if (cfilename == NULL) {
     return NULL;
   }
+  filename = mrb_wchar_from_utf8(cfilename, -1);
 
-  if ((p = strrchr(filename, '.')) != NULL && strchr(p, '/') == NULL) {
+  if ((p = wcsrchr(filename, L'.')) != NULL && wcschr(p, L'/') == NULL) {
     len = p - filename;
   }
   else {
-    len = strlen(filename);
+    len = wcslen(filename);
   }
 
-  s = (char *)mrb_malloc(mrb, len + strlen(ext) + 1);
-  memset(s, '\0', len + strlen(ext) + 1);
-  strncpy_s(s, len, filename, len);
-  strcat_s(s, len, ext);
+  s = (wchar_t *)mrb_malloc(mrb, (len + wcslen(ext) + 1) * sizeof(wchar_t));
+  memset(s, '\0', (len + wcslen(ext) + 1) * sizeof(wchar_t));
+  wcsncpy_s(s, len, filename, len);
+  wcscat_s(s, len, ext);
 
+  mrb_utf8_free(filename);
   return s;
 }
 
@@ -309,7 +317,7 @@ parse_listcmd_args(mrb_state *mrb, mrdb_state *mrdb, listcmd_parser_state *st)
 
     if (st->filename == NULL) {
       if (mrdb->dbg->prvfile && strcmp(mrdb->dbg->prvfile, "-")) {
-        st->filename = replace_ext(mrb, mrdb->dbg->prvfile, ".rb");
+        st->filename = replace_ext(mrb, mrdb->dbg->prvfile, L".rb");
       }
     }
   }
@@ -402,7 +410,7 @@ show_long_help(char *cmd1, char *cmd2)
 dbgcmd_state
 dbgcmd_list(mrb_state *mrb, mrdb_state *mrdb)
 {
-  char *filename;
+  wchar_t *filename;
   listcmd_parser_state *st = listcmd_parser_state_new(mrb);
 
   if (parse_listcmd_args(mrb, mrdb, st)) {

@@ -13,8 +13,11 @@
 
 #define LINE_BUF_SIZE MAX_COMMAND_LINE
 
+char *mrb_utf8_from_wchar(const wchar_t *wcsp, size_t wcssize);
+wchar_t *mrb_wchar_from_utf8(const char *mbsp, size_t mbssize);
+
 typedef struct source_file {
-  char *path;
+  wchar_t *path;
   uint16_t lineno;
   FILE *fp;
 } source_file;
@@ -34,60 +37,60 @@ source_file_free(mrb_state *mrb, source_file *file)
   }
 }
 
-static char*
-build_path(mrb_state *mrb, const char *dir, const char *base)
+static wchar_t*
+build_path(mrb_state *mrb, const wchar_t *dir, const wchar_t *base)
 {
   int len;
-  char *path = NULL;
+  wchar_t *path = NULL;
 
-  len = strlen(base) + 1;
+  len = wcslen(base) + 1;
 
-  if (strcmp(dir, ".")) {
-    len += strlen(dir) + sizeof("/") - 1;
+  if (wcscmp(dir, L".")) {
+    len += wcslen(dir) + sizeof(L"/") - 1;
   }
 
-  path = (char *)mrb_malloc(mrb, len);
-  memset(path, 0, len);
+  path = (wchar_t *)mrb_malloc(mrb, len * sizeof(wchar_t));
+  memset(path, 0, len * sizeof(wchar_t));
 
-  if (strcmp(dir, ".")) {
-    strcat_s(path, len, dir);
-    strcat_s(path, len, "/");
+  if (wcscmp(dir, L".")) {
+    wcscat_s(path, len, dir);
+    wcscat_s(path, len, L"/");
   }
-  strcat_s(path, len, base);
+  wcscat_s(path, len, base);
 
   return path;
 }
 
-static char*
-dirname(mrb_state *mrb, const char *path)
+static wchar_t*
+dirname(mrb_state *mrb, const wchar_t *path)
 {
   size_t len;
-  const char *p;
-  char *dir;
+  const wchar_t *p;
+  wchar_t *dir;
 
   if (path == NULL) {
     return NULL;
   }
 
-  p = strrchr(path, '/');
-  len = p != NULL ? p - path : strlen(path);
+  p = wcsrchr(path, L'/');
+  len = p != NULL ? p - path : wcslen(path);
 
-  dir = (char *)mrb_malloc(mrb, len + 1);
-  strncpy_s(dir, len + 1, path, len);
-  dir[len] = '\0';
+  dir = (wchar_t *)mrb_malloc(mrb, (len + 1) * sizeof(wchar_t));
+  wcsncpy_s(dir, len + 1, path, len);
+  dir[len] = L'\0';
 
   return dir;
 }
 
 static source_file*
-source_file_new(mrb_state *mrb, mrb_debug_context *dbg, char *filename)
+source_file_new(mrb_state *mrb, mrb_debug_context *dbg, wchar_t *filename)
 {
   source_file *file = NULL;
 
   file = (source_file *)mrb_malloc(mrb, sizeof(source_file));
 
-  memset(file, '\0', sizeof(source_file));
-  fopen_s(&file->fp, filename, "rb");
+  memset(file, L'\0', sizeof(source_file));
+  _wfopen_s(&file->fp, filename, L"rb");
 
   if (file->fp == NULL) {
     source_file_free(mrb, file);
@@ -95,9 +98,9 @@ source_file_new(mrb_state *mrb, mrb_debug_context *dbg, char *filename)
   }
 
   file->lineno = 1;
-  int len = strlen(filename) + 1;
-  file->path = (char *)mrb_malloc(mrb, len);
-  strcpy_s(file->path, len, filename);
+  int len = wcslen(filename) + 1;
+  file->path = (wchar_t *)mrb_malloc(mrb, len * sizeof(wchar_t));
+  wcscpy_s(file->path, len, filename);
   return file;
 }
 
@@ -167,17 +170,18 @@ show_lines(source_file *file, uint16_t line_min, uint16_t line_max)
   }
 }
 
-char*
-mrb_debug_get_source(mrb_state *mrb, mrdb_state *mrdb, const char *srcpath, const char *filename)
+wchar_t*
+mrb_debug_get_source(mrb_state *mrb, mrdb_state *mrdb, const wchar_t *srcpath, const wchar_t *filename)
 {
   int i;
   FILE *fp;
-  const char *search_path[3];
-  char *path = NULL;
+  const wchar_t *search_path[3];
+  wchar_t *refname = mrb_wchar_from_utf8(mrb_debug_get_filename(mrdb->dbg->root_irep, 0), -1);
+  wchar_t *path = NULL;
 
   search_path[0] = srcpath;
-  search_path[1] = dirname(mrb, mrb_debug_get_filename(mrdb->dbg->root_irep, 0));
-  search_path[2] = ".";
+  search_path[1] = dirname(mrb, refname);
+  search_path[2] = L".";
 
   for (i = 0; i < 3; i++) {
     if (search_path[i] == NULL) {
@@ -188,7 +192,7 @@ mrb_debug_get_source(mrb_state *mrb, mrdb_state *mrdb, const char *srcpath, cons
       continue;
     }
 
-    if (fopen_s(&fp, path, "rb") != 0) {
+    if (_wfopen_s(&fp, path, L"rb") != 0) {
       mrb_free(mrb, path);
       path = NULL;
       continue;
@@ -197,24 +201,25 @@ mrb_debug_get_source(mrb_state *mrb, mrdb_state *mrdb, const char *srcpath, cons
     break;
   }
 
+  mrb_utf8_free(refname);
   mrb_free(mrb, (void *)search_path[1]);
 
   return path;
 }
 
 int32_t
-mrb_debug_list(mrb_state *mrb, mrb_debug_context *dbg, char *filename, uint16_t line_min, uint16_t line_max)
+mrb_debug_list(mrb_state *mrb, mrb_debug_context *dbg, wchar_t *filename, uint16_t line_min, uint16_t line_max)
 {
-  char *ext;
+  wchar_t *ext;
   source_file *file;
 
   if (mrb == NULL || dbg == NULL || filename == NULL) {
     return MRB_DEBUG_INVALID_ARGUMENT;
   }
 
-  ext = strrchr(filename, '.');
+  ext = wcsrchr(filename, L'.');
 
-  if (ext == NULL || strcmp(ext, ".rb")) {
+  if (ext == NULL || wcscmp(ext, L".rb")) {
     fprintf(stdout, "List command only supports .rb file.\n");
     return MRB_DEBUG_INVALID_ARGUMENT;
   }
@@ -229,7 +234,7 @@ mrb_debug_list(mrb_state *mrb, mrb_debug_context *dbg, char *filename, uint16_t 
     return MRB_DEBUG_OK;
   }
   else {
-    fprintf(stdout, "Invalid source file named %s.\n", filename);
+    fprintf(stdout, "Invalid source file named %ls.\n", filename);
     return MRB_DEBUG_INVALID_ARGUMENT;
   }
 }

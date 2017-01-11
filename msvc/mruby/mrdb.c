@@ -18,6 +18,7 @@
 
 void mrdb_state_free(mrb_state *);
 char *mrb_utf8_from_wchar(const wchar_t *wcsp, size_t wcssize);
+wchar_t *mrb_wchar_from_utf8(const char *mbsp, size_t mbssize);
 
 static mrb_debug_context *_debug_context = NULL;
 static mrdb_state *_mrdb_state = NULL;
@@ -443,8 +444,10 @@ print_info_stopped_step_next(mrb_state *mrb, mrdb_state *mrdb)
 static void
 print_info_stopped_code(mrb_state *mrb, mrdb_state *mrdb)
 {
-	char* file = mrb_debug_get_source(mrb, mrdb, mrdb->srcpath, mrdb->dbg->prvfile);
+	wchar_t *prvfile = mrb_wchar_from_utf8(mrdb->dbg->prvfile, -1);
+	wchar_t* file = mrb_debug_get_source(mrb, mrdb, mrdb->srcpath, prvfile);
 	uint16_t lineno = mrdb->dbg->prvline;
+	mrb_utf8_free(prvfile);
 	if (file != NULL) {
 		mrb_debug_list(mrb, mrdb->dbg, file, lineno, lineno);
 		mrb_free(mrb, file);
@@ -669,7 +672,7 @@ l_restart:
 	/* initialize debugger information */
 	mrdb = mrdb_state_get(mrb);
 	mrb_assert(mrdb && mrdb->dbg);
-	mrdb->srcpath = args.srcpath ? mrb_utf8_from_wchar(args.srcpath, -1) : NULL;
+	mrdb->srcpath = args.srcpath;
 
 	if (mrdb->dbg->xm == DBG_QUIT) {
 		mrdb->dbg->xphase = DBG_PHASE_RESTART;

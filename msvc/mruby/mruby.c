@@ -186,6 +186,27 @@ mrb_utf8_from_wchar(const wchar_t *wcsp, size_t wcssize)
 	return mbsp;
 }
 
+wchar_t*
+mrb_wchar_from_utf8(const char *mbsp, size_t mbssize)
+{
+	wchar_t* wcsp;
+	size_t wcssize;
+
+	if (mbssize == 0)
+		return _wcsdup(L"");
+	if (mbssize == -1)
+		mbssize = strlen(mbsp);
+
+	wcssize = MultiByteToWideChar(CP_UTF8, 0, mbsp, mbssize, NULL, 0);
+	wcsp = (wchar_t*)malloc((wcssize + 1) * sizeof(wchar_t));
+	if (!wcsp)
+		return NULL;
+
+	wcssize = MultiByteToWideChar(CP_UTF8, 0, mbsp, mbssize, wcsp, wcssize + 1);
+	wcsp[wcssize] = 0;
+	return wcsp;
+}
+
 __declspec(dllexport) int _stdcall
 mruby_main(int argc, wchar_t **argv)
 {
