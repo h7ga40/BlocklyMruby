@@ -812,12 +812,19 @@ public static partial class Blockly
 		}
 
 		/// <summary>
-		/// Highlight a block in the workspace.
+		/// Highlight or unhighlight a block in the workspace.
 		/// </summary>
-		/// <param name="id">ID of block to find.</param>
-		public void highlightBlock(string id)
+		/// <param name="id">ID of block to highlight/unhighlight,
+		/// or null for no block (used to unhighlight all blocks).</param>
+		/// <param name="opt_state">If undefined, highlight specified block and
+		/// automatically unhighlight all others.  If true or false, manually
+		/// highlight/unhighlight the specified block.</param>
+		public void highlightBlock(string id, bool opt_state = false)
 		{
-			instance.highlightBlock.call(instance, id);
+			if (String.IsNullOrEmpty(id))
+				instance.highlightBlock.call(instance, id);
+			else
+				instance.highlightBlock.call(instance, id, opt_state);
 		}
 
 		/// <summary>

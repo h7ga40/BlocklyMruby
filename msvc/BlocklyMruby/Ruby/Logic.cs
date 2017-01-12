@@ -79,7 +79,7 @@ namespace BlocklyMruby
 			// Negation.
 			var argument0 = valueToCode(block, "BOOL");
 			if (argument0 == null) argument0 = new true_node(this);
-			return new negate_node(this, argument0);
+			return new call_node(this, argument0, intern("!"), (node)null);
 		}
 
 		public node logic_boolean(LogicBooleanBlock block)

@@ -3611,7 +3611,7 @@ namespace BlocklyMruby
 		public string to_ruby()
 		{
 			if (tree != null) {
-				var cond = new ruby_code_cond();
+				var cond = new ruby_code_cond(filename);
 				tree.to_ruby(cond);
 				return cond.ToString();
 			}

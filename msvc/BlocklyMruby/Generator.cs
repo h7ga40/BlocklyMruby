@@ -196,6 +196,7 @@ namespace BlocklyMruby
 				// Block has handled code generation itself.
 				return null;
 			}
+			code.block_id = block.id;
 			var result = new List<node>() { code };
 			this.scrub_(block, result);
 			return result;
@@ -216,7 +217,7 @@ namespace BlocklyMruby
 				return null;
 			}
 			var code = this.blockToCode(targetBlock);
-			if(code.Count == 1) {
+			if (code.Count == 1) {
 				return code[0];
 			}
 			else {
@@ -238,6 +239,8 @@ namespace BlocklyMruby
 			// Statement blocks must only return code.
 			//goog.asserts.assertString(code, "Expecting code from statement block \"%s\".",
 			//	targetBlock != null ? targetBlock.type : "");
+			if (code == null)
+				code = new List<node>();
 			return new begin_node((IMrbParser)this, code);
 		}
 

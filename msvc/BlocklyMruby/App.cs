@@ -3,9 +3,10 @@ using Bridge;
 
 namespace BlocklyMruby
 {
-	class App
+	static class App
 	{
 		public static TerminalHost Term;
+		public static bool changed;
 
 		internal static void Init()
 		{
@@ -101,6 +102,7 @@ namespace BlocklyMruby
 
 		private static void Workspace_Changed(Blockly.Events.Abstract obj)
 		{
+			changed = true;
 		}
 	}
 }

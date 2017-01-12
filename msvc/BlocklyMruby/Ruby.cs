@@ -26,17 +26,16 @@ namespace BlocklyMruby
 				"Class,Object,BEGIN,END,__ENCODING__,__END__,__FILE__,__LINE__" +
 				"alias,and,begin,break,case,class,def,defined?,do,else,elsif,end,ensure,false,for,if,in,module,next" +
 				"nil,not,or,redo,rescue,retry,return,self,super,then,true,undef,unless,until,when,while,yield");
-
-			escapeChars_.Add("\"", "\\\"");
 		}
 
 		node tree;
+		List<node> allNodes;
 		locals_node locals;
 
-		public Ruby()
+		public Ruby(string filename)
 			: base("Ruby")
 		{
-			filename = "blockly.rb";
+			this.filename = filename;
 		}
 
 		/**
@@ -55,10 +54,9 @@ namespace BlocklyMruby
 		public override string finish(List<node> codes)
 		{
 			tree = new scope_node(this, new begin_node(this, codes));
-
-			var cond = new ruby_code_cond();
-			cond.indent_str = INDENT;
+			var cond = new ruby_code_cond(filename, INDENT);
 			tree.to_ruby(cond);
+			allNodes = cond.nodes;
 			return cond.ToString();
 		}
 
@@ -71,31 +69,6 @@ namespace BlocklyMruby
 		public override List<node> scrubNakedValue(List<node> line)
 		{
 			return line;
-		}
-
-		static Dictionary<string, string> escapeChars_ = new Dictionary<string, string>();
-
-		/**
-		 * Encode a string as a properly escaped Ruby string, complete with quotes.
-		 * @param {string} string Text to encode.
-		 * @return {string} Python string.
-		 * @private
-		 */
-		string quote_(string str)
-		{
-			// copy and modified goog.string.quote:
-			// http://docs.closure-library.googlecode.com/git/namespace_goog_string.html
-			var s = str.ToString();
-			var sb = new List<string>() { "\"" };
-			for (var i = 0; i < s.Length; i++) {
-				var ch = s.CharAt(i);
-				string rch;
-				if (!escapeChars_.TryGetValue(ch, out rch))
-					rch = ch;
-				sb.Add(rch);
-			}
-			sb.Add("\"");
-			return String.Join("", sb);
 		}
 
 		/**
@@ -298,6 +271,31 @@ namespace BlocklyMruby
 			}
 
 			return lhs;
+		}
+
+		public string[] GetBlockId(string filename, int lineno)
+		{
+			var nodes = allNodes;
+			var result = new List<string>();
+			foreach (var node in nodes) {
+				if (node.filename != filename)
+					continue;
+				if (lineno < node.start_lineno)
+					continue;
+				if (node.column == 0) {
+					if (lineno >= node.lineno)
+						continue;
+				}
+				else {
+					if (lineno > node.lineno)
+						continue;
+				}
+				if (String.IsNullOrEmpty(node.block_id))
+					continue;
+
+				result.Add(node.block_id);
+			}
+			return result.ToArray();
 		}
 
 		public void yyError(string message, params object[] expected)
