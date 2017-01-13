@@ -189,7 +189,7 @@ mrb_debug_context_new(mrb_state *mrb)
 
 	memset(dbg, 0, sizeof(mrb_debug_context));
 
-	dbg->xm = DBG_INIT;
+	InterlockedExchange(&dbg->xm, DBG_INIT);
 	dbg->xphase = DBG_PHASE_BEFORE_RUN;
 	dbg->next_bpno = 1;
 
@@ -564,7 +564,7 @@ mrb_code_fetch_hook(mrb_state *mrb, mrb_irep *irep, mrb_code *pc, mrb_value *reg
 		dbg->root_irep = irep;
 		dbg->prvfile = NULL;
 		dbg->prvline = 0;
-		dbg->xm = DBG_RUN;
+		InterlockedExchange(&dbg->xm, DBG_RUN);
 		dbg->xphase = DBG_PHASE_RUNNING;
 	}
 
@@ -680,7 +680,7 @@ l_restart:
 	else {
 		mrdb->dbg->xphase = DBG_PHASE_BEFORE_RUN;
 	}
-	mrdb->dbg->xm = DBG_INIT;
+	InterlockedExchange(&mrdb->dbg->xm, DBG_INIT);
 	mrdb->dbg->ccnt = 1;
 
 	/* setup hook functions */
@@ -748,4 +748,14 @@ l_restart:
 	cleanup(mrb, &args);
 
 	return 0;
+}
+
+__declspec(dllexport) int __stdcall
+mrdb_break(void)
+{
+	mrdb_state *mrdb = _mrdb_state;
+	if (mrdb == NULL)
+		return 0;
+	LONG xm = InterlockedCompareExchange(&mrdb->dbg->xm, DBG_STEP, DBG_RUN);
+	return xm == DBG_RUN;
 }

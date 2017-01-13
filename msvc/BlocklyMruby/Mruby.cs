@@ -31,6 +31,8 @@ namespace BlocklyMruby
 		[DllImport("mruby.dll")]
 		extern static int mrdb_main(int argc, [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr, SizeParamIndex = 0), In]string[] argv);
 		[DllImport("mruby.dll")]
+		extern static int mrdb_break();
+		[DllImport("mruby.dll")]
 		extern static void set_func(clearerr_t pclearerr, feof_t pfeof, getc_t pgetc, fwrite_t pfwrite, fflush_t pfflush, abort_t pabort);
 		[DllImport("mruby.dll")]
 		extern static void clear_func();
@@ -147,6 +149,14 @@ namespace BlocklyMruby
 			_Thread.Start();
 
 			return true;
+		}
+
+		public bool break_program()
+		{
+			if (!IsRunning)
+				return false;
+
+			return mrdb_break() != 0;
 		}
 
 		internal void WriteStdin(string data)

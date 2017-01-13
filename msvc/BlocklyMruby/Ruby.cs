@@ -298,6 +298,35 @@ namespace BlocklyMruby
 			return result.ToArray();
 		}
 
+		public string[] GetBlockId(string filename, int lineno, int column)
+		{
+			var nodes = allNodes;
+			var result = new List<string>();
+			foreach (var node in nodes) {
+				if (node.filename != filename)
+					continue;
+				if ((lineno < node.start_lineno))
+					continue;
+				if ((lineno == node.start_lineno) && (column < node.column))
+					continue;
+				if (node.column == 0) {
+					if (lineno >= node.lineno)
+						continue;
+				}
+				else {
+					if ((lineno == node.lineno) && (column > node.column))
+						continue;
+					if (lineno > node.lineno)
+						continue;
+				}
+				if (String.IsNullOrEmpty(node.block_id))
+					continue;
+
+				result.Add(node.block_id);
+			}
+			return result.ToArray();
+		}
+
 		public void yyError(string message, params object[] expected)
 		{
 			if (App.Term == null)

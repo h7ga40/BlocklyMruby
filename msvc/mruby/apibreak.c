@@ -278,7 +278,7 @@ mrb_debug_get_breaknum( mrb_state *mrb, mrb_debug_context *dbg )
 }
 
 int32_t 
-mrb_debug_get_break_all( mrb_state *mrb, mrb_debug_context *dbg, uint32_t size, mrb_debug_breakpoint *bp )
+mrb_debug_get_break_all( mrb_state *mrb, mrb_debug_context *dbg, uint32_t size, mrb_debug_breakpoint bp[] )
 {
   uint32_t get_size = 0;
 

@@ -14,9 +14,9 @@ dbgcmd_run(mrb_state *mrb, mrdb_state *mrdb)
   mrb_debug_context *dbg = mrdb->dbg;
 
   if( dbg->xm == DBG_INIT ){
-    dbg->xm = DBG_RUN;
+    InterlockedExchange(&dbg->xm, DBG_RUN);
   } else {
-    dbg->xm = DBG_QUIT;
+    InterlockedExchange(&dbg->xm, DBG_QUIT);
     if( dbg->xphase == DBG_PHASE_RUNNING ){
       struct RClass *exc;
       puts("Start it from the beginning.");
@@ -41,9 +41,9 @@ dbgcmd_continue(mrb_state *mrb, mrdb_state *mrdb)
 
   if( dbg->xphase == DBG_PHASE_AFTER_RUN ){
     puts("The program is not running.");
-    dbg->xm = DBG_QUIT;
+    InterlockedExchange(&dbg->xm, DBG_QUIT);
   } else {
-    dbg->xm = DBG_RUN;
+    InterlockedExchange(&dbg->xm, DBG_RUN);
   }
   return DBGST_CONTINUE;
 }
@@ -51,6 +51,6 @@ dbgcmd_continue(mrb_state *mrb, mrdb_state *mrdb)
 dbgcmd_state
 dbgcmd_step(mrb_state *mrb, mrdb_state *mrdb)
 {
-  mrdb->dbg->xm = DBG_STEP;
+  InterlockedExchange(&mrdb->dbg->xm, DBG_STEP);
   return DBGST_CONTINUE;
 }

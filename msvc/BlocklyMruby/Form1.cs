@@ -276,6 +276,7 @@ namespace BlocklyMruby
 			Compile,
 			Run,
 			Debug,
+			DebugRunning,
 			DebugEnd,
 		}
 
@@ -286,7 +287,7 @@ namespace BlocklyMruby
 			DebugRunBtn.Enabled = mode == RunningMode.Debug;
 			StepBtn.Enabled = mode == RunningMode.Debug;
 			ContinueBtn.Enabled = mode == RunningMode.Debug;
-			BreakBtn.Enabled = mode == RunningMode.Debug;
+			BreakBtn.Enabled = mode == RunningMode.DebugRunning;
 			QuitBtn.Enabled = mode == RunningMode.DebugEnd;
 
 			switch (mode) {
@@ -300,6 +301,7 @@ namespace BlocklyMruby
 				_ConsoleHook = ConsoleHookInRunning;
 				break;
 			case RunningMode.Debug:
+			case RunningMode.DebugRunning:
 			case RunningMode.DebugEnd:
 				_ConsoleHook = ConsoleHookInDebuging;
 				break;
@@ -308,7 +310,23 @@ namespace BlocklyMruby
 
 		public void ConsoleHookInCompiling(object sender, StdioEventArgs e)
 		{
-
+			var match = new Regex(@"^(.+)\(([0-9]+),([0-9]+)\): (.+)\r?$", RegexOptions.Multiline).Match(e.Text);
+			if (match.Success) {
+				_BlockIds = new List<string>();
+				string filename = match.Groups[1].Value;
+				int lineno = Script.ParseInt(match.Groups[2].Value, 10);
+				int column = Script.ParseInt(match.Groups[3].Value, 10);
+				string message = match.Groups[4].Value;
+				do {
+					_BlockIds.AddRange(_RubyCode.GetBlockId(filename, lineno, column));
+					match = match.NextMatch();
+				} while (match.Success);
+				if (_BlockIds.Count > 0) {
+					var workspace = Blockly.getMainWorkspace();
+					var block = workspace.getBlockById(_BlockIds[0]);
+					block.setWarningText(message);
+				}
+			}
 		}
 
 		public void ConsoleHookInRunning(object sender, StdioEventArgs e)
@@ -318,7 +336,6 @@ namespace BlocklyMruby
 
 		public void ConsoleHookInDebuging(object sender, StdioEventArgs e)
 		{
-			_BlockIds = new List<string>();
 			if (e.Text.StartsWith("(-:0)")) {
 				var workspace = Blockly.getMainWorkspace();
 				workspace.highlightBlock(null);
@@ -327,6 +344,7 @@ namespace BlocklyMruby
 			}
 			var match = new Regex(@"^\((.+):([0-9]+)\)", RegexOptions.Multiline).Match(e.Text);
 			if (match.Success) {
+				_BlockIds = new List<string>();
 				string filename = match.Groups[1].Value;
 				int lineno = Script.ParseInt(match.Groups[2].Value, 10);
 				do {
@@ -338,6 +356,7 @@ namespace BlocklyMruby
 				foreach (var blockid in _BlockIds) {
 					workspace.highlightBlock(blockid, true);
 				}
+				SetRunningMode(RunningMode.Debug);
 				return;
 			}
 		}
@@ -379,21 +398,24 @@ namespace BlocklyMruby
 		private void StepBtn_Click(object sender, EventArgs e)
 		{
 			_Mruby.WriteStdin("s\n");
+			SetRunningMode(RunningMode.DebugRunning);
 		}
 
 		private void ContinueBtn_Click(object sender, EventArgs e)
 		{
 			_Mruby.WriteStdin("c\n");
+			SetRunningMode(RunningMode.DebugRunning);
 		}
 
 		private void DebugRunBtn_Click(object sender, EventArgs e)
 		{
 			_Mruby.WriteStdin("r\n");
+			SetRunningMode(RunningMode.DebugRunning);
 		}
 
 		private void BreakBtn_Click(object sender, EventArgs e)
 		{
-			_Mruby.WriteStdin("b\n");
+			_Mruby.break_program();
 		}
 
 		private void QuitBtn_Click(object sender, EventArgs e)

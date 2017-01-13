@@ -476,14 +476,14 @@ dbgcmd_quit(mrb_state *mrb, mrdb_state *mrdb)
       fflush(stdout);
 
       if ((buf = getc(stdin)) == EOF) {
-        mrdb->dbg->xm = DBG_QUIT;
+        InterlockedExchange(&mrdb->dbg->xm, DBG_QUIT);
         break;
       }
       c = buf;
       while (buf != '\n' && (buf = getc(stdin)) != EOF) ;
 
       if (c == 'y' || c == 'Y') {
-        mrdb->dbg->xm = DBG_QUIT;
+        InterlockedExchange(&mrdb->dbg->xm, DBG_QUIT);
         break;
       }
       else if (c == 'n' || c == 'N') {
@@ -495,7 +495,7 @@ dbgcmd_quit(mrb_state *mrb, mrdb_state *mrdb)
     }
     break;
   default:
-    mrdb->dbg->xm = DBG_QUIT;
+    InterlockedExchange(&mrdb->dbg->xm, DBG_QUIT);
     break;
   }
 
