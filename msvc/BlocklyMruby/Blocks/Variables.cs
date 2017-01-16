@@ -37,8 +37,8 @@ namespace BlocklyMruby
 		public const string type_name = "variables_get";
 		string contextMenuType_ = VariablesSetBlock.type_name;
 
-		public VariablesGetBlock()
-			: base(type_name)
+		public VariablesGetBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -49,9 +49,9 @@ namespace BlocklyMruby
 		public void init()
 		{
 			this.setHelpUrl(Msg.VARIABLES_GET_HELPURL);
-			this.setColour(Blockly.Variables.HUE);
+			this.setColour(Variables.HUE);
 			this.appendDummyInput()
-				.appendField(new Blockly.FieldVariable(
+				.appendField(new FieldVariable(Blockly, 
 				Msg.VARIABLES_DEFAULT_NAME), "VAR");
 			this.setOutput(true);
 			this.setTooltip(Msg.VARIABLES_GET_TOOLTIP);
@@ -68,11 +68,11 @@ namespace BlocklyMruby
 			var option = new ContextMenuOption() { enabled = true };
 			var name = this.getFieldValue("VAR");
 			option.text = this.contextMenuMsg_.Replace("%1", name);
-			var xmlField = goog.dom.createDom("field", null, name);
+			var xmlField = goog.dom.createDom(Script, "field", null, name);
 			xmlField.SetAttribute("name", "VAR");
-			var xmlBlock = goog.dom.createDom("block", null, xmlField);
+			var xmlBlock = goog.dom.createDom(Script, "block", null, xmlField);
 			xmlBlock.SetAttribute("type", this.contextMenuType_);
-			option.callback = Blockly.ContextMenu.callbackFactory(this, xmlBlock);
+			option.callback = ContextMenu.callbackFactory(this, xmlBlock);
 			options.push(option);
 		}
 	}
@@ -83,8 +83,8 @@ namespace BlocklyMruby
 		public const string type_name = "variables_set";
 		string contextMenuType_ = VariablesGetBlock.type_name;
 
-		public VariablesSetBlock()
-			: base(type_name)
+		public VariablesSetBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -109,7 +109,7 @@ namespace BlocklyMruby
 				},
 				previousStatement = (Any<string, string[]>)null,
 				nextStatement = (Any<string, string[]>)null,
-				colour = Blockly.Variables.HUE,
+				colour = Variables.HUE,
 				tooltip = Msg.VARIABLES_SET_TOOLTIP,
 				helpUrl = Msg.VARIABLES_SET_HELPURL
 
@@ -127,11 +127,11 @@ namespace BlocklyMruby
 			var option = new ContextMenuOption() { enabled = true };
 			var name = this.getFieldValue("VAR");
 			option.text = this.contextMenuMsg_.Replace("%1", name);
-			var xmlField = goog.dom.createDom("field", null, name);
+			var xmlField = goog.dom.createDom(Script, "field", null, name);
 			xmlField.SetAttribute("name", "VAR");
-			var xmlBlock = goog.dom.createDom("block", null, xmlField);
+			var xmlBlock = goog.dom.createDom(Script, "block", null, xmlField);
 			xmlBlock.SetAttribute("type", this.contextMenuType_);
-			option.callback = Blockly.ContextMenu.callbackFactory(this, xmlBlock);
+			option.callback = ContextMenu.callbackFactory(this, xmlBlock);
 			options.push(option);
 		}
 	}

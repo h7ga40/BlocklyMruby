@@ -4,7 +4,7 @@
 // MIT Lisence
 using System;
 using Bridge;
-using Bridge.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
@@ -32,8 +32,8 @@ namespace BlocklyMruby
 		List<node> allNodes;
 		locals_node locals;
 
-		public Ruby(string filename)
-			: base("Ruby")
+		public Ruby(Blockly blockly, string filename)
+			: base(blockly, "Ruby")
 		{
 			this.filename = filename;
 		}
@@ -41,7 +41,7 @@ namespace BlocklyMruby
 		/**
 		 * Initialise the database of variable names.
 		 */
-		public override void init(Blockly.Workspace workspace)
+		public override void init(Workspace workspace)
 		{
 			locals = new locals_node(null);
 		}

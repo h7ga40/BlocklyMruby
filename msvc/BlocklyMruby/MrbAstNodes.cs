@@ -446,11 +446,11 @@ namespace BlocklyMruby
 			}
 		}
 
-		public virtual Element to_xml()
+		public virtual Element to_xml(Document document)
 		{
 			var a = car as node;
 			if (a != null && cdr == null) {
-				return a.to_xml();
+				return a.to_xml(document);
 			}
 
 			throw new NotImplementedException();
@@ -476,8 +476,9 @@ namespace BlocklyMruby
 		protected virtual void to_rb(ruby_code_cond cond)
 		{
 			var a = car as node;
-			if (a != null && cdr == null) {
+			while (a != null) {
 				a.to_ruby(cond);
+				a = cdr as node;
 			}
 
 			throw new NotImplementedException();
@@ -516,11 +517,11 @@ namespace BlocklyMruby
 		public List<mrb_sym> local_variables { get { return _local_variables; } }
 		public node body { get { return _body; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			// TODO:？？？
-			var s = Document.CreateElement("scope");
-			var b = _body.to_xml();
+			var s = document.CreateElement("scope");
+			var b = _body.to_xml(document);
 			if (b != null) {
 				s.AppendChild(b);
 			}
@@ -571,19 +572,19 @@ namespace BlocklyMruby
 			_progs.Add((node)b.car);
 		}
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			switch (_progs.Count) {
 			case 0:
 				return null;
 			case 1:
-				return _progs[0].to_xml();
+				return _progs[0].to_xml(document);
 			}
-			var b = _progs[0].to_xml();
+			var b = _progs[0].to_xml(document);
 			var p = b;
 			for (int i = 1; i < _progs.Count; i++) {
-				var n = Document.CreateElement("next");
-				var q = _progs[i].to_xml();
+				var n = document.CreateElement("next");
+				var q = _progs[i].to_xml(document);
 				n.AppendChild(q);
 				p.AppendChild(n);
 				p = q;
@@ -692,10 +693,10 @@ namespace BlocklyMruby
 		public List<rescue_t> rescue { get { return _rescue; } }
 		public node @else { get { return _else; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			// TODO:？？？
-			return body.to_xml();
+			return body.to_xml(document);
 		}
 
 		protected override void to_rb(ruby_code_cond cond)
@@ -753,7 +754,7 @@ namespace BlocklyMruby
 		public node body { get { return _body; } }
 		public node ensure { get { return _ensure; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}
@@ -789,9 +790,9 @@ namespace BlocklyMruby
 		{
 		}
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "logic_null");
 			return block;
 		}
@@ -826,14 +827,14 @@ namespace BlocklyMruby
 		{
 		}
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "logic_boolean");
 
-			var field = Document.CreateElement("field");
+			var field = document.CreateElement("field");
 			field.SetAttribute("name", "BOOL");
-			field.AppendChild(Document.CreateTextNode("TRUE"));
+			field.AppendChild(document.CreateTextNode("TRUE"));
 			block.AppendChild(field);
 
 			return block;
@@ -869,14 +870,14 @@ namespace BlocklyMruby
 		{
 		}
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "logic_boolean");
 
-			var field = Document.CreateElement("field");
+			var field = document.CreateElement("field");
 			field.SetAttribute("name", "BOOL");
-			field.AppendChild(Document.CreateTextNode("FALSE"));
+			field.AppendChild(document.CreateTextNode("FALSE"));
 			block.AppendChild(field);
 
 			return block;
@@ -920,7 +921,7 @@ namespace BlocklyMruby
 		public mrb_sym @new { get { return _new; } }
 		public mrb_sym old { get { return _old; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}
@@ -957,7 +958,7 @@ namespace BlocklyMruby
 		public node then { get { return _then; } }
 		public node @else { get { return _else; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			var _elsif = new List<Tuple<node, node>>();
 			node _else = this._else;
@@ -967,32 +968,32 @@ namespace BlocklyMruby
 				_elsif.Add(new Tuple<node, node>(c._cond, c._then));
 			}
 
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "controls_if");
 
-			var mutation = Document.CreateElement("mutation");
+			var mutation = document.CreateElement("mutation");
 			mutation.SetAttribute("elseif", _elsif.Count.ToString());
 			mutation.SetAttribute("else", _else != null ? "1" : "0");
 			block.AppendChild(mutation);
 
 			int i = 0;
 			foreach (var e in _elsif) {
-				var value = Document.CreateElement("value");
+				var value = document.CreateElement("value");
 				value.SetAttribute("name", $"IF{i}");
-				value.AppendChild(e.Item1.to_xml());
+				value.AppendChild(e.Item1.to_xml(document));
 				block.AppendChild(value);
 
-				var statement = Document.CreateElement("statement");
+				var statement = document.CreateElement("statement");
 				statement.SetAttribute("name", $"DO{i}");
-				statement.AppendChild(e.Item2.to_xml());
+				statement.AppendChild(e.Item2.to_xml(document));
 				block.AppendChild(statement);
 				i++;
 			}
 
 			if (_else != null) {
-				var statement = Document.CreateElement("statement");
+				var statement = document.CreateElement("statement");
 				statement.SetAttribute("name", "ELSE");
-				statement.AppendChild(_else.to_xml());
+				statement.AppendChild(_else.to_xml(document));
 				block.AppendChild(statement);
 			}
 
@@ -1072,30 +1073,30 @@ namespace BlocklyMruby
 		public node then { get { return _then; } }
 		public node @else { get { return _else; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "controls_if");
 
-			var value = Document.CreateElement("value");
+			var value = document.CreateElement("value");
 			value.SetAttribute("name", "IF0");
-			value.AppendChild(_cond.to_xml());
+			value.AppendChild(_cond.to_xml(document));
 			block.AppendChild(value);
 
 			if (_then != null) {
-				var statement = Document.CreateElement("statement");
+				var statement = document.CreateElement("statement");
 				statement.SetAttribute("name", "DO0");
 				block.AppendChild(statement);
 
-				statement.AppendChild(_then.to_xml());
+				statement.AppendChild(_then.to_xml(document));
 			}
 
 			if (_else != null) {
-				var statement = Document.CreateElement("statement");
+				var statement = document.CreateElement("statement");
 				statement.SetAttribute("name", "ELSE");
 				block.AppendChild(statement);
 
-				statement.AppendChild(_else.to_xml());
+				statement.AppendChild(_else.to_xml(document));
 			}
 
 			return block;
@@ -1142,24 +1143,24 @@ namespace BlocklyMruby
 		public node cond { get { return _cond; } }
 		public node body { get { return _body; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "controls_whileUntil");
 
-			var field = Document.CreateElement("field");
+			var field = document.CreateElement("field");
 			field.SetAttribute("name", "MODE");
-			field.AppendChild(Document.CreateTextNode("WHILE"));
+			field.AppendChild(document.CreateTextNode("WHILE"));
 			block.AppendChild(field);
 
-			var value = Document.CreateElement("value");
+			var value = document.CreateElement("value");
 			value.SetAttribute("name", "BOOL");
-			value.AppendChild(_cond.to_xml());
+			value.AppendChild(_cond.to_xml(document));
 			block.AppendChild(value);
 
-			var statement = Document.CreateElement("statement");
+			var statement = document.CreateElement("statement");
 			statement.SetAttribute("name", "DO");
-			statement.AppendChild(_body.to_xml());
+			statement.AppendChild(_body.to_xml(document));
 			block.AppendChild(statement);
 
 			return block;
@@ -1199,24 +1200,24 @@ namespace BlocklyMruby
 		public node cond { get { return _cond; } }
 		public node body { get { return _body; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "controls_whileUntil");
 
-			var field = Document.CreateElement("field");
+			var field = document.CreateElement("field");
 			field.SetAttribute("name", "MODE");
-			field.AppendChild(Document.CreateTextNode("UNTIL"));
+			field.AppendChild(document.CreateTextNode("UNTIL"));
 			block.AppendChild(field);
 
-			var value = Document.CreateElement("value");
+			var value = document.CreateElement("value");
 			value.SetAttribute("name", "BOOL");
-			value.AppendChild(_cond.to_xml());
+			value.AppendChild(_cond.to_xml(document));
 			block.AppendChild(value);
 
-			var statement = Document.CreateElement("statement");
+			var statement = document.CreateElement("statement");
 			statement.SetAttribute("name", "DO");
-			statement.AppendChild(_body.to_xml());
+			statement.AppendChild(_body.to_xml(document));
 			block.AppendChild(statement);
 
 			return block;
@@ -1312,27 +1313,27 @@ namespace BlocklyMruby
 		public node @in { get { return _in; } }
 		public node @do { get { return _do; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "controls_forEach");
 
-			var field = Document.CreateElement("field");
+			var field = document.CreateElement("field");
 			field.SetAttribute("name", "VAR");
 			// TODO:var？
 			var pre = var.pre[0];
 			switch ((node_type)pre.car) {
 			case node_type.NODE_GVAR:
-				field.AppendChild(Document.CreateTextNode(p.sym2name(((gvar_node)pre).name)));
+				field.AppendChild(document.CreateTextNode(p.sym2name(((gvar_node)pre).name)));
 				break;
 			case node_type.NODE_CVAR:
-				field.AppendChild(Document.CreateTextNode(p.sym2name(((cvar_node)pre).name)));
+				field.AppendChild(document.CreateTextNode(p.sym2name(((cvar_node)pre).name)));
 				break;
 			case node_type.NODE_IVAR:
-				field.AppendChild(Document.CreateTextNode(p.sym2name(((ivar_node)pre).name)));
+				field.AppendChild(document.CreateTextNode(p.sym2name(((ivar_node)pre).name)));
 				break;
 			case node_type.NODE_LVAR:
-				field.AppendChild(Document.CreateTextNode(p.sym2name(((lvar_node)pre).name)));
+				field.AppendChild(document.CreateTextNode(p.sym2name(((lvar_node)pre).name)));
 				break;
 			default:
 				// TODO: ？
@@ -1340,14 +1341,14 @@ namespace BlocklyMruby
 			}
 			block.AppendChild(field);
 
-			var value = Document.CreateElement("value");
+			var value = document.CreateElement("value");
 			value.SetAttribute("name", "LIST");
-			value.AppendChild(_in.to_xml());
+			value.AppendChild(_in.to_xml(document));
 			block.AppendChild(value);
 
-			var statement = Document.CreateElement("statement");
+			var statement = document.CreateElement("statement");
 			statement.SetAttribute("name", "DO");
-			statement.AppendChild(_do.to_xml());
+			statement.AppendChild(_do.to_xml(document));
 			block.AppendChild(statement);
 
 			return block;
@@ -1417,9 +1418,9 @@ namespace BlocklyMruby
 		public node arg { get { return _arg; } }
 		public List<when_t> when { get { return _when; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "switch_case_number");
 
 			int c = 0, d = 0;
@@ -1433,7 +1434,7 @@ namespace BlocklyMruby
 					c++;
 			}
 
-			var mutation = Document.CreateElement("mutation");
+			var mutation = document.CreateElement("mutation");
 			mutation.SetAttribute("case", c.ToString());
 			mutation.SetAttribute("default", d.ToString());
 			block.AppendChild(mutation);
@@ -1443,34 +1444,34 @@ namespace BlocklyMruby
 				if (w.value.Count == 0)
 					continue;
 
-				var field = Document.CreateElement("field");
+				var field = document.CreateElement("field");
 				field.SetAttribute("name", "CONST" + i);
 				// TODO:whenの値が複数の場合
-				field.AppendChild(Document.CreateTextNode(MrbParser.UTF8ArrayToString(((int_node)w.value[0]).num, 0)));
+				field.AppendChild(document.CreateTextNode(MrbParser.UTF8ArrayToString(((int_node)w.value[0]).num, 0)));
 				block.AppendChild(field);
 				i++;
 			}
 
-			var value = Document.CreateElement("value");
+			var value = document.CreateElement("value");
 			value.SetAttribute("name", "SWITCH");
 			block.AppendChild(value);
 
-			value.AppendChild(_arg.to_xml());
+			value.AppendChild(_arg.to_xml(document));
 
 			foreach (var w in _when) {
 				if (w.value.Count == 0)
 					continue;
 
-				var statement = Document.CreateElement("statement");
+				var statement = document.CreateElement("statement");
 				statement.SetAttribute("name", "DO" + i);
-				statement.AppendChild(w.body.to_xml());
+				statement.AppendChild(w.body.to_xml(document));
 				block.AppendChild(statement);
 			}
 
 			if (default_node != null) {
-				var statement = Document.CreateElement("statement");
+				var statement = document.CreateElement("statement");
 				statement.SetAttribute("name", "DEFAULT");
-				statement.AppendChild(default_node.body.to_xml());
+				statement.AppendChild(default_node.body.to_xml(document));
 				block.AppendChild(statement);
 			}
 
@@ -1531,7 +1532,7 @@ namespace BlocklyMruby
 
 		public node postexe { get { return _postexe; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}
@@ -1557,7 +1558,7 @@ namespace BlocklyMruby
 		{
 		}
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}
@@ -1633,36 +1634,36 @@ namespace BlocklyMruby
 			}
 		}
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			var method = p.sym2name(_method);
 			switch (method) {
-			case "==": return logic_compare("EQ");
-			case "!=": return logic_compare("NEQ");
-			case "<": return logic_compare("LT");
-			case "<=": return logic_compare("LTE");
-			case ">": return logic_compare("GT");
-			case ">=": return logic_compare("GTE");
+			case "==": return logic_compare(document, "EQ");
+			case "!=": return logic_compare(document, "NEQ");
+			case "<": return logic_compare(document, "LT");
+			case "<=": return logic_compare(document, "LTE");
+			case ">": return logic_compare(document, "GT");
+			case ">=": return logic_compare(document, "GTE");
 			}
 
-			return procedures_callreturn(method);
+			return procedures_callreturn(document, method);
 		}
 
-		private Element procedures_callreturn(string method)
+		private Element procedures_callreturn(Document document, string method)
 		{
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "procedures_callreturn");
 
-			var mutation = Document.CreateElement("mutation");
+			var mutation = document.CreateElement("mutation");
 			mutation.SetAttribute("name", method);
 			block.AppendChild(mutation);
 
 			int i = 0;
 			foreach (var a in args) {
-				var arg = Document.CreateElement("arg");
+				var arg = document.CreateElement("arg");
 				// TODO: 引数名を持ってくkる
 				arg.SetAttribute("name", i.ToString());
-				arg.AppendChild(a.to_xml());
+				arg.AppendChild(a.to_xml(document));
 				block.AppendChild(arg);
 				i++;
 			}
@@ -1670,25 +1671,25 @@ namespace BlocklyMruby
 			return block;
 		}
 
-		private Element logic_compare(string op)
+		private Element logic_compare(Document document, string op)
 		{
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "logic_compare");
 
-			var field = Document.CreateElement("field");
+			var field = document.CreateElement("field");
 			field.SetAttribute("name", "OP");
-			field.AppendChild(Document.CreateTextNode(op));
+			field.AppendChild(document.CreateTextNode(op));
 			block.AppendChild(field);
 
-			var value = Document.CreateElement("value");
+			var value = document.CreateElement("value");
 			value.SetAttribute("name", "A");
-			value.AppendChild(_obj.to_xml());
+			value.AppendChild(_obj.to_xml(document));
 			block.AppendChild(value);
 
 			// argsは１つ
-			value = Document.CreateElement("value");
+			value = document.CreateElement("value");
 			value.SetAttribute("name", "B");
-			value.AppendChild(args[0].to_xml());
+			value.AppendChild(args[0].to_xml(document));
 			block.AppendChild(value);
 
 			return block;
@@ -1853,12 +1854,13 @@ namespace BlocklyMruby
 			}
 		}
 
-		public fcall_node(IMrbParser p, mrb_sym b, List<node> args, node block)
+		public fcall_node(IMrbParser p, mrb_sym b, List<node> args = null, node block = null)
 			: base(p, node_type.NODE_FCALL)
 		{
 			_self = new self_node(p);
 			_method = b;
-			_args.AddRange(args);
+			if (args != null)
+				_args.AddRange(args);
 			_block = block;
 		}
 
@@ -1877,21 +1879,21 @@ namespace BlocklyMruby
 			}
 		}
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "procedures_callreturn");
 
-			var mutation = Document.CreateElement("mutation");
+			var mutation = document.CreateElement("mutation");
 			mutation.SetAttribute("name", p.sym2name(_method));
 			block.AppendChild(mutation);
 
 			int i = 0;
 			foreach (var a in args) {
-				var arg = Document.CreateElement("arg");
+				var arg = document.CreateElement("arg");
 				// TODO: 引数名を持ってくkる
 				arg.SetAttribute("name", i.ToString());
-				arg.AppendChild(a.to_xml());
+				arg.AppendChild(a.to_xml(document));
 				block.AppendChild(arg);
 				i++;
 			}
@@ -1974,21 +1976,21 @@ namespace BlocklyMruby
 		public List<node> args { get { return _args; } }
 		public node block { get { return _block; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "procedures_callreturn");
 
-			var mutation = Document.CreateElement("mutation");
+			var mutation = document.CreateElement("mutation");
 			mutation.SetAttribute("name", "super");
 			block.AppendChild(mutation);
 
 			int i = 0;
 			foreach (var a in args) {
-				var arg = Document.CreateElement("arg");
+				var arg = document.CreateElement("arg");
 				// TODO: 引数名を持ってくkる
 				arg.SetAttribute("name", i.ToString());
-				arg.AppendChild(a.to_xml());
+				arg.AppendChild(a.to_xml(document));
 				block.AppendChild(arg);
 				i++;
 			}
@@ -2065,7 +2067,7 @@ namespace BlocklyMruby
 			}
 		}
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}
@@ -2120,7 +2122,7 @@ namespace BlocklyMruby
 
 		public List<node> args { get { return _args; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}
@@ -2166,19 +2168,19 @@ namespace BlocklyMruby
 
 		public node retval { get { return _retval; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "procedures_return");
 
-			var mutation = Document.CreateElement("mutation");
+			var mutation = document.CreateElement("mutation");
 			mutation.SetAttribute("value", (_retval != null) ? "0" : "1");
 			block.AppendChild(mutation);
 
 			if (_retval != null) {
-				var value = Document.CreateElement("value");
+				var value = document.CreateElement("value");
 				value.SetAttribute("name", "VALUE");
-				value.AppendChild(_retval.to_xml());
+				value.AppendChild(_retval.to_xml(document));
 				block.AppendChild(value);
 			}
 
@@ -2218,14 +2220,14 @@ namespace BlocklyMruby
 
 		public node retval { get { return _retval; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "controls_flow_statements");
 
-			var field = Document.CreateElement("field");
+			var field = document.CreateElement("field");
 			field.SetAttribute("name", "FLOW");
-			field.AppendChild(Document.CreateTextNode("BREAK"));
+			field.AppendChild(document.CreateTextNode("BREAK"));
 			block.AppendChild(field);
 
 			return block;
@@ -2264,14 +2266,14 @@ namespace BlocklyMruby
 
 		public node retval { get { return _retval; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "controls_flow_statements");
 
-			var field = Document.CreateElement("field");
+			var field = document.CreateElement("field");
 			field.SetAttribute("name", "FLOW");
-			field.AppendChild(Document.CreateTextNode("CONTINUE"));
+			field.AppendChild(document.CreateTextNode("CONTINUE"));
 			block.AppendChild(field);
 
 			return block;
@@ -2305,7 +2307,7 @@ namespace BlocklyMruby
 		{
 		}
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}
@@ -2329,7 +2331,7 @@ namespace BlocklyMruby
 		{
 		}
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}
@@ -2362,7 +2364,7 @@ namespace BlocklyMruby
 
 		public node b { get { return _b; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}
@@ -2397,7 +2399,7 @@ namespace BlocklyMruby
 
 		public node b { get { return _b; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}
@@ -2431,10 +2433,10 @@ namespace BlocklyMruby
 		public node b { get { return _b; } }
 		public mrb_sym c { get { return _c; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			// TODO:？？？
-			var block = Document.CreateElement("class");
+			var block = document.CreateElement("class");
 			block.SetAttribute("const", p.sym2name(((const_node)_b).name));
 			block.SetAttribute("name", p.sym2name(_c));
 
@@ -2466,7 +2468,7 @@ namespace BlocklyMruby
 
 		public mrb_sym c { get { return _c; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}
@@ -2499,24 +2501,24 @@ namespace BlocklyMruby
 
 		public node b { get { return _b; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "logic_operation");
 
-			var field = Document.CreateElement("field");
+			var field = document.CreateElement("field");
 			field.SetAttribute("name", "OP");
-			field.AppendChild(Document.CreateTextNode("AND"));
+			field.AppendChild(document.CreateTextNode("AND"));
 			block.AppendChild(field);
 
-			var value = Document.CreateElement("value");
+			var value = document.CreateElement("value");
 			value.SetAttribute("name", "A");
-			value.AppendChild(_a.to_xml());
+			value.AppendChild(_a.to_xml(document));
 			block.AppendChild(value);
 
-			value = Document.CreateElement("value");
+			value = document.CreateElement("value");
 			value.SetAttribute("name", "B");
-			value.AppendChild(_b.to_xml());
+			value.AppendChild(_b.to_xml(document));
 			block.AppendChild(value);
 
 			return block;
@@ -2551,24 +2553,24 @@ namespace BlocklyMruby
 		public node a { get { return _a; } }
 		public node b { get { return _b; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "logic_operation");
 
-			var field = Document.CreateElement("field");
+			var field = document.CreateElement("field");
 			field.SetAttribute("name", "OP");
-			field.AppendChild(Document.CreateTextNode("OR"));
+			field.AppendChild(document.CreateTextNode("OR"));
 			block.AppendChild(field);
 
-			var value = Document.CreateElement("value");
+			var value = document.CreateElement("value");
 			value.SetAttribute("name", "A");
-			value.AppendChild(_a.to_xml());
+			value.AppendChild(_a.to_xml(document));
 			block.AppendChild(value);
 
-			value = Document.CreateElement("value");
+			value = document.CreateElement("value");
 			value.SetAttribute("name", "B");
-			value.AppendChild(_b.to_xml());
+			value.AppendChild(_b.to_xml(document));
 			block.AppendChild(value);
 
 			return block;
@@ -2607,20 +2609,20 @@ namespace BlocklyMruby
 
 		public List<node> array { get { return _array; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "lists_create_with");
 
-			var mutation = Document.CreateElement("mutation");
+			var mutation = document.CreateElement("mutation");
 			mutation.SetAttribute("items", _array.Count.ToString());
 			block.AppendChild(mutation);
 
 			int i = 0;
 			foreach (var item in _array) {
-				var value = Document.CreateElement("value");
+				var value = document.CreateElement("value");
 				value.SetAttribute("name", $"ADD{i}");
-				value.AppendChild(_array[i].to_xml());
+				value.AppendChild(_array[i].to_xml(document));
 				block.AppendChild(value);
 				i++;
 			}
@@ -2666,7 +2668,7 @@ namespace BlocklyMruby
 
 		public node a { get { return _a; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}
@@ -2722,7 +2724,7 @@ namespace BlocklyMruby
 
 		public List<kv_t> kvs { get { return _kvs; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}
@@ -2769,14 +2771,14 @@ namespace BlocklyMruby
 
 		public mrb_sym name { get { return _name; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "variables_get");
 
-			var field = Document.CreateElement("field");
+			var field = document.CreateElement("field");
 			field.SetAttribute("name", "VAR");
-			field.AppendChild(Document.CreateTextNode(":" + p.sym2name(_name)));
+			field.AppendChild(document.CreateTextNode(":" + p.sym2name(_name)));
 			block.AppendChild(field);
 
 			return block;
@@ -2806,14 +2808,14 @@ namespace BlocklyMruby
 
 		public mrb_sym name { get { return _name; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "variables_get");
 
-			var field = Document.CreateElement("field");
+			var field = document.CreateElement("field");
 			field.SetAttribute("name", "VAR");
-			field.AppendChild(Document.CreateTextNode(p.sym2name(_name)));
+			field.AppendChild(document.CreateTextNode(p.sym2name(_name)));
 			block.AppendChild(field);
 
 			return block;
@@ -2843,14 +2845,14 @@ namespace BlocklyMruby
 
 		public mrb_sym name { get { return _name; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "variables_get");
 
-			var field = Document.CreateElement("field");
+			var field = document.CreateElement("field");
 			field.SetAttribute("name", "VAR");
-			field.AppendChild(Document.CreateTextNode(p.sym2name(_name)));
+			field.AppendChild(document.CreateTextNode(p.sym2name(_name)));
 			block.AppendChild(field);
 
 			return block;
@@ -2880,14 +2882,14 @@ namespace BlocklyMruby
 
 		public mrb_sym name { get { return _name; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "variables_get");
 
-			var field = Document.CreateElement("field");
+			var field = document.CreateElement("field");
 			field.SetAttribute("name", "VAR");
-			field.AppendChild(Document.CreateTextNode(p.sym2name(_name)));
+			field.AppendChild(document.CreateTextNode(p.sym2name(_name)));
 			block.AppendChild(field);
 
 			return block;
@@ -2917,14 +2919,14 @@ namespace BlocklyMruby
 
 		public mrb_sym name { get { return _name; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "variables_get");
 
-			var field = Document.CreateElement("field");
+			var field = document.CreateElement("field");
 			field.SetAttribute("name", "VAR");
-			field.AppendChild(Document.CreateTextNode(p.sym2name(_name)));
+			field.AppendChild(document.CreateTextNode(p.sym2name(_name)));
 			block.AppendChild(field);
 
 			return block;
@@ -2954,14 +2956,14 @@ namespace BlocklyMruby
 
 		public mrb_sym name { get { return _name; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "variables_get");
 
-			var field = Document.CreateElement("field");
+			var field = document.CreateElement("field");
 			field.SetAttribute("name", "VAR");
-			field.AppendChild(Document.CreateTextNode(p.sym2name(_name)));
+			field.AppendChild(document.CreateTextNode(p.sym2name(_name)));
 			block.AppendChild(field);
 
 			return block;
@@ -2996,7 +2998,7 @@ namespace BlocklyMruby
 			_syms.Add((mrb_sym)b.car);
 		}
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}
@@ -3065,22 +3067,22 @@ namespace BlocklyMruby
 		public node super { get { return _super; } }
 		public node body { get { return _body; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			// TODO:クラス？
-			var block = Document.CreateElement("class");
+			var block = document.CreateElement("class");
 			block.SetAttribute("name", p.sym2name(_name));
 
 			if (_super != null) {
-				var field = Document.CreateElement("field");
+				var field = document.CreateElement("field");
 				field.SetAttribute("name", "SUPER");
-				field.AppendChild(_super.to_xml());
+				field.AppendChild(_super.to_xml(document));
 				block.AppendChild(field);
 			}
 
-			var statement = Document.CreateElement("statement");
+			var statement = document.CreateElement("statement");
 			statement.SetAttribute("name", "BODY");
-			statement.AppendChild(_body.to_xml());
+			statement.AppendChild(_body.to_xml(document));
 			block.AppendChild(statement);
 
 			return block;
@@ -3129,7 +3131,7 @@ namespace BlocklyMruby
 		public node obj { get { return _obj; } }
 		public node body { get { return _body; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}
@@ -3190,7 +3192,7 @@ namespace BlocklyMruby
 		public object type { get { return _type; } }
 		public node body { get { return _body; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}
@@ -3315,19 +3317,19 @@ namespace BlocklyMruby
 		public mrb_sym blk { get { return _blk; } }
 		public node body { get { return _body; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "procedures_defreturn");
 
-			var field = Document.CreateElement("field");
+			var field = document.CreateElement("field");
 			field.SetAttribute("name", "NAME");
-			field.AppendChild(Document.CreateTextNode(p.sym2name(_name)));
+			field.AppendChild(document.CreateTextNode(p.sym2name(_name)));
 			block.AppendChild(field);
 
 			Element bxml;
-			if (_body != null && (bxml = _body.to_xml()) != null) {
-				var statement = Document.CreateElement("statement");
+			if (_body != null && (bxml = _body.to_xml(document)) != null) {
+				var statement = document.CreateElement("statement");
 				statement.SetAttribute("name", "STACK");
 				statement.AppendChild(bxml);
 				block.AppendChild(statement);
@@ -3455,7 +3457,7 @@ namespace BlocklyMruby
 		public mrb_sym blk { get { return _blk; } }
 		public node body { get { return _body; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}
@@ -3530,7 +3532,7 @@ namespace BlocklyMruby
 
 		public mrb_sym name { get { return _name; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}
@@ -3559,7 +3561,7 @@ namespace BlocklyMruby
 
 		public node a { get { return _a; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}
@@ -3588,12 +3590,12 @@ namespace BlocklyMruby
 		private node _body;
 		private bool _brace;
 
-		public block_node(IMrbParser p, node a, node b, bool brace)
+		public block_node(IMrbParser p, node args, node body, bool brace)
 			: base(p, node_type.NODE_BLOCK)
 		{
 			_local_variables.AddRange(p.locals_node());
-			if (a != null) {
-				node n = a;
+			if (args != null) {
+				node n = args;
 
 				if (n.car != null) {
 					dump_recur(_mandatory_args, (node)n.car);
@@ -3622,7 +3624,7 @@ namespace BlocklyMruby
 					_blk = (mrb_sym)n.cdr;
 				}
 			}
-			_body = b;
+			_body = body;
 			if (_body is ensure_node) {
 				((ensure_node)_body).def = true;
 			}
@@ -3648,7 +3650,7 @@ namespace BlocklyMruby
 		public mrb_sym blk { get { return _blk; } }
 		public node body { get { return _body; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}
@@ -3774,7 +3776,7 @@ namespace BlocklyMruby
 		public mrb_sym blk { get { return _blk; } }
 		public node body { get { return _body; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}
@@ -3847,38 +3849,38 @@ namespace BlocklyMruby
 		public node lhs { get { return _lhs; } }
 		public node rhs { get { return _rhs; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "variables_set");
 
-			var field = Document.CreateElement("field");
+			var field = document.CreateElement("field");
 			field.SetAttribute("name", "VAR");
 			switch ((node_type)_lhs.car) {
 			case node_type.NODE_GVAR:
-				field.AppendChild(Document.CreateTextNode(p.sym2name(((gvar_node)_lhs).name)));
+				field.AppendChild(document.CreateTextNode(p.sym2name(((gvar_node)_lhs).name)));
 				break;
 			case node_type.NODE_CVAR:
-				field.AppendChild(Document.CreateTextNode(p.sym2name(((cvar_node)_lhs).name)));
+				field.AppendChild(document.CreateTextNode(p.sym2name(((cvar_node)_lhs).name)));
 				break;
 			case node_type.NODE_IVAR:
-				field.AppendChild(Document.CreateTextNode(p.sym2name(((ivar_node)_lhs).name)));
+				field.AppendChild(document.CreateTextNode(p.sym2name(((ivar_node)_lhs).name)));
 				break;
 			case node_type.NODE_LVAR:
-				field.AppendChild(Document.CreateTextNode(p.sym2name(((lvar_node)_lhs).name)));
+				field.AppendChild(document.CreateTextNode(p.sym2name(((lvar_node)_lhs).name)));
 				break;
 			default:
 				// TODO: list[0] = ...？
-				field.AppendChild(_lhs.to_xml());
+				field.AppendChild(_lhs.to_xml(document));
 				break;
 			}
 			block.AppendChild(field);
 
-			var value = Document.CreateElement("value");
+			var value = document.CreateElement("value");
 			value.SetAttribute("name", "VALUE");
 			block.AppendChild(value);
 
-			value.AppendChild(_rhs.to_xml());
+			value.AppendChild(_rhs.to_xml(document));
 
 			return block;
 		}
@@ -3977,7 +3979,7 @@ namespace BlocklyMruby
 		public mlhs_t mlhs { get { return _mlhs; } }
 		public node mrhs { get { return _mrhs; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}
@@ -4051,31 +4053,31 @@ namespace BlocklyMruby
 		public mrb_sym op { get { return _op; } }
 		public node rhs { get { return _rhs; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			// TODO:Rubyの演算は数値だけとは限らない
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "math_arithmetic");
 
-			var field = Document.CreateElement("field");
+			var field = document.CreateElement("field");
 			field.SetAttribute("name", "OP");
 			switch (p.sym2name(op)) {
-			case "+": field.AppendChild(Document.CreateTextNode("ADD")); break;
-			case "-": field.AppendChild(Document.CreateTextNode("MINUS")); break;
-			case "*": field.AppendChild(Document.CreateTextNode("MULTIPLY")); break;
-			case "/": field.AppendChild(Document.CreateTextNode("DIVIDE")); break;
-			case "**": field.AppendChild(Document.CreateTextNode("POWER")); break;
+			case "+": field.AppendChild(document.CreateTextNode("ADD")); break;
+			case "-": field.AppendChild(document.CreateTextNode("MINUS")); break;
+			case "*": field.AppendChild(document.CreateTextNode("MULTIPLY")); break;
+			case "/": field.AppendChild(document.CreateTextNode("DIVIDE")); break;
+			case "**": field.AppendChild(document.CreateTextNode("POWER")); break;
 			}
 			block.AppendChild(field);
 
-			var value = Document.CreateElement("value");
+			var value = document.CreateElement("value");
 			value.SetAttribute("name", "A");
-			value.AppendChild(lhs.to_xml());
+			value.AppendChild(lhs.to_xml(document));
 			block.AppendChild(value);
 
-			value = Document.CreateElement("value");
+			value = document.CreateElement("value");
 			value.SetAttribute("name", "B");
-			value.AppendChild(rhs.to_xml());
+			value.AppendChild(rhs.to_xml(document));
 			block.AppendChild(value);
 
 			return block;
@@ -4109,19 +4111,19 @@ namespace BlocklyMruby
 
 		public node n { get { return _n; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "math_single");
 
-			var field = Document.CreateElement("field");
+			var field = document.CreateElement("field");
 			field.SetAttribute("name", "OP");
-			field.AppendChild(Document.CreateTextNode("NEG"));
+			field.AppendChild(document.CreateTextNode("NEG"));
 			block.AppendChild(field);
 
-			var value = Document.CreateElement("value");
+			var value = document.CreateElement("value");
 			value.SetAttribute("name", "NUM");
-			value.AppendChild(_n.to_xml());
+			value.AppendChild(_n.to_xml(document));
 			block.AppendChild(value);
 
 			return block;
@@ -4162,14 +4164,14 @@ namespace BlocklyMruby
 		public Uint8Array num { get { return _s; } }
 		public int @base { get { return _base; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "math_number");
 
-			var field = Document.CreateElement("field");
+			var field = document.CreateElement("field");
 			field.SetAttribute("name", "NUM");
-			field.AppendChild(Document.CreateTextNode(GetString()));
+			field.AppendChild(document.CreateTextNode(GetString()));
 			block.AppendChild(field);
 
 			return block;
@@ -4343,14 +4345,14 @@ namespace BlocklyMruby
 
 		public Uint8Array num { get { return _s; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "math_number");
 
-			var field = Document.CreateElement("field");
+			var field = document.CreateElement("field");
 			field.SetAttribute("name", "NUM");
-			field.AppendChild(Document.CreateTextNode(MrbParser.UTF8ArrayToString(_s, 0)));
+			field.AppendChild(document.CreateTextNode(MrbParser.UTF8ArrayToString(_s, 0)));
 			block.AppendChild(field);
 
 			return block;
@@ -4472,14 +4474,14 @@ namespace BlocklyMruby
 		public Uint8Array str { get { return _str; } }
 		public int len { get { return _len; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "text");
 
-			var field = Document.CreateElement("field");
+			var field = document.CreateElement("field");
 			field.SetAttribute("name", "TEXT");
-			field.AppendChild(Document.CreateTextNode(MrbParser.UTF8ArrayToString(_str, 0)));
+			field.AppendChild(document.CreateTextNode(MrbParser.UTF8ArrayToString(_str, 0)));
 			block.AppendChild(field);
 
 			return block;
@@ -4566,7 +4568,7 @@ namespace BlocklyMruby
 
 		public List<node> a { get { return _a; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}
@@ -4617,7 +4619,7 @@ namespace BlocklyMruby
 		public Uint8Array str { get { return _str; } }
 		public int len { get { return _len; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}
@@ -4648,7 +4650,7 @@ namespace BlocklyMruby
 
 		public List<node> a { get { return _a; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}
@@ -4683,7 +4685,7 @@ namespace BlocklyMruby
 
 		public List<node> a { get { return _a.a; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}
@@ -4719,7 +4721,7 @@ namespace BlocklyMruby
 		public Uint8Array flags { get { return _flags; } }
 		public Uint8Array encp { get { return _encp; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}
@@ -4757,7 +4759,7 @@ namespace BlocklyMruby
 		public Uint8Array opt { get { return _opt; } }
 		public Uint8Array tail { get { return _tail; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}
@@ -4794,7 +4796,7 @@ namespace BlocklyMruby
 
 		public int n { get { return _n; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}
@@ -4823,7 +4825,7 @@ namespace BlocklyMruby
 
 		public int n { get { return _n; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}
@@ -4852,14 +4854,14 @@ namespace BlocklyMruby
 
 		public parser_heredoc_info info { get { return _info; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
-			var block = Document.CreateElement("block");
+			var block = document.CreateElement("block");
 			block.SetAttribute("type", "text");
 
-			var field = Document.CreateElement("field");
+			var field = document.CreateElement("field");
 			field.SetAttribute("name", "TEXT");
-			field.AppendChild(Document.CreateTextNode(info.GetString()));
+			field.AppendChild(document.CreateTextNode(info.GetString()));
 			block.AppendChild(field);
 
 			return block;
@@ -4883,7 +4885,7 @@ namespace BlocklyMruby
 		{
 		}
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}
@@ -4911,7 +4913,7 @@ namespace BlocklyMruby
 
 		public List<node> a { get { return _a; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}
@@ -4944,7 +4946,7 @@ namespace BlocklyMruby
 
 		public List<node> a { get { return _a; } }
 
-		public override Element to_xml()
+		public override Element to_xml(Document document)
 		{
 			throw new NotImplementedException();
 		}

@@ -4,7 +4,7 @@
 // MIT Lisence
 using System;
 using Bridge;
-using Bridge.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 using System.Collections.Generic;
 
 namespace BlocklyMruby
@@ -26,20 +26,20 @@ namespace BlocklyMruby
 			else if (block.itemCount_ == 1) {
 				var argument0 = valueToCode(block, "ADD0");
 				if (argument0 == null) argument0 = new str_node(this, "");
-				return new call_node(this, argument0, intern("to_s"), new List<node>(), null);
+				return new call_node(this, argument0, intern("to_s"));
 			}
 			else {
 				var argument0 = valueToCode(block, "ADD0");
 				if (argument0 == null)
 					argument0 = new str_node(this, "");
 				else
-					argument0 = new call_node(this, argument0, intern("to_s"), new List<node>(), null);
+					argument0 = new call_node(this, argument0, intern("to_s"));
 				for (var n = 1; n < block.itemCount_; n++) {
 					var argument1 = valueToCode(block, "ADD" + n);
 					if (argument1 == null)
 						argument1 = new str_node(this, "");
 					else
-						argument1 = new call_node(this, argument1, intern("to_s"), new List<node>(), null);
+						argument1 = new call_node(this, argument1, intern("to_s"));
 					argument0 = new call_node(this, argument0, intern("+"), argument1);
 				}
 				return argument0;
@@ -54,8 +54,8 @@ namespace BlocklyMruby
 			if (argument0 == null)
 				argument0 = new str_node(this, "");
 			else
-				argument0 = new call_node(this, argument0, intern("to_s"), new List<node>(), null);
-			var code = new call_node(this, new_var_node(varName), intern("to_s"), new List<node>(), null);
+				argument0 = new call_node(this, argument0, intern("to_s"));
+			var code = new call_node(this, new_var_node(varName), intern("to_s"));
 			code = new call_node(this, code, intern("+"), argument0);
 			return new asgn_node(this, new_var_node(varName), code);
 		}
@@ -65,7 +65,7 @@ namespace BlocklyMruby
 			// String length.
 			var argument0 = valueToCode(block, "VALUE");
 			if (argument0 == null) argument0 = new str_node(this, "");
-			return new call_node(this, argument0, intern("size"), new List<node>(), null);
+			return new call_node(this, argument0, intern("size"));
 		}
 
 		public node text_isEmpty(TextIsEmptyBlock block)
@@ -73,7 +73,7 @@ namespace BlocklyMruby
 			// Is the string null?
 			var argument0 = valueToCode(block, "VALUE");
 			if (argument0 == null) argument0 = new str_node(this, "");
-			return new call_node(this, argument0, intern("empty?"), new List<node>(), null);
+			return new call_node(this, argument0, intern("empty?"));
 		}
 
 		public node text_indexOf(TextIndexOfBlock block)
@@ -106,7 +106,7 @@ namespace BlocklyMruby
 			}
 			else {
 				// If the index is dynamic, decrement it in code.
-				at = new call_node(this, at, intern("to_i"), new List<node>(), null);
+				at = new call_node(this, at, intern("to_i"));
 				at = new call_node(this, at, intern("-"), new int_node(this, 1));
 			}
 
@@ -147,7 +147,7 @@ namespace BlocklyMruby
 				}
 				else {
 					// If the index is dynamic, decrement it in code.
-					at1 = new call_node(this, at1, intern("to_i"), new List<node>(), null);
+					at1 = new call_node(this, at1, intern("to_i"));
 					at1 = new call_node(this, at1, intern("-"), new int_node(this, 1));
 				}
 			}
@@ -157,7 +157,7 @@ namespace BlocklyMruby
 				}
 				else {
 					at1 = new call_node(this, at1, intern("-@"), (node)null);
-					at1 = new call_node(this, at1, intern("to_i"), new List<node>(), null);
+					at1 = new call_node(this, at1, intern("to_i"));
 				}
 			}
 			if (where2 == "LAST" || (where2 == "FROM_END" && at2 is int_node && ((int_node)at2).to_i() == 1)) {
@@ -168,7 +168,7 @@ namespace BlocklyMruby
 					at2 = new int_node(this, (int)(((int_node)at2).to_i() - 1));
 				}
 				else {
-					at2 = new call_node(this, at2, intern("to_i"), new List<node>(), null);
+					at2 = new call_node(this, at2, intern("to_i"));
 					at2 = new call_node(this, at2, intern("-"), new int_node(this, 1));
 				}
 			}
@@ -178,7 +178,7 @@ namespace BlocklyMruby
 				}
 				else {
 					at2 = new call_node(this, at2, intern("-@"), (node)null);
-					at2 = new call_node(this, at2, intern("to_i"), new List<node>(), null);
+					at2 = new call_node(this, at2, intern("to_i"));
 				}
 			}
 			var code = new dot2_node(this, at1, at2);
@@ -199,7 +199,7 @@ namespace BlocklyMruby
 				@operator = OPERATORS[block.getFieldValue("CASE")];
 				var argument0 = valueToCode(block, "TEXT");
 				if (argument0 == null) argument0 = new str_node(this, "");
-				code = new call_node(this, argument0, intern(@operator), new List<node>(), null);
+				code = new call_node(this, argument0, intern(@operator));
 			}
 			else {
 				// Title case is not a native Ruby function. Define one.
@@ -221,7 +221,7 @@ namespace BlocklyMruby
 			var @operator = OPERATORS[block.getFieldValue("MODE")];
 			var argument0 = valueToCode(block, "TEXT");
 			if (argument0 == null) argument0 = new str_node(this, "");
-			return new call_node(this, argument0, intern(@operator), new List<node>(), null);
+			return new call_node(this, argument0, intern(@operator));
 		}
 
 		public node text_print(TextPrintBlock block)
@@ -239,7 +239,7 @@ namespace BlocklyMruby
 			node code = new fcall_node(this, intern("text_prompt"), new List<node>() { msg }, null);
 			var toNumber = block.getFieldValue("TYPE") == "NUMBER";
 			if (toNumber) {
-				code = new call_node(this, code, intern("to_f"), new List<node>(), null);
+				code = new call_node(this, code, intern("to_f"));
 			}
 			return code;
 		}

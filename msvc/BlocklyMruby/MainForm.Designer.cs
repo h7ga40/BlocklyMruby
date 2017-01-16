@@ -27,16 +27,15 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			this.BlocklyWb = new System.Windows.Forms.WebBrowser();
 			this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
 			this.LoadBtn = new System.Windows.Forms.Button();
 			this.SaveBtn = new System.Windows.Forms.Button();
 			this.RunBtn = new System.Windows.Forms.Button();
 			this.DebugBtn = new System.Windows.Forms.Button();
 			this.ExportRubyBtn = new System.Windows.Forms.Button();
+			this.DebugRunBtn = new System.Windows.Forms.Button();
 			this.StepBtn = new System.Windows.Forms.Button();
 			this.ContinueBtn = new System.Windows.Forms.Button();
-			this.DebugRunBtn = new System.Windows.Forms.Button();
 			this.BreakBtn = new System.Windows.Forms.Button();
 			this.QuitBtn = new System.Windows.Forms.Button();
 			this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
@@ -45,27 +44,16 @@
 			this.tabControl1 = new System.Windows.Forms.TabControl();
 			this.BlockTabPage = new System.Windows.Forms.TabPage();
 			this.RubyTabPage = new System.Windows.Forms.TabPage();
-			this.RubyEditorWb = new System.Windows.Forms.WebBrowser();
 			this.ConsoleTabPage = new System.Windows.Forms.TabPage();
-			this.ConsoleWb = new System.Windows.Forms.WebBrowser();
+			this.blocklyView1 = new BlocklyMruby.BlocklyView();
+			this.aceView1 = new BlocklyMruby.AceView();
+			this.xTermView1 = new BlocklyMruby.XTermView();
 			this.flowLayoutPanel1.SuspendLayout();
 			this.tabControl1.SuspendLayout();
 			this.BlockTabPage.SuspendLayout();
 			this.RubyTabPage.SuspendLayout();
 			this.ConsoleTabPage.SuspendLayout();
 			this.SuspendLayout();
-			// 
-			// BlocklyWb
-			// 
-			this.BlocklyWb.AllowNavigation = false;
-			this.BlocklyWb.AllowWebBrowserDrop = false;
-			this.BlocklyWb.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.BlocklyWb.Location = new System.Drawing.Point(3, 3);
-			this.BlocklyWb.MinimumSize = new System.Drawing.Size(20, 20);
-			this.BlocklyWb.Name = "BlocklyWb";
-			this.BlocklyWb.Size = new System.Drawing.Size(770, 502);
-			this.BlocklyWb.TabIndex = 0;
-			this.BlocklyWb.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.BlocklyPage_DocumentCompleted);
 			// 
 			// flowLayoutPanel1
 			// 
@@ -147,6 +135,18 @@
 			this.ExportRubyBtn.UseVisualStyleBackColor = true;
 			this.ExportRubyBtn.Click += new System.EventHandler(this.ExportRubyBtn_Click);
 			// 
+			// DebugRunBtn
+			// 
+			this.DebugRunBtn.AutoSize = true;
+			this.DebugRunBtn.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+			this.DebugRunBtn.Location = new System.Drawing.Point(298, 3);
+			this.DebugRunBtn.Name = "DebugRunBtn";
+			this.DebugRunBtn.Size = new System.Drawing.Size(39, 22);
+			this.DebugRunBtn.TabIndex = 7;
+			this.DebugRunBtn.Text = "実行";
+			this.DebugRunBtn.UseVisualStyleBackColor = true;
+			this.DebugRunBtn.Click += new System.EventHandler(this.DebugRunBtn_Click);
+			// 
 			// StepBtn
 			// 
 			this.StepBtn.AutoSize = true;
@@ -170,18 +170,6 @@
 			this.ContinueBtn.Text = "継続";
 			this.ContinueBtn.UseVisualStyleBackColor = true;
 			this.ContinueBtn.Click += new System.EventHandler(this.ContinueBtn_Click);
-			// 
-			// DebugRunBtn
-			// 
-			this.DebugRunBtn.AutoSize = true;
-			this.DebugRunBtn.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-			this.DebugRunBtn.Location = new System.Drawing.Point(298, 3);
-			this.DebugRunBtn.Name = "DebugRunBtn";
-			this.DebugRunBtn.Size = new System.Drawing.Size(39, 22);
-			this.DebugRunBtn.TabIndex = 7;
-			this.DebugRunBtn.Text = "実行";
-			this.DebugRunBtn.UseVisualStyleBackColor = true;
-			this.DebugRunBtn.Click += new System.EventHandler(this.DebugRunBtn_Click);
 			// 
 			// BreakBtn
 			// 
@@ -240,7 +228,7 @@
 			// 
 			// BlockTabPage
 			// 
-			this.BlockTabPage.Controls.Add(this.BlocklyWb);
+			this.BlockTabPage.Controls.Add(this.blocklyView1);
 			this.BlockTabPage.Location = new System.Drawing.Point(4, 22);
 			this.BlockTabPage.Name = "BlockTabPage";
 			this.BlockTabPage.Padding = new System.Windows.Forms.Padding(3);
@@ -251,7 +239,7 @@
 			// 
 			// RubyTabPage
 			// 
-			this.RubyTabPage.Controls.Add(this.RubyEditorWb);
+			this.RubyTabPage.Controls.Add(this.aceView1);
 			this.RubyTabPage.Location = new System.Drawing.Point(4, 22);
 			this.RubyTabPage.Name = "RubyTabPage";
 			this.RubyTabPage.Padding = new System.Windows.Forms.Padding(3);
@@ -260,21 +248,9 @@
 			this.RubyTabPage.Text = "Ruby";
 			this.RubyTabPage.UseVisualStyleBackColor = true;
 			// 
-			// RubyEditorWb
-			// 
-			this.RubyEditorWb.AllowNavigation = false;
-			this.RubyEditorWb.AllowWebBrowserDrop = false;
-			this.RubyEditorWb.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.RubyEditorWb.Location = new System.Drawing.Point(3, 3);
-			this.RubyEditorWb.MinimumSize = new System.Drawing.Size(20, 20);
-			this.RubyEditorWb.Name = "RubyEditorWb";
-			this.RubyEditorWb.Size = new System.Drawing.Size(770, 502);
-			this.RubyEditorWb.TabIndex = 0;
-			this.RubyEditorWb.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.RubyEditorPage_DocumentCompleted);
-			// 
 			// ConsoleTabPage
 			// 
-			this.ConsoleTabPage.Controls.Add(this.ConsoleWb);
+			this.ConsoleTabPage.Controls.Add(this.xTermView1);
 			this.ConsoleTabPage.Location = new System.Drawing.Point(4, 22);
 			this.ConsoleTabPage.Name = "ConsoleTabPage";
 			this.ConsoleTabPage.Padding = new System.Windows.Forms.Padding(3);
@@ -283,19 +259,31 @@
 			this.ConsoleTabPage.Text = "コンソール";
 			this.ConsoleTabPage.UseVisualStyleBackColor = true;
 			// 
-			// ConsoleWb
+			// blocklyView1
 			// 
-			this.ConsoleWb.AllowNavigation = false;
-			this.ConsoleWb.AllowWebBrowserDrop = false;
-			this.ConsoleWb.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.ConsoleWb.Location = new System.Drawing.Point(3, 3);
-			this.ConsoleWb.MinimumSize = new System.Drawing.Size(20, 20);
-			this.ConsoleWb.Name = "ConsoleWb";
-			this.ConsoleWb.Size = new System.Drawing.Size(770, 502);
-			this.ConsoleWb.TabIndex = 0;
-			this.ConsoleWb.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.ConsolePage_DocumentCompleted);
+			this.blocklyView1.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.blocklyView1.Location = new System.Drawing.Point(3, 3);
+			this.blocklyView1.Name = "blocklyView1";
+			this.blocklyView1.Size = new System.Drawing.Size(770, 502);
+			this.blocklyView1.TabIndex = 0;
 			// 
-			// Form1
+			// aceView1
+			// 
+			this.aceView1.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.aceView1.Location = new System.Drawing.Point(3, 3);
+			this.aceView1.Name = "aceView1";
+			this.aceView1.Size = new System.Drawing.Size(770, 502);
+			this.aceView1.TabIndex = 0;
+			// 
+			// xTermView1
+			// 
+			this.xTermView1.Dock = System.Windows.Forms.DockStyle.Top;
+			this.xTermView1.Location = new System.Drawing.Point(3, 3);
+			this.xTermView1.Name = "xTermView1";
+			this.xTermView1.Size = new System.Drawing.Size(770, 681);
+			this.xTermView1.TabIndex = 0;
+			// 
+			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -303,7 +291,7 @@
 			this.Controls.Add(this.tabControl1);
 			this.Controls.Add(this.flowLayoutPanel1);
 			this.KeyPreview = true;
-			this.Name = "Form1";
+			this.Name = "MainForm";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "BlocklyMruby";
 			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
@@ -320,8 +308,6 @@
 		}
 
 		#endregion
-
-		private System.Windows.Forms.WebBrowser BlocklyWb;
 		private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
 		private System.Windows.Forms.Button LoadBtn;
 		private System.Windows.Forms.Button SaveBtn;
@@ -333,15 +319,16 @@
 		private System.Windows.Forms.TabControl tabControl1;
 		private System.Windows.Forms.TabPage BlockTabPage;
 		private System.Windows.Forms.TabPage ConsoleTabPage;
-		private System.Windows.Forms.WebBrowser ConsoleWb;
 		private System.Windows.Forms.Button DebugBtn;
 		private System.Windows.Forms.TabPage RubyTabPage;
-		private System.Windows.Forms.WebBrowser RubyEditorWb;
 		private System.Windows.Forms.Button StepBtn;
 		private System.Windows.Forms.Button ContinueBtn;
 		private System.Windows.Forms.Button DebugRunBtn;
 		private System.Windows.Forms.Button BreakBtn;
 		private System.Windows.Forms.Button QuitBtn;
+		private BlocklyView blocklyView1;
+		private AceView aceView1;
+		private XTermView xTermView1;
 	}
 }
 

@@ -28,7 +28,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Bridge;
-using Bridge.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 
 namespace BlocklyMruby
 {
@@ -36,16 +36,20 @@ namespace BlocklyMruby
 	public abstract class Generator
 	{
 		public string name_;
+		public BlocklyScript Script { get; }
+		public Blockly Blockly { get; }
 
 		/// <summary>
 		/// Class for a code generator that translates the blocks into a language.
 		/// </summary>
 		/// <param name="name">Language name of this generator.</param>
-		public Generator(string name)
+		public Generator(Blockly blockly, string name)
 		{
+			this.Blockly = blockly;
+			Script = blockly.Script;
 			this.name_ = name;
 			this.FUNCTION_NAME_PLACEHOLDER_REGEXP_ =
-				new Regex(this.FUNCTION_NAME_PLACEHOLDER_, "g");
+				new Regex(this.FUNCTION_NAME_PLACEHOLDER_, RegexOptions.None);
 		}
 
 		public MethodInfo this[string name] {
@@ -98,7 +102,7 @@ namespace BlocklyMruby
 		/// </summary>
 		public List<int[]> ORDER_OVERRIDES = new List<int[]>();
 
-		public abstract void init(Blockly.Workspace workspace);
+		public abstract void init(Workspace workspace);
 		public abstract string finish(List<node> code);
 		public abstract List<node> scrubNakedValue(List<node> line);
 		public abstract void scrub_(Block block, List<node> code);
@@ -108,7 +112,7 @@ namespace BlocklyMruby
 		/// </summary>
 		/// <param name="workspace">workspace Workspace to generate code from.</param>
 		/// <returns>Generated code.</returns>
-		public string workspaceToCode(Blockly.Workspace workspace)
+		public string workspaceToCode(Workspace workspace)
 		{
 			if (workspace == null) {
 				// Backwards compatibility from before there could be multiple workspaces.
@@ -144,7 +148,7 @@ namespace BlocklyMruby
 		/// <returns>The prefixed lines of code.</returns>
 		public string prefixLines(string text, string prefix)
 		{
-			return prefix + text.Replace(new Regex("(?!\n$)\n", "g"), "\n" + prefix);
+			return prefix + Regex.Replace(text, "(?!\n$)\n", "\n" + prefix);
 		}
 
 		/// <summary>

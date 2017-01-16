@@ -3,15 +3,61 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Bridge;
 using Bridge.Html5;
 
 namespace BlocklyMruby
 {
+	public class BlocklyView : WebConsole
+	{
+		public Blockly Blockly { get; private set; }
+
+		public BlocklyView()
+		{
+			Open(new ResourceReader("BlocklyMrubyRes"), new BlocklyScriptingHost(this));
+
+			Application.Idle += Application_Idle;
+		}
+
+		private void Application_Idle(object sender, EventArgs e)
+		{
+			Application.Idle -= Application_Idle;
+
+			Navigate("blockly.html");
+		}
+
+		protected override bool DocumentCompleted1(Uri Url)
+		{
+			if (Url.Scheme == "about")
+				return false;
+
+			InvokeScript("load_blockly");
+			return ((BlocklyScriptingHost)ObjectForScripting).blockly != null;
+		}
+
+		protected override Script NewScript(ScriptingHost scriptingHost)
+		{
+			var script = new BlocklyScript((BlocklyScriptingHost)scriptingHost);
+			Blockly = script.Blockly;
+			return script;
+		}
+
+		protected override void DocumentCompleted(Uri Url)
+		{
+			if (Blockly == null)
+				return;
+
+			base.DocumentCompleted(Url);
+
+			App.Init(Blockly);
+			InvokeScript("start_blockly");
+			App.Init2();
+		}
+	}
+
 	[System.Runtime.InteropServices.ComVisible(true)]
-	public class BlocklyScriptHost : ScriptHost
+	public class BlocklyScriptingHost : ScriptingHost
 	{
 		public dynamic blockly;
 		public dynamic ProceduresGetDefinition;
@@ -38,6 +84,13 @@ namespace BlocklyMruby
 		public dynamic MutatorReconnect;
 		public dynamic procedures;
 		public dynamic variables;
+		internal new BlocklyScript Script { get { return (BlocklyScript)base.Script; } }
+		internal Blockly Blockly { get { return ((BlocklyView)View).Blockly; } }
+
+		public BlocklyScriptingHost(BlocklyView view)
+			: base(view)
+		{
+		}
 
 		public dynamic GetBlockInstance(object block_)
 		{
@@ -47,15 +100,15 @@ namespace BlocklyMruby
 
 		public object NewBlockInstance(object instance)
 		{
-			var block = BlocklyScript.CreateBlock(instance);
+			var block = Script.CreateBlock(instance);
 			System.Diagnostics.Debug.Assert(block != null);
 			((dynamic)block).init();
 			return block;
 		}
 
-		public Blockly.Workspace ToWorkspace(dynamic workspace)
+		public Workspace ToWorkspace(dynamic workspace)
 		{
-			return Blockly.WorkspaceSvg.Create(workspace);
+			return WorkspaceSvg.Create(Blockly, workspace);
 		}
 
 		public Block ToBlock(dynamic block)
@@ -63,12 +116,12 @@ namespace BlocklyMruby
 			var instance = Script.Get(block, "instance");
 			if ((instance != null) && !(instance is DBNull))
 				return (Block)instance;
-			return BlocklyScript.CreateBlock(block);
+			return Script.CreateBlock(block);
 		}
 
-		public Blockly.Events.Abstract ToEvent(dynamic ev)
+		public Abstract ToEvent(dynamic ev)
 		{
-			return BlocklyScript.CreateEvent(ev);
+			return Script.CreateEvent(ev);
 		}
 
 		public object mutationToDom(object block_, object opt_paramIds_)
@@ -118,7 +171,7 @@ namespace BlocklyMruby
 		public void customContextMenu(object block_, object options_)
 		{
 			dynamic block = (Block)block_;
-			var options = new ContextMenuOptionList(options_);
+			var options = new ContextMenuOptionList(Script, options_);
 			block.customContextMenu(options);
 		}
 
@@ -133,12 +186,12 @@ namespace BlocklyMruby
 			dynamic block = (Block)block_;
 			var ret = block.getProcedureDef();
 			if (ret != null) {
-				var a = Script.NewArray();
+				var a = Bridge.Script.NewArray();
 				foreach (var i in ret) {
 					if (i is string[])
-						Script.Push(a, Script.NewArray(i));
+						Bridge.Script.Push(a, Bridge.Script.NewArray(i));
 					else
-						Script.Push(a, i);
+						Bridge.Script.Push(a, i);
 				}
 				return a;
 			}
@@ -150,9 +203,9 @@ namespace BlocklyMruby
 			dynamic block = (Block)block_;
 			var ret = block.getVars();
 			if (ret != null) {
-				var a = Script.NewArray();
+				var a = Bridge.Script.NewArray();
 				foreach (var i in ret)
-					Script.Push(a, i);
+					Bridge.Script.Push(a, i);
 				return a;
 			}
 			return null;
@@ -172,7 +225,7 @@ namespace BlocklyMruby
 
 		public void dump_svg_element(object obj, string text, object element)
 		{
-			var block = BlocklyScript.CreateBlock(obj);
+			var block = Script.CreateBlock(obj);
 			Console.Write(block.type + "(" + block.id + ")" + text + " :");
 			var target = (dynamic)element;
 			var owner = target.parentNode();
@@ -198,11 +251,6 @@ namespace BlocklyMruby
 			Console.WriteLine();
 		}
 
-		private string NullOrString(object text)
-		{
-			return ((text == null) || (text is DBNull)) ? "null" : text.ToString();
-		}
-
 		public bool names_equals(object name1, object name2)
 		{
 			return Names.equals((string)name1, (string)name2);
@@ -212,9 +260,9 @@ namespace BlocklyMruby
 		{
 			var workspace = ToWorkspace(workspace_);
 			var ret = Blockly.Procedures.flyoutCategory(workspace);
-			var result = Script.NewArray();
+			var result = Bridge.Script.NewArray();
 			foreach (var e in ret) {
-				Script.Push(result, e.instance);
+				Bridge.Script.Push(result, e.instance);
 			}
 			return result;
 		}
@@ -223,9 +271,9 @@ namespace BlocklyMruby
 		{
 			var workspace = ToWorkspace(workspace_);
 			var ret = Blockly.Variables.flyoutCategory(workspace);
-			var result = Script.NewArray();
+			var result = Bridge.Script.NewArray();
 			foreach (var e in ret) {
-				Script.Push(result, e.instance);
+				Bridge.Script.Push(result, e.instance);
 			}
 			return result;
 		}
@@ -234,9 +282,9 @@ namespace BlocklyMruby
 		{
 			var block = ToBlock(block_);
 			var ret = Blockly.Variables.allUsedVariables(block);
-			var result = Script.NewArray();
+			var result = Bridge.Script.NewArray();
 			foreach (var s in ret) {
-				Script.Push(result, s);
+				Bridge.Script.Push(result, s);
 			}
 			return result;
 		}
@@ -245,9 +293,9 @@ namespace BlocklyMruby
 		{
 			var workspace = ToWorkspace(workspace_);
 			var ret = Blockly.Variables.allUsedVariables(workspace);
-			var result = Script.NewArray();
+			var result = Bridge.Script.NewArray();
 			foreach (var s in ret) {
-				Script.Push(result, s);
+				Bridge.Script.Push(result, s);
 			}
 			return result;
 		}
@@ -268,21 +316,22 @@ namespace BlocklyMruby
 
 	public class BlocklyScript : Script
 	{
-		internal static HtmlDocument Document;
-		public new static BlocklyScriptHost ScriptHost;
+		dynamic Blockly_Msg;
+		Dictionary<string, Type> m_BlockTypes = new Dictionary<string, Type>();
+		public new BlocklyScriptingHost ScriptHost { get { return (BlocklyScriptingHost)base.ScriptHost; } }
+		public Blockly Blockly { get; }
 
-		internal static void SetDocument(HtmlDocument document, BlocklyScriptHost scriptHost)
+		public BlocklyScript(BlocklyScriptingHost scriptHost)
+			: base(scriptHost)
 		{
-			Document = document;
-			ScriptHost = scriptHost;
-			Bridge = Document.InvokeScript("eval", new object[] { "Bridge" });
-			Bridge.instance = scriptHost;
-			Blockly.instance = scriptHost.blockly;
+			Bridge = ScriptHost.bridge;
+			Blockly_Msg = Get(ScriptHost.blockly, "Msg");
+			Blockly = new Blockly(this, ScriptHost.blockly);
 		}
 
-		internal static void SetMessage(Type type)
+		public void SetMessage(Type type)
 		{
-			var msg = Document.InvokeScript("eval", new object[] { "Blockly.Msg" });
+			var msg = Blockly_Msg;
 
 			foreach (var f in type.GetFields()) {
 				if (f.FieldType != typeof(string))
@@ -291,235 +340,236 @@ namespace BlocklyMruby
 				if (!f.IsPublic || !f.IsStatic || !f.IsLiteral)
 					continue;
 
-				Script.Set(msg, f.Name, f.GetValue(null));
+				Set(msg, f.Name, f.GetValue(null));
 			}
 		}
 
-		static Dictionary<string, Type> m_BlockTypes = new Dictionary<string, Type>();
-
-		internal static void SetBlocks(Block block)
+		internal void SetBlocks(Block block)
 		{
 			m_BlockTypes.Add(block.type, block.GetType());
 			Bridge.SetBlocks(block);
 		}
 
-		internal static Block CreateBlock(dynamic target)
+		internal Block CreateBlock(dynamic target)
 		{
 			if ((target == null) || (target is DBNull))
 				return null;
 
-			var instance = Script.Get(target, "instance");
+			var instance = Get(target, "instance");
 			if ((instance != null) && !(instance is DBNull))
 				return (Block)instance;
 
-			var ts = Script.Get<string>(target, "type");
+			var ts = Get<string>(target, "type");
 			if ((ts == null) || (ts is DBNull))
 				return null;
 
 			var type = m_BlockTypes[ts];
-			var ctor = type.GetConstructor(new Type[] { });
-			var block = (Block)ctor.Invoke(new object[] { });
+			var ctor = type.GetConstructor(new Type[] { typeof(Blockly) });
+			var block = (Block)ctor.Invoke(new object[] { Blockly });
 			block.instance = target;
-			Script.Set(target, "instance", block);
+			Set(target, "instance", block);
 			return block;
 		}
 
-		internal static void SetGenerator()
+		internal void SetGenerator()
 		{
-			ScriptHost.procedures = Script.Get(ScriptHost.blockly, "Procedures");
-			ScriptHost.variables = Script.Get(ScriptHost.blockly, "Variables");
-			Script.Set(ScriptHost.procedures, "NAME_TYPE", Blockly.Procedures.NAME_TYPE);
-			Script.Set(ScriptHost.variables, "NAME_TYPE", Blockly.Variables.NAME_TYPE);
+			ScriptHost.procedures = Get(ScriptHost.blockly, "Procedures");
+			ScriptHost.variables = Get(ScriptHost.blockly, "Variables");
+			Set(ScriptHost.procedures, "NAME_TYPE", Procedures.NAME_TYPE);
+			Set(ScriptHost.variables, "NAME_TYPE", Variables.NAME_TYPE);
 		}
 
-		internal static string goog_getMsg(string str, object opt_values)
+		internal string goog_getMsg(string str, object opt_values)
 		{
 			return Bridge.goog_getMsg(str, opt_values);
 		}
 
-		internal static object goog_dom_createDom(string v, object o, string t)
+		internal object goog_dom_createDom(string v, object o, string t)
 		{
 			return Bridge.goog_dom_createDom(v, o, t);
 		}
 
-		internal static object goog_dom_createDom(string v, object o, Element t)
+		internal object goog_dom_createDom(string v, object o, Element t)
 		{
 			return Bridge.goog_dom_createDom(v, o, t.instance);
 		}
 
-		internal static bool goog_array_equals(Array a, Array b)
+		internal bool goog_array_equals(Array a, Array b)
 		{
 			return Bridge.goog_array_equals(a, b);
 		}
 
-		internal static Blockly.Workspace WorkspaceGetById(string id)
-		{
-			return Blockly.WorkspaceSvg.Create(ScriptHost.WorkspaceGetById(id));
-		}
-
-		internal static bool NamesEquals(string name1, string name2)
-		{
-			return ScriptHost.NamesEquals(name1, name2);
-		}
-
-		internal static bool MutatorReconnect(dynamic connectionChild, dynamic block, string inputName)
-		{
-			return ScriptHost.MutatorReconnect(connectionChild, block, inputName);
-		}
-
-		internal static Blockly.Events.Abstract CreateEvent(dynamic ev)
-		{
-			switch ((string)ev.type) {
-			case Blockly.Events.CREATE:
-				return new Blockly.Events.Create(ev);
-			case Blockly.Events.DELETE:
-				return new Blockly.Events.Delete(ev);
-			case Blockly.Events.CHANGE:
-				return new Blockly.Events.Change(ev);
-			case Blockly.Events.MOVE:
-				return new Blockly.Events.Move(ev);
-			case Blockly.Events.UI:
-				return new Blockly.Events.Ui(ev);
-			default:
-				return new Blockly.Events.Abstract(ev);
-			}
-		}
-
-		internal static Blockly.Input CreateInput(dynamic target)
-		{
-			if ((target == null) || (target is DBNull))
-				return null;
-
-			var instance = Script.Get(target, "instance");
-			if ((instance != null) && !(instance is DBNull))
-				return (Blockly.Input)instance;
-
-			var input = new Blockly.Input(target);
-			Script.Set(target, "instance", input);
-			return input;
-		}
-
-		internal static Blockly.Field CreateField(dynamic ret)
-		{
-			if ((ret == null) || (ret is DBNull))
-				return null;
-
-			var instance = Script.Get(ret, "instance");
-			if ((instance != null) && !(instance is DBNull))
-				return (Blockly.Field)instance;
-
-			var field = new Blockly.Field(ret);
-			Script.Set(ret, "instance", field);
-			return field;
-		}
-
-		internal static object ProceduresGetDefinition(string name, dynamic workspace)
+		internal object ProceduresGetDefinition(string name, dynamic workspace)
 		{
 			return ScriptHost.ProceduresGetDefinition(name, workspace);
 		}
 
-		internal static void ProceduresMutateCallers(dynamic block)
+		internal void ProceduresMutateCallers(dynamic block)
 		{
 			ScriptHost.ProceduresMutateCallers(block);
 		}
 
-		internal static object XmlWorkspaceToDom(dynamic workspace)
+		internal object XmlWorkspaceToDom(dynamic workspace)
 		{
 			return ScriptHost.XmlWorkspaceToDom(workspace);
 		}
 
-		internal static object XmlBlockToDomWithXY(dynamic block)
+		internal object XmlBlockToDomWithXY(dynamic block)
 		{
 			return ScriptHost.XmlBlockToDomWithXY(block);
 		}
 
-		internal static object XmlBlockToDom(dynamic block)
+		internal object XmlBlockToDom(dynamic block)
 		{
 			return ScriptHost.XmlBlockToDom(block);
 		}
 
-		internal static string XmlDomToText(dynamic dom)
+		internal string XmlDomToText(dynamic dom)
 		{
 			return ScriptHost.XmlDomToText(dom);
 		}
 
-		internal static string XmlDomToPrettyText(dynamic dom)
+		internal string XmlDomToPrettyText(dynamic dom)
 		{
 			return ScriptHost.XmlDomToPrettyText(dom);
 		}
 
-		internal static object XmlTextToDom(string text)
+		internal object XmlTextToDom(string text)
 		{
 			return ScriptHost.XmlTextToDom(text);
 		}
 
-		internal static void XmlDomToWorkspace(dynamic xml, dynamic workspace)
+		internal void XmlDomToWorkspace(dynamic xml, dynamic workspace)
 		{
 			ScriptHost.XmlDomToWorkspace(xml, workspace);
 		}
 
-		internal static dynamic XmlDomToBlock(dynamic block, dynamic workspace)
+		internal dynamic XmlDomToBlock(dynamic block, dynamic workspace)
 		{
 			return ScriptHost.XmlDomToBlock(block, workspace);
 		}
 
-		internal static void XmlDeleteNext(dynamic block)
+		internal void XmlDeleteNext(dynamic block)
 		{
 			ScriptHost.XmlDeleteNext(block);
 		}
 
-		internal static void EventsEnable()
+		internal void EventsEnable()
 		{
 			ScriptHost.EventsEnable();
 		}
 
-		internal static void EventsDisable()
+		internal void EventsDisable()
 		{
 			ScriptHost.EventsDisable();
 		}
 
-		internal static object EventsGetDescendantIds_(dynamic block)
+		internal object EventsGetDescendantIds_(dynamic block)
 		{
 			return ScriptHost.EventsGetDescendantIds_(block);
 		}
 
-		internal static void EventsSetGroup(string group)
+		internal void EventsSetGroup(string group)
 		{
 			ScriptHost.EventsSetGroup(group);
 		}
 
-		internal static bool EventsGetRecordUndo()
+		internal bool EventsGetRecordUndo()
 		{
 			return ScriptHost.EventsGetRecordUndo.call(null);
 		}
 
-		internal static void EventsSetRecordUndo(bool value)
+		internal void EventsSetRecordUndo(bool value)
 		{
 			ScriptHost.EventsSetRecordUndo.call(null, value);
 		}
 
-		internal static void EventsFire(object ev)
+		internal void EventsFire(object ev)
 		{
 			ScriptHost.EventsFire(ev);
 		}
 
-		internal static dynamic ContextMenuCallbackFactory(dynamic block, dynamic xml)
+		internal dynamic ContextMenuCallbackFactory(dynamic block, dynamic xml)
 		{
 			return ScriptHost.ContextMenuCallbackFactory(block, xml);
 		}
+
+		internal Workspace WorkspaceGetById(string id)
+		{
+			return WorkspaceSvg.Create(Blockly, ScriptHost.WorkspaceGetById(id));
+		}
+
+		internal bool NamesEquals(string name1, string name2)
+		{
+			return ScriptHost.NamesEquals(name1, name2);
+		}
+
+		internal bool MutatorReconnect(dynamic connectionChild, dynamic block, string inputName)
+		{
+			return ScriptHost.MutatorReconnect(connectionChild, block, inputName);
+		}
+
+		internal Abstract CreateEvent(dynamic ev)
+		{
+			switch ((string)ev.type) {
+			case Events.CREATE:
+				return new Create(Blockly, ev);
+			case Events.DELETE:
+				return new Delete(Blockly, ev);
+			case Events.CHANGE:
+				return new Change(Blockly, ev);
+			case Events.MOVE:
+				return new Move(Blockly, ev);
+			case Events.UI:
+				return new Ui(Blockly, ev);
+			default:
+				return new Abstract(Blockly, ev);
+			}
+		}
+
+		internal Input CreateInput(dynamic target)
+		{
+			if ((target == null) || (target is DBNull))
+				return null;
+
+			var instance = Get(target, "instance");
+			if ((instance != null) && !(instance is DBNull))
+				return (Input)instance;
+
+			var input = new Input(Blockly, target);
+			Set(target, "instance", input);
+			return input;
+		}
+
+		internal Field CreateField(dynamic ret)
+		{
+			if ((ret == null) || (ret is DBNull))
+				return null;
+
+			var instance = Get(ret, "instance");
+			if ((instance != null) && !(instance is DBNull))
+				return (Field)instance;
+
+			var field = new Field(Blockly, ret);
+			Set(ret, "instance", field);
+			return field;
+		}
 	}
+
 
 	public class BlockList : IEnumerable<Block>
 	{
 		internal dynamic instance;
+		public static BlocklyScript Script { get; private set; }
 
-		public BlockList(object instance)
+		public BlockList(BlocklyScript script, object instance)
 		{
+			Script = script;
 			this.instance = instance;
 		}
 
 		public Block this[int index] {
-			get { return BlocklyScript.CreateBlock(Script.Get(instance, index.ToString())); }
+			get { return Script.CreateBlock(Script.Get(instance, index.ToString())); }
 			set { Script.Set(instance, index.ToString(), value == null ? null : value.instance); }
 		}
 
@@ -571,28 +621,30 @@ namespace BlocklyMruby
 
 		public static implicit operator BlockList(Block[] value)
 		{
-			var ary = Script.NewArray();
+			var ary = Bridge.Script.NewArray();
 			foreach (var i in value) {
-				Script.Push(ary, i);
+				Bridge.Script.Push(ary, i);
 			}
-			return new BlockList(ary);
+			return new BlockList(Script, ary);
 		}
 	}
 
-	public class FieldList : IEnumerable<Blockly.Field>
+	public class FieldList : IEnumerable<Field>
 	{
 		internal dynamic instance;
+		public static BlocklyScript Script { get; private set; }
 
-		public FieldList(object instance)
+		public FieldList(BlocklyScript script, object instance)
 		{
+			Script = script;
 			this.instance = instance;
 		}
 
-		public Blockly.Field this[int index] { get { return BlocklyScript.CreateField(Script.Get(instance, index.ToString())); } }
+		public Field this[int index] { get { return Script.CreateField(Script.Get(instance, index.ToString())); } }
 
 		public int Length { get { return Script.Get<int>(instance, "length"); } }
 
-		public class Enumerator : IEnumerator<Blockly.Field>
+		public class Enumerator : IEnumerator<Field>
 		{
 			private FieldList fieldList;
 			private int index = -1;
@@ -602,7 +654,7 @@ namespace BlocklyMruby
 				this.fieldList = fieldList;
 			}
 
-			public Blockly.Field Current {
+			public Field Current {
 				get { return fieldList[index]; }
 			}
 
@@ -626,7 +678,7 @@ namespace BlocklyMruby
 			}
 		}
 
-		public IEnumerator<Blockly.Field> GetEnumerator()
+		public IEnumerator<Field> GetEnumerator()
 		{
 			return new Enumerator(this);
 		}
@@ -637,20 +689,22 @@ namespace BlocklyMruby
 		}
 	}
 
-	public class InputList : IEnumerable<Blockly.Input>
+	public class InputList : IEnumerable<Input>
 	{
 		internal dynamic instance;
+		public static BlocklyScript Script { get; private set; }
 
-		public InputList(object instance)
+		public InputList(BlocklyScript script, object instance)
 		{
+			Script = script;
 			this.instance = instance;
 		}
 
-		public Blockly.Input this[int index] { get { return BlocklyScript.CreateInput(Script.Get(instance, index.ToString())); } }
+		public Input this[int index] { get { return Script.CreateInput(Script.Get(instance, index.ToString())); } }
 
 		public int Length { get { return Script.Get<int>(instance, "length"); } }
 
-		public class Enumerator : IEnumerator<Blockly.Input>
+		public class Enumerator : IEnumerator<Input>
 		{
 			private InputList inputList;
 			private int index = -1;
@@ -660,7 +714,7 @@ namespace BlocklyMruby
 				this.inputList = inputList;
 			}
 
-			public Blockly.Input Current {
+			public Input Current {
 				get { return inputList[index]; }
 			}
 
@@ -684,7 +738,7 @@ namespace BlocklyMruby
 			}
 		}
 
-		public IEnumerator<Blockly.Input> GetEnumerator()
+		public IEnumerator<Input> GetEnumerator()
 		{
 			return new Enumerator(this);
 		}

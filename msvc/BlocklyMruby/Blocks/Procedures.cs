@@ -27,7 +27,7 @@ using System.Linq;
 using System.Collections.Generic;
 using Bridge;
 using Bridge.Html5;
-using Bridge.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
 
 namespace BlocklyMruby
@@ -44,10 +44,10 @@ namespace BlocklyMruby
 		List<string> paramIds_;
 		bool hasStatements_;
 		internal List<string> arguments_;
-		public Blockly.Connection statementConnection_;
+		public Connection statementConnection_;
 
-		public ProcedureDefBlock(string type)
-			: base(type)
+		public ProcedureDefBlock(Blockly blockly, string type)
+			: base(blockly, type)
 		{
 		}
 
@@ -89,7 +89,7 @@ namespace BlocklyMruby
 		{
 			// Check for duplicated arguments.
 			var badArg = false;
-			var hash = Script.NewObject();
+			var hash = Bridge.Script.NewObject();
 			for (var i = 0; i < this.arguments_.Count; i++) {
 				var ret = Script.Get(hash, "arg_" + this.arguments_[i].ToLowerCase());
 				if ((ret != null) && !(ret is DBNull)) {
@@ -173,11 +173,11 @@ namespace BlocklyMruby
 
 		/**
 		 * Populate the mutator"s dialog with this block"s components.
-		 * @param {!Blockly.Workspace} workspace Mutator"s workspace.
+		 * @param {!Workspace} workspace Mutator"s workspace.
 		 * @return {!Blockly.Block} Root block in mutator.
 		 * @this Blockly.Block
 		 */
-		public Block decompose(Blockly.Workspace workspace)
+		public Block decompose(Workspace workspace)
 		{
 			var containerBlock = workspace.newBlock(ProceduresMutatorcontainerBlock.type_name);
 			containerBlock.initSvg();
@@ -234,7 +234,7 @@ namespace BlocklyMruby
 					if (hasStatements) {
 						this.setStatements_(true);
 						// Restore the stack, if one was saved.
-						Blockly.Mutator.reconnect(this.statementConnection_, this, "STACK");
+						Mutator.reconnect(this.statementConnection_, this, "STACK");
 						this.statementConnection_ = null;
 					}
 					else {
@@ -305,16 +305,16 @@ namespace BlocklyMruby
 			var option = new ContextMenuOption() { enabled = true };
 			var name = this.getFieldValue("NAME");
 			option.text = Msg.PROCEDURES_CREATE_DO.Replace("%1", name);
-			var xmlMutation = goog.dom.createDom("mutation");
+			var xmlMutation = goog.dom.createDom(Script, "mutation");
 			xmlMutation.SetAttribute("name", name);
 			for (var i = 0; i < this.arguments_.Count; i++) {
-				var xmlArg = goog.dom.createDom("arg");
+				var xmlArg = goog.dom.createDom(Script, "arg");
 				xmlArg.SetAttribute("name", this.arguments_[i]);
 				xmlMutation.AppendChild(xmlArg);
 			}
-			var xmlBlock = goog.dom.createDom("block", null, xmlMutation);
+			var xmlBlock = goog.dom.createDom(Script, "block", null, xmlMutation);
 			xmlBlock.SetAttribute("type", this.callType_);
-			option.callback = Blockly.ContextMenu.callbackFactory(this, xmlBlock);
+			option.callback = ContextMenu.callbackFactory(this, xmlBlock);
 			options.push(option);
 
 			// Add options to create getters for each parameter.
@@ -323,11 +323,11 @@ namespace BlocklyMruby
 					option = new ContextMenuOption() { enabled = true };
 					name = this.arguments_[i];
 					option.text = Msg.VARIABLES_SET_CREATE_GET.Replace("%1", name);
-					var xmlField = goog.dom.createDom("field", null, name);
+					var xmlField = goog.dom.createDom(Script, "field", null, name);
 					xmlField.SetAttribute("name", "VAR");
-					xmlBlock = goog.dom.createDom("block", null, xmlField);
+					xmlBlock = goog.dom.createDom(Script, "block", null, xmlField);
 					xmlBlock.SetAttribute("type", VariablesGetBlock.type_name);
-					option.callback = Blockly.ContextMenu.callbackFactory(this, xmlBlock);
+					option.callback = ContextMenu.callbackFactory(this, xmlBlock);
 					options.push(option);
 				}
 			}
@@ -339,8 +339,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "procedures_defnoreturn";
 
-		public ProceduresDefnoreturnBlock()
-			: base(type_name)
+		public ProceduresDefnoreturnBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 			callType_ = ProceduresCallnoreturnBlock.type_name;
 		}
@@ -351,7 +351,7 @@ namespace BlocklyMruby
 		 */
 		public void init()
 		{
-			var nameField = new Blockly.FieldTextInput(
+			var nameField = new FieldTextInput(Blockly, 
 				Msg.PROCEDURES_DEFNORETURN_PROCEDURE);
 			nameField.setValidator((str) => { return Blockly.Procedures.rename(nameField, str); });
 			nameField.setSpellcheck(false);
@@ -359,7 +359,7 @@ namespace BlocklyMruby
 				.appendField(Msg.PROCEDURES_DEFNORETURN_TITLE)
 				.appendField(nameField, "NAME")
 				.appendField("", "PARAMS");
-			this.setMutator(new Blockly.Mutator(new[] { ProceduresMutatorargBlock.type_name }));
+			this.setMutator(new Mutator(Blockly, new[] { ProceduresMutatorargBlock.type_name }));
 			if ((this.workspace.options.comments ||
 				 (this.workspace.options.parentWorkspace != null &&
 				  this.workspace.options.parentWorkspace.options.comments)) &&
@@ -393,8 +393,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "procedures_defreturn";
 
-		public ProceduresDefreturnBlock()
-			: base(type_name)
+		public ProceduresDefreturnBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 			callType_ = ProceduresCallreturnBlock.type_name;
 		}
@@ -405,7 +405,7 @@ namespace BlocklyMruby
 		 */
 		public void init()
 		{
-			var nameField = new Blockly.FieldTextInput(
+			var nameField = new FieldTextInput(Blockly, 
 				Msg.PROCEDURES_DEFRETURN_PROCEDURE);
 			nameField.setValidator((str) => { return Blockly.Procedures.rename(nameField, str); });
 			nameField.setSpellcheck(false);
@@ -416,7 +416,7 @@ namespace BlocklyMruby
 			this.appendValueInput("RETURN")
 				.setAlign(Blockly.ALIGN_RIGHT)
 				.appendField(Msg.PROCEDURES_DEFRETURN_RETURN);
-			this.setMutator(new Blockly.Mutator(new[] { ProceduresMutatorargBlock.type_name }));
+			this.setMutator(new Mutator(Blockly, new[] { ProceduresMutatorargBlock.type_name }));
 			if ((this.workspace.options.comments ||
 				 (this.workspace.options.parentWorkspace != null &&
 				  this.workspace.options.parentWorkspace.options.comments)) &&
@@ -450,8 +450,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "procedures_mutatorcontainer";
 
-		public ProceduresMutatorcontainerBlock()
-			: base(type_name)
+		public ProceduresMutatorcontainerBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -466,7 +466,7 @@ namespace BlocklyMruby
 			this.appendStatementInput("STACK");
 			this.appendDummyInput("STATEMENT_INPUT")
 				.appendField(Msg.PROCEDURES_ALLOW_STATEMENTS)
-				.appendField(new Blockly.FieldCheckbox("TRUE"), "STATEMENTS");
+				.appendField(new FieldCheckbox(Blockly, "TRUE"), "STATEMENTS");
 			this.setColour(ProcedureDefBlock.HUE);
 			this.setTooltip(Msg.PROCEDURES_MUTATORCONTAINER_TOOLTIP);
 			this.contextMenu = false;
@@ -479,8 +479,8 @@ namespace BlocklyMruby
 		public const string type_name = "procedures_mutatorarg";
 		public int oldLocation;
 
-		public ProceduresMutatorargBlock()
-			: base(type_name)
+		public ProceduresMutatorargBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -490,7 +490,7 @@ namespace BlocklyMruby
 		 */
 		public void init()
 		{
-			var field = new Blockly.FieldTextInput("x", this.validator_);
+			var field = new FieldTextInput(Blockly, "x", this.validator_);
 			this.appendDummyInput()
 				.appendField(Msg.PROCEDURES_MUTATORARG_TITLE)
 				.appendField(field, "NAME");
@@ -517,7 +517,7 @@ namespace BlocklyMruby
 		 */
 		public string validator_(string newVar)
 		{
-			newVar = newVar.Replace(new Regex("[\\s\\xa0]+", "g"), " ").Replace(new Regex("^ | $", "g"), "");
+			newVar = Regex.Replace(Regex.Replace(newVar, "[\\s\\xa0]+", " "), "^ | $", "");
 			return newVar;
 		}
 
@@ -526,11 +526,11 @@ namespace BlocklyMruby
 		 * Creates a new variable with this name.
 		 * @param {string} newText The new variable name.
 		 * @private
-		 * @this Blockly.FieldTextInput
+		 * @this FieldTextInput
 		 */
 		public void createNewVar_(string newText)
 		{
-			var source = this/*((Blockly.FieldTextInput)this).sourceBlock_*/;
+			var source = this/*((FieldTextInput)this).sourceBlock_*/;
 			if (source != null && source.workspace != null && source.workspace.options != null
 				&& source.workspace.options.parentWorkspace != null) {
 				source.workspace.options.parentWorkspace.createVariable(newText);
@@ -542,13 +542,13 @@ namespace BlocklyMruby
 	public class ProcedureCallBlock : Block
 	{
 		internal List<string> arguments_;
-		protected Dictionary<string, Blockly.Connection> quarkConnections_;
+		protected Dictionary<string, Connection> quarkConnections_;
 		protected List<string> quarkIds_;
 		protected bool rendered;
 		protected string defType_;
 
-		public ProcedureCallBlock(string type)
-			: base(type)
+		public ProcedureCallBlock(Blockly blockly, string type)
+			: base(blockly, type)
 		{
 		}
 
@@ -595,7 +595,7 @@ namespace BlocklyMruby
 			// Data structures:
 			// this.arguments = ["x", "y"]
 			//     Existing param names.
-			// this.quarkConnections_ {piua: null, f8b_: Blockly.Connection}
+			// this.quarkConnections_ {piua: null, f8b_: Connection}
 			//     Look-up of paramIds to connections plugged into the call block.
 			// this.quarkIds_ = ["piua", "f8b_"]
 			//     Existing param IDs.
@@ -606,14 +606,14 @@ namespace BlocklyMruby
 			var mutatorOpen = defBlock != null && defBlock.mutator != null &&
 				defBlock.mutator.isVisible();
 			if (!mutatorOpen) {
-				this.quarkConnections_ = new Dictionary<string, Blockly.Connection>();
+				this.quarkConnections_ = new Dictionary<string, Connection>();
 				this.quarkIds_ = null;
 			}
 			if (paramIds == null) {
 				// Reset the quarks (a mutator is about to open).
 				return;
 			}
-			if (goog.array.equals(this.arguments_.ToArray(), paramNames.ToArray())) {
+			if (goog.array.equals(Script, this.arguments_.ToArray(), paramNames.ToArray())) {
 				// No change.
 				this.quarkIds_ = paramIds;
 				return;
@@ -624,7 +624,7 @@ namespace BlocklyMruby
 			this.setCollapsed(false);
 			if (this.quarkIds_ == null) {
 				// Initialize tracking for this block.
-				this.quarkConnections_ = new Dictionary<string, Blockly.Connection>();
+				this.quarkConnections_ = new Dictionary<string, Connection>();
 				if (String.Join("\n", paramNames) == String.Join("\n", this.arguments_)) {
 					// No change to the parameters, allow quarkConnections_ to be
 					// populated with the existing connections.
@@ -632,7 +632,7 @@ namespace BlocklyMruby
 				}
 				else {
 					this.quarkIds_ = new List<string>();
-					for(int i = 0; i < this.arguments_.Count; i++) {
+					for (int i = 0; i < this.arguments_.Count; i++) {
 						this.quarkIds_.Add(i.ToString());
 					}
 				}
@@ -665,9 +665,9 @@ namespace BlocklyMruby
 					var quarkId = this.quarkIds_[i];
 					if (quarkId == null)
 						continue;
-					Blockly.Connection connection;
+					Connection connection;
 					if (this.quarkConnections_.TryGetValue(quarkId, out connection)) {
-						if (!Blockly.Mutator.reconnect(connection, this, "ARG" + i)) {
+						if (!Mutator.reconnect(connection, this, "ARG" + i)) {
 							// Block no longer exists or has been attached elsewhere.
 							this.quarkConnections_.Remove(quarkId);
 						}
@@ -705,7 +705,7 @@ namespace BlocklyMruby
 				}
 				else {
 					// Add new input.
-					field = new Blockly.FieldLabel(this.arguments_[i]);
+					field = new FieldLabel(Blockly, this.arguments_[i]);
 					var input = this.appendValueInput("ARG" + i)
 						.setAlign(Blockly.ALIGN_RIGHT)
 						.appendField(field, "ARGNAME" + i);
@@ -796,14 +796,14 @@ namespace BlocklyMruby
 		 * definition.  Enforce this link whenever an event is fired.
 		 * @this Blockly.Block
 		 */
-		public void onchange(Blockly.Events.Abstract e)
+		public void onchange(Abstract e)
 		{
 			if (this.workspace == null || this.workspace.isFlyout) {
 				// Block is deleted or is in a flyout.
 				return;
 			}
-			if (e.type == Blockly.Events.CREATE &&
-				Array.IndexOf(((Blockly.Events.Create)e).ids, this.id) != -1) {
+			if (e.type == Events.CREATE &&
+				Array.IndexOf(((Create)e).ids, this.id) != -1) {
 				// Look for the case where a procedure call was created (usually through
 				// paste) and there is no matching definition.  In this case, create
 				// an empty definition block with the correct signature.
@@ -827,8 +827,8 @@ namespace BlocklyMruby
 					 *   </block>
 					 * </xml>
 					 */
-					var xml = goog.dom.createDom("xml");
-					var block = goog.dom.createDom("block");
+					var xml = goog.dom.createDom(Script, "xml");
+					var block = goog.dom.createDom(Script, "block");
 					block.SetAttribute("type", this.defType_);
 					var xy = this.getRelativeToSurfaceXY();
 					var x = xy.x + Blockly.SNAP_RADIUS * (this.RTL ? -1 : 1);
@@ -837,7 +837,7 @@ namespace BlocklyMruby
 					block.SetAttribute("y", y.ToString());
 					var mutation = this.mutationToDom(false);
 					block.AppendChild(mutation);
-					var field = goog.dom.createDom("field");
+					var field = goog.dom.createDom(Script, "field");
 					field.SetAttribute("name", "NAME");
 					field.AppendChild(Document.CreateTextNode(this.getProcedureCall()));
 					block.AppendChild(field);
@@ -846,7 +846,7 @@ namespace BlocklyMruby
 					Blockly.Events.setGroup(false.ToString());
 				}
 			}
-			else if (e.type == Blockly.Events.DELETE) {
+			else if (e.type == Events.DELETE) {
 				// Look for the case where a procedure definition has been deleted,
 				// leaving this block (a procedure call) orphaned.  In this case, delete
 				// the orphan.
@@ -866,8 +866,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "procedures_callnoreturn";
 
-		public ProceduresCallnoreturnBlock()
-			: base(type_name)
+		public ProceduresCallnoreturnBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 			defType_ = ProceduresDefnoreturnBlock.type_name;
 		}
@@ -886,7 +886,7 @@ namespace BlocklyMruby
 			// Tooltip is set in renameProcedure.
 			this.setHelpUrl(Msg.PROCEDURES_CALLNORETURN_HELPURL);
 			this.arguments_ = new List<string>();
-			this.quarkConnections_ = new Dictionary<string, Blockly.Connection>();
+			this.quarkConnections_ = new Dictionary<string, Connection>();
 			this.quarkIds_ = null;
 		}
 
@@ -915,8 +915,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "procedures_callreturn";
 
-		public ProceduresCallreturnBlock()
-			: base(type_name)
+		public ProceduresCallreturnBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 			defType_ = ProceduresDefreturnBlock.type_name;
 		}
@@ -934,7 +934,7 @@ namespace BlocklyMruby
 			// Tooltip is set in domToMutation.
 			this.setHelpUrl(Msg.PROCEDURES_CALLRETURN_HELPURL);
 			this.arguments_ = new List<string>();
-			this.quarkConnections_ = new Dictionary<string, Blockly.Connection>();
+			this.quarkConnections_ = new Dictionary<string, Connection>();
 			this.quarkIds_ = null;
 		}
 	}
@@ -945,8 +945,8 @@ namespace BlocklyMruby
 		public const string type_name = "procedures_ifreturn";
 		internal bool hasReturnValue_;
 
-		public ProceduresIfreturnBlock()
-			: base(type_name)
+		public ProceduresIfreturnBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -1001,12 +1001,12 @@ namespace BlocklyMruby
 		/**
 		 * Called whenever anything on the workspace changes.
 		 * Add warning if this flow block is not nested inside a loop.
-		 * @param {!Blockly.Events.Abstract} e Change event.
+		 * @param {!Abstract} e Change event.
 		 * @this Blockly.Block
 		 */
-		public void onchange(Blockly.Events.Abstract e)
+		public void onchange(Abstract e)
 		{
-			if (((Blockly.WorkspaceSvg)this.workspace).isDragging() != 0) {
+			if (((WorkspaceSvg)this.workspace).isDragging() != 0) {
 				return;  // Don't change state at the start of a drag.
 			}
 			var legal = false;

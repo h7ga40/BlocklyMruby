@@ -45,8 +45,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "lists_create_empty";
 
-		public ListsCreateEmptyBlock()
-			: base(type_name)
+		public ListsCreateEmptyBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -76,8 +76,8 @@ namespace BlocklyMruby
 		public const string type_name = "lists_create_with";
 		internal int itemCount_;
 
-		public ListsCreateWithBlock()
-			: base(type_name)
+		public ListsCreateWithBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -92,7 +92,7 @@ namespace BlocklyMruby
 			this.itemCount_ = 3;
 			this.updateShape_();
 			this.setOutput(true, "Array");
-			this.setMutator(new Blockly.Mutator(new[] { ListsCreateWithItemBlock.type_name }));
+			this.setMutator(new Mutator(Blockly, new[] { ListsCreateWithItemBlock.type_name }));
 			this.setTooltip(Msg.LISTS_CREATE_WITH_TOOLTIP);
 		}
 
@@ -115,17 +115,17 @@ namespace BlocklyMruby
 		 */
 		public void domToMutation(Element xmlElement)
 		{
-			this.itemCount_ = Script.ParseInt(xmlElement.GetAttribute("items"), 10);
+			this.itemCount_ = Bridge.Script.ParseInt(xmlElement.GetAttribute("items"), 10);
 			this.updateShape_();
 		}
 
 		/**
 		 * Populate the mutator"s dialog with this block"s components.
-		 * @param {!Blockly.Workspace} workspace Mutator"s workspace.
+		 * @param {!Workspace} workspace Mutator"s workspace.
 		 * @return {!Blockly.Block} Root block in mutator.
 		 * @this Blockly.Block
 		 */
-		public Block decompose(Blockly.Workspace workspace)
+		public Block decompose(Workspace workspace)
 		{
 			var containerBlock = workspace.newBlock(ListsCreateWithContainerBlock.type_name);
 			containerBlock.initSvg();
@@ -148,7 +148,7 @@ namespace BlocklyMruby
 		{
 			var itemBlock = (ListsCreateWithItemBlock)containerBlock.getInputTargetBlock("STACK");
 			// Count number of inputs.
-			var connections = new List<Blockly.Connection>();
+			var connections = new List<Connection>();
 			while (itemBlock != null) {
 				connections.Add(itemBlock.valueConnection_);
 				itemBlock = (itemBlock.nextConnection != null) ?
@@ -165,7 +165,7 @@ namespace BlocklyMruby
 			this.updateShape_();
 			// Reconnect any child blocks.
 			for (var i = 0; i < this.itemCount_; i++) {
-				Blockly.Mutator.reconnect(connections[i], this, "ADD" + i);
+				Mutator.reconnect(connections[i], this, "ADD" + i);
 			}
 		}
 
@@ -224,8 +224,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "lists_create_with_container";
 
-		public ListsCreateWithContainerBlock()
-			: base(type_name)
+		public ListsCreateWithContainerBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -248,10 +248,10 @@ namespace BlocklyMruby
 	public class ListsCreateWithItemBlock : Block
 	{
 		public const string type_name = "lists_create_with_item";
-		public Blockly.Connection valueConnection_;
+		public Connection valueConnection_;
 
-		public ListsCreateWithItemBlock()
-			: base(type_name)
+		public ListsCreateWithItemBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -276,8 +276,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "lists_repeat";
 
-		public ListsRepeatBlock()
-			: base(type_name)
+		public ListsRepeatBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -313,8 +313,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "lists_length";
 
-		public ListsLengthBlock()
-			: base(type_name)
+		public ListsLengthBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -346,8 +346,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "lists_isEmpty";
 
-		public ListsIsEmptyBlock()
-			: base(type_name)
+		public ListsIsEmptyBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -379,8 +379,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "lists_indexOf";
 
-		public ListsIndexOfBlock()
-			: base(type_name)
+		public ListsIndexOfBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -401,7 +401,7 @@ namespace BlocklyMruby
 				.setCheck("Array")
 				.appendField(Msg.LISTS_INDEX_OF_INPUT_IN_LIST);
 			this.appendValueInput("FIND")
-				.appendField(new Blockly.FieldDropdown(OPERATORS), "END");
+				.appendField(new FieldDropdown(Blockly, OPERATORS), "END");
 			this.setInputsInline(true);
 			// Assign "this" to a variable for use in the tooltip closure below.
 			var thisBlock = this;
@@ -418,8 +418,8 @@ namespace BlocklyMruby
 		public const string type_name = "lists_getIndex";
 		string[][] WHERE_OPTIONS;
 
-		public ListsGetIndexBlock()
-			: base(type_name)
+		public ListsGetIndexBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -443,11 +443,11 @@ namespace BlocklyMruby
 			};
 			this.setHelpUrl(Msg.LISTS_GET_INDEX_HELPURL);
 			this.setColour(Lists.HUE);
-			var modeMenu = new Blockly.FieldDropdown(MODE);
+			var modeMenu = new FieldDropdown(Blockly, MODE);
 			modeMenu.setValidator((value) => {
 				var isStatement = (value == "REMOVE");
 				((ListsGetIndexBlock)modeMenu.sourceBlock_).updateStatement_(isStatement);
-				return Script.Undefined;
+				return Bridge.Script.Undefined;
 			});
 			this.appendValueInput("VALUE")
 				.setCheck("Array")
@@ -599,7 +599,7 @@ namespace BlocklyMruby
 			else {
 				this.appendDummyInput("AT");
 			}
-			var menu = new Blockly.FieldDropdown(this.WHERE_OPTIONS);
+			var menu = new FieldDropdown(Blockly, this.WHERE_OPTIONS);
 			menu.setValidator((value) => {
 				var newAt = (value == "FROM_START") || (value == "FROM_END");
 				// The "isAt" variable is available due to this function being a closure.
@@ -610,7 +610,7 @@ namespace BlocklyMruby
 					block.setFieldValue(value, "WHERE");
 					return null;
 				}
-				return Script.Undefined;
+				return Bridge.Script.Undefined;
 			});
 			this.getInput("AT").appendField(menu, "WHERE");
 			if (!String.IsNullOrEmpty(Msg.LISTS_GET_INDEX_TAIL)) {
@@ -625,8 +625,8 @@ namespace BlocklyMruby
 		public const string type_name = "lists_setIndex";
 		string[][] WHERE_OPTIONS;
 
-		public ListsSetIndexBlock()
-			: base(type_name)
+		public ListsSetIndexBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -653,7 +653,7 @@ namespace BlocklyMruby
 				.setCheck("Array")
 				.appendField(Msg.LISTS_SET_INDEX_INPUT_IN_LIST);
 			this.appendDummyInput()
-				.appendField(new Blockly.FieldDropdown(MODE), "MODE")
+				.appendField(new FieldDropdown(Blockly, MODE), "MODE")
 				.appendField("", "SPACE");
 			this.appendDummyInput("AT");
 			this.appendValueInput("TO")
@@ -754,7 +754,7 @@ namespace BlocklyMruby
 			else {
 				this.appendDummyInput("AT");
 			}
-			var menu = new Blockly.FieldDropdown(this.WHERE_OPTIONS);
+			var menu = new FieldDropdown(Blockly, this.WHERE_OPTIONS);
 			menu.setValidator((value) => {
 				var newAt = (value == "FROM_START") || (value == "FROM_END");
 				// The "isAt" variable is available due to this function being a closure.
@@ -765,7 +765,7 @@ namespace BlocklyMruby
 					block.setFieldValue(value, "WHERE");
 					return null;
 				}
-				return Script.Undefined;
+				return Bridge.Script.Undefined;
 			});
 			this.moveInputBefore("AT", "TO");
 			if (this.getInput("ORDINAL") != null) {
@@ -783,8 +783,8 @@ namespace BlocklyMruby
 
 		public string[][][] WHERE_OPTIONS;
 
-		public ListsGetSublistBlock()
-			: base(type_name)
+		public ListsGetSublistBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -877,7 +877,7 @@ namespace BlocklyMruby
 			else {
 				this.appendDummyInput("AT" + n);
 			}
-			var menu = new Blockly.FieldDropdown(WHERE_OPTIONS[n - 1]);
+			var menu = new FieldDropdown(Blockly, WHERE_OPTIONS[n - 1]);
 			menu.setValidator((value) => {
 				var newAt = (value == "FROM_START") || (value == "FROM_END");
 				// The "isAt" variable is available due to this function being a
@@ -890,7 +890,7 @@ namespace BlocklyMruby
 					block.setFieldValue(value, "WHERE" + n);
 					return null;
 				}
-				return Script.Undefined;
+				return Bridge.Script.Undefined;
 			});
 			this.getInput("AT" + n)
 				.appendField(menu, "WHERE" + n);
@@ -911,8 +911,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "lists_sort";
 
-		public ListsSortBlock()
-			: base(type_name)
+		public ListsSortBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -961,8 +961,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "lists_split";
 
-		public ListsSplitBlock()
-			: base(type_name)
+		public ListsSplitBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -974,13 +974,13 @@ namespace BlocklyMruby
 		{
 			// Assign "this" to a variable for use in the closures below.
 			var thisBlock = this;
-			var dropdown = new Blockly.FieldDropdown(new[] {
+			var dropdown = new FieldDropdown(Blockly, new[] {
 					new [] {Msg.LISTS_SPLIT_LIST_FROM_TEXT, "SPLIT"},
 					new [] {Msg.LISTS_SPLIT_TEXT_FROM_LIST, "JOIN"}
 				},
 				(newMode) => {
 					thisBlock.updateType_(newMode);
-					return Script.Undefined;
+					return Bridge.Script.Undefined;
 				});
 			this.setHelpUrl(Msg.LISTS_SPLIT_HELPURL);
 			this.setColour(Lists.HUE);

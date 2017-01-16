@@ -4,7 +4,7 @@
 // MIT Lisence
 using System;
 using Bridge;
-using Bridge.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 using System.Collections.Generic;
 
 namespace BlocklyMruby
@@ -47,7 +47,7 @@ namespace BlocklyMruby
 			// List length.
 			var argument0 = valueToCode(block, "VALUE");
 			if (argument0 == null) argument0 = new array_node(this, new List<node>());
-			return new call_node(this, argument0, intern("length"), new List<node>(), null);
+			return new call_node(this, argument0, intern("length"));
 		}
 
 		public node lists_isEmpty(ListsIsEmptyBlock block)
@@ -55,7 +55,7 @@ namespace BlocklyMruby
 			// Is the list empty?
 			var argument0 = valueToCode(block, "VALUE");
 			if (argument0 == null) argument0 = new array_node(this, new List<node>());
-			return new call_node(this, argument0, intern("empty?"), new List<node>(), null);
+			return new call_node(this, argument0, intern("empty?"));
 		}
 
 		public node lists_indexOf(ListsIndexOfBlock block)
@@ -86,28 +86,28 @@ namespace BlocklyMruby
 
 			if (where == "FIRST") {
 				if (mode == "GET") {
-					return new call_node(this, list, intern("first"), new List<node>(), null);
+					return new call_node(this, list, intern("first"));
 				}
 				else {
 					if (mode == "GET_REMOVE") {
-						return new call_node(this, list, intern("shift"), new List<node>(), null);
+						return new call_node(this, list, intern("shift"));
 					}
 					else if (mode == "REMOVE") {
-						return new call_node(this, list, intern("shift"), new List<node>(), null);
+						return new call_node(this, list, intern("shift"));
 					}
 				}
 			}
 			else if (where == "LAST") {
 				if (mode == "GET") {
-					return new call_node(this, list, intern("last"), new List<node>(), null);
+					return new call_node(this, list, intern("last"));
 				}
 				else {
 					var code = list + ".pop";
 					if (mode == "GET_REMOVE") {
-						return new call_node(this, list, intern("pop"), new List<node>(), null);
+						return new call_node(this, list, intern("pop"));
 					}
 					else if (mode == "REMOVE") {
-						return new call_node(this, list, intern("pop"), new List<node>(), null);
+						return new call_node(this, list, intern("pop"));
 					}
 				}
 			}
@@ -120,7 +120,7 @@ namespace BlocklyMruby
 				else {
 					// If the index is dynamic, decrement it in code.
 					at = new begin_node(this, new call_node(this, at, intern("-"), new int_node(this, 1)), true);
-					at = new call_node(this, at, intern("to_i"), new List<node>(), null);
+					at = new call_node(this, at, intern("to_i"));
 				}
 				if (mode == "GET") {
 					return new call_node(this, list, intern("[]"), new List<node>() { at }, null);
@@ -199,7 +199,7 @@ namespace BlocklyMruby
 				else {
 					// If the index is dynamic, decrement it in code.
 					at = new begin_node(this, new call_node(this, at, intern("-"), new int_node(this, 1)), true);
-					at = new call_node(this, at, intern("to_i"), new List<node>(), null);
+					at = new call_node(this, at, intern("to_i"));
 				}
 				if (mode == "SET") {
 					return new asgn_node(this, new call_node(this, list, intern("[]"), new List<node>() { at }, null), value);
@@ -216,7 +216,7 @@ namespace BlocklyMruby
 					}
 					else {
 						// If the index is dynamic, decrement it in code.
-						at = new call_node(this, at, intern("to_i"), new List<node>(), null);
+						at = new call_node(this, at, intern("to_i"));
 					}
 					return new asgn_node(this, new call_node(this, list, intern("[]"), new List<node>() { at }, null), value);
 				}
@@ -229,7 +229,7 @@ namespace BlocklyMruby
 					else {
 						// If the index is dynamic, decrement it in code.
 						at = new begin_node(this, new call_node(this, at, intern("+"), new int_node(this, 1)), true);
-						at = new call_node(this, at, intern("to_i"), new List<node>(), null);
+						at = new call_node(this, at, intern("to_i"));
 					}
 
 					at = new call_node(this, at, intern("-@"), (node)null);
@@ -267,7 +267,7 @@ namespace BlocklyMruby
 					at1 = new int_node(this, (int)(((int_node)at1).to_i() - 1));
 				}
 				else {
-					at1 = new call_node(this, at1, intern("to_i"), new List<node>(), null);
+					at1 = new call_node(this, at1, intern("to_i"));
 					at1 = new call_node(this, at1, intern("-"), new int_node(this, 1));
 				}
 			}
@@ -277,7 +277,7 @@ namespace BlocklyMruby
 				}
 				else {
 					at1 = new call_node(this, at1, intern("-@"), (node)null);
-					at1 = new call_node(this, at1, intern("to_i"), new List<node>(), null);
+					at1 = new call_node(this, at1, intern("to_i"));
 				}
 			}
 			if (where2 == "LAST" || (where2 == "FROM_END" && at2 is int_node && ((int_node)at2).to_i() == 1)) {
@@ -288,7 +288,7 @@ namespace BlocklyMruby
 					at2 = new int_node(this, (int)(((int_node)at2).to_i() - 1));
 				}
 				else {
-					at2 = new call_node(this, at2, intern("to_i"), new List<node>(), null);
+					at2 = new call_node(this, at2, intern("to_i"));
 					at2 = new call_node(this, at2, intern("-"), new int_node(this, 1));
 				}
 			}
@@ -298,7 +298,7 @@ namespace BlocklyMruby
 				}
 				else {
 					at2 = new call_node(this, at2, intern("-@"), (node)null);
-					at2 = new call_node(this, at2, intern("to_i"), new List<node>(), null);
+					at2 = new call_node(this, at2, intern("to_i"));
 				}
 			}
 			return new fcall_node(this, intern("lists_sublist"), new List<node>() { list, at1, at2 }, null);

@@ -27,22 +27,31 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Bridge;
 using Bridge.Html5;
-using Bridge.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 using BlocklyMruby;
 
-public static partial class Blockly
+namespace BlocklyMruby
 {
-	public static class Variables
+	public class Variables
 	{
+		public Blockly Blockly { get; }
+		public BlocklyScript Script { get; }
+
 		/// <summary>
 		/// Category to separate variable names from procedures and generated functions.
 		/// </summary>
-		public static string NAME_TYPE = "VARIABLE";
+		public const string NAME_TYPE = "VARIABLE";
 
 		/// <summary>
 		/// Common HSV hue for all blocks in this category.
 		/// </summary>
-		public static int HUE = 330;
+		public const int HUE = 330;
+
+		public Variables(Blockly Blockly)
+		{
+			this.Blockly = Blockly;
+			Script = Blockly.Script;
+		}
 
 		/// <summary>
 		/// Find all user-created variables that are in use in the workspace.
@@ -50,16 +59,16 @@ public static partial class Blockly
 		/// </summary>
 		/// <param name="root">Root block or workspace.</param>
 		/// <returns>Array of variable names.</returns>
-		public static string[] allUsedVariables(Any<Block, Blockly.Workspace> root)
+		public string[] allUsedVariables(Any<Block, Workspace> root)
 		{
 			BlockList blocks;
 			if (root.Is<Block>()) {
 				// Root is Block.
 				blocks = ((Block)root).getDescendants();
 			}
-			else if (root.Is<Blockly.Workspace>()) {
+			else if (root.Is<Workspace>()) {
 				// Root is Workspace.
-				blocks = ((Blockly.Workspace)root).getAllBlocks();
+				blocks = ((Workspace)root).getAllBlocks();
 			}
 			else {
 				throw new Exception("Not Block or Workspace: " + root);
@@ -92,7 +101,7 @@ public static partial class Blockly
 		/// </summary>
 		/// <param name="root">The workspace to inspect.</param>
 		/// <returns>Array of variable names.</returns>
-		public static string[] allVariables(Blockly.Workspace root)
+		public string[] allVariables(Workspace root)
 		{
 			if (root is Block) {
 				// Root is Block.
@@ -108,18 +117,18 @@ public static partial class Blockly
 		/// </summary>
 		/// <param name="workspace">The workspace contianing variables.</param>
 		/// <returns>Array of XML block elements.</returns>
-		public static Element[] flyoutCategory(Blockly.Workspace workspace)
+		public Element[] flyoutCategory(Workspace workspace)
 		{
 			var variableList = workspace.variableList;
 			Array.Sort(variableList, goog.@string.caseInsensitiveCompare);
 
 			var xmlList = new List<Element>();
-			var button = goog.dom.createDom("button");
+			var button = goog.dom.createDom(Script, "button");
 			button.SetAttribute("text", Msg.NEW_VARIABLE);
 			button.SetAttribute("callbackKey", "CREATE_VARIABLE");
 
 			Blockly.registerButtonCallback("CREATE_VARIABLE", (btn) => {
-				Variables.createVariable(btn.getTargetWorkspace());
+				createVariable(btn.getTargetWorkspace());
 			});
 
 			xmlList.Add(button);
@@ -129,7 +138,7 @@ public static partial class Blockly
 					// <block type="variables_set" gap="20">
 					//   <field name="VAR">item</field>
 					// </block>
-					var block = goog.dom.createDom("block");
+					var block = goog.dom.createDom(Script, "block");
 					block.SetAttribute("type", "variables_set");
 					if (Script.Get(Blockly.Blocks, "math_change") != null) {
 						block.SetAttribute("gap", "8");
@@ -137,7 +146,7 @@ public static partial class Blockly
 					else {
 						block.SetAttribute("gap", "24");
 					}
-					var field = goog.dom.createDom("field", null, variableList[0]);
+					var field = goog.dom.createDom(Script, "field", null, variableList[0]);
 					field.SetAttribute("name", "VAR");
 					block.AppendChild(field);
 					xmlList.Add(block);
@@ -150,24 +159,24 @@ public static partial class Blockly
 					//     </shadow>
 					//   </value>
 					// </block>
-					var block = goog.dom.createDom("block");
+					var block = goog.dom.createDom(Script, "block");
 					block.SetAttribute("type", "math_change");
 					if (Script.Get(Blockly.Blocks, "variables_get") != null) {
 						block.SetAttribute("gap", "20");
 					}
-					var value = goog.dom.createDom("value");
+					var value = goog.dom.createDom(Script, "value");
 					value.SetAttribute("name", "DELTA");
 					block.AppendChild(value);
 
-					var field = goog.dom.createDom("field", null, variableList[0]);
+					var field = goog.dom.createDom(Script, "field", null, variableList[0]);
 					field.SetAttribute("name", "VAR");
 					block.AppendChild(field);
 
-					var shadowBlock = goog.dom.createDom("shadow");
+					var shadowBlock = goog.dom.createDom(Script, "shadow");
 					shadowBlock.SetAttribute("type", "math_number");
 					value.AppendChild(shadowBlock);
 
-					var numberField = goog.dom.createDom("field", null, "1");
+					var numberField = goog.dom.createDom(Script, "field", null, "1");
 					numberField.SetAttribute("name", "NUM");
 					shadowBlock.AppendChild(numberField);
 
@@ -179,12 +188,12 @@ public static partial class Blockly
 						// <block type="variables_get" gap="8">
 						//   <field name="VAR">item</field>
 						// </block>
-						var block = goog.dom.createDom("block");
+						var block = goog.dom.createDom(Script, "block");
 						block.SetAttribute("type", "variables_get");
 						if (Script.Get(Blockly.Blocks, "variables_set") != null) {
 							block.SetAttribute("gap", "8");
 						}
-						var field = goog.dom.createDom("field", null, variableList[i]);
+						var field = goog.dom.createDom(Script, "field", null, variableList[i]);
 						field.SetAttribute("name", "VAR");
 						block.AppendChild(field);
 						xmlList.Add(block);
@@ -202,7 +211,7 @@ public static partial class Blockly
 		/// </summary>
 		/// <param name="workspace">The workspace to be unique in.</param>
 		/// <returns>New variable name.</returns>
-		public static string generateUniqueName(Blockly.Workspace workspace)
+		public string generateUniqueName(Workspace workspace)
 		{
 			var variableList = workspace.variableList;
 			var newName = "";
@@ -253,11 +262,11 @@ public static partial class Blockly
 		/// <param name="opt_callback">A callback. It will
 		/// return an acceptable new variable name, or null if change is to be
 		/// aborted (cancel button), or undefined if an existing variable was chosen.</param>
-		public static void createVariable(Blockly.Workspace workspace, Func<string, object> opt_callback = null)
+		public void createVariable(Workspace workspace, Func<string, object> opt_callback = null)
 		{
 			Action<string> promptAndCheckWithAlert = null;
 			promptAndCheckWithAlert = new Action<string>((defaultName) => {
-				Variables.promptName(Msg.NEW_VARIABLE_TITLE, defaultName,
+				promptName(Msg.NEW_VARIABLE_TITLE, defaultName,
 					(text) => {
 						if (text != null) {
 							if (workspace.variableIndexOf(text) != -1) {
@@ -292,13 +301,13 @@ public static partial class Blockly
 		/// <param name="defaultText">The default value to show in the prompt's field.</param>
 		/// <param name="callback">A callback. It will return the new
 		/// variable name, or null if the user picked something illegal.</param>
-		public static void promptName(string promptText, string defaultText, Action<string> callback)
+		public void promptName(string promptText, string defaultText, Action<string> callback)
 		{
 			Blockly.prompt(promptText, defaultText, new Action<string>((newVar) => {
 				// Merge runs of whitespace.  Strip leading and trailing whitespace.
 				// Beyond this, all names are legal.
 				if (newVar != null) {
-					newVar = newVar.Replace(new Regex(@"[\s\xa0] +", "g"), " ").Replace(new Regex("^ | $", "g"), "");
+					newVar = Regex.Replace(Regex.Replace(newVar, @"[\s\xa0] +", " "), "^ | $", "");
 					if (newVar == Msg.RENAME_VARIABLE ||
 						newVar == Msg.NEW_VARIABLE) {
 						// Ok, not ALL names are legal...

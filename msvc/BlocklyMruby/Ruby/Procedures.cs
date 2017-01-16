@@ -4,7 +4,7 @@
 // MIT Lisence
 using System;
 using Bridge;
-using Bridge.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 using System.Collections.Generic;
 
 namespace BlocklyMruby

@@ -11,26 +11,29 @@ namespace BlocklyMruby
 	public class Block
 	{
 		public dynamic instance;
+		public BlocklyScript Script { get; private set; }
+		public Blockly Blockly { get; private set; }
+		public Document Document { get; private set; }
 		public string type;
 
 		[External, FieldProperty]
 		internal string id { get { return instance.id; } }
 		[External, FieldProperty]
-		internal Blockly.Connection outputConnection {
-			get { return Blockly.Connection.Create(instance.outputConnection); }
+		internal Connection outputConnection {
+			get { return Connection.Create(Blockly, instance.outputConnection); }
 		}
 		[External, FieldProperty]
-		internal Blockly.Connection nextConnection {
-			get { return Blockly.Connection.Create(instance.nextConnection); }
+		internal Connection nextConnection {
+			get { return Connection.Create(Blockly, instance.nextConnection); }
 		}
 		[External, FieldProperty]
-		internal Blockly.Connection previousConnection {
-			get { return Blockly.Connection.Create(instance.previousConnection); }
+		internal Connection previousConnection {
+			get { return Connection.Create(Blockly, instance.previousConnection); }
 		}
 		[External, FieldProperty]
 		internal InputList inputList {
 			get {
-				return new InputList(instance.inputList);
+				return new InputList(Script, instance.inputList);
 			}
 		}
 		[External, FieldProperty]
@@ -50,15 +53,15 @@ namespace BlocklyMruby
 		internal bool contextMenu { get { return instance.contextMenu; } set { instance.contextMenu = value; } }
 		[External, FieldProperty]
 		internal string contextMenuMsg_ {
-			get { return Script.HasMember(instance, "contextMenuMsg_") ? instance.contextMenuMsg_ : null; }
+			get { return Bridge.Script.HasMember(instance, "contextMenuMsg_") ? instance.contextMenuMsg_ : null; }
 			set { Script.Set(instance, "contextMenuMsg_", value); }
 		}
 		[External, FieldProperty]
-		internal Any<string, Blockly.Comment> comment {
+		internal Any<string, Comment> comment {
 			get {
 				var str = instance.comment as string;
 				if (str != null) return str;
-				return new Blockly.Comment(instance.comment);
+				return new Comment(Blockly, instance.comment);
 			}
 		}
 		[External, FieldProperty]
@@ -69,21 +72,24 @@ namespace BlocklyMruby
 				var blocks = Script.Get<dynamic>(instance, "prevBlocks_");
 				if ((blocks == null) || (blocks is DBNull))
 					return null;
-				return new BlockList(blocks);
+				return new BlockList(Script, blocks);
 			}
 			set {
 				Script.Set(instance, "prevBlocks_", value == null ? null : value.instance);
 			}
 		}
 		[External, FieldProperty]
-		internal Blockly.Workspace workspace { get { return Blockly.WorkspaceSvg.Create(instance.workspace); } }
+		internal Workspace workspace { get { return WorkspaceSvg.Create(Blockly, instance.workspace); } }
 		[External, FieldProperty]
-		internal Blockly.Mutator mutator { get { return Blockly.Mutator.Create(instance.mutator); } }
+		internal Mutator mutator { get { return Mutator.Create(Blockly, instance.mutator); } }
 		[External, FieldProperty]
 		internal bool isInFlyout { get { return instance.isInFlyout; } }
 
-		internal Block(string type)
+		internal Block(Blockly blockly, string type)
 		{
+			Blockly = blockly;
+			Script = blockly.Script;
+			Document = new Document(Script);
 			this.type = type;
 		}
 
@@ -127,7 +133,7 @@ namespace BlocklyMruby
 			var ret = instance.getParent.call(instance);
 			if ((ret == null) || (ret is DBNull))
 				return null;
-			return BlocklyScript.CreateBlock(ret);
+			return Script.CreateBlock(ret);
 		}
 
 		/// <summary>
@@ -136,12 +142,12 @@ namespace BlocklyMruby
 		/// <param name="block">A block connected to an input on this block.</param>
 		/// <returns>The input that connects to the specified block.</returns>
 		[External]
-		internal Blockly.Input getInputWithBlock(Block block)
+		internal Input getInputWithBlock(Block block)
 		{
 			var ret = instance.getInputWithBlock.call(instance, block.instance);
 			if ((ret == null) || (ret is DBNull))
 				return null;
-			return BlocklyScript.CreateInput(ret);
+			return Script.CreateInput(ret);
 		}
 
 		/// <summary>
@@ -156,7 +162,7 @@ namespace BlocklyMruby
 			var ret = instance.getSurroundParent.call(instance);
 			if ((ret == null) || (ret is DBNull))
 				return null;
-			return BlocklyScript.CreateBlock(ret);
+			return Script.CreateBlock(ret);
 		}
 
 		/// <summary>
@@ -169,7 +175,7 @@ namespace BlocklyMruby
 			var ret = instance.getNextBlock.call(instance);
 			if ((ret == null) || (ret is DBNull))
 				return null;
-			return BlocklyScript.CreateBlock(ret);
+			return Script.CreateBlock(ret);
 		}
 
 		/// <summary>
@@ -183,7 +189,7 @@ namespace BlocklyMruby
 			var ret = instance.getRootBlock.call(instance);
 			if ((ret == null) || (ret is DBNull))
 				return null;
-			return BlocklyScript.CreateBlock(ret);
+			return Script.CreateBlock(ret);
 		}
 
 		/// <summary>
@@ -198,7 +204,7 @@ namespace BlocklyMruby
 			var childlen = instance.getChildren.call(instance);
 			if ((childlen == null) || (childlen is DBNull))
 				return null;
-			return new BlockList(childlen);
+			return new BlockList(Script, childlen);
 		}
 
 		/// <summary>
@@ -224,7 +230,7 @@ namespace BlocklyMruby
 			var descendants = instance.getDescendants.call(instance);
 			if ((descendants == null) || (descendants is DBNull))
 				return null;
-			return new BlockList(descendants);
+			return new BlockList(Script, descendants);
 		}
 
 		/// <summary>
@@ -377,9 +383,9 @@ namespace BlocklyMruby
 		/// <param name="name">The name of the field.</param>
 		/// <returns>Named field, or null if field does not exist.</returns>
 		[External]
-		internal Blockly.Field getField(string name)
+		internal Field getField(string name)
 		{
-			return BlocklyScript.CreateField(instance.getField.call(instance, name));
+			return Script.CreateField(instance.getField.call(instance, name));
 		}
 
 		/// <summary>
@@ -473,7 +479,7 @@ namespace BlocklyMruby
 		{
 			var check = opt_check == null ? null : opt_check.As<string[]>();
 			if (check != null)
-				instance.setPreviousStatement.call(instance, newBoolean, Script.NewArray(check));
+				instance.setPreviousStatement.call(instance, newBoolean, Bridge.Script.NewArray(check));
 			else
 				instance.setPreviousStatement.call(instance, newBoolean, (string)opt_check);
 		}
@@ -489,7 +495,7 @@ namespace BlocklyMruby
 		{
 			var check = opt_check == null ? null : opt_check.As<string[]>();
 			if (check != null)
-				instance.setNextStatement.call(instance, newBoolean, Script.NewArray(check));
+				instance.setNextStatement.call(instance, newBoolean, Bridge.Script.NewArray(check));
 			else
 				instance.setNextStatement.call(instance, newBoolean, (string)opt_check);
 		}
@@ -506,7 +512,7 @@ namespace BlocklyMruby
 		{
 			var check = opt_check == null ? null : opt_check.As<string[]>();
 			if (check != null)
-				instance.setOutput.call(instance, newBoolean, Script.NewArray(check));
+				instance.setOutput.call(instance, newBoolean, Bridge.Script.NewArray(check));
 			else
 				instance.setOutput.call(instance, newBoolean, (string)opt_check);
 		}
@@ -596,9 +602,9 @@ namespace BlocklyMruby
 		/// input again.  Should be unique to this block.</param>
 		/// <returns>The input object created.</returns>
 		[External]
-		internal Blockly.Input appendValueInput(string name)
+		internal Input appendValueInput(string name)
 		{
-			return BlocklyScript.CreateInput(instance.appendValueInput.call(instance, name));
+			return Script.CreateInput(instance.appendValueInput.call(instance, name));
 		}
 
 		/// <summary>
@@ -608,9 +614,9 @@ namespace BlocklyMruby
 		/// input again.  Should be unique to this block.</param>
 		/// <returns>The input object created.</returns>
 		[External]
-		internal Blockly.Input appendStatementInput(string name)
+		internal Input appendStatementInput(string name)
 		{
-			return BlocklyScript.CreateInput(instance.appendStatementInput.call(instance, name));
+			return Script.CreateInput(instance.appendStatementInput.call(instance, name));
 		}
 
 		/// <summary>
@@ -620,9 +626,9 @@ namespace BlocklyMruby
 		/// this input again.  Should be unique to this block.</param>
 		/// <returns>The input object created.</returns>
 		[External]
-		internal Blockly.Input appendDummyInput(string opt_name = null)
+		internal Input appendDummyInput(string opt_name = null)
 		{
-			return BlocklyScript.CreateInput(instance.appendDummyInput.call(instance, opt_name));
+			return Script.CreateInput(instance.appendDummyInput.call(instance, opt_name));
 		}
 
 		/// <summary>
@@ -677,12 +683,12 @@ namespace BlocklyMruby
 		/// <param name="name">The name of the input.</param>
 		/// <returns>The input object, or null if input does not exist.</returns>
 		[External]
-		internal Blockly.Input getInput(string name)
+		internal Input getInput(string name)
 		{
 			var ret = instance.getInput.call(instance, name);
 			if ((ret == null) || (ret is DBNull))
 				return null;
-			return BlocklyScript.CreateInput(ret);
+			return Script.CreateInput(ret);
 		}
 
 		/// <summary>
@@ -697,7 +703,7 @@ namespace BlocklyMruby
 			var ret = instance.getInputTargetBlock.call(instance, name);
 			if ((ret == null) || (ret is DBNull))
 				return null;
-			return BlocklyScript.CreateBlock(ret);
+			return Script.CreateBlock(ret);
 		}
 
 		/// <summary>
@@ -738,7 +744,7 @@ namespace BlocklyMruby
 		/// </summary>
 		/// <param name="mutator">A mutator dialog instance or null to remove.</param>
 		[External]
-		internal void setMutator(Blockly.Mutator mutator)
+		internal void setMutator(Mutator mutator)
 		{
 			instance.setMutator.call(instance, mutator.instance);
 		}
@@ -751,7 +757,7 @@ namespace BlocklyMruby
 		[External]
 		internal goog.math.Coordinate getRelativeToSurfaceXY()
 		{
-			return new goog.math.Coordinate(instance.getRelativeToSurfaceXY.call(instance));
+			return new goog.math.Coordinate(Script, instance.getRelativeToSurfaceXY.call(instance));
 		}
 
 		/// <summary>
@@ -826,7 +832,7 @@ namespace BlocklyMruby
 		[External]
 		internal goog.math.Size getHeightWidth()
 		{
-			return new goog.math.Size(instance.getHeightWidth.call(instance));
+			return new goog.math.Size(Script, instance.getHeightWidth.call(instance));
 		}
 
 		/// <summary>
@@ -835,9 +841,9 @@ namespace BlocklyMruby
 		/// </summary>
 		/// <returns>Object with top left and bottom right coordinates of the bounding box.</returns>
 		[External]
-		internal Blockly.Rectangle getBoundingRectangle()
+		internal Rectangle getBoundingRectangle()
 		{
-			return new Blockly.Rectangle(instance.getBoundingRectangle.call(instance));
+			return new Rectangle(Script, instance.getBoundingRectangle.call(instance));
 		}
 
 		/// <summary>
@@ -846,7 +852,7 @@ namespace BlocklyMruby
 		/// <param name="start">Current location.</param>
 		/// <param name="forward">If true go forward, otherwise backward.</param>
 		[External]
-		internal void tab(Any<Blockly.Field, Block> start, bool forward)
+		internal void tab(Any<Field, Block> start, bool forward)
 		{
 			instance.tab.call(instance, start.Value, forward);
 		}
@@ -870,7 +876,7 @@ namespace BlocklyMruby
 			var ret = instance.getSvgRoot.call(instance);
 			if ((ret == null) || (ret is DBNull))
 				return null;
-			return Element.Create(ret);
+			return Element.Create(Script, ret);
 		}
 
 		/// <summary>
@@ -970,51 +976,62 @@ namespace BlocklyMruby
 
 	public class ContextMenuOption
 	{
-		internal dynamic instance;
+		internal Microsoft.JScript.JSObject instance;
 
 		public bool enabled {
 			get {
-				return Script.Get(instance, "enabled");
+				return (bool)Get("enabled");
 			}
 			set {
-				Script.Set(instance, "enabled", value);
+				Set("enabled", value);
 			}
 		}
 		public string text {
 			get {
-				return Script.Get(instance, "text");
+				return (string)Get("text");
 			}
 			set {
-				Script.Set(instance, "text", value);
+				Set("text", value);
 			}
 		}
 		public dynamic callback {
 			get {
-				return Script.Get(instance, "callback");
+				return Get("callback");
 			}
 			set {
-				Script.Set(instance, "callback", value);
+				Set("callback", value);
 			}
 		}
 
 		public ContextMenuOption()
 		{
-			instance = Script.NewObject();
+			instance = new Microsoft.JScript.JSObject();
+		}
+
+		private object Get(string name)
+		{
+			return instance.InvokeMember(name, System.Reflection.BindingFlags.Default, null, instance, new object[0],
+				new System.Reflection.ParameterModifier[0], null, null);
+		}
+
+		private void Set(string name, object value)
+		{
+			instance.SetMemberValue2(name, value);
 		}
 
 		internal void push(ContextMenuOption option)
 		{
 			object value = enabled;
 			if ((value != null) || !(value is DBNull)) {
-				Script.Set(instance, "enabled", value);
+				Set("enabled", value);
 			}
 			value = text;
 			if ((value != null) || !(value is DBNull)) {
-				Script.Set(instance, "text", value);
+				Set("text", value);
 			}
 			value = callback;
 			if ((value != null) || !(value is DBNull)) {
-				Script.Set(instance, "callback", value);
+				Set("callback", value);
 			}
 		}
 	}
@@ -1022,9 +1039,11 @@ namespace BlocklyMruby
 	public class ContextMenuOptionList
 	{
 		internal dynamic instance;
+		public Script Script { get; private set; }
 
-		public ContextMenuOptionList(object instance)
+		public ContextMenuOptionList(Script script, object instance)
 		{
+			Script = script;
 			this.instance = instance;
 		}
 

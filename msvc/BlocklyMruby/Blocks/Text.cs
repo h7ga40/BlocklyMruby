@@ -45,8 +45,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "text";
 
-		public TextBlock()
-			: base(type_name)
+		public TextBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -60,7 +60,7 @@ namespace BlocklyMruby
 			this.setColour(Texts.HUE);
 			this.appendDummyInput()
 				.appendField(this.newQuote_(true))
-				.appendField(new Blockly.FieldTextInput(""), "TEXT")
+				.appendField(new FieldTextInput(Blockly, ""), "TEXT")
 				.appendField(this.newQuote_(false));
 			this.setOutput(true, "String");
 			// Assign "this" to a variable for use in the tooltip closure below.
@@ -76,16 +76,16 @@ namespace BlocklyMruby
 		/**
 		 * Create an image of an open or closed quote.
 		 * @param {boolean} open True if open quote, false if closed.
-		 * @return {!Blockly.FieldImage} The field image of the quote.
+		 * @return {!FieldImage} The field image of the quote.
 		 * @this Blockly.Block
 		 * @private
 		 */
-		public Blockly.Field newQuote_(bool open)
+		public Field newQuote_(bool open)
 		{
-			return TextBlock.newQuote_(open, this.RTL);
+			return TextBlock.newQuote_(Blockly, open, this.RTL);
 		}
 
-		public static Blockly.Field newQuote_(bool open, bool RTL)
+		public static Field newQuote_(Blockly Blockly, bool open, bool RTL)
 		{
 			string file;
 			if (open == RTL) {
@@ -94,7 +94,7 @@ namespace BlocklyMruby
 			else {
 				file = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAKCAQAAAAqJXdxAAAAn0lEQVQI1z3OMa5BURSF4f/cQhAKjUQhuQmFNwGJEUi0RKN5rU7FHKhpjEH3TEMtkdBSCY1EIv8r7nFX9e29V7EBAOvu7RPjwmWGH/VuF8CyN9/OAdvqIXYLvtRaNjx9mMTDyo+NjAN1HNcl9ZQ5oQMM3dgDUqDo1l8DzvwmtZN7mnD+PkmLa+4mhrxVA9fRowBWmVBhFy5gYEjKMfz9AylsaRRgGzvZAAAAAElFTkSuQmCC";
 			}
-			return new Blockly.FieldImage(file, 12, 12, "\"");
+			return new FieldImage(Blockly, file, 12, 12, "\"");
 		}
 	}
 
@@ -104,8 +104,8 @@ namespace BlocklyMruby
 		public const string type_name = "text_join";
 		internal int itemCount_;
 
-		public TextJoinBlock()
-			: base(type_name)
+		public TextJoinBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -120,7 +120,7 @@ namespace BlocklyMruby
 			this.itemCount_ = 2;
 			this.updateShape_();
 			this.setOutput(true, "String");
-			this.setMutator(new Blockly.Mutator(new[] { TextCreateJoinItemBlock.type_name }));
+			this.setMutator(new Mutator(Blockly, new[] { TextCreateJoinItemBlock.type_name }));
 			this.setTooltip(Msg.TEXT_JOIN_TOOLTIP);
 		}
 
@@ -143,17 +143,17 @@ namespace BlocklyMruby
 		 */
 		public void domToMutation(Element xmlElement)
 		{
-			this.itemCount_ = Script.ParseInt(xmlElement.GetAttribute("items"), 10);
+			this.itemCount_ = Bridge.Script.ParseInt(xmlElement.GetAttribute("items"), 10);
 			this.updateShape_();
 		}
 
 		/**
 		 * Populate the mutator"s dialog with this block"s components.
-		 * @param {!Blockly.Workspace} workspace Mutator"s workspace.
+		 * @param {!Workspace} workspace Mutator"s workspace.
 		 * @return {!Blockly.Block} Root block in mutator.
 		 * @this Blockly.Block
 		 */
-		public Block decompose(Blockly.Workspace workspace)
+		public Block decompose(Workspace workspace)
 		{
 			var containerBlock = workspace.newBlock(TextCreateJoinContainerBlock.type_name);
 			containerBlock.initSvg();
@@ -176,7 +176,7 @@ namespace BlocklyMruby
 		{
 			var itemBlock = (TextCreateJoinItemBlock)containerBlock.getInputTargetBlock("STACK");
 			// Count number of inputs.
-			var connections = new List<Blockly.Connection>();
+			var connections = new List<Connection>();
 			while (itemBlock != null) {
 				connections.Add(itemBlock.valueConnection_);
 				itemBlock = (itemBlock.nextConnection != null) ?
@@ -193,7 +193,7 @@ namespace BlocklyMruby
 			this.updateShape_();
 			// Reconnect any child blocks.
 			for (var i = 0; i < this.itemCount_; i++) {
-				Blockly.Mutator.reconnect(connections[i], this, "ADD" + i);
+				Mutator.reconnect(connections[i], this, "ADD" + i);
 			}
 		}
 
@@ -247,9 +247,9 @@ namespace BlocklyMruby
 			}
 		}
 
-		public Blockly.Field newQuote_(bool open)
+		public Field newQuote_(bool open)
 		{
-			return TextBlock.newQuote_(open, this.RTL);
+			return TextBlock.newQuote_(Blockly, open, this.RTL);
 		}
 	}
 
@@ -258,8 +258,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "text_create_join_container";
 
-		public TextCreateJoinContainerBlock()
-			: base(type_name)
+		public TextCreateJoinContainerBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -282,10 +282,10 @@ namespace BlocklyMruby
 	public class TextCreateJoinItemBlock : Block
 	{
 		public const string type_name = "text_create_join_item";
-		public Blockly.Connection valueConnection_;
+		public Connection valueConnection_;
 
-		public TextCreateJoinItemBlock()
-			: base(type_name)
+		public TextCreateJoinItemBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -310,8 +310,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "text_append";
 
-		public TextAppendBlock()
-			: base(type_name)
+		public TextAppendBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -325,7 +325,7 @@ namespace BlocklyMruby
 			this.setColour(Texts.HUE);
 			this.appendValueInput("TEXT")
 				.appendField(Msg.TEXT_APPEND_TO)
-				.appendField(new Blockly.FieldVariable(
+				.appendField(new FieldVariable(Blockly, 
 				Msg.TEXT_APPEND_VARIABLE), "VAR")
 				.appendField(Msg.TEXT_APPEND_APPENDTEXT);
 			this.setPreviousStatement(true);
@@ -343,8 +343,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "text_length";
 
-		public TextLengthBlock()
-			: base(type_name)
+		public TextLengthBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -376,8 +376,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "text_isEmpty";
 
-		public TextIsEmptyBlock()
-			: base(type_name)
+		public TextIsEmptyBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -409,8 +409,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "text_indexOf";
 
-		public TextIndexOfBlock()
-			: base(type_name)
+		public TextIndexOfBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -432,7 +432,7 @@ namespace BlocklyMruby
 				.appendField(Msg.TEXT_INDEXOF_INPUT_INTEXT);
 			this.appendValueInput("FIND")
 				.setCheck("String")
-				.appendField(new Blockly.FieldDropdown(OPERATORS), "END");
+				.appendField(new FieldDropdown(Blockly, OPERATORS), "END");
 			if (!String.IsNullOrEmpty(Msg.TEXT_INDEXOF_TAIL)) {
 				this.appendDummyInput().appendField(Msg.TEXT_INDEXOF_TAIL);
 			}
@@ -452,8 +452,8 @@ namespace BlocklyMruby
 		public const string type_name = "text_charAt";
 		string[][] WHERE_OPTIONS;
 
-		public TextCharAtBlock()
-			: base(type_name)
+		public TextCharAtBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -548,7 +548,7 @@ namespace BlocklyMruby
 				this.appendDummyInput("TAIL")
 					.appendField(Msg.TEXT_CHARAT_TAIL);
 			}
-			var menu = new Blockly.FieldDropdown(this.WHERE_OPTIONS);
+			var menu = new FieldDropdown(Blockly, this.WHERE_OPTIONS);
 			menu.setValidator((value) => {
 				var newAt = (value == "FROM_START") || (value == "FROM_END");
 				// The "isAt" variable is available due to this function being a closure.
@@ -559,7 +559,7 @@ namespace BlocklyMruby
 					block.setFieldValue(value, "WHERE");
 					return null;
 				}
-				return Script.Undefined;
+				return Bridge.Script.Undefined;
 			});
 			this.getInput("AT").appendField(menu, "WHERE");
 		}
@@ -572,8 +572,8 @@ namespace BlocklyMruby
 
 		private string[][][] WHERE_OPTIONS;
 
-		public TextGetSubstringBlock()
-			: base(type_name)
+		public TextGetSubstringBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -672,7 +672,7 @@ namespace BlocklyMruby
 				this.appendDummyInput("TAIL")
 					.appendField(Msg.TEXT_GET_SUBSTRING_TAIL);
 			}
-			var menu = new Blockly.FieldDropdown(WHERE_OPTIONS[n - 1]);
+			var menu = new FieldDropdown(Blockly, WHERE_OPTIONS[n - 1]);
 			menu.setValidator((value) => {
 				var newAt = (value == "FROM_START") || (value == "FROM_END");
 				// The "isAt" variable is available due to this function being a
@@ -685,7 +685,7 @@ namespace BlocklyMruby
 					block.setFieldValue(value, "WHERE" + n);
 					return null;
 				}
-				return Script.Undefined;
+				return Bridge.Script.Undefined;
 			});
 
 			this.getInput("AT" + n)
@@ -701,8 +701,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "text_changeCase";
 
-		public TextChangeCaseBlock()
-			: base(type_name)
+		public TextChangeCaseBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -721,7 +721,7 @@ namespace BlocklyMruby
 			this.setColour(Texts.HUE);
 			this.appendValueInput("TEXT")
 				.setCheck("String")
-				.appendField(new Blockly.FieldDropdown(OPERATORS), "CASE");
+				.appendField(new FieldDropdown(Blockly, OPERATORS), "CASE");
 			this.setOutput(true, "String");
 			this.setTooltip(Msg.TEXT_CHANGECASE_TOOLTIP);
 		}
@@ -732,8 +732,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "text_trim";
 
-		public TextTrimBlock()
-			: base(type_name)
+		public TextTrimBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -752,7 +752,7 @@ namespace BlocklyMruby
 			this.setColour(Texts.HUE);
 			this.appendValueInput("TEXT")
 				.setCheck("String")
-				.appendField(new Blockly.FieldDropdown(OPERATORS), "MODE");
+				.appendField(new FieldDropdown(Blockly, OPERATORS), "MODE");
 			this.setOutput(true, "String");
 			this.setTooltip(Msg.TEXT_TRIM_TOOLTIP);
 		}
@@ -763,8 +763,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "text_print";
 
-		public TextPrintBlock()
-			: base(type_name)
+		public TextPrintBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -796,8 +796,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "text_prompt_ext";
 
-		public TextPromptExtBlock()
-			: base(type_name)
+		public TextPromptExtBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -815,9 +815,9 @@ namespace BlocklyMruby
 			this.setColour(Texts.HUE);
 			// Assign "this" to a variable for use in the closures below.
 			var thisBlock = this;
-			var dropdown = new Blockly.FieldDropdown(TYPES, (newOp) => {
+			var dropdown = new FieldDropdown(Blockly, TYPES, (newOp) => {
 				thisBlock.updateType_(newOp);
-				return Script.Undefined;
+				return Bridge.Script.Undefined;
 			});
 			this.appendValueInput("TEXT")
 				.appendField(dropdown, "TYPE");
@@ -868,8 +868,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "text_prompt";
 
-		public TextPromptBlock()
-			: base(type_name)
+		public TextPromptBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -888,14 +888,14 @@ namespace BlocklyMruby
 			var thisBlock = this;
 			this.setHelpUrl(Msg.TEXT_PROMPT_HELPURL);
 			this.setColour(Texts.HUE);
-			var dropdown = new Blockly.FieldDropdown(TYPES, (newOp) => {
+			var dropdown = new FieldDropdown(Blockly, TYPES, (newOp) => {
 				thisBlock.updateType_(newOp);
-				return Script.Undefined;
+				return Bridge.Script.Undefined;
 			});
 			this.appendDummyInput()
 				.appendField(dropdown, "TYPE")
 				.appendField(this.newQuote_(true))
-				.appendField(new Blockly.FieldTextInput(""), "TEXT")
+				.appendField(new FieldTextInput(Blockly, ""), "TEXT")
 				.appendField(this.newQuote_(false));
 			this.setOutput(true, "String");
 			this.setTooltip(new Func<string>(() => {
@@ -905,9 +905,9 @@ namespace BlocklyMruby
 			}));
 		}
 
-		public Blockly.Field newQuote_(bool open)
+		public Field newQuote_(bool open)
 		{
-			return TextBlock.newQuote_(open, this.RTL);
+			return TextBlock.newQuote_(Blockly, open, this.RTL);
 		}
 
 		/**

@@ -34,12 +34,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.JScript" />
-    <Reference Include="Microsoft.mshtml, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -54,7 +50,9 @@
     <Compile Include="App.cs" />
     <Compile Include="Block.cs" />
     <Compile Include="Blockly.cs" />
-    <Compile Include="BlocklyView.cs" />
+    <Compile Include="BlocklyView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Blocks\Colour.cs" />
     <Compile Include="Blocks\Lists.cs" />
     <Compile Include="Blocks\Logic.cs" />
@@ -79,6 +77,9 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Ruby.cs" />
+    <Compile Include="AceView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Ruby\Colour.cs" />
     <Compile Include="Ruby\Lists.cs" />
     <Compile Include="Ruby\Logic.cs" />
@@ -88,6 +89,9 @@
     <Compile Include="Ruby\Text.cs" />
     <Compile Include="Ruby\Variables.cs" />
     <Compile Include="SwitchCaseBlock.cs" />
+    <Compile Include="XTermView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Variables.cs" />
     <Compile Include="yyDebug.cs" />
     <EmbeddedResource Include="MainForm.resx">
@@ -117,6 +121,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BlocklyMrubyRes\BlocklyMrubyRes.vcxproj">
+      <Project>{b71e967b-e4a8-457a-bd38-6cc771f3d9b9}</Project>
+      <Name>BlocklyMrubyRes</Name>
+    </ProjectReference>
     <ProjectReference Include="..\WebConsole\WebConsole.csproj">
       <Project>{fd59ae4f-2473-454f-80b5-de23d2e1f34c}</Project>
       <Name>WebConsole</Name>

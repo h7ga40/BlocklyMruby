@@ -47,8 +47,8 @@ namespace BlocklyMruby
 		internal int elseifCount_;
 		internal int elseCount_;
 
-		public ControlsIfBlock()
-			: base(type_name)
+		public ControlsIfBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -67,7 +67,7 @@ namespace BlocklyMruby
 				.appendField(Msg.CONTROLS_IF_MSG_THEN);
 			this.setPreviousStatement(true);
 			this.setNextStatement(true);
-			this.setMutator(new Blockly.Mutator(new[] { ControlsIfElseIfBlock.type_name, ControlsIfElseBlock.type_name }));
+			this.setMutator(new Mutator(Blockly, new[] { ControlsIfElseIfBlock.type_name, ControlsIfElseBlock.type_name }));
 			// Assign "this" to a variable for use in the tooltip closure below.
 			var thisBlock = this;
 			this.setTooltip(new Func<string>(() => {
@@ -116,18 +116,18 @@ namespace BlocklyMruby
 		 */
 		public void domToMutation(Element xmlElement)
 		{
-			this.elseifCount_ = Script.ParseInt(xmlElement.GetAttribute("elseif"), 10);
-			this.elseCount_ = Script.ParseInt(xmlElement.GetAttribute("else"), 10);
+			this.elseifCount_ = Bridge.Script.ParseInt(xmlElement.GetAttribute("elseif"), 10);
+			this.elseCount_ = Bridge.Script.ParseInt(xmlElement.GetAttribute("else"), 10);
 			this.updateShape_();
 		}
 
 		/**
 		 * Populate the mutator"s dialog with this block"s components.
-		 * @param {!Blockly.Workspace} workspace Mutator"s workspace.
+		 * @param {!Workspace} workspace Mutator"s workspace.
 		 * @return {!Blockly.Block} Root block in mutator.
 		 * @this Blockly.Block
 		 */
-		public Block decompose(Blockly.Workspace workspace)
+		public Block decompose(Workspace workspace)
 		{
 			var containerBlock = workspace.newBlock(ControlsIfIfBlock.type_name);
 			containerBlock.initSvg();
@@ -157,9 +157,9 @@ namespace BlocklyMruby
 			// Count number of inputs.
 			this.elseifCount_ = 0;
 			this.elseCount_ = 0;
-			var valueConnections = new List<Blockly.Connection>() { null };
-			var statementConnections = new List<Blockly.Connection>() { null };
-			var elseStatementConnection = (Blockly.Connection)null;
+			var valueConnections = new List<Connection>() { null };
+			var statementConnections = new List<Connection>() { null };
+			var elseStatementConnection = (Connection)null;
 			while (clauseBlock != null) {
 				switch (clauseBlock.type) {
 				case ControlsIfElseIfBlock.type_name:
@@ -180,10 +180,10 @@ namespace BlocklyMruby
 			this.updateShape_();
 			// Reconnect any child blocks.
 			for (var i = 1; i <= this.elseifCount_; i++) {
-				Blockly.Mutator.reconnect(valueConnections[i], this, "IF" + i);
-				Blockly.Mutator.reconnect(statementConnections[i], this, "DO" + i);
+				Mutator.reconnect(valueConnections[i], this, "IF" + i);
+				Mutator.reconnect(statementConnections[i], this, "DO" + i);
 			}
-			Blockly.Mutator.reconnect(elseStatementConnection, this, "ELSE");
+			Mutator.reconnect(elseStatementConnection, this, "ELSE");
 		}
 
 		/**
@@ -258,8 +258,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "controls_if_if";
 
-		public ControlsIfIfBlock()
-			: base(type_name)
+		public ControlsIfIfBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -282,11 +282,11 @@ namespace BlocklyMruby
 	public class ControlsIfElseIfBlock : Block
 	{
 		public const string type_name = "controls_if_elseif";
-		public Blockly.Connection valueConnection_;
-		public Blockly.Connection statementConnection_;
+		public Connection valueConnection_;
+		public Connection statementConnection_;
 
-		public ControlsIfElseIfBlock()
-			: base(type_name)
+		public ControlsIfElseIfBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -310,10 +310,10 @@ namespace BlocklyMruby
 	public class ControlsIfElseBlock : Block
 	{
 		public const string type_name = "controls_if_else";
-		public Blockly.Connection statementConnection_;
+		public Connection statementConnection_;
 
-		public ControlsIfElseBlock()
-			: base(type_name)
+		public ControlsIfElseBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -337,8 +337,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "logic_compare";
 
-		public LogicCompareBlock()
-			: base(type_name)
+		public LogicCompareBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -370,7 +370,7 @@ namespace BlocklyMruby
 			this.setOutput(true, "Boolean");
 			this.appendValueInput("A");
 			this.appendValueInput("B")
-				.appendField(new Blockly.FieldDropdown(OPERATORS), "OP");
+				.appendField(new FieldDropdown(Blockly, OPERATORS), "OP");
 			this.setInputsInline(true);
 			// Assign "this" to a variable for use in the tooltip closure below.
 			var thisBlock = this;
@@ -391,10 +391,10 @@ namespace BlocklyMruby
 		/**
 		 * Called whenever anything on the workspace changes.
 		 * Prevent mismatched types from being compared.
-		 * @param {!Blockly.Events.Abstract} e Change event.
+		 * @param {!Abstract} e Change event.
 		 * @this Blockly.Block
 		 */
-		public void onchange(Blockly.Events.Abstract e)
+		public void onchange(Abstract e)
 		{
 			var blockA = this.getInputTargetBlock("A");
 			var blockB = this.getInputTargetBlock("B");
@@ -423,8 +423,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "logic_operation";
 
-		public LogicOperationBlock()
-			: base(type_name)
+		public LogicOperationBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -445,7 +445,7 @@ namespace BlocklyMruby
 				.setCheck("Boolean");
 			this.appendValueInput("B")
 				.setCheck("Boolean")
-				.appendField(new Blockly.FieldDropdown(OPERATORS), "OP");
+				.appendField(new FieldDropdown(Blockly, OPERATORS), "OP");
 			this.setInputsInline(true);
 			// Assign "this" to a variable for use in the tooltip closure below.
 			var thisBlock = this;
@@ -464,8 +464,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "logic_negate";
 
-		public LogicNegateBlock()
-			: base(type_name)
+		public LogicNegateBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -497,8 +497,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "logic_boolean";
 
-		public LogicBooleanBlock()
-			: base(type_name)
+		public LogicBooleanBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -533,8 +533,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "logic_null";
 
-		public LogicNullBlock()
-			: base(type_name)
+		public LogicNullBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -558,10 +558,10 @@ namespace BlocklyMruby
 	public class LogicTernaryBlock : Block
 	{
 		public const string type_name = "logic_ternary";
-		Blockly.Connection prevParentConnection_;
+		Connection prevParentConnection_;
 
-		public LogicTernaryBlock()
-			: base(type_name)
+		public LogicTernaryBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -588,10 +588,10 @@ namespace BlocklyMruby
 		/**
 		 * Called whenever anything on the workspace changes.
 		 * Prevent mismatched types.
-		 * @param {!Blockly.Events.Abstract} e Change event.
+		 * @param {!Abstract} e Change event.
 		 * @this Blockly.Block
 		 */
-		public void onchange(Blockly.Events.Abstract e)
+		public void onchange(Abstract e)
 		{
 			var blockA = this.getInputTargetBlock("THEN");
 			var blockB = this.getInputTargetBlock("ELSE");

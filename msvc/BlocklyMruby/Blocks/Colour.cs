@@ -44,8 +44,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "colour_picker";
 
-		public ColourPickerBlock()
-			: base(type_name)
+		public ColourPickerBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -84,8 +84,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "colour_random";
 
-		public ColourRandomBlock()
-			: base(type_name)
+		public ColourRandomBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -110,8 +110,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "colour_rgb";
 
-		public ColourRGBBlock()
-			: base(type_name)
+		public ColourRGBBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -146,8 +146,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "colour_blend";
 
-		public ColourBlendBlock()
-			: base(type_name)
+		public ColourBlendBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 

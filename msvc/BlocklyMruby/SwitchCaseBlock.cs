@@ -14,8 +14,8 @@ namespace BlocklyMruby
 		internal List<Tuple<string, string>> cases_;
 		internal int defaultCount_;
 
-		public SwitchCaseNumberBlock()
-			: base(type_name)
+		public SwitchCaseNumberBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -28,7 +28,7 @@ namespace BlocklyMruby
 			setColour(210);
 			appendValueInput("SWITCH")
 				.appendField("右の値が");
-			setMutator(new Blockly.Mutator(new[] {
+			setMutator(new Mutator(Blockly, new[] {
 				SwitchCaseNumberConstBlock.type_name,
 				SwitchCaseNumberRangeBlock.type_name,
 				SwitchCaseNumberDefaultBlock.type_name }));
@@ -109,7 +109,7 @@ namespace BlocklyMruby
 					}
 				}
 			}
-			defaultCount_ = Script.ParseInt(xmlElement.GetAttribute("default"), 10);
+			defaultCount_ = Bridge.Script.ParseInt(xmlElement.GetAttribute("default"), 10);
 			updateShape_();
 		}
 
@@ -118,7 +118,7 @@ namespace BlocklyMruby
 		/// </summary>
 		/// <param name="workspace">Mutator"s workspace.</param>
 		/// <returns>Root block in mutator.</returns>
-		public Block decompose(Blockly.Workspace workspace)
+		public Block decompose(Workspace workspace)
 		{
 			var containerBlock = workspace.newBlock(SwitchCaseNumberContainerBlock.type_name);
 			containerBlock.initSvg();
@@ -163,8 +163,8 @@ namespace BlocklyMruby
 			// Count number of inputs.
 			cases_ = new List<Tuple<string, string>>();
 			defaultCount_ = 0;
-			var statementConnections = new List<Blockly.Connection>();
-			Blockly.Connection defaultStatementConnection = null;
+			var statementConnections = new List<Connection>();
+			Connection defaultStatementConnection = null;
 			while (clauseBlock != null) {
 				switch (clauseBlock.type) {
 				case SwitchCaseNumberConstBlock.type_name: {
@@ -194,9 +194,9 @@ namespace BlocklyMruby
 			updateShape_();
 			// Reconnect any child blocks.
 			for (var i = 0; i < cases_.Count; i++) {
-				Blockly.Mutator.reconnect(statementConnections[i], this, "DO" + i);
+				Mutator.reconnect(statementConnections[i], this, "DO" + i);
 			}
-			Blockly.Mutator.reconnect(defaultStatementConnection, this, "DEFAULT_DO");
+			Mutator.reconnect(defaultStatementConnection, this, "DEFAULT_DO");
 		}
 
 		/// <summary>
@@ -259,14 +259,14 @@ namespace BlocklyMruby
 			foreach (var c in cases_) {
 				if (c.Item2 == null) {
 					appendDummyInput("CASE" + i)
-						.appendField(new Blockly.FieldNumber(c.Item1, "-Infinity", "Infinity", 0), "CONST" + i)
+						.appendField(new FieldNumber(Blockly, c.Item1, "-Infinity", "Infinity", 0), "CONST" + i)
 						.appendField("の");
 				}
 				else {
 					appendDummyInput("CASE" + i)
-						.appendField(new Blockly.FieldNumber(c.Item1, "-Infinity", "Infinity", 0), "RANGE_MIN" + i)
+						.appendField(new FieldNumber(Blockly, c.Item1, "-Infinity", "Infinity", 0), "RANGE_MIN" + i)
 						.appendField("から")
-						.appendField(new Blockly.FieldNumber(c.Item2, "-Infinity", "Infinity", 0), "RANGE_MAX" + i)
+						.appendField(new FieldNumber(Blockly, c.Item2, "-Infinity", "Infinity", 0), "RANGE_MAX" + i)
 						.appendField("の");
 				}
 				appendStatementInput("DO" + i)
@@ -287,8 +287,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "switch_case_number_container";
 
-		public SwitchCaseNumberContainerBlock()
-			: base(type_name)
+		public SwitchCaseNumberContainerBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -307,10 +307,10 @@ namespace BlocklyMruby
 	public class SwitchCaseNumberConstBlock : Block
 	{
 		public const string type_name = "switch_case_number_const";
-		public Blockly.Connection statementConnection_;
+		public Connection statementConnection_;
 
-		public SwitchCaseNumberConstBlock()
-			: base(type_name)
+		public SwitchCaseNumberConstBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -334,10 +334,10 @@ namespace BlocklyMruby
 	public class SwitchCaseNumberRangeBlock : Block
 	{
 		public const string type_name = "switch_case_number_range";
-		public Blockly.Connection statementConnection_;
+		public Connection statementConnection_;
 
-		public SwitchCaseNumberRangeBlock()
-			: base(type_name)
+		public SwitchCaseNumberRangeBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -363,10 +363,10 @@ namespace BlocklyMruby
 	public class SwitchCaseNumberDefaultBlock : Block
 	{
 		public const string type_name = "switch_case_number_default";
-		public Blockly.Connection statementConnection_;
+		public Connection statementConnection_;
 
-		public SwitchCaseNumberDefaultBlock()
-			: base(type_name)
+		public SwitchCaseNumberDefaultBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -392,8 +392,8 @@ namespace BlocklyMruby
 		internal List<Tuple<string, string>> cases_;
 		internal int defaultCount_;
 
-		public SwitchCaseTextBlock()
-			: base(type_name)
+		public SwitchCaseTextBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -406,7 +406,7 @@ namespace BlocklyMruby
 			setColour(210);
 			appendValueInput("SWITCH")
 				.appendField("右の値が");
-			setMutator(new Blockly.Mutator(new[] {
+			setMutator(new Mutator(Blockly, new[] {
 				SwitchCaseTextConstBlock.type_name,
 				SwitchCaseTextRangeBlock.type_name,
 				SwitchCaseTextDefaultBlock.type_name }));
@@ -486,7 +486,7 @@ namespace BlocklyMruby
 					}
 				}
 			}
-			defaultCount_ = Script.ParseInt(xmlElement.GetAttribute("default"), 10);
+			defaultCount_ = Bridge.Script.ParseInt(xmlElement.GetAttribute("default"), 10);
 			updateShape_();
 		}
 
@@ -495,7 +495,7 @@ namespace BlocklyMruby
 		/// </summary>
 		/// <param name="workspace">Mutator"s workspace.</param>
 		/// <returns>Root block in mutator.</returns>
-		public Block decompose(Blockly.Workspace workspace)
+		public Block decompose(Workspace workspace)
 		{
 			var containerBlock = workspace.newBlock(SwitchCaseTextContainerBlock.type_name);
 			containerBlock.initSvg();
@@ -540,8 +540,8 @@ namespace BlocklyMruby
 			// Count text of inputs.
 			cases_ = new List<Tuple<string, string>>();
 			defaultCount_ = 0;
-			var statementConnections = new List<Blockly.Connection>();
-			Blockly.Connection defaultStatementConnection = null;
+			var statementConnections = new List<Connection>();
+			Connection defaultStatementConnection = null;
 			while (clauseBlock != null) {
 				switch (clauseBlock.type) {
 				case SwitchCaseTextConstBlock.type_name: {
@@ -571,9 +571,9 @@ namespace BlocklyMruby
 			updateShape_();
 			// Reconnect any child blocks.
 			for (var i = 0; i <= cases_.Count; i++) {
-				Blockly.Mutator.reconnect(statementConnections[i], this, "DO" + i);
+				Mutator.reconnect(statementConnections[i], this, "DO" + i);
 			}
-			Blockly.Mutator.reconnect(defaultStatementConnection, this, "DEFAULT_DO");
+			Mutator.reconnect(defaultStatementConnection, this, "DEFAULT_DO");
 		}
 
 		/// <summary>
@@ -636,14 +636,14 @@ namespace BlocklyMruby
 			foreach (var c in cases_) {
 				if (c.Item2 == null) {
 					appendDummyInput("CASE" + i)
-						.appendField(new Blockly.FieldTextInput(c.Item1), "CONST" + i)
+						.appendField(new FieldTextInput(Blockly, c.Item1), "CONST" + i)
 						.appendField("の");
 				}
 				else {
 					appendDummyInput("CASE" + i)
-						.appendField(new Blockly.FieldTextInput(c.Item1), "RANGE_MIN" + i)
+						.appendField(new FieldTextInput(Blockly, c.Item1), "RANGE_MIN" + i)
 						.appendField("から")
-						.appendField(new Blockly.FieldTextInput(c.Item2), "RANGE_MAX" + i)
+						.appendField(new FieldTextInput(Blockly, c.Item2), "RANGE_MAX" + i)
 						.appendField("の");
 				}
 				appendStatementInput("DO" + i)
@@ -664,8 +664,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "switch_case_text_container";
 
-		public SwitchCaseTextContainerBlock()
-			: base(type_name)
+		public SwitchCaseTextContainerBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -684,10 +684,10 @@ namespace BlocklyMruby
 	public class SwitchCaseTextConstBlock : Block
 	{
 		public const string type_name = "switch_case_text_const";
-		public Blockly.Connection statementConnection_;
+		public Connection statementConnection_;
 
-		public SwitchCaseTextConstBlock()
-			: base(type_name)
+		public SwitchCaseTextConstBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -711,10 +711,10 @@ namespace BlocklyMruby
 	public class SwitchCaseTextRangeBlock : Block
 	{
 		public const string type_name = "switch_case_text_range";
-		public Blockly.Connection statementConnection_;
+		public Connection statementConnection_;
 
-		public SwitchCaseTextRangeBlock()
-			: base(type_name)
+		public SwitchCaseTextRangeBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -740,10 +740,10 @@ namespace BlocklyMruby
 	public class SwitchCaseTextDefaultBlock : Block
 	{
 		public const string type_name = "switch_case_text_default";
-		public Blockly.Connection statementConnection_;
+		public Connection statementConnection_;
 
-		public SwitchCaseTextDefaultBlock()
-			: base(type_name)
+		public SwitchCaseTextDefaultBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -763,7 +763,7 @@ namespace BlocklyMruby
 
 	partial class Ruby
 	{
-		internal node switch_case_number(SwitchCaseNumberBlock block)
+		public node switch_case_number(SwitchCaseNumberBlock block)
 		{
 			// case/when/else condition.
 			var argument0 = valueToCode(block, "SWITCH");
@@ -775,7 +775,7 @@ namespace BlocklyMruby
 				var argument1 = block.getFieldValue("CONST" + n);
 				if (argument1 != null) {
 					var when = new case_node.when_t() { body = branch };
-					when.value.Add(new int_node(this, Script.ParseInt(argument1, 10)));
+					when.value.Add(new int_node(this, Bridge.Script.ParseInt(argument1, 10)));
 					code.Add(when);
 				}
 				else {
@@ -784,8 +784,8 @@ namespace BlocklyMruby
 					if ((min != null) && (max != null)) {
 						var when = new case_node.when_t() { body = branch };
 						when.value.Add(new dot2_node(this,
-							new int_node(this, Script.ParseInt(min, 10)),
-							new int_node(this, Script.ParseInt(max, 10))));
+							new int_node(this, Bridge.Script.ParseInt(min, 10)),
+							new int_node(this, Bridge.Script.ParseInt(max, 10))));
 						code.Add(when);
 					}
 				}
@@ -800,7 +800,7 @@ namespace BlocklyMruby
 			return new case_node(this, argument0, code);
 		}
 
-		internal node switch_case_text(SwitchCaseTextBlock block)
+		public node switch_case_text(SwitchCaseTextBlock block)
 		{
 			// case/when/else condition.
 			var argument0 = valueToCode(block, "SWITCH");

@@ -4,7 +4,7 @@
 // MIT Lisence
 using System;
 using Bridge;
-using Bridge.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 using System.Collections.Generic;
 
 namespace BlocklyMruby
@@ -63,7 +63,7 @@ namespace BlocklyMruby
 			var math = new const_node(this, intern("Math"));
 			switch (@operator) {
 			case "ABS":
-				code = new call_node(this, arg, intern("abs"), new List<node>(), null);
+				code = new call_node(this, arg, intern("abs"));
 				break;
 			case "ROOT":
 				code = new call_node(this, math, intern("sqrt"), new List<node>() { arg }, null);
@@ -81,13 +81,13 @@ namespace BlocklyMruby
 				code = new call_node(this, new int_node(this, 10), intern("exp"), new List<node>() { arg }, null);
 				break;
 			case "ROUND":
-				code = new call_node(this, arg, intern("round"), new List<node>(), null);
+				code = new call_node(this, arg, intern("round"));
 				break;
 			case "ROUNDUP":
-				code = new call_node(this, arg, intern("ceil"), new List<node>(), null);
+				code = new call_node(this, arg, intern("ceil"));
 				break;
 			case "ROUNDDOWN":
-				code = new call_node(this, arg, intern("floor"), new List<node>(), null);
+				code = new call_node(this, arg, intern("floor"));
 				break;
 			case "SIN":
 				arg = new call_node(this, arg, intern("/"), new float_node(this, 180.0));
@@ -172,9 +172,9 @@ namespace BlocklyMruby
 			}
 			switch (dropdown_property) {
 			case "EVEN":
-				return new call_node(this, number_to_check, intern("even?"), new List<node>(), null);
+				return new call_node(this, number_to_check, intern("even?"));
 			case "ODD":
-				return new call_node(this, number_to_check, intern("odd?"), new List<node>(), null);
+				return new call_node(this, number_to_check, intern("odd?"));
 			case "WHOLE":
 				code = new call_node(this, number_to_check, intern("%"), new int_node(this, 1));
 				return new call_node(this, code, intern("=="), new int_node(this, 0));
@@ -218,21 +218,21 @@ namespace BlocklyMruby
 			node code;
 			switch (func) {
 			case "SUM":
-				code = new call_node(this, list, intern("sum"), new List<node>(), null);
+				code = new call_node(this, list, intern("sum"));
 				break;
 			case "MIN":
-				code = new call_node(this, list, intern("numbers"), new List<node>(), null);
-				code = new call_node(this, code, intern("min"), new List<node>(), null);
+				code = new call_node(this, list, intern("numbers"));
+				code = new call_node(this, code, intern("min"));
 				break;
 			case "MAX":
-				code = new call_node(this, list, intern("numbers"), new List<node>(), null);
-				code = new call_node(this, code, intern("max"), new List<node>(), null);
+				code = new call_node(this, list, intern("numbers"));
+				code = new call_node(this, code, intern("max"));
 				break;
 			case "AVERAGE":
-				code = new call_node(this, list, intern("average"), new List<node>(), null);
+				code = new call_node(this, list, intern("average"));
 				break;
 			case "MEDIAN":
-				code = new call_node(this, list, intern("median"), new List<node>(), null);
+				code = new call_node(this, list, intern("median"));
 				break;
 			case "MODE":
 				// As a list of numbers can contain more than one mode,
@@ -241,10 +241,10 @@ namespace BlocklyMruby
 				code = new fcall_node(this, intern("math_modes"), new List<node>() { list }, null);
 				break;
 			case "STD_DEV":
-				code = new call_node(this, list, intern("standard_deviation"), new List<node>(), null);
+				code = new call_node(this, list, intern("standard_deviation"));
 				break;
 			case "RANDOM":
-				code = new call_node(this, list, intern("size"), new List<node>(), null);
+				code = new call_node(this, list, intern("size"));
 				code = new fcall_node(this, intern("rand"), new List<node>() { code }, null);
 				code = new call_node(this, list, intern("[]"), new List<node>() { code }, null);
 				break;
@@ -274,9 +274,9 @@ namespace BlocklyMruby
 			var argument2 = valueToCode(block, "HIGH");
 			if (argument2 == null) argument2 = new fcall_node(this, intern("Float"), new List<node>() { new str_node(this, "inf") }, null);
 			node code = new array_node(this, new List<node>() { argument0, argument1 });
-			code = new call_node(this, code, intern("max"), new List<node>(), null);
+			code = new call_node(this, code, intern("max"));
 			code = new array_node(this, new List<node>() { code, argument2 });
-			return new call_node(this, code, intern("min"), new List<node>(), null);
+			return new call_node(this, code, intern("min"));
 		}
 
 		public node math_random_int(MathRandomIntBlock block)
@@ -293,7 +293,7 @@ namespace BlocklyMruby
 		public node math_random_float(MathRandomFloatBlock block)
 		{
 			// Random fraction between 0 and 1.
-			return new fcall_node(this, intern("rand"), new List<node>(), null);
+			return new fcall_node(this, intern("rand"));
 		}
 	}
 }

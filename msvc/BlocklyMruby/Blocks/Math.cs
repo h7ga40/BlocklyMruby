@@ -44,8 +44,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "math_number";
 
-		public MathNumberBlock()
-			: base(type_name)
+		public MathNumberBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -58,7 +58,7 @@ namespace BlocklyMruby
 			this.setHelpUrl(Msg.MATH_NUMBER_HELPURL);
 			this.setColour(Math.HUE);
 			this.appendDummyInput()
-				.appendField(new Blockly.FieldNumber("0", "-Infinity", "Infinity", 0), "NUM");
+				.appendField(new FieldNumber(Blockly, "0", "-Infinity", "Infinity", 0), "NUM");
 			this.setOutput(true, "Number");
 			// Assign "this" to a variable for use in the tooltip closure below.
 			var thisBlock = this;
@@ -76,8 +76,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "math_arithmetic";
 
-		public MathArithmeticBlock()
-			: base(type_name)
+		public MathArithmeticBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -137,8 +137,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "math_single";
 
-		public MathSingleBlock()
-			: base(type_name)
+		public MathSingleBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -196,8 +196,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "math_trig";
 
-		public MathTrigBlock()
-			: base(type_name)
+		public MathTrigBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -253,8 +253,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "math_constant";
 
-		public MathConstantBlock()
-			: base(type_name)
+		public MathConstantBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -293,8 +293,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "math_number_property";
 
-		public MathNumberPropertyBlock()
-			: base(type_name)
+		public MathNumberPropertyBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -317,11 +317,11 @@ namespace BlocklyMruby
 			this.setColour(Math.HUE);
 			this.appendValueInput("NUMBER_TO_CHECK")
 				.setCheck("Number");
-			var dropdown = new Blockly.FieldDropdown(PROPERTIES);
+			var dropdown = new FieldDropdown(Blockly, PROPERTIES);
 			dropdown.setValidator((option) => {
 				var divisorInput = (option == "DIVISIBLE_BY");
 				((MathNumberPropertyBlock)dropdown.sourceBlock_).updateShape_(divisorInput);
-				return Script.Undefined;
+				return Bridge.Script.Undefined;
 			});
 			this.appendDummyInput()
 				.appendField(dropdown, "PROPERTY");
@@ -381,8 +381,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "math_change";
 
-		public MathChangeBlock()
-			: base(type_name)
+		public MathChangeBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -408,7 +408,7 @@ namespace BlocklyMruby
 				},
 				previousStatement = (Any<string, string[]>)null,
 				nextStatement = (Any<string, string[]>)null,
-				colour = Blockly.Variables.HUE,
+				colour = Variables.HUE,
 				helpUrl = Msg.MATH_CHANGE_HELPURL
 			});
 			// Assign "this" to a variable for use in the tooltip closure below.
@@ -424,8 +424,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "math_round";
 
-		public MathRoundBlock()
-			: base(type_name)
+		public MathRoundBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -466,8 +466,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "math_on_list";
 
-		public MathOnListBlock()
-			: base(type_name)
+		public MathOnListBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -493,9 +493,9 @@ namespace BlocklyMruby
 			this.setHelpUrl(Msg.MATH_ONLIST_HELPURL);
 			this.setColour(Math.HUE);
 			this.setOutput(true, "Number");
-			var dropdown = new Blockly.FieldDropdown(OPERATORS, (newOp) => {
+			var dropdown = new FieldDropdown(Blockly, OPERATORS, (newOp) => {
 				thisBlock.updateType_(newOp);
-				return Script.Undefined;
+				return Bridge.Script.Undefined;
 			});
 			this.appendValueInput("LIST")
 				.setCheck("Array")
@@ -559,8 +559,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "math_modulo";
 
-		public MathModuloBlock()
-			: base(type_name)
+		public MathModuloBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -598,8 +598,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "math_constrain";
 
-		public MathConstrainBlock()
-			: base(type_name)
+		public MathConstrainBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -642,8 +642,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "math_random_int";
 
-		public MathRandomIntBlock()
-			: base(type_name)
+		public MathRandomIntBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -681,8 +681,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "math_random_float";
 
-		public MathRandomFloatBlock()
-			: base(type_name)
+		public MathRandomFloatBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 

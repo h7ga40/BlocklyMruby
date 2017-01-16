@@ -27,17 +27,26 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Bridge;
 using Bridge.Html5;
-using Bridge.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 using BlocklyMruby;
 
-public static partial class Blockly
+namespace BlocklyMruby
 {
-	public static class Procedures
+	public class Procedures
 	{
+		public Blockly Blockly { get; }
+		public BlocklyScript Script { get; }
+
 		/// <summary>
 		/// Category to separate procedure names from variables and generated functions.
 		/// </summary>
 		public static string NAME_TYPE = "PROCEDURE";
+
+		public Procedures(Blockly Blockly)
+		{
+			this.Blockly = Blockly;
+			Script = Blockly.Script;
+		}
 
 		/// <summary>
 		/// Find all user-created procedure definitions in a workspace.
@@ -46,7 +55,7 @@ public static partial class Blockly
 		/// <returns>Pair of arrays, the first contains procedures without return variables, the
 		/// second with. Each procedure is defined by a three-element list of name, parameter
 		/// list, and return value boolean.</returns>
-		public static object[] allProcedures(Blockly.Workspace root)
+		public object[] allProcedures(Workspace root)
 		{
 			var blocks = root.getAllBlocks();
 			var proceduresReturn = new List<object[]>();
@@ -77,7 +86,7 @@ public static partial class Blockly
 		/// <param name="ta">First tuple.</param>
 		/// <param name="tb">Second tuple.</param>
 		/// <returns>-1, 0, or 1 to signify greater than, equality, or less than.</returns>
-		public static int procTupleComparator_(object[] ta, object[] tb)
+		public int procTupleComparator_(object[] ta, object[] tb)
 		{
 			return ((string)ta[0]).ToLowerCase().LocaleCompare(((string)tb[0]).ToLowerCase());
 		}
@@ -88,7 +97,7 @@ public static partial class Blockly
 		/// <param name="name">Proposed procedure name.</param>
 		/// <param name="block">Block to disambiguate.</param>
 		/// <returns>Non-colliding name.</returns>
-		public static string findLegalName(string name, Block block)
+		public string findLegalName(string name, Block block)
 		{
 			if (block.isInFlyout) {
 				// Flyouts can have multiple procedures called 'do something'.
@@ -96,12 +105,12 @@ public static partial class Blockly
 			}
 			while (!isLegalName_(name, block.workspace, block)) {
 				// Collision with another procedure.
-				var r = name.Match(new Regex(@"^(.*?)(\d+)$"));
+				var r = Regex.Match(name, @"^(.*?)(\d+)$");
 				if (r == null) {
 					name += "2";
 				}
 				else {
-					name = r[1] + (Script.ParseInt(r[2], 10) + 1);
+					name = r.Groups[1].Value + (Bridge.Script.ParseInt(r.Groups[2].Value, 10) + 1);
 				}
 			}
 			return name;
@@ -116,7 +125,7 @@ public static partial class Blockly
 		/// <param name="opt_exclude">Optional block to exclude from
 		/// comparisons (one doesn't want to collide with oneself).</param>
 		/// <returns>True if the name is legal.</returns>
-		public static bool isLegalName_(string name, Blockly.Workspace workspace, Block opt_exclude = null)
+		public bool isLegalName_(string name, Workspace workspace, Block opt_exclude = null)
 		{
 			var blocks = workspace.getAllBlocks();
 			// Iterate through every block and check the name.
@@ -141,13 +150,13 @@ public static partial class Blockly
 		/// <param name="field"></param>
 		/// <param name="name">The proposed new name.</param>
 		/// <returns>The accepted name.</returns>
-		public static string rename(Blockly.Field field, string name)
+		public string rename(Field field, string name)
 		{
 			// Strip leading and trailing whitespace.  Beyond this, all names are legal.
-			name = name.Replace(new Regex(@"^[\s\xa0] +|[\s\xa0] +$", "g"), "");
+			name = Regex.Replace(name, @"^[\s\xa0] +|[\s\xa0] +$", "");
 
 			// Ensure two identically-named procedures don't exist.
-			var legalName = Procedures.findLegalName(name, field.sourceBlock_);
+			var legalName = findLegalName(name, field.sourceBlock_);
 			var oldName = field.text_;
 			if (oldName != name && oldName != legalName) {
 				// Rename any callers.
@@ -167,26 +176,26 @@ public static partial class Blockly
 		/// </summary>
 		/// <param name="workspace">The workspace contianing procedures.</param>
 		/// <returns>Array of XML block elements.</returns>
-		public static Element[] flyoutCategory(Blockly.Workspace workspace)
+		public Element[] flyoutCategory(Workspace workspace)
 		{
 			var xmlList = new List<Element>();
 			if (Script.Get(Blockly.Blocks, "procedures_defnoreturn") != null) {
 				// <block type="procedures_defnoreturn" gap="16"></block>
-				var block = goog.dom.createDom("block");
+				var block = goog.dom.createDom(Script, "block");
 				block.SetAttribute("type", "procedures_defnoreturn");
 				block.SetAttribute("gap", "16");
 				xmlList.Add(block);
 			}
 			if (Script.Get(Blockly.Blocks, "procedures_defreturn") != null) {
 				// <block type="procedures_defreturn" gap="16"></block>
-				var block = goog.dom.createDom("block");
+				var block = goog.dom.createDom(Script, "block");
 				block.SetAttribute("type", "procedures_defreturn");
 				block.SetAttribute("gap", "16");
 				xmlList.Add(block);
 			}
 			if (Script.Get(Blockly.Blocks, "procedures_ifreturn") != null) {
 				// <block type="procedures_ifreturn" gap="16"></block>
-				var block = goog.dom.createDom("block");
+				var block = goog.dom.createDom(Script, "block");
 				block.SetAttribute("type", "procedures_ifreturn");
 				block.SetAttribute("gap", "16");
 				xmlList.Add(block);
@@ -205,14 +214,14 @@ public static partial class Blockly
 					//     <arg name="x"></arg>
 					//   </mutation>
 					// </block>
-					var block = goog.dom.createDom("block");
+					var block = goog.dom.createDom(Script, "block");
 					block.SetAttribute("type", templateName);
 					block.SetAttribute("gap", "16");
-					var mutation = goog.dom.createDom("mutation");
+					var mutation = goog.dom.createDom(Script, "mutation");
 					mutation.SetAttribute("name", name);
 					block.AppendChild(mutation);
 					for (var j = 0; j < args.Length; j++) {
-						var arg = goog.dom.createDom("arg");
+						var arg = goog.dom.createDom(Script, "arg");
 						arg.SetAttribute("name", args[j]);
 						mutation.AppendChild(arg);
 					}
@@ -220,7 +229,7 @@ public static partial class Blockly
 				}
 			});
 
-			var tuple = Procedures.allProcedures(workspace);
+			var tuple = allProcedures(workspace);
 			populateProcedures((object[][])tuple[0], "procedures_callnoreturn");
 			populateProcedures((object[][])tuple[1], "procedures_callreturn");
 			return xmlList.ToArray();
@@ -232,7 +241,7 @@ public static partial class Blockly
 		/// <param name="name">Name of procedure.</param>
 		/// <param name="workspace">The workspace to find callers in.</param>
 		/// <returns>Array of caller blocks.</returns>
-		public static ProcedureCallBlock[] getCallers(string name, Blockly.Workspace workspace)
+		public ProcedureCallBlock[] getCallers(string name, Workspace workspace)
 		{
 			var callers = new List<ProcedureCallBlock>();
 			var blocks = workspace.getAllBlocks();
@@ -255,12 +264,12 @@ public static partial class Blockly
 		/// callers.
 		/// </summary>
 		/// <param name="defBlock">Procedure definition block.</param>
-		public static void mutateCallers(ProcedureDefBlock defBlock)
+		public void mutateCallers(ProcedureDefBlock defBlock)
 		{
 			var oldRecordUndo = Blockly.Events.recordUndo;
 			var name = (string)(defBlock.getProcedureDef())[0];
 			var xmlElement = defBlock.mutationToDom(true);
-			var callers = Procedures.getCallers(name, defBlock.workspace);
+			var callers = getCallers(name, defBlock.workspace);
 			foreach (var caller in callers) {
 				var oldMutationDom = caller.mutationToDom();
 				var oldMutation = oldMutationDom != null ? Blockly.Xml.domToText(oldMutationDom) : null;
@@ -272,7 +281,7 @@ public static partial class Blockly
 					// undo action since it is deterministically tied to the procedure's
 					// definition mutation.
 					Blockly.Events.recordUndo = false;
-					Blockly.Events.fire(Blockly.Events.Change.construct(
+					Blockly.Events.fire(Change.construct(
 						caller, "mutation", null, oldMutation, newMutation));
 					Blockly.Events.recordUndo = oldRecordUndo;
 				}
@@ -285,7 +294,7 @@ public static partial class Blockly
 		/// <param name="name">Name of procedure.</param>
 		/// <param name="workspace">The workspace to search.</param>
 		/// <returns>The procedure definition block, or null not found.</returns>
-		public static Block getDefinition(string name, Blockly.Workspace workspace)
+		public Block getDefinition(string name, Workspace workspace)
 		{
 			// Assume that a procedure definition is a top block.
 			var blocks = workspace.getTopBlocks(false);

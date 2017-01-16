@@ -4,7 +4,7 @@
 // MIT Lisence
 using System;
 using Bridge;
-using Bridge.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 using System.Collections.Generic;
 
 namespace BlocklyMruby
@@ -14,7 +14,7 @@ namespace BlocklyMruby
 		public node controls_repeat(ControlsRepeatBlock block)
 		{
 			// Repeat n times (internal number).
-			var repeats = new int_node(this, Script.ParseInt(block.getFieldValue("TIMES"), 10));
+			var repeats = new int_node(this, Bridge.Script.ParseInt(block.getFieldValue("TIMES"), 10));
 			var branch = statementToCode(block, "DO");
 			if (branch == null) branch = new nil_node(this);
 			return new call_node(this, repeats, intern("times"), new List<node>(), new block_node(this, new List<node>(), branch, false));
@@ -28,7 +28,7 @@ namespace BlocklyMruby
 			if (repeats is int_node) {
 			}
 			else {
-				repeats = new call_node(this, repeats, intern("to_i"), new List<node>(), null);
+				repeats = new call_node(this, repeats, intern("to_i"));
 			}
 			var branch = statementToCode(block, "DO");
 			if (branch == null) branch = new nil_node(this);
@@ -71,12 +71,12 @@ namespace BlocklyMruby
 				// All parameters are simple numbers.
 			}
 			else {
-				fromVal = new call_node(this, fromVal, intern("to_f"), new List<node>(), null);
-				toVal = new call_node(this, toVal, intern("to_f"), new List<node>(), null);
+				fromVal = new call_node(this, fromVal, intern("to_f"));
+				toVal = new call_node(this, toVal, intern("to_f"));
 				if (increment == null)
 					increment = new float_node(this, 1);
 				else
-					increment = new call_node(this, increment, intern("to_f"), new List<node>(), null);
+					increment = new call_node(this, increment, intern("to_f"));
 			}
 
 			local_resume(lv);

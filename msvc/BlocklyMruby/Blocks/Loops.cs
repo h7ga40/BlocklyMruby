@@ -44,8 +44,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "controls_repeat_ext";
 
-		public ControlsRepeatExtBlock()
-			: base(type_name)
+		public ControlsRepeatExtBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -80,8 +80,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "controls_repeat";
 
-		public ControlsRepeatBlock()
-			: base(type_name)
+		public ControlsRepeatBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -119,8 +119,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "controls_whileUntil";
 
-		public ControlsWhileUntilBlock()
-			: base(type_name)
+		public ControlsWhileUntilBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -138,7 +138,7 @@ namespace BlocklyMruby
 			this.setColour(Loops.HUE);
 			this.appendValueInput("BOOL")
 				.setCheck("Boolean")
-				.appendField(new Blockly.FieldDropdown(OPERATORS), "MODE");
+				.appendField(new FieldDropdown(Blockly, OPERATORS), "MODE");
 			this.appendStatementInput("DO")
 				.appendField(Msg.CONTROLS_WHILEUNTIL_INPUT_DO);
 			this.setPreviousStatement(true);
@@ -160,8 +160,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "controls_for";
 
-		public ControlsForBlock()
-			: base(type_name)
+		public ControlsForBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -224,11 +224,11 @@ namespace BlocklyMruby
 				var option = new ContextMenuOption() { enabled = true };
 				var name = this.getFieldValue("VAR");
 				option.text = Msg.VARIABLES_SET_CREATE_GET.Replace("%1", name);
-				var xmlField = goog.dom.createDom("field", null, name);
+				var xmlField = goog.dom.createDom(Script, "field", null, name);
 				xmlField.SetAttribute("name", "VAR");
-				var xmlBlock = goog.dom.createDom("block", null, xmlField);
+				var xmlBlock = goog.dom.createDom(Script, "block", null, xmlField);
 				xmlBlock.SetAttribute("type", VariablesGetBlock.type_name);
-				option.callback = Blockly.ContextMenu.callbackFactory(this, xmlBlock);
+				option.callback = ContextMenu.callbackFactory(this, xmlBlock);
 				options.push(option);
 			}
 		}
@@ -239,8 +239,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "controls_forEach";
 
-		public ControlsForEachBlock()
-			: base(type_name)
+		public ControlsForEachBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -289,11 +289,11 @@ namespace BlocklyMruby
 				var option = new ContextMenuOption() { enabled = true };
 				var name = this.getFieldValue("VAR");
 				option.text = Msg.VARIABLES_SET_CREATE_GET.Replace("%1", name);
-				var xmlField = goog.dom.createDom("field", null, name);
+				var xmlField = goog.dom.createDom(Script, "field", null, name);
 				xmlField.SetAttribute("name", "VAR");
-				var xmlBlock = goog.dom.createDom("block", null, xmlField);
+				var xmlBlock = goog.dom.createDom(Script, "block", null, xmlField);
 				xmlBlock.SetAttribute("type", VariablesGetBlock.type_name);
-				option.callback = Blockly.ContextMenu.callbackFactory(this, xmlBlock);
+				option.callback = ContextMenu.callbackFactory(this, xmlBlock);
 				options.push(option);
 			}
 		}
@@ -304,8 +304,8 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "controls_flow_statements";
 
-		public ControlsFlowStatementsBlock()
-			: base(type_name)
+		public ControlsFlowStatementsBlock(Blockly blockly)
+			: base(blockly, type_name)
 		{
 		}
 
@@ -322,7 +322,7 @@ namespace BlocklyMruby
 			this.setHelpUrl(Msg.CONTROLS_FLOW_STATEMENTS_HELPURL);
 			this.setColour(Loops.HUE);
 			this.appendDummyInput()
-				.appendField(new Blockly.FieldDropdown(OPERATORS), "FLOW");
+				.appendField(new FieldDropdown(Blockly, OPERATORS), "FLOW");
 			this.setPreviousStatement(true);
 			// Assign "this" to a variable for use in the tooltip closure below.
 			var thisBlock = this;
@@ -338,12 +338,12 @@ namespace BlocklyMruby
 		/**
 		 * Called whenever anything on the workspace changes.
 		 * Add warning if this flow block is not nested inside a loop.
-		 * @param {!Blockly.Events.Abstract} e Change event.
+		 * @param {!Abstract} e Change event.
 		 * @this Blockly.Block
 		 */
-		public void onchange(Blockly.Events.Abstract e)
+		public void onchange(Abstract e)
 		{
-			if (((Blockly.WorkspaceSvg)this.workspace).isDragging() != 0) {
+			if (((WorkspaceSvg)this.workspace).isDragging() != 0) {
 				return;  // Don't change state at the start of a drag.
 			}
 			var legal = false;

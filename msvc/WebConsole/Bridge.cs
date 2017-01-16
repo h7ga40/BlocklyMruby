@@ -19,8 +19,166 @@ namespace Bridge
 	/// ここでリダイレクトするため、引数の型はobject型で定義する。
 	/// </remarks>
 	[ComVisible(true)]
-	public class ScriptHost
+	public class ScriptingHost
 	{
+		public object bridge;
+		WebConsole _View;
+		WebBrowserReadyState _ReadyState;
+		int _Status;
+		string _Type;
+		string _Url;
+		bool _Async;
+		byte[] _Response;
+		string _ResponseText;
+		string _ContentType;
+
+		public ScriptingHost(WebConsole view)
+		{
+			_View = view;
+		}
+
+		public WebConsole View { get { return _View; } }
+
+		public Script Script { get { return _View.Script; } }
+		public Document Document { get { return _View.Script.Document; } }
+
+		public object CreateXMLHttpRequest()
+		{
+			return new ScriptingHost(_View);
+		}
+
+		public object new_array()
+		{
+			return new List<object>();
+		}
+
+		public void array_add(object array_, object item)
+		{
+			var array = (List<object>)array_;
+			array.Add(item);
+		}
+
+		public object new_object()
+		{
+			return new Dictionary<string, object>();
+		}
+
+		public void object_add(object dic_, string name, object item)
+		{
+			var dic = (Dictionary<string, object>)dic_;
+			dic.Add(name, item);
+		}
+
+		public void console_log(object text)
+		{
+			System.Diagnostics.Debug.WriteLine(text.ToString());
+		}
+
+		public void console_warn(object text)
+		{
+			System.Diagnostics.Debug.WriteLine(text.ToString());
+		}
+
+		public object Error { get; set; }
+
+		public object new_error()
+		{
+			return ((dynamic)Error).call();
+		}
+
+		public void onerror(string msg, string src, int line, int column, Dictionary<string, object> excpetion)
+		{
+			var kvs = new string[excpetion.Count];
+			int i = 0;
+			foreach (var kv in excpetion) {
+				kvs[i++] = kv.Key + ":\"" + kv.Value.ToString() + "\"";
+			}
+
+			System.Diagnostics.Debug.WriteLine(GetType().Name + "." + System.Reflection.MethodBase.GetCurrentMethod().Name
+				+ " " + msg + " " + src + " " + line + " " + column + "\n" + String.Join(",\n", kvs));
+		}
+
+		private void SetReadyState(WebBrowserReadyState readyState)
+		{
+			_ReadyState = readyState;
+			try {
+				if (onreadystatechange != null)
+					onreadystatechange.call(null, true);
+			}
+			catch (System.Runtime.InteropServices.COMException e) {
+				System.Diagnostics.Debug.WriteLine(e.Message);
+			}
+		}
+
+		private void Load(string url)
+		{
+			if (url.StartsWith("./"))
+				url = url.Substring(2);
+
+			if (!_View.ResourceReader.GetResource(url, out _Response)) {
+				_Status = 404;
+				SetReadyState(WebBrowserReadyState.Complete);
+				return;
+			}
+
+			switch (System.IO.Path.GetExtension(url)) {
+			case "html": _ContentType = "text/html"; break;
+			case "css": _ContentType = "text/css"; break;
+			case "js": _ContentType = "text/javascript"; break;
+			case "gif": _ContentType = "image/gif"; break;
+			case "jpeg": _ContentType = "image/jpeg"; break;
+			case "png": _ContentType = "image/png"; break;
+			case "svg": _ContentType = "image/svg+xml"; break;
+			case "json": _ContentType = "application/json"; break;
+			default: _ContentType = "text/plane"; break;
+			}
+			_ResponseText = Encoding.UTF8.GetString(_Response);
+
+			_Status = 200;
+			SetReadyState(WebBrowserReadyState.Complete);
+		}
+
+		public int readyState { get { return (int)_ReadyState; } }
+		public int status { get { return _Status; } }
+		public string statusText { get { return (_Status == 200) ? "OK" : "Not Found"; } }
+		public string responseText { get { return _ResponseText; } }
+		public dynamic onreadystatechange { get; set; }
+
+		public void open(string type, string url, bool async)
+		{
+			open(type, url, async, "", "");
+		}
+
+		public void open(string type, string url, bool async, string username, string password)
+		{
+			_Type = type;
+			_Url = url;
+			_Async = async;
+
+			_Status = 404;
+			SetReadyState(WebBrowserReadyState.Loading);
+		}
+
+		public void send(object body)
+		{
+			SetReadyState(WebBrowserReadyState.Loaded);
+
+			if (_Async)
+				_View.BeginInvoke(new MethodInvoker(() => { Load(_Url); }));
+			else
+				Load(_Url);
+		}
+
+		public string getAllResponseHeaders()
+		{
+			return
+				"Content-Type: " + _ContentType + "\n" +
+				"Last-Modified: Tue, 11 Nov 2014 00:00:00 GMT\n" +
+				"Accept-Ranges: bytes\n" +
+				"Server: Microsoft-IIS/8.0\n" +
+				"Date: " + DateTime.Now.ToString("R");
+		}
+
 		public bool isDefined(object obj, string name)
 		{
 			var members = obj.GetType().GetMember(name);
@@ -33,17 +191,6 @@ namespace Bridge
 			return element.instance;
 		}
 
-		public List<object> NewArray()
-		{
-			return new List<object>();
-		}
-
-		public void Push(object a, object i)
-		{
-			var l = a as List<object>;
-			l.Add(i);
-		}
-
 		public object InvokeHandler(object handler_, object arguments_)
 		{
 			var handler = handler_ as Delegate;
@@ -53,25 +200,31 @@ namespace Bridge
 
 		public Element ToElement(dynamic element)
 		{
-			return Element.Create(element);
+			return Element.Create(Script, element);
 		}
 
-		public void console_log(object text)
+		public string NullOrString(object text)
 		{
-			Console.WriteLine(text.ToString());
-		}
-
-		public void console_warn(object text)
-		{
-			Console.WriteLine(text.ToString());
+			return ((text == null) || (text is DBNull)) ? "null" : text.ToString();
 		}
 	}
 
 	public class Script
 	{
 		public static DBNull Undefined = DBNull.Value;
-		public static dynamic Bridge;
-		public static ScriptHost ScriptHost;
+		public dynamic Bridge;
+		public ScriptingHost ScriptHost;
+		public Document Document { get; private set; }
+
+		public Script(ScriptingHost scriptHost)
+		{
+			ScriptHost = scriptHost;
+			Bridge = ScriptHost.bridge;
+			if (Bridge != null) {
+				Bridge.instance = ScriptHost;
+				Document = new Document(this);
+			}
+		}
 
 		public static dynamic NewObject()
 		{
@@ -93,13 +246,13 @@ namespace Bridge
 				Microsoft.JScript.ArrayPrototype.push(a, i);
 		}
 
-		public static dynamic NewFunc(Delegate d)
+		public dynamic NewFunc(Delegate d)
 		{
 			System.Diagnostics.Debug.Assert(d != null);
 			return Bridge.NewFunc(d);
 		}
 
-		public static dynamic New(string name, object[] args)
+		public dynamic New(string name, object[] args)
 		{
 			var a = Script.NewArray();
 			foreach (var i in args)
@@ -107,27 +260,27 @@ namespace Bridge
 			return Bridge.New(name, a);
 		}
 
-		public static int ParseInt(string value, int radix)
+		public static int ParseInt(string value, int radix = 10)
 		{
-			return (int)Bridge.ParseInt(value, radix);
+			return (int)Microsoft.JScript.GlobalObject.parseInt(value, radix);
 		}
 
 		public static double ParseFloat(string value)
 		{
-			return (double)Bridge.ParseFloat(value);
+			return Microsoft.JScript.GlobalObject.parseFloat(value);
 		}
 
 		public static bool IsNaN(object num)
 		{
-			return (bool)Bridge.IsNaN(num);
+			return Microsoft.JScript.GlobalObject.isNaN(num);
 		}
 
-		public static object Get(object scope, string name)
+		public object Get(object scope, string name)
 		{
 			return Bridge.Get(scope, name);
 		}
 
-		public static T Get<T>(object scope, string name)
+		public T Get<T>(object scope, string name)
 		{
 			var ret = Bridge.Get(scope, name);
 			if ((ret == null) || (ret is DBNull))
@@ -135,64 +288,79 @@ namespace Bridge
 			return (T)ret;
 		}
 
-		public static void Set(object scope, string name, object value)
+		public void Set(object scope, string name, object value)
 		{
 			Bridge.Set(scope, name, value);
 		}
 
-		public static string Replace(string str, dynamic instance, string dst)
+		public string Replace(string str, dynamic regex, string dst)
 		{
-			return Bridge.Replace(str, instance, dst);
+			return Bridge.Replace(str, regex, dst);
 		}
 
-		public static object Match(string str, dynamic instance)
+		public string Split(string str, dynamic regex)
 		{
-			return Bridge.Match(str, instance);
+			return Bridge.Split(str, regex);
 		}
 
-		public static Element CreateElement(string tagname)
+		public object Match(string str, dynamic regex)
 		{
-			return Element.Create(Bridge.CreateElement(tagname));
+			return Bridge.Match(str, regex);
 		}
 
-		public static Element CreateTextNode(string v)
+		public Element CreateElement(string tagname)
 		{
-			return Element.Create(Bridge.CreateTextNode(v));
+			return Element.Create(this, Bridge.CreateElement(tagname));
 		}
 
-		public static void PreventDefault(Event @event)
+		public Element CreateTextNode(string text)
+		{
+			return Element.Create(this, Bridge.CreateTextNode(text));
+		}
+
+		public HTMLElement GetElementById(string id)
+		{
+			return Element.Create(this, Bridge.GetElementById(id));
+		}
+
+		public void PreventDefault(Event @event)
 		{
 			Bridge.PreventDefault(@event.instance);
 		}
 
-		public static void StopPropagation(Event @event)
+		public void StopPropagation(Event @event)
 		{
 			Bridge.StopPropagation(@event.instance);
 		}
 
-		public static string Stringify(object value)
+		public string Stringify(object value)
 		{
 			return Bridge.Stringify(value);
 		}
 
-		public static object Parse(string text)
+		public object Parse(string text)
 		{
 			return Bridge.Parse(text);
 		}
 
 		public static string EncodeURI(string url)
 		{
-			return Bridge.EncodeURI(url);
+			return Microsoft.JScript.GlobalObject.encodeURI(url);
 		}
 
-		public static string dncodeURI(string url)
+		public static string DecodeURI(string url)
 		{
-			return Bridge.DncodeURI(url);
+			return Microsoft.JScript.GlobalObject.decodeURI(url);
 		}
 
-		public static dynamic NewRegExp(string pattern, string flag)
+		public dynamic NewRegExp(string pattern, string flag)
 		{
 			return Bridge.NewRegExp(pattern, flag);
+		}
+
+		public static string RegExpEscape(string s)
+		{
+			return Microsoft.JScript.GlobalObject.escape(s);
 		}
 
 		public static string[] GetFieldNames(object comObj)
@@ -283,19 +451,14 @@ namespace Bridge
 			return a.Contains(name);
 		}
 
-		private string NullOrString(object text)
+		public void console_log(string text)
 		{
-			return ((text == null) || (text is DBNull)) ? "null" : text.ToString();
+			ScriptHost.console_log((object)text);
 		}
 
-		public static void console_log(string text)
+		public void console_warn(string text)
 		{
-			ScriptHost.console_log(text);
-		}
-
-		public static void console_warn(string text)
-		{
-			ScriptHost.console_warn(text);
+			ScriptHost.console_warn((object)text);
 		}
 	}
 
@@ -406,11 +569,27 @@ namespace Bridge
 
 		public static string Replace(this string str, Text.RegularExpressions.Regex regex, string dst)
 		{
+			var Script = regex.Script;
 			return Script.Replace(str, regex.instance, dst);
+		}
+
+		public static string[] Split(this string str, Text.RegularExpressions.Regex regex)
+		{
+			var Script = regex.Script;
+			var ret = Script.Split(str, regex.instance);
+			if ((ret == null) || (ret is DBNull))
+				return null;
+			int len = Script.Get(ret, "length");
+			var result = new List<string>(len);
+			for (int i = 0; i < len; i++) {
+				result.Add(Script.Get<string>(ret, i.ToString()));
+			}
+			return result.ToArray();
 		}
 
 		public static string[] Match(this string str, Text.RegularExpressions.Regex regex)
 		{
+			var Script = regex.Script;
 			var ret = Script.Match(str, regex.instance);
 			if ((ret == null) || (ret is DBNull))
 				return null;
@@ -448,6 +627,14 @@ namespace Bridge
 		}
 	}
 
+	public static class StringListExtention
+	{
+		public static string Join(this IEnumerable<string> list, string separator)
+		{
+			return String.Join(separator, list);
+		}
+	}
+
 	public class ExternalAttribute : Attribute
 	{
 
@@ -473,19 +660,21 @@ namespace Bridge
 	public class Location
 	{
 		public dynamic instance;
+		public Script Script { get; private set; }
 
 		public string parentId { get { return instance.parentId; } }
 		public string inputName { get { return instance.inputName; } }
 		public object coordinate { get { return instance.coordinate; } }
 
-		public Location(object instance)
+		public Location(Script script, object instance)
 		{
+			Script = script;
 			this.instance = instance;
 		}
 
 		public void construct(string parentId, string inputName, object coordinate)
 		{
-			instance = Script.New("Location", new[] { parentId, inputName, coordinate });
+			instance = Script.New("Blockly.Location", new[] { parentId, inputName, coordinate });
 			instance.parentId = parentId;
 			instance.inputName = inputName;
 			instance.coordinate = coordinate;
@@ -537,44 +726,51 @@ namespace Bridge.Html5
 	public class Node
 	{
 		public dynamic instance;
+		public Script Script { get; private set; }
 
-		public Node(object instance)
+		public Node(Script script, object instance)
 		{
+			Script = script;
 			this.instance = instance;
 		}
 
 		public string NodeName { get { return instance.nodeName; } }
-		public NodeList ChildNodes { get { return new NodeList(instance.childNodes); } }
+		public string NodeValue { get { return instance.nodeValue; } }
+		public NodeList ChildNodes { get { return new NodeList(Script, instance.childNodes); } }
 	}
 
 	public class NodeList
 	{
 		public dynamic instance;
+		public Script Script { get; private set; }
 
-		public NodeList(object instance)
+		public NodeList(Script script, object instance)
 		{
+			Script = script;
 			this.instance = instance;
 		}
 
-		public Node this[int index] { get { return Element.Create(Script.Get(instance, index.ToString())); } }
+		public Node this[int index] { get { return Element.Create(Script, Script.Get(instance, index.ToString())); } }
+
+		public int Length { get { return instance.length; } }
 	}
 
 	public class Element : Node
 	{
-		public string InnerHTML { get { return instance.innerHTML; } }
+		public string InnerHTML { get { return instance.innerHTML; } set { instance.innerHTML = value; } }
 
 		public string OuterHTML { get { return instance.outerHTML; } }
 
-		public Element(object instance)
-			: base(instance)
+		public Element(Script script, object instance)
+			: base(script, instance)
 		{
 		}
 
-		public static Element Create(dynamic instance)
+		public static Element Create(Script script, dynamic instance)
 		{
 			if ((instance == null) || (instance is DBNull))
 				return null;
-			return new Element(instance);
+			return new Element(script, instance);
 		}
 
 		public string GetAttribute(string name)
@@ -596,16 +792,36 @@ namespace Bridge.Html5
 		}
 	}
 
-	public static class Document
+	public class Document
 	{
-		public static Element CreateElement(string tagname)
+		public Script Script { get; private set; }
+
+		public Document(Script script)
+		{
+			Script = script;
+		}
+
+		public Element CreateElement(string tagname)
 		{
 			return Script.CreateElement(tagname);
 		}
 
-		public static Element CreateTextNode(string v)
+		public Element CreateTextNode(string text)
 		{
-			return Script.CreateTextNode(v);
+			return Script.CreateTextNode(text);
+		}
+
+		public HTMLElement GetElementById(string id)
+		{
+			return Script.GetElementById(id);
+		}
+	}
+
+	public class HTMLElement : Element
+	{
+		public HTMLElement(Script script, object instance)
+			: base(script, instance)
+		{
 		}
 	}
 
@@ -622,9 +838,11 @@ namespace Bridge.Html5
 	public class Event
 	{
 		public dynamic instance;
+		public Script Script { get; private set; }
 
-		public Event(object instance)
+		public Event(Script script, object instance)
 		{
+			Script = script;
 			this.instance = instance;
 		}
 
@@ -641,15 +859,13 @@ namespace Bridge.Html5
 
 	public class JSON
 	{
-		public static string Stringify(string[] value)
+		public static string Stringify(object value)
 		{
-			//return Script.Stringify(value);
 			return Codeplex.Data.DynamicJson.Serialize(value);
 		}
 
 		public static object Parse(string text)
 		{
-			//return Script.Parse(text);
 			return Codeplex.Data.DynamicJson.Parse(text);
 		}
 	}
@@ -660,15 +876,61 @@ namespace Bridge.Text.RegularExpressions
 	public class Regex
 	{
 		public dynamic instance;
+		public Script Script { get; private set; }
 
-		public Regex(object instance)
+		public Regex(Script script, object instance)
 		{
+			Script = script;
 			this.instance = instance;
 		}
 
-		public Regex(string patern, string flag = "")
+		public Regex(Script script, string patern, string flag = "")
 		{
+			Script = script;
 			instance = Script.NewRegExp(patern, flag);
+		}
+
+		public bool Global { get { return instance.global; } }
+		public bool IgnoreCase { get { return instance.ignoreCase; } }
+		public int LastIndex { get { return instance.lastIndex; } set { instance.lastIndex = value; } }
+		public bool Multiline { get { return instance.multiline; } }
+		public string Pattern { get { return instance.pattern; } }
+		public string Source { get { return instance.source; } }
+
+		public static string Escape(string s)
+		{
+			return Script.RegExpEscape(s);
+		}
+
+		public Matches Exec(string s)
+		{
+			return new Matches(Script, instance.exec(s));
+		}
+
+		public bool Test(string s)
+		{
+			return instance.test(s);
+		}
+	}
+
+	public class Matches
+	{
+		public dynamic instance;
+		public Script Script { get; private set; }
+
+		public Matches(Script script, object instance)
+		{
+			Script = script;
+			this.instance = instance;
+		}
+
+		public int index { get { return instance.index; } }
+
+		public string this[int i] { get { return Script.Get(instance, i.ToString()); } }
+
+		public static implicit operator string(Matches m)
+		{
+			return m.instance;
 		}
 	}
 }

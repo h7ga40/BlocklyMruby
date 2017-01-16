@@ -24,7 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Bridge;
-using Bridge.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 
 namespace BlocklyMruby
 {
@@ -84,7 +84,7 @@ namespace BlocklyMruby
 		public string getName(string name, string type)
 		{
 			var normalized = name.ToLowerCase() + '_' + type;
-			var prefix = (type == Blockly.Variables.NAME_TYPE) ?
+			var prefix = (type == Variables.NAME_TYPE) ?
 				this.variablePrefix_ : "";
 			if (this.db_.ContainsKey(normalized)) {
 				return prefix + this.db_[normalized];
@@ -116,7 +116,7 @@ namespace BlocklyMruby
 			if (i > 0)
 				safeName += i;
 			this.dbReverse_[safeName] = true;
-			var prefix = (type == Blockly.Variables.NAME_TYPE) ?
+			var prefix = (type == Variables.NAME_TYPE) ?
 				this.variablePrefix_ : "";
 			return prefix + safeName;
 		}
@@ -136,7 +136,7 @@ namespace BlocklyMruby
 			else {
 				// Unfortunately names in non-latin characters will look like
 				// _E9_9F_B3_E4_B9_90 which is pretty meaningless.
-				name = Script.EncodeURI(name.Replace(new Regex(" ", "g"), "_")).Replace(new Regex(@"[^\w]", "g"), "_");
+				name = Script.EncodeURI(Regex.Replace(Regex.Replace(name, " ", "_"), @"[^\w]", "_"));
 				// Most languages don't allow names with leading numbers.
 				if ("0123456789".IndexOf(name[0]) != -1) {
 					name = "my_" + name;
