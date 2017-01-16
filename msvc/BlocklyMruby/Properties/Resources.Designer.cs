@@ -68,9 +68,18 @@ namespace BlocklyMruby.Properties {
         ///	&lt;meta http-equiv=&quot;X-UA-Compatible&quot; content=&quot;IE=edge&quot;&gt;
         ///	&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;
         ///	&lt;title&gt;Ruby Editor&lt;/title&gt;
+        ///	&lt;style type=&quot;text/css&quot; media=&quot;screen&quot;&gt;
+        ///		#text-editor {
+        ///			position: absolute;
+        ///			top: 0;
+        ///			right: 0;
+        ///			bottom: 0;
+        ///			left: 0;
+        ///		}
+        ///	&lt;/style&gt;
         ///&lt;/head&gt;
         ///&lt;body&gt;
-        ///	&lt;div class=&quot;ace_editor ace-clouds&quot; id=&quot;text-editor&quot;&gt;&lt;textarea style=&quot;opacity: 0;&quot; spellcheck=&quot;false&quot; class=&quot;ace_text-input&quot; nowrap&gt;&lt;/textarea&gt;&lt;div class=&quot;ace_gutter&quot;&gt;&lt;div class=&quot;ace_layer ace_gutter-layer ace_folding-enabled&quot;&gt;&lt;/div&gt;&lt;div class=&quot;ace_gutter-active-l [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
+        ///	&lt;div class=&quot;ace_editor ace-clouds&quot; id=&quot;text-editor&quot;&gt;&lt;textarea style=&quot;opacity: 0;&quot; spellcheck=&quot;false&quot; class=&quot;ace_ [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string ace_html {
             get {
@@ -120,6 +129,36 @@ namespace BlocklyMruby.Properties {
         internal static string blockly_js {
             get {
                 return ResourceManager.GetString("blockly_js", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   var Bridge = {
+        ///	instance: null
+        ///};
+        ///Bridge.NewFunc = function(handler) {
+        ///	var ret = function() {
+        ///		var a = Bridge.instance.NewArray();
+        ///		for(i in arguments) {
+        ///			Bridge.instance.Push(a, arguments[i]);
+        ///		}
+        ///		return Bridge.instance.InvokeHandler(handler, a);
+        ///	};
+        ///	ret.handler = handler;
+        ///	return ret;
+        ///}
+        ///Bridge.New = function(name, args) {
+        ///	var ctor = eval(name);
+        ///	var obj = Object.create(ctor.prototype);
+        ///	ctor.apply(obj, args);
+        ///	return obj;
+        ///}
+        ///Bridge.ParseInt = function(value, radix) {
+        ///	return p [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string bridge_js {
+            get {
+                return ResourceManager.GetString("bridge_js", resourceCulture);
             }
         }
         
@@ -265,20 +304,22 @@ namespace BlocklyMruby.Properties {
         ///	&lt;meta http-equiv=&quot;X-UA-Compatible&quot; content=&quot;IE=edge&quot;&gt;
         ///	&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;
         ///	&lt;title&gt;Terminal&lt;/title&gt;
+        ///	&lt;style type=&quot;text/css&quot; media=&quot;screen&quot;&gt;
+        ///		#terminal {
+        ///			position: absolute;
+        ///			top: 0;
+        ///			right: 0;
+        ///			bottom: 0;
+        ///			left: 0;
+        ///			font-size: small;
+        ///		}
+        ///	&lt;/style&gt;
         ///&lt;/head&gt;
         ///&lt;body&gt;
         ///	&lt;div id=&quot;terminal&quot;&gt; &lt;/div&gt;
         ///	&lt;script&gt;
         ///		function start_xterm() {
-        ///			var term = new Terminal({
-        ///				cols: 80,
-        ///				rows: 24,
-        ///				useStyle: true,
-        ///				screenKeys: true,
-        ///				cursorBlink: true
-        ///			});
-        ///			term.open(document.getElementById(&apos;terminal&apos;));
-        ///			external.te [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
+        ///			var term = new Terminal({        /// [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string xterm_html {
             get {

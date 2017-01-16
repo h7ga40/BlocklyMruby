@@ -9,15 +9,15 @@ using System.Collections.Generic;
 
 namespace BlocklyMruby
 {
-	public partial class Form1 : Form
+	public partial class MainForm : Form
 	{
 		Mruby _Mruby;
-		ScriptHost _ScriptHost;
+		BlocklyScriptHost _ScriptHost;
 		EditorHost _EditorHost;
 		Ruby _RubyCode;
 		const string FEATURE_BROWSER_EMULATION = @"Software\Microsoft\Internet Explorer\Main\FeatureControl\FEATURE_BROWSER_EMULATION";
 
-		public Form1()
+		public MainForm()
 		{
 			_Mruby = new Mruby();
 
@@ -36,7 +36,7 @@ namespace BlocklyMruby
 
 		private void Form1_Load(object sender, EventArgs e)
 		{
-			_ScriptHost = new ScriptHost();
+			_ScriptHost = new BlocklyScriptHost();
 			BlocklyWb.ObjectForScripting = _ScriptHost;
 			BlocklyWb.DocumentText = Resources.index_html;
 			App.Term = new TerminalHost(_Mruby);
@@ -90,9 +90,9 @@ namespace BlocklyMruby
 		private void BlocklyPage_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
 		{
 			AddScript(BlocklyWb, Resources.blockly_js);
-			AddScript(BlocklyWb, Script.runtime);
+			AddScript(BlocklyWb, Resources.bridge_js);
 			BlocklyWb.Document.InvokeScript("load_blockly");
-			Script.SetDocument(BlocklyWb.Document, _ScriptHost);
+			BlocklyScript.SetDocument(BlocklyWb.Document, _ScriptHost);
 			App.Init();
 			BlocklyWb.Document.InvokeScript("start_blockly");
 			App.Init2();

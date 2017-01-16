@@ -12,6 +12,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libmruby", "libmruby\libmru
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mruby", "mruby\mruby.vcxproj", "{2FB89344-8B06-4273-86E5-FE89171D189F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebConsole", "WebConsole\WebConsole.csproj", "{FD59AE4F-2473-454F-80B5-DE23D2E1F34C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -56,6 +58,18 @@ Global
 		{2FB89344-8B06-4273-86E5-FE89171D189F}.Release|x64.Build.0 = Release|x64
 		{2FB89344-8B06-4273-86E5-FE89171D189F}.Release|x86.ActiveCfg = Release|Win32
 		{2FB89344-8B06-4273-86E5-FE89171D189F}.Release|x86.Build.0 = Release|Win32
+		{FD59AE4F-2473-454F-80B5-DE23D2E1F34C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FD59AE4F-2473-454F-80B5-DE23D2E1F34C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FD59AE4F-2473-454F-80B5-DE23D2E1F34C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{FD59AE4F-2473-454F-80B5-DE23D2E1F34C}.Debug|x64.Build.0 = Debug|Any CPU
+		{FD59AE4F-2473-454F-80B5-DE23D2E1F34C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FD59AE4F-2473-454F-80B5-DE23D2E1F34C}.Debug|x86.Build.0 = Debug|Any CPU
+		{FD59AE4F-2473-454F-80B5-DE23D2E1F34C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FD59AE4F-2473-454F-80B5-DE23D2E1F34C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FD59AE4F-2473-454F-80B5-DE23D2E1F34C}.Release|x64.ActiveCfg = Release|Any CPU
+		{FD59AE4F-2473-454F-80B5-DE23D2E1F34C}.Release|x64.Build.0 = Release|Any CPU
+		{FD59AE4F-2473-454F-80B5-DE23D2E1F34C}.Release|x86.ActiveCfg = Release|Any CPU
+		{FD59AE4F-2473-454F-80B5-DE23D2E1F34C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

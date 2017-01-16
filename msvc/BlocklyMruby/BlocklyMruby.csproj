@@ -54,6 +54,7 @@
     <Compile Include="App.cs" />
     <Compile Include="Block.cs" />
     <Compile Include="Blockly.cs" />
+    <Compile Include="BlocklyView.cs" />
     <Compile Include="Blocks\Colour.cs" />
     <Compile Include="Blocks\Lists.cs" />
     <Compile Include="Blocks\Logic.cs" />
@@ -62,13 +63,11 @@
     <Compile Include="Blocks\Procedures.cs" />
     <Compile Include="Blocks\Text.cs" />
     <Compile Include="Blocks\Variables.cs" />
-    <Compile Include="Bridge.cs" />
-    <Compile Include="DynamicJson.cs" />
-    <Compile Include="Form1.cs">
+    <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Generator.cs" />
     <Compile Include="MrbAstNodes.cs" />
@@ -89,11 +88,10 @@
     <Compile Include="Ruby\Text.cs" />
     <Compile Include="Ruby\Variables.cs" />
     <Compile Include="SwitchCaseBlock.cs" />
-    <Compile Include="Uint8Array.cs" />
     <Compile Include="Variables.cs" />
     <Compile Include="yyDebug.cs" />
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <EmbeddedResource Include="MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -119,17 +117,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ace.html" />
-    <Content Include="ace\ace.js" />
-    <Content Include="ace\mode-ruby.js" />
-    <Content Include="ace\theme-twilight.js" />
-    <Content Include="js\blockly.js" />
-    <Content Include="xterm.html" />
-    <Content Include="xterm\addons\fit\fit.js" />
-    <Content Include="xterm\src\xterm.css" />
-    <Content Include="xterm\src\xterm.js" />
-    <None Include="index.html" />
-    <None Include="icon.png" />
+    <ProjectReference Include="..\WebConsole\WebConsole.csproj">
+      <Project>{fd59ae4f-2473-454f-80b5-de23d2e1f34c}</Project>
+      <Name>WebConsole</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

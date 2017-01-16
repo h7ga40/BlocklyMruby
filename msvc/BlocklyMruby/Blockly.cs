@@ -216,7 +216,7 @@ public static partial class Blockly
 	/// Currently selected block.
 	/// </summary>
 	[FieldProperty]
-	public static Block selected { get { return Script.CreateBlock(instance.selected); } }
+	public static Block selected { get { return BlocklyScript.CreateBlock(instance.selected); } }
 
 	[Name(false), FieldProperty]
 	public static object Blocks { get { return instance.Blocks; } }
@@ -230,7 +230,7 @@ public static partial class Blockly
 		/// <returns>XML document.</returns>
 		public static Element workspaceToDom(Workspace workspace)
 		{
-			return Element.Create(Script.XmlWorkspaceToDom(workspace.instance));
+			return Element.Create(BlocklyScript.XmlWorkspaceToDom(workspace.instance));
 		}
 
 		/// <summary>
@@ -240,7 +240,7 @@ public static partial class Blockly
 		/// <returns>Tree of XML elements.</returns>
 		public static Element blockToDomWithXY(Block block)
 		{
-			return Element.Create(Script.XmlBlockToDomWithXY(block.instance));
+			return Element.Create(BlocklyScript.XmlBlockToDomWithXY(block.instance));
 		}
 
 		/// <summary>
@@ -250,7 +250,7 @@ public static partial class Blockly
 		/// <returns>Tree of XML elements.</returns>
 		public static Element blockToDom(Block block)
 		{
-			return Element.Create(Script.XmlBlockToDom(block.instance));
+			return Element.Create(BlocklyScript.XmlBlockToDom(block.instance));
 		}
 
 		/// <summary>
@@ -261,7 +261,7 @@ public static partial class Blockly
 		/// <returns>Text representation.</returns>
 		public static string domToText(Element dom)
 		{
-			return Script.XmlDomToText(dom.instance);
+			return BlocklyScript.XmlDomToText(dom.instance);
 		}
 
 		/// <summary>
@@ -271,7 +271,7 @@ public static partial class Blockly
 		/// <returns>Text representation.</returns>
 		public static string domToPrettyText(Element dom)
 		{
-			return Script.XmlDomToPrettyText(dom.instance);
+			return BlocklyScript.XmlDomToPrettyText(dom.instance);
 		}
 
 		/// <summary>
@@ -282,7 +282,7 @@ public static partial class Blockly
 		/// <returns>A tree of XML elements.</returns>
 		public static Element textToDom(string text)
 		{
-			return Element.Create(Script.XmlTextToDom(text));
+			return Element.Create(BlocklyScript.XmlTextToDom(text));
 		}
 
 		/// <summary>
@@ -292,7 +292,7 @@ public static partial class Blockly
 		/// <param name="workspace">The workspace.</param>
 		public static void domToWorkspace(Element xml, Workspace workspace)
 		{
-			Script.XmlDomToWorkspace(xml.instance, workspace.instance);
+			BlocklyScript.XmlDomToWorkspace(xml.instance, workspace.instance);
 		}
 
 		/// <summary>
@@ -304,7 +304,7 @@ public static partial class Blockly
 		/// <returns>The root block created.</returns>
 		public static Block domToBlock(Element xmlBlock, Workspace workspace)
 		{
-			return Script.CreateBlock(Script.XmlDomToBlock(xmlBlock.instance, workspace.instance));
+			return BlocklyScript.CreateBlock(BlocklyScript.XmlDomToBlock(xmlBlock.instance, workspace.instance));
 		}
 
 		/// <summary>
@@ -313,7 +313,7 @@ public static partial class Blockly
 		/// <param name="xmlBlock">XML block element.</param>
 		public static void deleteNext(Element xmlBlock)
 		{
-			Script.XmlDeleteNext(xmlBlock.instance);
+			BlocklyScript.XmlDeleteNext(xmlBlock.instance);
 		}
 	}
 
@@ -477,7 +477,7 @@ public static partial class Blockly
 		/// <returns>The created block.</returns>
 		public Block newBlock(string prototypeName, string opt_id = null)
 		{
-			return Script.CreateBlock(instance.newBlock.call(instance, prototypeName, opt_id));
+			return BlocklyScript.CreateBlock(instance.newBlock.call(instance, prototypeName, opt_id));
 		}
 
 		/// <summary>
@@ -518,7 +518,7 @@ public static partial class Blockly
 		public Action<Events.Abstract> addChangeListener(Action<Events.Abstract> func)
 		{
 			var a = func == null ? null : Script.NewFunc(new Action<object>((e) => {
-				func(Script.CreateEvent(e));
+				func(BlocklyScript.CreateEvent(e));
 			}));
 			if (a != null)
 				Listeners.Add(a, func);
@@ -566,7 +566,7 @@ public static partial class Blockly
 			var ret = instance.getBlockById.call(instance, id);
 			if ((ret == null) || (ret is DBNull))
 				return null;
-			return Script.CreateBlock(ret);
+			return BlocklyScript.CreateBlock(ret);
 		}
 
 		/// <summary>
@@ -576,7 +576,7 @@ public static partial class Blockly
 		/// <returns>The sought after workspace or null if not found.</returns>
 		public static Workspace getById(string id)
 		{
-			return Script.WorkspaceGetById(id);
+			return BlocklyScript.WorkspaceGetById(id);
 		}
 
 		/// <summary>
@@ -1019,13 +1019,13 @@ public static partial class Blockly
 		public const string UI = "ui";
 
 		public static bool recordUndo {
-			get { return Script.EventsGetRecordUndo(); }
-			set { Script.EventsSetRecordUndo(value); }
+			get { return BlocklyScript.EventsGetRecordUndo(); }
+			set { BlocklyScript.EventsSetRecordUndo(value); }
 		}
 
 		private static string[] getDescendantIds_(Block block)
 		{
-			var ret = Script.EventsGetDescendantIds_(block.instance);
+			var ret = BlocklyScript.EventsGetDescendantIds_(block.instance);
 			if ((ret == null) || (ret is DBNull))
 				return null;
 			return new string[] { ret };
@@ -1337,22 +1337,22 @@ public static partial class Blockly
 
 		internal static void enable()
 		{
-			Script.EventsEnable();
+			BlocklyScript.EventsEnable();
 		}
 
 		internal static void disable()
 		{
-			Script.EventsDisable();
+			BlocklyScript.EventsDisable();
 		}
 
 		internal static void setGroup(string group)
 		{
-			Script.EventsSetGroup(group);
+			BlocklyScript.EventsSetGroup(group);
 		}
 
 		internal static void fire(Abstract ev)
 		{
-			Script.EventsFire(ev.instance);
+			BlocklyScript.EventsFire(ev.instance);
 		}
 	}
 
@@ -1400,7 +1400,7 @@ public static partial class Blockly
 		internal dynamic instance;
 		public int type { get { return instance.type; } }
 		public string name { get { return instance.name; } }
-		public Block block { get { return Script.CreateBlock(Script.Get(instance, "block")); } }
+		public Block block { get { return BlocklyScript.CreateBlock(Script.Get(instance, "block")); } }
 		public Connection connection { get { return Connection.Create(instance.connection); } }
 		public FieldList fieldRow {
 			get {
@@ -1440,9 +1440,9 @@ public static partial class Blockly
 		{
 			var f = field.As<Field>();
 			if (f != null)
-				return Script.CreateInput(instance.appendField.call(instance, f.instance, opt_name));
+				return BlocklyScript.CreateInput(instance.appendField.call(instance, f.instance, opt_name));
 			else
-				return Script.CreateInput(instance.appendField.call(instance, field.Value, opt_name));
+				return BlocklyScript.CreateInput(instance.appendField.call(instance, field.Value, opt_name));
 		}
 
 		/// <summary>
@@ -1456,9 +1456,9 @@ public static partial class Blockly
 		{
 			var f = field.As<Field>();
 			if (f != null)
-				return Script.CreateInput(instance.appendTitle.call(instance, f.instance, opt_name));
+				return BlocklyScript.CreateInput(instance.appendTitle.call(instance, f.instance, opt_name));
 			else
-				return Script.CreateInput(instance.appendTitle.call(instance, field.Value, opt_name));
+				return BlocklyScript.CreateInput(instance.appendTitle.call(instance, field.Value, opt_name));
 		}
 
 		/// <summary>
@@ -1500,9 +1500,9 @@ public static partial class Blockly
 		{
 			var chk = check == null ? null : check.As<string[]>();
 			if (chk != null)
-				return Script.CreateInput(instance.setCheck.call(instance, Script.NewArray(check)));
+				return BlocklyScript.CreateInput(instance.setCheck.call(instance, Script.NewArray(check)));
 			else
-				return Script.CreateInput(instance.setCheck.call(instance, (string)check));
+				return BlocklyScript.CreateInput(instance.setCheck.call(instance, (string)check));
 		}
 
 		/// <summary>
@@ -1513,7 +1513,7 @@ public static partial class Blockly
 		/// <returns>The input being modified (to allow chaining).</returns>
 		public Input setAlign(double align)
 		{
-			return Script.CreateInput(instance.setAlign.call(instance, align));
+			return BlocklyScript.CreateInput(instance.setAlign.call(instance, align));
 		}
 
 		/// <summary>
@@ -1588,7 +1588,7 @@ public static partial class Blockly
 		/// <returns>True iff a reconnection was made, false otherwise.</returns>
 		internal static bool reconnect(Connection connectionChild, Block block, string inputName)
 		{
-			return Script.MutatorReconnect(connectionChild == null ? null : connectionChild.instance, block.instance, inputName);
+			return BlocklyScript.MutatorReconnect(connectionChild == null ? null : connectionChild.instance, block.instance, inputName);
 		}
 
 		internal bool isVisible()
@@ -1644,7 +1644,7 @@ public static partial class Blockly
 
 		public Block targetBlock()
 		{
-			return Script.CreateBlock(instance.targetBlock.call(instance));
+			return BlocklyScript.CreateBlock(instance.targetBlock.call(instance));
 		}
 
 		public bool checkType_(Connection connection)
@@ -1662,7 +1662,7 @@ public static partial class Blockly
 			var ret = instance.getSourceBlock.call(instance);
 			if ((ret == null) || (ret is DBNull))
 				return null;
-			return Script.CreateBlock(ret);
+			return BlocklyScript.CreateBlock(ret);
 		}
 	}
 
@@ -1686,7 +1686,7 @@ public static partial class Blockly
 		internal dynamic instance;
 
 		public string text_ { get { return instance.text_; } }
-		public Block sourceBlock_ { get { return Script.CreateBlock(instance.sourceBlock_); } }
+		public Block sourceBlock_ { get { return BlocklyScript.CreateBlock(instance.sourceBlock_); } }
 
 		public Field(object instance)
 		{
@@ -2958,7 +2958,7 @@ public static partial class Blockly
 	{
 		public static dynamic callbackFactory(Block block, Element xml)
 		{
-			return Script.ContextMenuCallbackFactory(block.instance, xml.instance);
+			return BlocklyScript.ContextMenuCallbackFactory(block.instance, xml.instance);
 		}
 	}
 
@@ -3004,7 +3004,7 @@ public static class goog
 {
 	public static string getMsg(string str, object opt_values)
 	{
-		return Script.goog_getMsg(str, opt_values);
+		return BlocklyScript.goog_getMsg(str, opt_values);
 	}
 
 	public static class dom
@@ -3013,9 +3013,9 @@ public static class goog
 		{
 			var element = (t == null) ? null : t.As<Element>();
 			if (element != null)
-				return Element.Create(Script.goog_dom_createDom(v, o, element));
+				return Element.Create(BlocklyScript.goog_dom_createDom(v, o, element));
 			else
-				return Element.Create(Script.goog_dom_createDom(v, o, (string)t));
+				return Element.Create(BlocklyScript.goog_dom_createDom(v, o, (string)t));
 		}
 	}
 
@@ -3071,7 +3071,7 @@ public static class goog
 	{
 		internal static bool equals(Array a, Array b)
 		{
-			return Script.goog_array_equals(a, b);
+			return BlocklyScript.goog_array_equals(a, b);
 		}
 	}
 

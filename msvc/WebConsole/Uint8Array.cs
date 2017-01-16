@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace Bridge.Html5
 {
@@ -39,7 +40,7 @@ namespace Bridge.Html5
 
 		public override string ToString()
 		{
-			return BlocklyMruby.MrbParser.UTF8ArrayToString(this, 0);
+			return Encoding.UTF8.GetString(data);
 		}
 
 		public byte[] ToArray() { return data; }

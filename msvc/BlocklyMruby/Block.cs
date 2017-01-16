@@ -127,7 +127,7 @@ namespace BlocklyMruby
 			var ret = instance.getParent.call(instance);
 			if ((ret == null) || (ret is DBNull))
 				return null;
-			return Script.CreateBlock(ret);
+			return BlocklyScript.CreateBlock(ret);
 		}
 
 		/// <summary>
@@ -141,7 +141,7 @@ namespace BlocklyMruby
 			var ret = instance.getInputWithBlock.call(instance, block.instance);
 			if ((ret == null) || (ret is DBNull))
 				return null;
-			return Script.CreateInput(ret);
+			return BlocklyScript.CreateInput(ret);
 		}
 
 		/// <summary>
@@ -156,7 +156,7 @@ namespace BlocklyMruby
 			var ret = instance.getSurroundParent.call(instance);
 			if ((ret == null) || (ret is DBNull))
 				return null;
-			return Script.CreateBlock(ret);
+			return BlocklyScript.CreateBlock(ret);
 		}
 
 		/// <summary>
@@ -169,7 +169,7 @@ namespace BlocklyMruby
 			var ret = instance.getNextBlock.call(instance);
 			if ((ret == null) || (ret is DBNull))
 				return null;
-			return Script.CreateBlock(ret);
+			return BlocklyScript.CreateBlock(ret);
 		}
 
 		/// <summary>
@@ -183,7 +183,7 @@ namespace BlocklyMruby
 			var ret = instance.getRootBlock.call(instance);
 			if ((ret == null) || (ret is DBNull))
 				return null;
-			return Script.CreateBlock(ret);
+			return BlocklyScript.CreateBlock(ret);
 		}
 
 		/// <summary>
@@ -379,7 +379,7 @@ namespace BlocklyMruby
 		[External]
 		internal Blockly.Field getField(string name)
 		{
-			return Script.CreateField(instance.getField.call(instance, name));
+			return BlocklyScript.CreateField(instance.getField.call(instance, name));
 		}
 
 		/// <summary>
@@ -598,7 +598,7 @@ namespace BlocklyMruby
 		[External]
 		internal Blockly.Input appendValueInput(string name)
 		{
-			return Script.CreateInput(instance.appendValueInput.call(instance, name));
+			return BlocklyScript.CreateInput(instance.appendValueInput.call(instance, name));
 		}
 
 		/// <summary>
@@ -610,7 +610,7 @@ namespace BlocklyMruby
 		[External]
 		internal Blockly.Input appendStatementInput(string name)
 		{
-			return Script.CreateInput(instance.appendStatementInput.call(instance, name));
+			return BlocklyScript.CreateInput(instance.appendStatementInput.call(instance, name));
 		}
 
 		/// <summary>
@@ -622,7 +622,7 @@ namespace BlocklyMruby
 		[External]
 		internal Blockly.Input appendDummyInput(string opt_name = null)
 		{
-			return Script.CreateInput(instance.appendDummyInput.call(instance, opt_name));
+			return BlocklyScript.CreateInput(instance.appendDummyInput.call(instance, opt_name));
 		}
 
 		/// <summary>
@@ -682,7 +682,7 @@ namespace BlocklyMruby
 			var ret = instance.getInput.call(instance, name);
 			if ((ret == null) || (ret is DBNull))
 				return null;
-			return Script.CreateInput(ret);
+			return BlocklyScript.CreateInput(ret);
 		}
 
 		/// <summary>
@@ -697,7 +697,7 @@ namespace BlocklyMruby
 			var ret = instance.getInputTargetBlock.call(instance, name);
 			if ((ret == null) || (ret is DBNull))
 				return null;
-			return Script.CreateBlock(ret);
+			return BlocklyScript.CreateBlock(ret);
 		}
 
 		/// <summary>
