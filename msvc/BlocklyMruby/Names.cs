@@ -35,6 +35,7 @@ namespace BlocklyMruby
 		Dictionary<string, bool> reservedDict_;
 		Dictionary<string, string> db_;
 		Dictionary<string, bool> dbReverse_;
+		Blockly Blockly;
 
 		/// <summary>
 		/// Class for a database of entity names (variables, functions, etc).
@@ -43,8 +44,9 @@ namespace BlocklyMruby
 		/// illegal for use as names in a language (e.g. 'new,if,this,...').</param>
 		/// <param name="opt_variablePrefix">Some languages need a '$' or a namespace
 		/// before all variable names.</param>
-		public Names(string reservedWords, string opt_variablePrefix = null)
+		public Names(Blockly Blockly, string reservedWords, string opt_variablePrefix = null)
 		{
+			this.Blockly = Blockly;
 			this.variablePrefix_ = opt_variablePrefix == null ? "" : opt_variablePrefix;
 			this.reservedDict_ = new Dictionary<string, bool>();
 			if (reservedWords != null) {
@@ -83,8 +85,8 @@ namespace BlocklyMruby
 		/// <returns>An entity name legal for the exported language.</returns>
 		public string getName(string name, string type)
 		{
-			var normalized = name.ToLowerCase() + '_' + type;
-			var prefix = (type == Variables.NAME_TYPE) ?
+			var normalized = name.ToLower() + '_' + type;
+			var prefix = (type == Blockly.Variables.NAME_TYPE) ?
 				this.variablePrefix_ : "";
 			if (this.db_.ContainsKey(normalized)) {
 				return prefix + this.db_[normalized];
@@ -116,7 +118,7 @@ namespace BlocklyMruby
 			if (i > 0)
 				safeName += i;
 			this.dbReverse_[safeName] = true;
-			var prefix = (type == Variables.NAME_TYPE) ?
+			var prefix = (type == Blockly.Variables.NAME_TYPE) ?
 				this.variablePrefix_ : "";
 			return prefix + safeName;
 		}
@@ -152,9 +154,9 @@ namespace BlocklyMruby
 		/// <param name="name1">First name.</param>
 		/// <param name="name2">Second name.</param>
 		/// <returns>True if names are the same.</returns>
-		public static bool equals(string name1, string name2)
+		public bool equals(string name1, string name2)
 		{
-			return name1.ToLowerCase() == name2.ToLowerCase();
+			return name1.ToLower() == name2.ToLower();
 		}
 	}
 }

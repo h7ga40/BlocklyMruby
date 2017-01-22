@@ -4,7 +4,6 @@
 // MIT Lisence
 using System;
 using Bridge;
-using System.Text.RegularExpressions;
 using System.Collections.Generic;
 
 namespace BlocklyMruby
@@ -17,7 +16,7 @@ namespace BlocklyMruby
 			var repeats = new int_node(this, Bridge.Script.ParseInt(block.getFieldValue("TIMES"), 10));
 			var branch = statementToCode(block, "DO");
 			if (branch == null) branch = new nil_node(this);
-			return new call_node(this, repeats, intern("times"), new List<node>(), new block_node(this, new List<node>(), branch, false));
+			return new call_node(this, repeats, intern("times"), new JsArray<node>(), new block_node(this, new JsArray<node>(), branch, false));
 		}
 
 		public node controls_repeat_ext(ControlsRepeatExtBlock block)
@@ -32,7 +31,7 @@ namespace BlocklyMruby
 			}
 			var branch = statementToCode(block, "DO");
 			if (branch == null) branch = new nil_node(this);
-			return new call_node(this, repeats, intern("times"), new List<node>(), new block_node(this, new List<node>(), branch, false));
+			return new call_node(this, repeats, intern("times"), new JsArray<node>(), new block_node(this, new JsArray<node>(), branch, false));
 		}
 
 		public node controls_whileUntil(ControlsWhileUntilBlock block)
@@ -81,13 +80,13 @@ namespace BlocklyMruby
 
 			local_resume(lv);
 
-			var arg = new hash_node(this, new List<hash_node.kv_t>() {
+			var arg = new hash_node(this, new JsArray<hash_node.kv_t>() {
 				new hash_node.kv_t(new sym_node(this, intern("from")), fromVal),
 				new hash_node.kv_t(new sym_node(this, intern("to")), toVal),
 				new hash_node.kv_t(new sym_node(this, intern("by")), increment),
 			});
-			var exec = new block_node(this, new List<node>() { new arg_node(this, loopVar) }, branch, false);
-			return new fcall_node(this, intern("for_loop"), new List<node>() { arg }, exec);
+			var exec = new block_node(this, new JsArray<node>() { new arg_node(this, loopVar) }, branch, false);
+			return new fcall_node(this, intern("for_loop"), new JsArray<node>() { arg }, exec);
 		}
 
 		public node controls_forEach(ControlsForEachBlock block)
@@ -97,14 +96,14 @@ namespace BlocklyMruby
 
 			var loopVar = local_add_f(block.getFieldValue("VAR"));
 			var argument0 = valueToCode(block, "LIST");
-			if (argument0 == null) argument0 = new array_node(this, new List<node>());
+			if (argument0 == null) argument0 = new array_node(this, new JsArray<node>());
 			var branch = statementToCode(block, "DO");
 			if (branch == null) branch = new nil_node(this);
 
 			local_resume(lv);
 
-			var exec = new block_node(this, new List<node>() { new arg_node(this, loopVar) }, branch, false);
-			return new call_node(this, argument0, intern("each"), new List<node>(), exec);
+			var exec = new block_node(this, new JsArray<node>() { new arg_node(this, loopVar) }, branch, false);
+			return new call_node(this, argument0, intern("each"), new JsArray<node>(), exec);
 		}
 
 		public node controls_flow_statements(ControlsFlowStatementsBlock block)

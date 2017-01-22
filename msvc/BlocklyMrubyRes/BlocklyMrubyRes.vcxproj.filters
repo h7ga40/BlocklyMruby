@@ -37,9 +37,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ResourceCompile Include="app.rc">
       <Filter>リソース ファイル</Filter>
     </ResourceCompile>
@@ -69,6 +66,9 @@
       <Filter>リソース ファイル</Filter>
     </None>
     <None Include="js\blockly.js">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="class_selector.html">
       <Filter>リソース ファイル</Filter>
     </None>
   </ItemGroup>

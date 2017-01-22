@@ -106,15 +106,7 @@ Blockly.Names = {
 		return Bridge.instance.names_equals(name1, name2);
 	},
 }
-Blockly.Procedures = {
-	flyoutCategory: function(workspace) {
-		return Bridge.instance.procedures_flyoutCategory(workspace);
-	},
-}
 Blockly.Variables = {
-	flyoutCategory: function(workspace) {
-		return Bridge.instance.variables_flyoutCategory(workspace);
-	},
 	allUsedVariables: function(root) {
 		var blocks;
 		if (root instanceof Blockly.Block) {

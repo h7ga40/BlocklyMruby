@@ -49,13 +49,13 @@ namespace Bridge
 
 		public object new_array()
 		{
-			return new List<object>();
+			return new JsArray<object>();
 		}
 
 		public void array_add(object array_, object item)
 		{
-			var array = (List<object>)array_;
-			array.Add(item);
+			var array = (JsArray<object>)array_;
+			array.Push(item);
 		}
 
 		public object new_object()
@@ -194,8 +194,14 @@ namespace Bridge
 		public object InvokeHandler(object handler_, object arguments_)
 		{
 			var handler = handler_ as Delegate;
-			var arguments = arguments_ as List<object>;
-			return handler.DynamicInvoke(arguments.ToArray());
+			var arguments = arguments_ as JsArray<object>;
+			try {
+				return handler.DynamicInvoke(arguments.ToArray());
+			}
+			catch (Exception e) {
+				System.Diagnostics.Debug.WriteLine(e.ToString());
+				return null;
+			}
 		}
 
 		public Element ToElement(dynamic element)
@@ -320,7 +326,7 @@ namespace Bridge
 
 		public HTMLElement GetElementById(string id)
 		{
-			return Element.Create(this, Bridge.GetElementById(id));
+			return HTMLElement.Create(this, Bridge.GetElementById(id));
 		}
 
 		public void PreventDefault(Event @event)
@@ -363,9 +369,14 @@ namespace Bridge
 			return Microsoft.JScript.GlobalObject.escape(s);
 		}
 
+		public Element ParseXML(string data)
+		{
+			return new Element(this, Bridge.ParseXML(data));
+		}
+
 		public static string[] GetFieldNames(object comObj)
 		{
-			List<string> result = new List<string>();
+			JsArray<string> result = new JsArray<string>();
 
 			IDispatch dispatch = comObj as IDispatch;
 			if (dispatch == null)
@@ -393,7 +404,7 @@ namespace Bridge
 					Array.Resize(ref names, j);
 
 					foreach (string name in names) {
-						result.Add(name);
+						result.Push(name);
 					}
 				}
 			}
@@ -406,7 +417,7 @@ namespace Bridge
 
 		public static string[] GetFuncNames(object comObj)
 		{
-			List<string> result = new List<string>();
+			JsArray<string> result = new JsArray<string>();
 
 			IDispatch dispatch = comObj as IDispatch;
 			if (dispatch == null)
@@ -434,7 +445,7 @@ namespace Bridge
 					Array.Resize(ref names, j);
 
 					foreach (string name in names) {
-						result.Add(name);
+						result.Push(name);
 					}
 				}
 			}
@@ -462,11 +473,11 @@ namespace Bridge
 		}
 	}
 
-	public class Any<T1, T2>
+	public class Union<T1, T2>
 	{
 		object value;
 
-		public Any(object value)
+		public Union(object value)
 		{
 			if (value is T1 || value is T2)
 				this.value = value;
@@ -480,22 +491,22 @@ namespace Bridge
 
 		public bool Is<T>() { return value is T; }
 
-		public static implicit operator Any<T1, T2>(T1 value)
+		public static implicit operator Union<T1, T2>(T1 value)
 		{
-			return new Any<T1, T2>(value);
+			return new Union<T1, T2>(value);
 		}
 
-		public static implicit operator Any<T1, T2>(T2 value)
+		public static implicit operator Union<T1, T2>(T2 value)
 		{
-			return new Any<T1, T2>(value);
+			return new Union<T1, T2>(value);
 		}
 
-		public static explicit operator T1(Any<T1, T2> any)
+		public static explicit operator T1(Union<T1, T2> any)
 		{
 			return any == null ? default(T1) : (T1)any.value;
 		}
 
-		public static explicit operator T2(Any<T1, T2> any)
+		public static explicit operator T2(Union<T1, T2> any)
 		{
 			return any == null ? default(T2) : (T2)any.value;
 		}
@@ -506,11 +517,11 @@ namespace Bridge
 		}
 	}
 
-	public class Any<T1, T2, T3>
+	public class Union<T1, T2, T3>
 	{
 		object value;
 
-		public Any(object value)
+		public Union(object value)
 		{
 			if (value is T1 || value is T2 || value is T3)
 				this.value = value;
@@ -524,32 +535,32 @@ namespace Bridge
 
 		public bool Is<T>() { return value is T; }
 
-		public static implicit operator Any<T1, T2, T3>(T1 value)
+		public static implicit operator Union<T1, T2, T3>(T1 value)
 		{
-			return new Any<T1, T2, T3>(value);
+			return new Union<T1, T2, T3>(value);
 		}
 
-		public static implicit operator Any<T1, T2, T3>(T2 value)
+		public static implicit operator Union<T1, T2, T3>(T2 value)
 		{
-			return new Any<T1, T2, T3>(value);
+			return new Union<T1, T2, T3>(value);
 		}
 
-		public static implicit operator Any<T1, T2, T3>(T3 value)
+		public static implicit operator Union<T1, T2, T3>(T3 value)
 		{
-			return new Any<T1, T2, T3>(value);
+			return new Union<T1, T2, T3>(value);
 		}
 
-		public static explicit operator T1(Any<T1, T2, T3> any)
+		public static explicit operator T1(Union<T1, T2, T3> any)
 		{
 			return (T1)any.value;
 		}
 
-		public static explicit operator T2(Any<T1, T2, T3> any)
+		public static explicit operator T2(Union<T1, T2, T3> any)
 		{
 			return (T2)any.value;
 		}
 
-		public static explicit operator T3(Any<T1, T2, T3> any)
+		public static explicit operator T3(Union<T1, T2, T3> any)
 		{
 			return (T3)any.value;
 		}
@@ -562,11 +573,6 @@ namespace Bridge
 
 	public static class StringExtention
 	{
-		public static string ToLowerCase(this string str)
-		{
-			return str.ToLower();
-		}
-
 		public static string Replace(this string str, Text.RegularExpressions.Regex regex, string dst)
 		{
 			var Script = regex.Script;
@@ -580,9 +586,9 @@ namespace Bridge
 			if ((ret == null) || (ret is DBNull))
 				return null;
 			int len = Script.Get(ret, "length");
-			var result = new List<string>(len);
+			var result = new JsArray<string>(len);
 			for (int i = 0; i < len; i++) {
-				result.Add(Script.Get<string>(ret, i.ToString()));
+				result.Push(Script.Get<string>(ret, i.ToString()));
 			}
 			return result.ToArray();
 		}
@@ -594,9 +600,9 @@ namespace Bridge
 			if ((ret == null) || (ret is DBNull))
 				return null;
 			int len = Script.Get(ret, "length");
-			var result = new List<string>(len);
+			var result = new JsArray<string>(len);
 			for (int i = 0; i < len; i++) {
-				result.Add(Script.Get<string>(ret, i.ToString()));
+				result.Push(Script.Get<string>(ret, i.ToString()));
 			}
 			return result.ToArray();
 		}
@@ -632,6 +638,46 @@ namespace Bridge
 		public static string Join(this IEnumerable<string> list, string separator)
 		{
 			return String.Join(separator, list);
+		}
+	}
+
+	public class JsArray<T> : List<T>
+	{
+		public JsArray()
+			: base()
+		{
+		}
+
+		public JsArray(int capacity)
+			: base(capacity)
+		{
+		}
+
+		public JsArray(IEnumerable<T> collection)
+			: base(collection)
+		{
+		}
+
+		public int Length { get { return Count; } }
+
+		public void Push(T item)
+		{
+			Add(item);
+		}
+
+		public JsArray<T> Concat(IEnumerable<T> items)
+		{
+			var result = new JsArray<T>(this);
+			result.AddRange(items);
+			return result;
+		}
+	}
+
+	public static class JsArrayExtention
+	{
+		public static void Concat<T>(this List<T> first, IEnumerable<T> second)
+		{
+			first.AddRange(second);
 		}
 	}
 
@@ -726,7 +772,12 @@ namespace Bridge.Html5
 	public class Node
 	{
 		public dynamic instance;
-		public Script Script { get; private set; }
+		public Script Script { get; internal set; }
+		public string TextContent { get; }
+
+		public Node()
+		{
+		}
 
 		public Node(Script script, object instance)
 		{
@@ -736,10 +787,15 @@ namespace Bridge.Html5
 
 		public string NodeName { get { return instance.nodeName; } }
 		public string NodeValue { get { return instance.nodeValue; } }
-		public NodeList ChildNodes { get { return new NodeList(Script, instance.childNodes); } }
+		public NodeList<Node> ChildNodes { get { return new NodeList<Node>(Script, instance.childNodes); } }
+
+		public void AppendChild(Node parameter)
+		{
+			instance.appendChild(parameter.instance);
+		}
 	}
 
-	public class NodeList
+	public class NodeList<T> : IEnumerable<T> where T : Node, new()
 	{
 		public dynamic instance;
 		public Script Script { get; private set; }
@@ -750,9 +806,132 @@ namespace Bridge.Html5
 			this.instance = instance;
 		}
 
-		public Node this[int index] { get { return Element.Create(Script, Script.Get(instance, index.ToString())); } }
+		public T this[int index] {
+			get {
+				return Element.Create(Script, Script.Get(instance, index.ToString()));
+			}
+		}
 
 		public int Length { get { return instance.length; } }
+
+		public class Enumerator : IEnumerator<T>
+		{
+			private NodeList<T> nodeList;
+			private int index = -1;
+
+			public Enumerator(NodeList<T> jquery)
+			{
+				this.nodeList = jquery;
+			}
+
+			T IEnumerator<T>.Current {
+				get {
+					var node = new T();
+					node.Script = nodeList.Script;
+					node.instance = nodeList.Script.Get(nodeList.instance, index.ToString());
+					return node;
+				}
+			}
+
+			public object Current {
+				get {
+					return ((IEnumerator<T>)this).Current;
+				}
+			}
+
+			public void Dispose()
+			{
+			}
+
+			public bool MoveNext()
+			{
+				index++;
+				return index < nodeList.Length;
+			}
+
+			public void Reset()
+			{
+				index = -1;
+			}
+		}
+
+		public IEnumerator<T> GetEnumerator()
+		{
+			return new Enumerator(this);
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
+		}
+	}
+
+	public enum ElementType
+	{
+		Anchor = 0,
+		Area = 1,
+		Audio = 2,
+		Base = 3,
+		Body = 4,
+		BR = 5,
+		Button = 6,
+		Canvas = 7,
+		DataList = 8,
+		Div = 9,
+		DList = 10,
+		Embed = 11,
+		FieldSet = 12,
+		Form = 13,
+		Head = 14,
+		H1 = 15,
+		H2 = 16,
+		H3 = 17,
+		H4 = 18,
+		H5 = 19,
+		H6 = 20,
+		HR = 21,
+		Html = 22,
+		IFrame = 23,
+		Image = 24,
+		Input = 25,
+		Keygen = 26,
+		Label = 27,
+		Legend = 28,
+		LI = 29,
+		Link = 30,
+		Map = 31,
+		Media = 32,
+		Meta = 33,
+		Meter = 34,
+		Mod = 35,
+		Object = 36,
+		OList = 37,
+		OptGroup = 38,
+		Option = 39,
+		Output = 40,
+		Paragraph = 41,
+		Param = 42,
+		Pre = 43,
+		Progress = 44,
+		Quote = 45,
+		Script = 46,
+		Select = 47,
+		Source = 48,
+		Span = 49,
+		Style = 50,
+		TableCaption = 51,
+		TableCell = 52,
+		TableCol = 53,
+		TableDataCell = 54,
+		Table = 55,
+		TableHeaderCell = 56,
+		TableRow = 57,
+		TableSection = 58,
+		TextArea = 59,
+		Title = 60,
+		Track = 61,
+		UList = 62,
+		Video = 63
 	}
 
 	public class Element : Node
@@ -761,9 +940,35 @@ namespace Bridge.Html5
 
 		public string OuterHTML { get { return instance.outerHTML; } }
 
+		public Element()
+		{
+		}
+
 		public Element(Script script, object instance)
 			: base(script, instance)
 		{
+			if (instance is ElementType) {
+				string tagname = ToTagName((ElementType)instance);
+				this.instance = Script.CreateElement(tagname).instance;
+			}
+		}
+
+		public static string ToTagName(ElementType instance)
+		{
+			var tagname = instance.ToString().ToLower();
+			switch (tagname) {
+			case "anchor": tagname = "a"; break;
+			case "datalist": tagname = "dl"; break;
+			case "olist": tagname = "ol"; break;
+			case "paragraph": tagname = "p"; break;
+			case "quote": tagname = "q"; break;
+			case "tablecaption": tagname = "caption"; break;
+			case "tabledatacell": tagname = "td"; break;
+			case "tableheadercell": tagname = "th"; break;
+			case "tablerow": tagname = "tr"; break;
+			case "ulist": tagname = "ul"; break;
+			}
+			return tagname;
 		}
 
 		public static Element Create(Script script, dynamic instance)
@@ -786,9 +991,20 @@ namespace Bridge.Html5
 			instance.setAttribute(name, value);
 		}
 
-		public void AppendChild(Element parameter)
+		public NodeList<Element> GetElementsByTagName(string tagname)
 		{
-			instance.appendChild(parameter.instance);
+			return new NodeList<Element>(Script, instance.getElementsByTagName(tagname));
+		}
+	}
+
+	public class Text : Node
+	{
+		public Text(Script script, object instance)
+			: base(script, instance)
+		{
+			if (instance is string) {
+				this.instance = Script.CreateTextNode((string)instance).instance;
+			}
 		}
 	}
 
@@ -822,6 +1038,13 @@ namespace Bridge.Html5
 		public HTMLElement(Script script, object instance)
 			: base(script, instance)
 		{
+		}
+
+		public new static HTMLElement Create(Script script, dynamic instance)
+		{
+			if ((instance == null) || (instance is DBNull))
+				return null;
+			return new HTMLElement(script, instance);
 		}
 	}
 
@@ -932,5 +1155,238 @@ namespace Bridge.Text.RegularExpressions
 		{
 			return m.instance;
 		}
+	}
+}
+
+namespace Bridge.jQuery2
+{
+	public class jQuery : IEnumerable
+	{
+		public dynamic instance;
+		Script Script;
+
+		public jQuery(Script script, object instance = null)
+		{
+			Script = script;
+			this.instance = instance;
+		}
+
+		public jQuery New(string val)
+		{
+			return new jQuery(Script, Script.Bridge.jqNew(val));
+		}
+
+		public jQuery New(Element val)
+		{
+			return new jQuery(Script, Script.Bridge.jqNew(val.instance));
+		}
+
+		public jQuery New(ElementType val)
+		{
+			return new jQuery(Script, Script.Bridge.jqNew("<" + Element.ToTagName(val) + ">"));
+		}
+
+		public jQuery Select(string selector, jQuery parent = null)
+		{
+			if (parent == null)
+				return new jQuery(Script, Script.Bridge.Select(selector));
+			else
+				return new jQuery(Script, Script.Bridge.Select2(selector, parent.instance));
+		}
+
+		public string Attr(string attr)
+		{
+			return Script.Bridge.Attr(instance, attr);
+		}
+
+		public void Attr(string attr, string val)
+		{
+			Script.Bridge.Attr2(instance, attr, val);
+		}
+
+		public void ReplaceWith(jQuery val)
+		{
+			Script.Bridge.ReplaceWith(instance, val.instance);
+		}
+
+		public string Val()
+		{
+			return Script.Bridge.Val(instance);
+		}
+
+		public void Val(string val)
+		{
+			Script.Bridge.Val1(instance, val);
+		}
+
+		public jQuery Get()
+		{
+			return new jQuery(Script, Script.Bridge.jqGet(instance));
+		}
+
+		public Element Get(int val)
+		{
+			return new Element(Script, Script.Bridge.jqGet2(instance, val));
+		}
+
+		public jQuery Parent()
+		{
+			return new jQuery(Script, Script.Bridge.Parent(instance));
+		}
+
+		public void Append(Element ele)
+		{
+			Script.Bridge.Append(instance, ele.instance);
+		}
+
+		public string Text()
+		{
+			return Script.Bridge.Text(instance);
+		}
+
+		public void Text(string text)
+		{
+			Script.Bridge.Text2(instance, text);
+		}
+
+		public string Html()
+		{
+			return Script.Bridge.Html(instance);
+		}
+
+		public void Html(string html)
+		{
+			Script.Bridge.Html2(instance, html);
+		}
+
+		public void RemoveAttr(string attr)
+		{
+			Script.Bridge.RemoveAttr(instance, attr);
+		}
+
+		public void Click(object state, Action<jQueryMouseEvent> handler)
+		{
+			Script.Bridge.Click(instance, state, Script.NewFunc(new Action<object>((e) => {
+				handler(new jQueryMouseEvent(Script, e));
+			})));
+		}
+
+		public jQuery ButtonToggle()
+		{
+			return new jQuery(Script, Script.Bridge.ButtonToggle(instance));
+		}
+
+		public bool Is(string val)
+		{
+			return Script.Bridge.Is(instance, val);
+		}
+
+		public jQuery Children()
+		{
+			return new jQuery(Script, Script.Bridge.Children(instance));
+		}
+
+		public jQuery Find(string selector)
+		{
+			return new jQuery(Script, Script.Bridge.Find(instance, selector));
+		}
+
+		public jQuery Remove()
+		{
+			return new jQuery(Script, Script.Bridge.Remove(instance));
+		}
+
+		public jQuery Append(jQuery content)
+		{
+			return new jQuery(Script, Script.Bridge.Append(instance, content.instance));
+		}
+
+		public jQuery Append(string content)
+		{
+			return new jQuery(Script, Script.Bridge.Append(instance, content));
+		}
+
+		public jQuery Show()
+		{
+			return new jQuery(Script, Script.Bridge.Show(instance));
+		}
+
+		public jQuery Hide()
+		{
+			return new jQuery(Script, Script.Bridge.Hide(instance));
+		}
+
+		public jQuery On(string events, Action<jQueryMouseEvent> handler)
+		{
+			return new jQuery(Script, Script.Bridge.On(instance, events, Script.NewFunc(new Action<object>((e) => {
+				handler(new jQueryMouseEvent(Script, e));
+			}))));
+		}
+
+		public int Length { get { return Script.Get<int>(instance, "length"); } }
+
+		public class Enumerator : IEnumerator<Element>
+		{
+			private jQuery jquery;
+			private int index = -1;
+
+			public Enumerator(jQuery jquery)
+			{
+				this.jquery = jquery;
+			}
+
+			Element IEnumerator<Element>.Current {
+				get { return new Element(jquery.Script, jquery.Script.Get(jquery.instance, index.ToString())); }
+			}
+
+			public object Current {
+				get {
+					return ((IEnumerator<Element>)this).Current;
+				}
+			}
+
+			public void Dispose()
+			{
+			}
+
+			public bool MoveNext()
+			{
+				index++;
+				return index < jquery.Length;
+			}
+
+			public void Reset()
+			{
+				index = -1;
+			}
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return new Enumerator(this);
+		}
+	}
+
+	public class jQueryMouseEvent : Html5.Event
+	{
+		public object Data { get { return instance.data; } }
+
+		public jQueryMouseEvent(Script script, object instance)
+			: base(script, instance)
+		{
+
+		}
+	}
+
+	public class AjaxOptions
+	{
+		public string Url;
+		public Action<object, string, jqXHR> Success;
+		public Action<jqXHR, string, string> Error;
+	}
+
+	public class jqXHR
+	{
+
 	}
 }

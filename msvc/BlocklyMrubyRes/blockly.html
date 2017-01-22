@@ -31,9 +31,9 @@
 			height: 99%;
 		}
 	</style>
-	<script src="js/bridge.js"></script>
-	<script src="js/blockly.js"></script>
-	<script src="js/blockly-bridge.js"></script>
+	<script src="js/bridge.js" type="text/javascript"></script>
+	<script src="js/blockly.js" type="text/javascript"></script>
+	<script src="js/blockly-bridge.js" type="text/javascript"></script>
 </head>
 <body>
 	<table>
@@ -347,8 +347,6 @@
 				warn: function (text) { external.console_warn(text); }
 			};
 			external.blockly = Blockly;
-			external.ProceduresGetDefinition = Blockly.Procedures.getDefinition;
-			external.ProceduresMutateCallers = Blockly.Procedures.mutateCallers;
 			external.XmlWorkspaceToDom = Blockly.Xml.workspaceToDom;
 			external.XmlBlockToDomWithXY = Blockly.Xml.blockToDomWithXY;
 			external.XmlBlockToDom = Blockly.Xml.blockToDom;
@@ -394,6 +392,9 @@
 					minScale: 0.3
 				}
 			});
+			workspace.toolbox_.flyout_.flyoutCategory = function (xmlList, targetWorkspase) {
+				return external.flyoutCategory(xmlList, targetWorkspase);
+			};
 			var onresize = function (e) {
 				// Compute the absolute coordinates and dimensions of blocklyArea.
 				var element = blocklyArea;

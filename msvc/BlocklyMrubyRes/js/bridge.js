@@ -41,7 +41,7 @@ Bridge.NewFunc = function (handler) {
 		}
 		return Bridge.instance.InvokeHandler(handler, a);
 	};
-	ret.handler = handler;
+	ret.instance = handler;
 	return ret;
 }
 Bridge.New = function (name, args) {
@@ -95,5 +95,88 @@ Bridge.EncodeURI = function (url) { return encodeURI(url); }
 Bridge.DecodeURI = function (url) { return decodeURI(url); }
 Bridge.NewRegExp = function (patern, flag) { return new RegExp(patern, flag); }
 Bridge.RegExpEscape = function (s) { return RegExp.escape(s); }
-
+Bridge.ParseXML = function (data) {
+	return (new window.DOMParser()).parseFromString(data, "text/xml");
+}
+Bridge.jqNew = function(v) {
+	return $(v);
+}
+Bridge.Select = function(selector) {
+	return $(selector);
+}
+Bridge.Select2 = function(selector, parent) {
+	return $(selector, parent);
+}
+Bridge.Attr = function(obj, attr) {
+	return obj.attr(attr);
+}
+Bridge.Attr2 = function(obj, attr, val) {
+	obj.attr(attr, val);
+}
+Bridge.ReplaceWith = function(obj, str) {
+	obj.replaceWith(str);
+}
+Bridge.Val = function(obj) {
+	return obj.val();
+}
+Bridge.Val1 = function(obj, val) {
+	obj.val(val);
+}
+Bridge.jqGet = function(obj) {
+	return obj.get();
+}
+Bridge.jqGet2 = function(obj, val) {
+	return obj.get(val);
+}
+Bridge.Parent = function(obj) {
+	return obj.parent();
+}
+Bridge.AppendChild = function(obj, ele) {
+	obj.appendChild(ele);
+}
+Bridge.Text = function (obj) {
+	return obj.text();
+}
+Bridge.Text2 = function (obj, text) {
+	obj.text(text);
+}
+Bridge.Html = function (obj) {
+	return obj.html();
+}
+Bridge.Html2 = function (obj, html) {
+	obj.html(html);
+}
+Bridge.RemoveAttr = function(obj, attr) {
+	obj.removeAttr(attr);
+}
+Bridge.Click = function(obj, state, callback) {
+	obj.click(state, callback);
+}
+Bridge.ButtonToggle = function(obj) {
+	return obj.button('toggle');
+}
+Bridge.Is = function(obj, val) {
+	return obj.is(val);
+}
+Bridge.Children = function (obj) {
+	return obj.children();
+}
+Bridge.Find = function (obj, selector) {
+	return obj.find(selector);
+}
+Bridge.Remove = function (obj) {
+	return obj.remove();
+}
+Bridge.Append = function (obj, content) {
+	return obj.append(content);
+}
+Bridge.Show = function (obj) {
+	return obj.show();
+}
+Bridge.Hide = function (obj) {
+	return obj.hide();
+}
+Bridge.On = function (obj, events, handler) {
+	return obj.on(events, handler);
+}
 external.bridge = Bridge;

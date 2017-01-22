@@ -100,12 +100,12 @@ namespace BlocklyMruby
 		/// <summary>
 		/// List of outer-inner pairings that do NOT require parentheses.
 		/// </summary>
-		public List<int[]> ORDER_OVERRIDES = new List<int[]>();
+		public JsArray<int[]> ORDER_OVERRIDES = new JsArray<int[]>();
 
 		public abstract void init(Workspace workspace);
-		public abstract string finish(List<node> code);
-		public abstract List<node> scrubNakedValue(List<node> line);
-		public abstract void scrub_(Block block, List<node> code);
+		public abstract string finish(JsArray<node> code);
+		public abstract JsArray<node> scrubNakedValue(JsArray<node> line);
+		public abstract void scrub_(Block block, JsArray<node> code);
 
 		/// <summary>
 		/// Generate code for all blocks in the workspace to the specified language.
@@ -119,7 +119,7 @@ namespace BlocklyMruby
 				Script.console_warn("No workspace specified in workspaceToCode call.  Guessing.");
 				workspace = Blockly.getMainWorkspace();
 			}
-			var codes = new List<node>();
+			var codes = new JsArray<node>();
 			this.init(workspace);
 			var blocks = workspace.getTopBlocks(true);
 			Block block;
@@ -158,17 +158,17 @@ namespace BlocklyMruby
 		/// <returns>Concatenated list of comments.</returns>
 		public string allNestedComments(Block block)
 		{
-			var comments = new List<string>();
+			var comments = new JsArray<string>();
 			var blocks = block.getDescendants();
 			for (var i = 0; i < blocks.Length; i++) {
 				var comment = blocks[i].getCommentText();
 				if (comment != null) {
-					comments.Add(comment);
+					comments.Push(comment);
 				}
 			}
 			// Append an empty string to create a trailing line break when joined.
-			if (comments.Count != 0) {
-				comments.Add("");
+			if (comments.Length != 0) {
+				comments.Push("");
 			}
 			return String.Join("\n", comments);
 		}
@@ -181,7 +181,7 @@ namespace BlocklyMruby
 		/// For value blocks, an array containing the generated code and an
 		/// operator order value.  Returns '' if block is null.
 		/// </returns>
-		public List<node> blockToCode(Block block)
+		public JsArray<node> blockToCode(Block block)
 		{
 			if (block == null) {
 				return null;
@@ -200,8 +200,16 @@ namespace BlocklyMruby
 				// Block has handled code generation itself.
 				return null;
 			}
-			code.block_id = block.id;
-			var result = new List<node>() { code };
+			var result = new JsArray<node>();
+			if (code.GetType() == typeof(node)) {
+				do {
+					var c = (node)code.car;
+					c.set_blockid(block.workspace.id, block.id);
+					result.Push(c);
+				} while ((code = code.cdr as node) != null);
+			}
+			else
+				result.Push(code);
 			this.scrub_(block, result);
 			return result;
 		}
@@ -221,7 +229,7 @@ namespace BlocklyMruby
 				return null;
 			}
 			var code = this.blockToCode(targetBlock);
-			if (code.Count == 1) {
+			if (code.Length == 1) {
 				return code[0];
 			}
 			else {
@@ -244,7 +252,7 @@ namespace BlocklyMruby
 			//goog.asserts.assertString(code, "Expecting code from statement block \"%s\".",
 			//	targetBlock != null ? targetBlock.type : "");
 			if (code == null)
-				code = new List<node>();
+				code = new JsArray<node>();
 			return new begin_node((IMrbParser)this, code);
 		}
 

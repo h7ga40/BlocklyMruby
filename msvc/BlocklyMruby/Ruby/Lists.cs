@@ -4,7 +4,6 @@
 // MIT Lisence
 using System;
 using Bridge;
-using System.Text.RegularExpressions;
 using System.Collections.Generic;
 
 namespace BlocklyMruby
@@ -14,19 +13,19 @@ namespace BlocklyMruby
 		public node lists_create_empty(ListsCreateEmptyBlock block)
 		{
 			// Create an empty list.
-			var p = new List<node>();
+			var p = new JsArray<node>();
 			return new array_node(this, p);
 		}
 
 		public node lists_create_with(ListsCreateWithBlock block)
 		{
 			// Create a list with any number of elements of any type.
-			var p = new List<node>(block.itemCount_);
+			var p = new JsArray<node>(block.itemCount_);
 			for (var n = 0; n < block.itemCount_; n++) {
 				var i = valueToCode(block, "ADD" + n);
 				if (i == null)
 					i = new nil_node(this);
-				p.Add(i);
+				p.Push(i);
 			}
 			return new array_node(this, p);
 		}
@@ -38,7 +37,7 @@ namespace BlocklyMruby
 			if (argument0 == null) argument0 = new nil_node(this);
 			var argument1 = valueToCode(block, "NUM");
 			if (argument1 == null) argument1 = new int_node(this, 0);
-			var a = new array_node(this, new List<node>() { argument0 });
+			var a = new array_node(this, new JsArray<node>() { argument0 });
 			return new call_node(this, a, intern("*"), argument1);
 		}
 
@@ -46,7 +45,7 @@ namespace BlocklyMruby
 		{
 			// List length.
 			var argument0 = valueToCode(block, "VALUE");
-			if (argument0 == null) argument0 = new array_node(this, new List<node>());
+			if (argument0 == null) argument0 = new array_node(this, new JsArray<node>());
 			return new call_node(this, argument0, intern("length"));
 		}
 
@@ -54,7 +53,7 @@ namespace BlocklyMruby
 		{
 			// Is the list empty?
 			var argument0 = valueToCode(block, "VALUE");
-			if (argument0 == null) argument0 = new array_node(this, new List<node>());
+			if (argument0 == null) argument0 = new array_node(this, new JsArray<node>());
 			return new call_node(this, argument0, intern("empty?"));
 		}
 
@@ -64,9 +63,9 @@ namespace BlocklyMruby
 			var search = valueToCode(block, "FIND");
 			if (search == null) search = new str_node(this, "");
 			var list = valueToCode(block, "VALUE");
-			if (list == null) list = new array_node(this, new List<node>());
+			if (list == null) list = new array_node(this, new JsArray<node>());
 			var finder = block.getFieldValue("END") == "FIRST" ? "find_first" : "find_last";
-			var p = new List<node>() {
+			var p = new JsArray<node>() {
 				search
 			};
 			return new call_node(this, list, intern("finder"), p, null);
@@ -82,7 +81,7 @@ namespace BlocklyMruby
 			var at = valueToCode(block, "AT");
 			if (at == null) at = new int_node(this, 1);
 			var list = valueToCode(block, "VALUE");
-			if (list == null) list = new array_node(this, new List<node>());
+			if (list == null) list = new array_node(this, new JsArray<node>());
 
 			if (where == "FIRST") {
 				if (mode == "GET") {
@@ -123,37 +122,37 @@ namespace BlocklyMruby
 					at = new call_node(this, at, intern("to_i"));
 				}
 				if (mode == "GET") {
-					return new call_node(this, list, intern("[]"), new List<node>() { at }, null);
+					return new call_node(this, list, intern("[]"), new JsArray<node>() { at }, null);
 				}
 				else if (mode == "GET_REMOVE") {
-					return new call_node(this, list, intern("delete_at"), new List<node>() { at }, null);
+					return new call_node(this, list, intern("delete_at"), new JsArray<node>() { at }, null);
 				}
 				else if (mode == "REMOVE") {
-					return new call_node(this, list, intern("delete_at"), new List<node>() { at }, null);
+					return new call_node(this, list, intern("delete_at"), new JsArray<node>() { at }, null);
 				}
 			}
 			else if (where == "FROM_END") {
 				at = new call_node(this, at, intern("-@"), (node)null);
 				if (mode == "GET") {
-					return new call_node(this, list, intern("[]"), new List<node>() { at }, null);
+					return new call_node(this, list, intern("[]"), new JsArray<node>() { at }, null);
 				}
 				else if (mode == "GET_REMOVE") {
-					return new call_node(this, list, intern("delete_at"), new List<node>() { at }, null);
+					return new call_node(this, list, intern("delete_at"), new JsArray<node>() { at }, null);
 				}
 				else if (mode == "REMOVE") {
-					return new call_node(this, list, intern("delete_at"), new List<node>() { at }, null);
+					return new call_node(this, list, intern("delete_at"), new JsArray<node>() { at }, null);
 				}
 			}
 			else if (where == "RANDOM") {
 				if (mode == "GET") {
-					return new fcall_node(this, intern("lists_random_item"), new List<node>() { list }, null);
+					return new fcall_node(this, intern("lists_random_item"), new JsArray<node>() { list }, null);
 				}
 				else {
 					if (mode == "GET_REMOVE") {
-						return new fcall_node(this, intern("lists_remove_random_item"), new List<node>() { list }, null);
+						return new fcall_node(this, intern("lists_remove_random_item"), new JsArray<node>() { list }, null);
 					}
 					else if (mode == "REMOVE") {
-						return new fcall_node(this, intern("lists_remove_random_item"), new List<node>() { list }, null);
+						return new fcall_node(this, intern("lists_remove_random_item"), new JsArray<node>() { list }, null);
 					}
 				}
 			}
@@ -164,7 +163,7 @@ namespace BlocklyMruby
 		{
 			// Set element at index.
 			var list = valueToCode(block, "LIST");
-			if (list == null) list = new array_node(this, new List<node>());
+			if (list == null) list = new array_node(this, new JsArray<node>());
 			var mode = block.getFieldValue("MODE");
 			if (String.IsNullOrEmpty(mode)) mode = "GET";
 			var where = block.getFieldValue("WHERE");
@@ -176,18 +175,18 @@ namespace BlocklyMruby
 
 			if (where == "FIRST") {
 				if (mode == "SET") {
-					return new asgn_node(this, new call_node(this, list, intern("[]"), new List<node>() { new int_node(this, 0) }, null), value);
+					return new asgn_node(this, new call_node(this, list, intern("[]"), new JsArray<node>() { new int_node(this, 0) }, null), value);
 				}
 				else if (mode == "INSERT") {
-					return new call_node(this, list, intern("unshift"), new List<node>() { value }, null);
+					return new call_node(this, list, intern("unshift"), new JsArray<node>() { value }, null);
 				}
 			}
 			else if (where == "LAST") {
 				if (mode == "SET") {
-					return new asgn_node(this, new call_node(this, list, intern("[]"), new List<node>() { new int_node(this, -1) }, null), value);
+					return new asgn_node(this, new call_node(this, list, intern("[]"), new JsArray<node>() { new int_node(this, -1) }, null), value);
 				}
 				else if (mode == "INSERT") {
-					return new call_node(this, list, intern("push"), new List<node>() { value }, null);
+					return new call_node(this, list, intern("push"), new JsArray<node>() { value }, null);
 				}
 			}
 			else if (where == "FROM_START") {
@@ -202,10 +201,10 @@ namespace BlocklyMruby
 					at = new call_node(this, at, intern("to_i"));
 				}
 				if (mode == "SET") {
-					return new asgn_node(this, new call_node(this, list, intern("[]"), new List<node>() { at }, null), value);
+					return new asgn_node(this, new call_node(this, list, intern("[]"), new JsArray<node>() { at }, null), value);
 				}
 				else if (mode == "INSERT") {
-					return new call_node(this, list, intern("insert"), new List<node>() { at, value }, null);
+					return new call_node(this, list, intern("insert"), new JsArray<node>() { at, value }, null);
 				}
 			}
 			else if (where == "FROM_END") {
@@ -218,7 +217,7 @@ namespace BlocklyMruby
 						// If the index is dynamic, decrement it in code.
 						at = new call_node(this, at, intern("to_i"));
 					}
-					return new asgn_node(this, new call_node(this, list, intern("[]"), new List<node>() { at }, null), value);
+					return new asgn_node(this, new call_node(this, list, intern("[]"), new JsArray<node>() { at }, null), value);
 				}
 				else if (mode == "INSERT") {
 					// Blockly uses one-based indicies.
@@ -233,15 +232,15 @@ namespace BlocklyMruby
 					}
 
 					at = new call_node(this, at, intern("-@"), (node)null);
-					return new call_node(this, list, intern("insert"), new List<node>() { at, value }, null);
+					return new call_node(this, list, intern("insert"), new JsArray<node>() { at, value }, null);
 				}
 			}
 			else if (where == "RANDOM") {
 				if (mode == "SET") {
-					return new fcall_node(this, intern("lists_set_random_item"), new List<node>() { list, value }, null);
+					return new fcall_node(this, intern("lists_set_random_item"), new JsArray<node>() { list, value }, null);
 				}
 				else if (mode == "INSERT") {
-					return new fcall_node(this, intern("lists_insert_random_item"), new List<node>() { list, value }, null);
+					return new fcall_node(this, intern("lists_insert_random_item"), new JsArray<node>() { list, value }, null);
 				}
 			}
 			throw new Exception("Unhandled combination (lists_setIndex).");
@@ -251,7 +250,7 @@ namespace BlocklyMruby
 		{
 			// Get sublist.
 			var list = valueToCode(block, "LIST");
-			if (list == null) list = new array_node(this, new List<node>());
+			if (list == null) list = new array_node(this, new JsArray<node>());
 			var where1 = block.getFieldValue("WHERE1");
 			var where2 = block.getFieldValue("WHERE2");
 			var at1 = valueToCode(block, "AT1");
@@ -301,7 +300,7 @@ namespace BlocklyMruby
 					at2 = new call_node(this, at2, intern("to_i"));
 				}
 			}
-			return new fcall_node(this, intern("lists_sublist"), new List<node>() { list, at1, at2 }, null);
+			return new fcall_node(this, intern("lists_sublist"), new JsArray<node>() { list, at1, at2 }, null);
 		}
 	}
 }

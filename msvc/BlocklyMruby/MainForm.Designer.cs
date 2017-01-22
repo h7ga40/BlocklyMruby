@@ -42,17 +42,18 @@
 			this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
 			this.saveFileDialog2 = new System.Windows.Forms.SaveFileDialog();
 			this.tabControl1 = new System.Windows.Forms.TabControl();
-			this.BlockTabPage = new System.Windows.Forms.TabPage();
 			this.RubyTabPage = new System.Windows.Forms.TabPage();
-			this.ConsoleTabPage = new System.Windows.Forms.TabPage();
-			this.blocklyView1 = new BlocklyMruby.BlocklyView();
+			this.BlockTabPage = new System.Windows.Forms.TabPage();
+			this.splitter1 = new System.Windows.Forms.Splitter();
+			this.splitter2 = new System.Windows.Forms.Splitter();
 			this.aceView1 = new BlocklyMruby.AceView();
+			this.blocklyView1 = new BlocklyMruby.BlocklyView();
+			this.classSelectorView1 = new BlocklyMruby.ClassSelectorView();
 			this.xTermView1 = new BlocklyMruby.XTermView();
 			this.flowLayoutPanel1.SuspendLayout();
 			this.tabControl1.SuspendLayout();
-			this.BlockTabPage.SuspendLayout();
 			this.RubyTabPage.SuspendLayout();
-			this.ConsoleTabPage.SuspendLayout();
+			this.BlockTabPage.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// flowLayoutPanel1
@@ -72,7 +73,7 @@
 			this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Top;
 			this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
 			this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-			this.flowLayoutPanel1.Size = new System.Drawing.Size(784, 28);
+			this.flowLayoutPanel1.Size = new System.Drawing.Size(984, 28);
 			this.flowLayoutPanel1.TabIndex = 1;
 			// 
 			// LoadBtn
@@ -215,80 +216,95 @@
 			// 
 			// tabControl1
 			// 
-			this.tabControl1.Controls.Add(this.BlockTabPage);
 			this.tabControl1.Controls.Add(this.RubyTabPage);
-			this.tabControl1.Controls.Add(this.ConsoleTabPage);
+			this.tabControl1.Controls.Add(this.BlockTabPage);
 			this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.tabControl1.Location = new System.Drawing.Point(0, 28);
+			this.tabControl1.Location = new System.Drawing.Point(203, 28);
 			this.tabControl1.Name = "tabControl1";
 			this.tabControl1.SelectedIndex = 0;
-			this.tabControl1.Size = new System.Drawing.Size(784, 534);
+			this.tabControl1.Size = new System.Drawing.Size(781, 514);
 			this.tabControl1.TabIndex = 2;
 			this.tabControl1.SelectedIndexChanged += new System.EventHandler(this.tabControl1_SelectedIndexChanged);
-			// 
-			// BlockTabPage
-			// 
-			this.BlockTabPage.Controls.Add(this.blocklyView1);
-			this.BlockTabPage.Location = new System.Drawing.Point(4, 22);
-			this.BlockTabPage.Name = "BlockTabPage";
-			this.BlockTabPage.Padding = new System.Windows.Forms.Padding(3);
-			this.BlockTabPage.Size = new System.Drawing.Size(776, 508);
-			this.BlockTabPage.TabIndex = 0;
-			this.BlockTabPage.Text = "ブロック";
-			this.BlockTabPage.UseVisualStyleBackColor = true;
 			// 
 			// RubyTabPage
 			// 
 			this.RubyTabPage.Controls.Add(this.aceView1);
 			this.RubyTabPage.Location = new System.Drawing.Point(4, 22);
 			this.RubyTabPage.Name = "RubyTabPage";
-			this.RubyTabPage.Padding = new System.Windows.Forms.Padding(3);
-			this.RubyTabPage.Size = new System.Drawing.Size(776, 508);
+			this.RubyTabPage.Size = new System.Drawing.Size(773, 488);
 			this.RubyTabPage.TabIndex = 2;
 			this.RubyTabPage.Text = "Ruby";
 			this.RubyTabPage.UseVisualStyleBackColor = true;
 			// 
-			// ConsoleTabPage
+			// BlockTabPage
 			// 
-			this.ConsoleTabPage.Controls.Add(this.xTermView1);
-			this.ConsoleTabPage.Location = new System.Drawing.Point(4, 22);
-			this.ConsoleTabPage.Name = "ConsoleTabPage";
-			this.ConsoleTabPage.Padding = new System.Windows.Forms.Padding(3);
-			this.ConsoleTabPage.Size = new System.Drawing.Size(776, 508);
-			this.ConsoleTabPage.TabIndex = 1;
-			this.ConsoleTabPage.Text = "コンソール";
-			this.ConsoleTabPage.UseVisualStyleBackColor = true;
+			this.BlockTabPage.Controls.Add(this.blocklyView1);
+			this.BlockTabPage.Location = new System.Drawing.Point(4, 22);
+			this.BlockTabPage.Name = "BlockTabPage";
+			this.BlockTabPage.Size = new System.Drawing.Size(773, 488);
+			this.BlockTabPage.TabIndex = 0;
+			this.BlockTabPage.Text = "ブロック";
+			this.BlockTabPage.UseVisualStyleBackColor = true;
 			// 
-			// blocklyView1
+			// splitter1
 			// 
-			this.blocklyView1.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.blocklyView1.Location = new System.Drawing.Point(3, 3);
-			this.blocklyView1.Name = "blocklyView1";
-			this.blocklyView1.Size = new System.Drawing.Size(770, 502);
-			this.blocklyView1.TabIndex = 0;
+			this.splitter1.Location = new System.Drawing.Point(200, 28);
+			this.splitter1.Name = "splitter1";
+			this.splitter1.Size = new System.Drawing.Size(3, 514);
+			this.splitter1.TabIndex = 4;
+			this.splitter1.TabStop = false;
+			// 
+			// splitter2
+			// 
+			this.splitter2.Dock = System.Windows.Forms.DockStyle.Bottom;
+			this.splitter2.Location = new System.Drawing.Point(0, 542);
+			this.splitter2.Name = "splitter2";
+			this.splitter2.Size = new System.Drawing.Size(984, 3);
+			this.splitter2.TabIndex = 5;
+			this.splitter2.TabStop = false;
 			// 
 			// aceView1
 			// 
 			this.aceView1.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.aceView1.Location = new System.Drawing.Point(3, 3);
+			this.aceView1.Location = new System.Drawing.Point(0, 0);
 			this.aceView1.Name = "aceView1";
-			this.aceView1.Size = new System.Drawing.Size(770, 502);
+			this.aceView1.Size = new System.Drawing.Size(773, 488);
 			this.aceView1.TabIndex = 0;
+			// 
+			// blocklyView1
+			// 
+			this.blocklyView1.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.blocklyView1.Location = new System.Drawing.Point(0, 0);
+			this.blocklyView1.Name = "blocklyView1";
+			this.blocklyView1.Size = new System.Drawing.Size(773, 488);
+			this.blocklyView1.TabIndex = 0;
+			// 
+			// classSelectorView1
+			// 
+			this.classSelectorView1.Dock = System.Windows.Forms.DockStyle.Left;
+			this.classSelectorView1.Location = new System.Drawing.Point(0, 28);
+			this.classSelectorView1.Name = "classSelectorView1";
+			this.classSelectorView1.Size = new System.Drawing.Size(200, 514);
+			this.classSelectorView1.TabIndex = 3;
 			// 
 			// xTermView1
 			// 
-			this.xTermView1.Dock = System.Windows.Forms.DockStyle.Top;
-			this.xTermView1.Location = new System.Drawing.Point(3, 3);
+			this.xTermView1.Dock = System.Windows.Forms.DockStyle.Bottom;
+			this.xTermView1.Location = new System.Drawing.Point(0, 545);
 			this.xTermView1.Name = "xTermView1";
-			this.xTermView1.Size = new System.Drawing.Size(770, 681);
+			this.xTermView1.Size = new System.Drawing.Size(984, 160);
 			this.xTermView1.TabIndex = 0;
 			// 
 			// MainForm
 			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
-			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(784, 562);
+			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+			this.ClientSize = new System.Drawing.Size(984, 705);
 			this.Controls.Add(this.tabControl1);
+			this.Controls.Add(this.splitter1);
+			this.Controls.Add(this.classSelectorView1);
+			this.Controls.Add(this.splitter2);
+			this.Controls.Add(this.xTermView1);
 			this.Controls.Add(this.flowLayoutPanel1);
 			this.KeyPreview = true;
 			this.Name = "MainForm";
@@ -299,9 +315,8 @@
 			this.flowLayoutPanel1.ResumeLayout(false);
 			this.flowLayoutPanel1.PerformLayout();
 			this.tabControl1.ResumeLayout(false);
-			this.BlockTabPage.ResumeLayout(false);
 			this.RubyTabPage.ResumeLayout(false);
-			this.ConsoleTabPage.ResumeLayout(false);
+			this.BlockTabPage.ResumeLayout(false);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -318,7 +333,6 @@
 		private System.Windows.Forms.SaveFileDialog saveFileDialog2;
 		private System.Windows.Forms.TabControl tabControl1;
 		private System.Windows.Forms.TabPage BlockTabPage;
-		private System.Windows.Forms.TabPage ConsoleTabPage;
 		private System.Windows.Forms.Button DebugBtn;
 		private System.Windows.Forms.TabPage RubyTabPage;
 		private System.Windows.Forms.Button StepBtn;
@@ -329,6 +343,9 @@
 		private BlocklyView blocklyView1;
 		private AceView aceView1;
 		private XTermView xTermView1;
+		private ClassSelectorView classSelectorView1;
+		private System.Windows.Forms.Splitter splitter1;
+		private System.Windows.Forms.Splitter splitter2;
 	}
 }
 

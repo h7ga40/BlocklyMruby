@@ -7,12 +7,13 @@ using System;
 using System.Collections.Generic;
 using Bridge.Html5;
 using System.IO;
+using Bridge;
 
 namespace BlocklyMruby
 {
 	interface IEvaluatable
 	{
-		node evaluate(string method, List<node> args);
+		node evaluate(string method, JsArray<node> args);
 	}
 
 	class kwtable
@@ -78,7 +79,7 @@ namespace BlocklyMruby
 		Stream f;
 		public string filename {
 			get {
-				if (current_filename_index < filename_table.Count)
+				if (current_filename_index < filename_table.Length)
 					return filename_table[current_filename_index];
 				else
 					return "(null)";
@@ -112,8 +113,8 @@ namespace BlocklyMruby
 
 		internal node tree;
 
-		List<string> filename_table = new List<string>();
-		int filename_table_length { get { return filename_table.Count; } }
+		JsArray<string> filename_table = new JsArray<string>();
+		int filename_table_length { get { return filename_table.Length; } }
 		public int current_filename_index;
 
 		internal partial_hook_t partial_hook;
@@ -490,14 +491,14 @@ namespace BlocklyMruby
 		void CMDARG_LEXPOP() { BITSTACK_LEXPOP(ref cmdarg_stack); }
 		stack_type CMDARG_P() { return BITSTACK_SET_P(ref cmdarg_stack); }
 
-		List<string> syms = new List<string>();
+		JsArray<string> syms = new JsArray<string>();
 
 		private mrb_sym get_sym(string str)
 		{
 			int i = syms.IndexOf(str);
 			if (i < 0) {
-				i = syms.Count;
-				syms.Add(str);
+				i = syms.Length;
+				syms.Push(str);
 			}
 			return (mrb_sym)(i + 1);
 		}
@@ -505,7 +506,7 @@ namespace BlocklyMruby
 		public string sym2name(mrb_sym sym)
 		{
 			int i = (int)sym - 1;
-			if ((i < 0) || (i >= syms.Count))
+			if ((i < 0) || (i >= syms.Length))
 				return ((int)sym).ToString();
 			return syms[i];
 		}
@@ -628,7 +629,7 @@ namespace BlocklyMruby
 			}
 		}
 
-		public List<mrb_sym> locals_node()
+		public JsArray<mrb_sym> locals_node()
 		{
 			return this.locals != null ? this.locals.symList : null;
 		}
@@ -3506,7 +3507,7 @@ namespace BlocklyMruby
 			}
 
 			this.current_filename_index = this.filename_table_length + 1;
-			this.filename_table.Add(f);
+			this.filename_table.Push(f);
 		}
 
 		public void mrb_parse_file(string filename, Stream f)
@@ -3549,11 +3550,11 @@ namespace BlocklyMruby
 
 			var begin = tree as begin_node;
 			if (begin != null) {
-				List<node> progs = new List<node>();
+				JsArray<node> progs = new JsArray<node>();
 				foreach (var r in begin.progs) {
-					progs.Add(evaluate(r));
+					progs.Push(evaluate(r));
 				}
-				if (progs.Count != 1)
+				if (progs.Length != 1)
 					return new begin_node(p, progs);
 				return progs[0];
 			}
@@ -3591,9 +3592,9 @@ namespace BlocklyMruby
 			var call = tree as call_node;
 			if (call != null) {
 				var obj = evaluate(call.obj);
-				var args = new List<node>();
+				var args = new JsArray<node>();
 				foreach (var a in call.args) {
-					args.Add(evaluate(a));
+					args.Push(evaluate(a));
 				}
 
 				var eva = obj as IEvaluatable;

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Bridge;
 using Bridge.Html5;
 
 namespace BlocklyMruby
@@ -12,7 +13,7 @@ namespace BlocklyMruby
 		int column { get; set; }
 		string filename { get; }
 		string sym2name(mrb_sym sym);
-		List<mrb_sym> locals_node();
+		JsArray<mrb_sym> locals_node();
 		void yyError(string message, params object[] expected);
 	}
 
@@ -178,7 +179,7 @@ namespace BlocklyMruby
 		public mrb_string_type type;
 		public Uint8Array term;
 		public int term_len;
-		public List<node> doc = new List<node>();
+		public JsArray<node> doc = new JsArray<node>();
 
 		public string GetString()
 		{
@@ -219,7 +220,7 @@ namespace BlocklyMruby
 
 		internal void push_doc(node str)
 		{
-			doc.Add(str);
+			doc.Push(str);
 		}
 
 		internal void claer_doc()
@@ -242,6 +243,26 @@ namespace BlocklyMruby
 			}
 			cond.write_line();
 			cond.write_line(MrbParser.UTF8ArrayToString(term, 0));
+		}
+	}
+
+	public class xml_code_cond
+	{
+		private Document document;
+
+		public xml_code_cond(Document document)
+		{
+			this.document = document;
+		}
+
+		internal Element CreateElement(string tagname)
+		{
+			return document.CreateElement(tagname);
+		}
+
+		internal Node CreateTextNode(string text)
+		{
+			return document.CreateTextNode(text);
 		}
 	}
 
@@ -354,11 +375,11 @@ namespace BlocklyMruby
 			}
 		}
 
-		public List<node> nodes = new List<node>();
+		public JsArray<node> nodes = new JsArray<node>();
 
 		public void add_node(node node)
 		{
-			nodes.Add(node);
+			nodes.Push(node);
 		}
 
 		public override string ToString()
@@ -390,7 +411,8 @@ namespace BlocklyMruby
 		public int lineno { get; private set; }
 		public int column { get; private set; }
 		public string filename { get; private set; }
-		public string block_id;
+		public string workspace_id { get; private set; }
+		public string block_id { get; private set; }
 
 		protected node(IMrbParser p, node_type car)
 		{
@@ -419,6 +441,12 @@ namespace BlocklyMruby
 			}
 		}
 
+		public void set_blockid(string workspace_id, string block_id)
+		{
+			this.workspace_id = workspace_id;
+			this.block_id = block_id;
+		}
+
 		public static node cons(IMrbParser p, object car, object cdr)
 		{
 			var result = new node(p, 0);
@@ -438,19 +466,19 @@ namespace BlocklyMruby
 			}
 		}
 
-		public static void dump_recur<T>(List<T> list, node tree)
+		public static void dump_recur<T>(JsArray<T> list, node tree)
 		{
 			while (tree != null) {
-				list.Add((T)tree.car);
+				list.Push((T)tree.car);
 				tree = (node)tree.cdr;
 			}
 		}
 
-		public virtual Element to_xml(Document document)
+		public virtual Element to_xml(xml_code_cond cond)
 		{
 			var a = car as node;
 			if (a != null && cdr == null) {
-				return a.to_xml(document);
+				return a.to_xml(cond);
 			}
 
 			throw new NotImplementedException();
@@ -478,16 +506,14 @@ namespace BlocklyMruby
 			var a = car as node;
 			while (a != null) {
 				a.to_ruby(cond);
-				a = cdr as node;
+				a = a.cdr as node;
 			}
-
-			throw new NotImplementedException();
 		}
 	}
 
 	public class locals_node
 	{
-		public List<mrb_sym> symList = new List<mrb_sym>();
+		public JsArray<mrb_sym> symList = new JsArray<mrb_sym>();
 		public locals_node cdr;
 
 		public locals_node(locals_node cdr)
@@ -497,14 +523,14 @@ namespace BlocklyMruby
 
 		internal void push(mrb_sym sym)
 		{
-			symList.Add(sym);
+			symList.Push(sym);
 		}
 	}
 
 	/* (:scope (vars..) (prog...)) */
 	class scope_node : node
 	{
-		private List<mrb_sym> _local_variables = new List<mrb_sym>();
+		private JsArray<mrb_sym> _local_variables = new JsArray<mrb_sym>();
 		private node _body;
 
 		public scope_node(IMrbParser p, node body)
@@ -514,14 +540,14 @@ namespace BlocklyMruby
 			_body = body;
 		}
 
-		public List<mrb_sym> local_variables { get { return _local_variables; } }
+		public JsArray<mrb_sym> local_variables { get { return _local_variables; } }
 		public node body { get { return _body; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			// TODO:？？？
-			var s = document.CreateElement("scope");
-			var b = _body.to_xml(document);
+			var s = cond.CreateElement("scope");
+			var b = _body.to_xml(cond);
 			if (b != null) {
 				s.AppendChild(b);
 			}
@@ -546,45 +572,45 @@ namespace BlocklyMruby
 	/* (:begin prog...) */
 	class begin_node : node
 	{
-		private List<node> _progs = new List<node>();
+		private JsArray<node> _progs = new JsArray<node>();
 		bool _parentheses;
 
 		public begin_node(IMrbParser p, node body, bool parentheses = false)
 			: base(p, node_type.NODE_BEGIN)
 		{
 			while (body != null) {
-				_progs.Add(body);
+				_progs.Push(body);
 				body = (node)body.cdr;
 			}
 			_parentheses = parentheses;
 		}
 
-		public begin_node(IMrbParser p, List<node> progs)
+		public begin_node(IMrbParser p, JsArray<node> progs)
 			: base(p, node_type.NODE_BEGIN)
 		{
 			_progs.AddRange(progs);
 		}
 
-		public List<node> progs { get { return _progs; } }
+		public JsArray<node> progs { get { return _progs; } }
 
 		public override void append(node b)
 		{
-			_progs.Add((node)b.car);
+			_progs.Push((node)b.car);
 		}
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
-			switch (_progs.Count) {
+			switch (_progs.Length) {
 			case 0:
 				return null;
 			case 1:
-				return _progs[0].to_xml(document);
+				return _progs[0].to_xml(cond);
 			}
-			var b = _progs[0].to_xml(document);
+			var b = _progs[0].to_xml(cond);
 			var p = b;
-			for (int i = 1; i < _progs.Count; i++) {
-				var n = document.CreateElement("next");
-				var q = _progs[i].to_xml(document);
+			for (int i = 1; i < _progs.Length; i++) {
+				var n = cond.CreateElement("next");
+				var q = _progs[i].to_xml(cond);
 				n.AppendChild(q);
 				p.AppendChild(n);
 				p = q;
@@ -595,7 +621,7 @@ namespace BlocklyMruby
 
 		protected override void to_rb(ruby_code_cond cond)
 		{
-			var i = progs.Count;
+			var i = progs.Length;
 			foreach (var v in progs) {
 				var prn = _parentheses || (v is dot2_node);
 				if (prn) {
@@ -626,7 +652,7 @@ namespace BlocklyMruby
 	{
 		public class rescue_t
 		{
-			public List<node> handle_classes = new List<node>();
+			public JsArray<node> handle_classes = new JsArray<node>();
 			public node exc_var;
 			public node body;
 
@@ -643,7 +669,7 @@ namespace BlocklyMruby
 			{
 				cond.increment_nest();
 				cond.write("rescue");
-				int i = handle_classes.Count;
+				int i = handle_classes.Length;
 				if (i > 0)
 					cond.write(" ");
 				foreach (var c in handle_classes) {
@@ -663,7 +689,7 @@ namespace BlocklyMruby
 		}
 
 		private node _body;
-		private List<rescue_t> _rescue = new List<rescue_t>();
+		private JsArray<rescue_t> _rescue = new JsArray<rescue_t>();
 		private node _else;
 		public bool ensure;
 
@@ -682,7 +708,7 @@ namespace BlocklyMruby
 					}
 					r.exc_var = (node)((node)n3.cdr).car;
 					r.body = (node)((node)((node)n3.cdr).cdr).car;
-					_rescue.Add(r);
+					_rescue.Push(r);
 					n2 = (node)n2.cdr;
 				}
 			}
@@ -690,13 +716,13 @@ namespace BlocklyMruby
 		}
 
 		public node body { get { return _body; } }
-		public List<rescue_t> rescue { get { return _rescue; } }
+		public JsArray<rescue_t> rescue { get { return _rescue; } }
 		public node @else { get { return _else; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			// TODO:？？？
-			return body.to_xml(document);
+			return body.to_xml(cond);
 		}
 
 		protected override void to_rb(ruby_code_cond cond)
@@ -754,7 +780,7 @@ namespace BlocklyMruby
 		public node body { get { return _body; } }
 		public node ensure { get { return _ensure; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}
@@ -790,9 +816,9 @@ namespace BlocklyMruby
 		{
 		}
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "logic_null");
 			return block;
 		}
@@ -807,11 +833,11 @@ namespace BlocklyMruby
 			return $"(:nil)";
 		}
 
-		public node evaluate(string method, List<node> args)
+		public node evaluate(string method, JsArray<node> args)
 		{
 			switch (method) {
 			case "!":
-				if (args.Count != 0)
+				if (args.Length != 0)
 					break;
 				return new true_node(p);
 			}
@@ -827,14 +853,14 @@ namespace BlocklyMruby
 		{
 		}
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "logic_boolean");
 
-			var field = document.CreateElement("field");
+			var field = cond.CreateElement("field");
 			field.SetAttribute("name", "BOOL");
-			field.AppendChild(document.CreateTextNode("TRUE"));
+			field.AppendChild(cond.CreateTextNode("TRUE"));
 			block.AppendChild(field);
 
 			return block;
@@ -850,11 +876,11 @@ namespace BlocklyMruby
 			return $"(:true)";
 		}
 
-		public node evaluate(string method, List<node> args)
+		public node evaluate(string method, JsArray<node> args)
 		{
 			switch (method) {
 			case "!":
-				if (args.Count != 0)
+				if (args.Length != 0)
 					break;
 				return new false_node(p);
 			}
@@ -870,14 +896,14 @@ namespace BlocklyMruby
 		{
 		}
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "logic_boolean");
 
-			var field = document.CreateElement("field");
+			var field = cond.CreateElement("field");
 			field.SetAttribute("name", "BOOL");
-			field.AppendChild(document.CreateTextNode("FALSE"));
+			field.AppendChild(cond.CreateTextNode("FALSE"));
 			block.AppendChild(field);
 
 			return block;
@@ -893,11 +919,11 @@ namespace BlocklyMruby
 			return $"(:false)";
 		}
 
-		public node evaluate(string method, List<node> args)
+		public node evaluate(string method, JsArray<node> args)
 		{
 			switch (method) {
 			case "!":
-				if (args.Count != 0)
+				if (args.Length != 0)
 					break;
 				return new true_node(p);
 			}
@@ -921,7 +947,7 @@ namespace BlocklyMruby
 		public mrb_sym @new { get { return _new; } }
 		public mrb_sym old { get { return _old; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}
@@ -958,42 +984,42 @@ namespace BlocklyMruby
 		public node then { get { return _then; } }
 		public node @else { get { return _else; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
-			var _elsif = new List<Tuple<node, node>>();
+			var _elsif = new JsArray<Tuple<node, node>>();
 			node _else = this._else;
 
-			_elsif.Add(new Tuple<node, node>(_cond, _then));
+			_elsif.Push(new Tuple<node, node>(_cond, _then));
 			for (var c = _else as if_node; c != null; _else = c._else, c = _else as if_node) {
-				_elsif.Add(new Tuple<node, node>(c._cond, c._then));
+				_elsif.Push(new Tuple<node, node>(c._cond, c._then));
 			}
 
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "controls_if");
 
-			var mutation = document.CreateElement("mutation");
-			mutation.SetAttribute("elseif", _elsif.Count.ToString());
+			var mutation = cond.CreateElement("mutation");
+			mutation.SetAttribute("elseif", _elsif.Length.ToString());
 			mutation.SetAttribute("else", _else != null ? "1" : "0");
 			block.AppendChild(mutation);
 
 			int i = 0;
 			foreach (var e in _elsif) {
-				var value = document.CreateElement("value");
+				var value = cond.CreateElement("value");
 				value.SetAttribute("name", $"IF{i}");
-				value.AppendChild(e.Item1.to_xml(document));
+				value.AppendChild(e.Item1.to_xml(cond));
 				block.AppendChild(value);
 
-				var statement = document.CreateElement("statement");
+				var statement = cond.CreateElement("statement");
 				statement.SetAttribute("name", $"DO{i}");
-				statement.AppendChild(e.Item2.to_xml(document));
+				statement.AppendChild(e.Item2.to_xml(cond));
 				block.AppendChild(statement);
 				i++;
 			}
 
 			if (_else != null) {
-				var statement = document.CreateElement("statement");
+				var statement = cond.CreateElement("statement");
 				statement.SetAttribute("name", "ELSE");
-				statement.AppendChild(_else.to_xml(document));
+				statement.AppendChild(_else.to_xml(cond));
 				block.AppendChild(statement);
 			}
 
@@ -1013,11 +1039,11 @@ namespace BlocklyMruby
 				cond.decrement_nest();
 			}
 			else {
-				var _elsif = new List<Tuple<node, node>>();
+				var _elsif = new JsArray<Tuple<node, node>>();
 				node _else = this._else;
 
 				for (var c = _else as if_node; c != null; _else = c._else, c = _else as if_node) {
-					_elsif.Add(new Tuple<node, node>(c._cond, c._then));
+					_elsif.Push(new Tuple<node, node>(c._cond, c._then));
 				}
 
 				cond.increment_nest();
@@ -1073,30 +1099,30 @@ namespace BlocklyMruby
 		public node then { get { return _then; } }
 		public node @else { get { return _else; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "controls_if");
 
-			var value = document.CreateElement("value");
+			var value = cond.CreateElement("value");
 			value.SetAttribute("name", "IF0");
-			value.AppendChild(_cond.to_xml(document));
+			value.AppendChild(_cond.to_xml(cond));
 			block.AppendChild(value);
 
 			if (_then != null) {
-				var statement = document.CreateElement("statement");
+				var statement = cond.CreateElement("statement");
 				statement.SetAttribute("name", "DO0");
 				block.AppendChild(statement);
 
-				statement.AppendChild(_then.to_xml(document));
+				statement.AppendChild(_then.to_xml(cond));
 			}
 
 			if (_else != null) {
-				var statement = document.CreateElement("statement");
+				var statement = cond.CreateElement("statement");
 				statement.SetAttribute("name", "ELSE");
 				block.AppendChild(statement);
 
-				statement.AppendChild(_else.to_xml(document));
+				statement.AppendChild(_else.to_xml(cond));
 			}
 
 			return block;
@@ -1143,24 +1169,24 @@ namespace BlocklyMruby
 		public node cond { get { return _cond; } }
 		public node body { get { return _body; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "controls_whileUntil");
 
-			var field = document.CreateElement("field");
+			var field = cond.CreateElement("field");
 			field.SetAttribute("name", "MODE");
-			field.AppendChild(document.CreateTextNode("WHILE"));
+			field.AppendChild(cond.CreateTextNode("WHILE"));
 			block.AppendChild(field);
 
-			var value = document.CreateElement("value");
+			var value = cond.CreateElement("value");
 			value.SetAttribute("name", "BOOL");
-			value.AppendChild(_cond.to_xml(document));
+			value.AppendChild(_cond.to_xml(cond));
 			block.AppendChild(value);
 
-			var statement = document.CreateElement("statement");
+			var statement = cond.CreateElement("statement");
 			statement.SetAttribute("name", "DO");
-			statement.AppendChild(_body.to_xml(document));
+			statement.AppendChild(_body.to_xml(cond));
 			block.AppendChild(statement);
 
 			return block;
@@ -1200,24 +1226,24 @@ namespace BlocklyMruby
 		public node cond { get { return _cond; } }
 		public node body { get { return _body; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "controls_whileUntil");
 
-			var field = document.CreateElement("field");
+			var field = cond.CreateElement("field");
 			field.SetAttribute("name", "MODE");
-			field.AppendChild(document.CreateTextNode("UNTIL"));
+			field.AppendChild(cond.CreateTextNode("UNTIL"));
 			block.AppendChild(field);
 
-			var value = document.CreateElement("value");
+			var value = cond.CreateElement("value");
 			value.SetAttribute("name", "BOOL");
-			value.AppendChild(_cond.to_xml(document));
+			value.AppendChild(_cond.to_xml(cond));
 			block.AppendChild(value);
 
-			var statement = document.CreateElement("statement");
+			var statement = cond.CreateElement("statement");
 			statement.SetAttribute("name", "DO");
-			statement.AppendChild(_body.to_xml(document));
+			statement.AppendChild(_body.to_xml(cond));
 			block.AppendChild(statement);
 
 			return block;
@@ -1246,9 +1272,9 @@ namespace BlocklyMruby
 	{
 		public class var_t
 		{
-			public List<node> pre = new List<node>();
+			public JsArray<node> pre = new JsArray<node>();
 			public node rest;
-			public List<node> post = new List<node>();
+			public JsArray<node> post = new JsArray<node>();
 
 			public override string ToString()
 			{
@@ -1265,7 +1291,7 @@ namespace BlocklyMruby
 
 			internal void to_ruby(ruby_code_cond cond)
 			{
-				int i = pre.Count + (rest != null ? 1 : 0) + post.Count;
+				int i = pre.Length + (rest != null ? 1 : 0) + post.Length;
 				foreach (var p in pre) {
 					p.to_ruby(cond);
 					i--; if (i > 0) cond.write(", ");
@@ -1313,27 +1339,27 @@ namespace BlocklyMruby
 		public node @in { get { return _in; } }
 		public node @do { get { return _do; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "controls_forEach");
 
-			var field = document.CreateElement("field");
+			var field = cond.CreateElement("field");
 			field.SetAttribute("name", "VAR");
 			// TODO:var？
 			var pre = var.pre[0];
 			switch ((node_type)pre.car) {
 			case node_type.NODE_GVAR:
-				field.AppendChild(document.CreateTextNode(p.sym2name(((gvar_node)pre).name)));
+				field.AppendChild(cond.CreateTextNode(p.sym2name(((gvar_node)pre).name)));
 				break;
 			case node_type.NODE_CVAR:
-				field.AppendChild(document.CreateTextNode(p.sym2name(((cvar_node)pre).name)));
+				field.AppendChild(cond.CreateTextNode(p.sym2name(((cvar_node)pre).name)));
 				break;
 			case node_type.NODE_IVAR:
-				field.AppendChild(document.CreateTextNode(p.sym2name(((ivar_node)pre).name)));
+				field.AppendChild(cond.CreateTextNode(p.sym2name(((ivar_node)pre).name)));
 				break;
 			case node_type.NODE_LVAR:
-				field.AppendChild(document.CreateTextNode(p.sym2name(((lvar_node)pre).name)));
+				field.AppendChild(cond.CreateTextNode(p.sym2name(((lvar_node)pre).name)));
 				break;
 			default:
 				// TODO: ？
@@ -1341,14 +1367,14 @@ namespace BlocklyMruby
 			}
 			block.AppendChild(field);
 
-			var value = document.CreateElement("value");
+			var value = cond.CreateElement("value");
 			value.SetAttribute("name", "LIST");
-			value.AppendChild(_in.to_xml(document));
+			value.AppendChild(_in.to_xml(cond));
 			block.AppendChild(value);
 
-			var statement = document.CreateElement("statement");
+			var statement = cond.CreateElement("statement");
 			statement.SetAttribute("name", "DO");
-			statement.AppendChild(_do.to_xml(document));
+			statement.AppendChild(_do.to_xml(cond));
 			block.AppendChild(statement);
 
 			return block;
@@ -1380,7 +1406,7 @@ namespace BlocklyMruby
 	{
 		public class when_t
 		{
-			public List<node> value = new List<node>();
+			public JsArray<node> value = new JsArray<node>();
 			public node body;
 
 			public override string ToString()
@@ -1393,7 +1419,7 @@ namespace BlocklyMruby
 			}
 		}
 		private node _arg;
-		private List<when_t> _when = new List<when_t>();
+		private JsArray<when_t> _when = new JsArray<when_t>();
 
 		public case_node(IMrbParser p, node a, node b)
 			: base(p, node_type.NODE_CASE)
@@ -1403,12 +1429,12 @@ namespace BlocklyMruby
 				var w = new when_t();
 				dump_recur(w.value, (node)((node)b.car).car);
 				w.body = (node)((node)b.car).cdr;
-				_when.Add(w);
+				_when.Push(w);
 				b = (node)b.cdr;
 			}
 		}
 
-		public case_node(IMrbParser p, node a, List<when_t> b)
+		public case_node(IMrbParser p, node a, JsArray<when_t> b)
 			: base(p, node_type.NODE_CASE)
 		{
 			_arg = a;
@@ -1416,17 +1442,17 @@ namespace BlocklyMruby
 		}
 
 		public node arg { get { return _arg; } }
-		public List<when_t> when { get { return _when; } }
+		public JsArray<when_t> when { get { return _when; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "switch_case_number");
 
 			int c = 0, d = 0;
 			when_t default_node = null;
 			foreach (var w in _when) {
-				if (w.value.Count == 0) {
+				if (w.value.Length == 0) {
 					default_node = w;
 					d = 1;
 				}
@@ -1434,44 +1460,44 @@ namespace BlocklyMruby
 					c++;
 			}
 
-			var mutation = document.CreateElement("mutation");
+			var mutation = cond.CreateElement("mutation");
 			mutation.SetAttribute("case", c.ToString());
 			mutation.SetAttribute("default", d.ToString());
 			block.AppendChild(mutation);
 
 			int i = 0;
 			foreach (var w in _when) {
-				if (w.value.Count == 0)
+				if (w.value.Length == 0)
 					continue;
 
-				var field = document.CreateElement("field");
+				var field = cond.CreateElement("field");
 				field.SetAttribute("name", "CONST" + i);
 				// TODO:whenの値が複数の場合
-				field.AppendChild(document.CreateTextNode(MrbParser.UTF8ArrayToString(((int_node)w.value[0]).num, 0)));
+				field.AppendChild(cond.CreateTextNode(MrbParser.UTF8ArrayToString(((int_node)w.value[0]).num, 0)));
 				block.AppendChild(field);
 				i++;
 			}
 
-			var value = document.CreateElement("value");
+			var value = cond.CreateElement("value");
 			value.SetAttribute("name", "SWITCH");
 			block.AppendChild(value);
 
-			value.AppendChild(_arg.to_xml(document));
+			value.AppendChild(_arg.to_xml(cond));
 
 			foreach (var w in _when) {
-				if (w.value.Count == 0)
+				if (w.value.Length == 0)
 					continue;
 
-				var statement = document.CreateElement("statement");
+				var statement = cond.CreateElement("statement");
 				statement.SetAttribute("name", "DO" + i);
-				statement.AppendChild(w.body.to_xml(document));
+				statement.AppendChild(w.body.to_xml(cond));
 				block.AppendChild(statement);
 			}
 
 			if (default_node != null) {
-				var statement = document.CreateElement("statement");
+				var statement = cond.CreateElement("statement");
 				statement.SetAttribute("name", "DEFAULT");
-				statement.AppendChild(default_node.body.to_xml(document));
+				statement.AppendChild(default_node.body.to_xml(cond));
 				block.AppendChild(statement);
 			}
 
@@ -1488,7 +1514,7 @@ namespace BlocklyMruby
 			cond.separate_line();
 			foreach (var w in _when) {
 				cond.increment_nest();
-				var count = w.value.Count;
+				var count = w.value.Length;
 				if (count != 0) {
 					cond.write("when ");
 					foreach (var v in w.value) {
@@ -1532,7 +1558,7 @@ namespace BlocklyMruby
 
 		public node postexe { get { return _postexe; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}
@@ -1558,7 +1584,7 @@ namespace BlocklyMruby
 		{
 		}
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}
@@ -1579,7 +1605,7 @@ namespace BlocklyMruby
 	{
 		private node _obj;
 		private mrb_sym _method;
-		private List<node> _args = new List<node>();
+		private JsArray<node> _args = new JsArray<node>();
 		private node _block;
 		private MrbTokens _pass;
 
@@ -1599,7 +1625,7 @@ namespace BlocklyMruby
 			}
 		}
 
-		public call_node(IMrbParser p, node a, mrb_sym b, List<node> args = null, node block = null)
+		public call_node(IMrbParser p, node a, mrb_sym b, JsArray<node> args = null, node block = null)
 			: base(p, node_type.NODE_CALL)
 		{
 			_obj = a;
@@ -1615,13 +1641,13 @@ namespace BlocklyMruby
 			_obj = a;
 			_method = b;
 			if (arg != null)
-				_args.Add(arg);
+				_args.Push(arg);
 			_pass = (MrbTokens)1;
 		}
 
 		public node obj { get { return _obj; } }
 		public mrb_sym method { get { return _method; } }
-		public List<node> args { get { return _args; } }
+		public JsArray<node> args { get { return _args; } }
 		public node block { get { return _block; } }
 
 		internal void add_block(node b)
@@ -1634,36 +1660,36 @@ namespace BlocklyMruby
 			}
 		}
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			var method = p.sym2name(_method);
 			switch (method) {
-			case "==": return logic_compare(document, "EQ");
-			case "!=": return logic_compare(document, "NEQ");
-			case "<": return logic_compare(document, "LT");
-			case "<=": return logic_compare(document, "LTE");
-			case ">": return logic_compare(document, "GT");
-			case ">=": return logic_compare(document, "GTE");
+			case "==": return logic_compare(cond, "EQ");
+			case "!=": return logic_compare(cond, "NEQ");
+			case "<": return logic_compare(cond, "LT");
+			case "<=": return logic_compare(cond, "LTE");
+			case ">": return logic_compare(cond, "GT");
+			case ">=": return logic_compare(cond, "GTE");
 			}
 
-			return procedures_callreturn(document, method);
+			return procedures_callreturn(cond, method);
 		}
 
-		private Element procedures_callreturn(Document document, string method)
+		private Element procedures_callreturn(xml_code_cond cond, string method)
 		{
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "procedures_callreturn");
 
-			var mutation = document.CreateElement("mutation");
+			var mutation = cond.CreateElement("mutation");
 			mutation.SetAttribute("name", method);
 			block.AppendChild(mutation);
 
 			int i = 0;
 			foreach (var a in args) {
-				var arg = document.CreateElement("arg");
+				var arg = cond.CreateElement("arg");
 				// TODO: 引数名を持ってくkる
 				arg.SetAttribute("name", i.ToString());
-				arg.AppendChild(a.to_xml(document));
+				arg.AppendChild(a.to_xml(cond));
 				block.AppendChild(arg);
 				i++;
 			}
@@ -1671,25 +1697,25 @@ namespace BlocklyMruby
 			return block;
 		}
 
-		private Element logic_compare(Document document, string op)
+		private Element logic_compare(xml_code_cond cond, string op)
 		{
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "logic_compare");
 
-			var field = document.CreateElement("field");
+			var field = cond.CreateElement("field");
 			field.SetAttribute("name", "OP");
-			field.AppendChild(document.CreateTextNode(op));
+			field.AppendChild(cond.CreateTextNode(op));
 			block.AppendChild(field);
 
-			var value = document.CreateElement("value");
+			var value = cond.CreateElement("value");
 			value.SetAttribute("name", "A");
-			value.AppendChild(_obj.to_xml(document));
+			value.AppendChild(_obj.to_xml(cond));
 			block.AppendChild(value);
 
 			// argsは１つ
-			value = document.CreateElement("value");
+			value = cond.CreateElement("value");
 			value.SetAttribute("name", "B");
-			value.AppendChild(args[0].to_xml(document));
+			value.AppendChild(args[0].to_xml(cond));
 			block.AppendChild(value);
 
 			return block;
@@ -1708,7 +1734,7 @@ namespace BlocklyMruby
 			if (blk_arg != null)
 				blk = null;
 			var m = p.sym2name(_method);
-			int i = _args.Count + (blk_arg != null ? 1 : 0);
+			int i = _args.Length + (blk_arg != null ? 1 : 0);
 			if (_pass == (MrbTokens)1) {
 				cond.increment_nest();
 				switch (m) {
@@ -1834,7 +1860,7 @@ namespace BlocklyMruby
 	{
 		private node _self;
 		private mrb_sym _method;
-		private List<node> _args = new List<node>();
+		private JsArray<node> _args = new JsArray<node>();
 		private node _block;
 
 		public fcall_node(IMrbParser p, mrb_sym b, node c)
@@ -1854,7 +1880,7 @@ namespace BlocklyMruby
 			}
 		}
 
-		public fcall_node(IMrbParser p, mrb_sym b, List<node> args = null, node block = null)
+		public fcall_node(IMrbParser p, mrb_sym b, JsArray<node> args = null, node block = null)
 			: base(p, node_type.NODE_FCALL)
 		{
 			_self = new self_node(p);
@@ -1866,7 +1892,7 @@ namespace BlocklyMruby
 
 		public node self { get { return _self; } }
 		public mrb_sym method { get { return _method; } }
-		public List<node> args { get { return _args; } }
+		public JsArray<node> args { get { return _args; } }
 		public node block { get { return _block; } }
 
 		internal void add_block(node b)
@@ -1879,21 +1905,21 @@ namespace BlocklyMruby
 			}
 		}
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "procedures_callreturn");
 
-			var mutation = document.CreateElement("mutation");
+			var mutation = cond.CreateElement("mutation");
 			mutation.SetAttribute("name", p.sym2name(_method));
 			block.AppendChild(mutation);
 
 			int i = 0;
 			foreach (var a in args) {
-				var arg = document.CreateElement("arg");
+				var arg = cond.CreateElement("arg");
 				// TODO: 引数名を持ってくkる
 				arg.SetAttribute("name", i.ToString());
-				arg.AppendChild(a.to_xml(document));
+				arg.AppendChild(a.to_xml(cond));
 				block.AppendChild(arg);
 				i++;
 			}
@@ -1909,7 +1935,7 @@ namespace BlocklyMruby
 			if (blk_arg != null)
 				blk = null;
 			var m = p.sym2name(_method);
-			int i = _args.Count + (blk_arg != null ? 1 : 0);
+			int i = _args.Length + (blk_arg != null ? 1 : 0);
 			switch (m) {
 			case "include":
 			case "raise":
@@ -1959,7 +1985,7 @@ namespace BlocklyMruby
 	/* (:super . c) */
 	class super_node : node
 	{
-		private List<node> _args = new List<node>();
+		private JsArray<node> _args = new JsArray<node>();
 		private node _block;
 
 		public super_node(IMrbParser p, node c)
@@ -1973,24 +1999,24 @@ namespace BlocklyMruby
 			}
 		}
 
-		public List<node> args { get { return _args; } }
+		public JsArray<node> args { get { return _args; } }
 		public node block { get { return _block; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "procedures_callreturn");
 
-			var mutation = document.CreateElement("mutation");
+			var mutation = cond.CreateElement("mutation");
 			mutation.SetAttribute("name", "super");
 			block.AppendChild(mutation);
 
 			int i = 0;
 			foreach (var a in args) {
-				var arg = document.CreateElement("arg");
+				var arg = cond.CreateElement("arg");
 				// TODO: 引数名を持ってくkる
 				arg.SetAttribute("name", i.ToString());
-				arg.AppendChild(a.to_xml(document));
+				arg.AppendChild(a.to_xml(cond));
 				block.AppendChild(arg);
 				i++;
 			}
@@ -2005,7 +2031,7 @@ namespace BlocklyMruby
 			var blk = _block;
 			if (blk_arg != null)
 				blk = null;
-			int i = _args.Count + (blk_arg != null ? 1 : 0);
+			int i = _args.Length + (blk_arg != null ? 1 : 0);
 			if (i == 0)
 				cond.write("super");
 			else {
@@ -2067,7 +2093,7 @@ namespace BlocklyMruby
 			}
 		}
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}
@@ -2105,7 +2131,7 @@ namespace BlocklyMruby
 	/* (:yield . c) */
 	class yield_node : node
 	{
-		private List<node> _args = new List<node>();
+		private JsArray<node> _args = new JsArray<node>();
 
 		public yield_node(IMrbParser p, node c)
 			: base(p, node_type.NODE_YIELD)
@@ -2120,9 +2146,9 @@ namespace BlocklyMruby
 			dump_recur(_args, (node)c);
 		}
 
-		public List<node> args { get { return _args; } }
+		public JsArray<node> args { get { return _args; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}
@@ -2130,7 +2156,7 @@ namespace BlocklyMruby
 		protected override void to_rb(ruby_code_cond cond)
 		{
 			cond.increment_nest();
-			int i = _args.Count;
+			int i = _args.Length;
 			if (i == 0)
 				cond.write("yield");
 			else {
@@ -2168,19 +2194,19 @@ namespace BlocklyMruby
 
 		public node retval { get { return _retval; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "procedures_return");
 
-			var mutation = document.CreateElement("mutation");
+			var mutation = cond.CreateElement("mutation");
 			mutation.SetAttribute("value", (_retval != null) ? "0" : "1");
 			block.AppendChild(mutation);
 
 			if (_retval != null) {
-				var value = document.CreateElement("value");
+				var value = cond.CreateElement("value");
 				value.SetAttribute("name", "VALUE");
-				value.AppendChild(_retval.to_xml(document));
+				value.AppendChild(_retval.to_xml(cond));
 				block.AppendChild(value);
 			}
 
@@ -2220,14 +2246,14 @@ namespace BlocklyMruby
 
 		public node retval { get { return _retval; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "controls_flow_statements");
 
-			var field = document.CreateElement("field");
+			var field = cond.CreateElement("field");
 			field.SetAttribute("name", "FLOW");
-			field.AppendChild(document.CreateTextNode("BREAK"));
+			field.AppendChild(cond.CreateTextNode("BREAK"));
 			block.AppendChild(field);
 
 			return block;
@@ -2266,14 +2292,14 @@ namespace BlocklyMruby
 
 		public node retval { get { return _retval; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "controls_flow_statements");
 
-			var field = document.CreateElement("field");
+			var field = cond.CreateElement("field");
 			field.SetAttribute("name", "FLOW");
-			field.AppendChild(document.CreateTextNode("CONTINUE"));
+			field.AppendChild(cond.CreateTextNode("CONTINUE"));
 			block.AppendChild(field);
 
 			return block;
@@ -2307,7 +2333,7 @@ namespace BlocklyMruby
 		{
 		}
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}
@@ -2331,7 +2357,7 @@ namespace BlocklyMruby
 		{
 		}
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}
@@ -2364,7 +2390,7 @@ namespace BlocklyMruby
 
 		public node b { get { return _b; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}
@@ -2399,7 +2425,7 @@ namespace BlocklyMruby
 
 		public node b { get { return _b; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}
@@ -2433,10 +2459,10 @@ namespace BlocklyMruby
 		public node b { get { return _b; } }
 		public mrb_sym c { get { return _c; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			// TODO:？？？
-			var block = document.CreateElement("class");
+			var block = cond.CreateElement("class");
 			block.SetAttribute("const", p.sym2name(((const_node)_b).name));
 			block.SetAttribute("name", p.sym2name(_c));
 
@@ -2468,7 +2494,7 @@ namespace BlocklyMruby
 
 		public mrb_sym c { get { return _c; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}
@@ -2501,24 +2527,24 @@ namespace BlocklyMruby
 
 		public node b { get { return _b; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "logic_operation");
 
-			var field = document.CreateElement("field");
+			var field = cond.CreateElement("field");
 			field.SetAttribute("name", "OP");
-			field.AppendChild(document.CreateTextNode("AND"));
+			field.AppendChild(cond.CreateTextNode("AND"));
 			block.AppendChild(field);
 
-			var value = document.CreateElement("value");
+			var value = cond.CreateElement("value");
 			value.SetAttribute("name", "A");
-			value.AppendChild(_a.to_xml(document));
+			value.AppendChild(_a.to_xml(cond));
 			block.AppendChild(value);
 
-			value = document.CreateElement("value");
+			value = cond.CreateElement("value");
 			value.SetAttribute("name", "B");
-			value.AppendChild(_b.to_xml(document));
+			value.AppendChild(_b.to_xml(cond));
 			block.AppendChild(value);
 
 			return block;
@@ -2553,24 +2579,24 @@ namespace BlocklyMruby
 		public node a { get { return _a; } }
 		public node b { get { return _b; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "logic_operation");
 
-			var field = document.CreateElement("field");
+			var field = cond.CreateElement("field");
 			field.SetAttribute("name", "OP");
-			field.AppendChild(document.CreateTextNode("OR"));
+			field.AppendChild(cond.CreateTextNode("OR"));
 			block.AppendChild(field);
 
-			var value = document.CreateElement("value");
+			var value = cond.CreateElement("value");
 			value.SetAttribute("name", "A");
-			value.AppendChild(_a.to_xml(document));
+			value.AppendChild(_a.to_xml(cond));
 			block.AppendChild(value);
 
-			value = document.CreateElement("value");
+			value = cond.CreateElement("value");
 			value.SetAttribute("name", "B");
-			value.AppendChild(_b.to_xml(document));
+			value.AppendChild(_b.to_xml(cond));
 			block.AppendChild(value);
 
 			return block;
@@ -2592,7 +2618,7 @@ namespace BlocklyMruby
 	/* (:array a...) */
 	class array_node : node
 	{
-		private List<node> _array = new List<node>();
+		private JsArray<node> _array = new JsArray<node>();
 
 		public array_node(IMrbParser p, node a)
 			: base(p, node_type.NODE_ARRAY)
@@ -2600,29 +2626,29 @@ namespace BlocklyMruby
 			dump_recur(_array, a);
 		}
 
-		public array_node(IMrbParser p, List<node> a)
+		public array_node(IMrbParser p, JsArray<node> a)
 			: base(p, node_type.NODE_ARRAY)
 		{
 			_array.AddRange(a);
 		}
 
 
-		public List<node> array { get { return _array; } }
+		public JsArray<node> array { get { return _array; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "lists_create_with");
 
-			var mutation = document.CreateElement("mutation");
-			mutation.SetAttribute("items", _array.Count.ToString());
+			var mutation = cond.CreateElement("mutation");
+			mutation.SetAttribute("items", _array.Length.ToString());
 			block.AppendChild(mutation);
 
 			int i = 0;
 			foreach (var item in _array) {
-				var value = document.CreateElement("value");
+				var value = cond.CreateElement("value");
 				value.SetAttribute("name", $"ADD{i}");
-				value.AppendChild(_array[i].to_xml(document));
+				value.AppendChild(_array[i].to_xml(cond));
 				block.AppendChild(value);
 				i++;
 			}
@@ -2634,7 +2660,7 @@ namespace BlocklyMruby
 		{
 			cond.increment_nest();
 			cond.write("[");
-			int i = _array.Count;
+			int i = _array.Length;
 			foreach (var item in _array) {
 				item.to_ruby(cond);
 				i--;
@@ -2668,7 +2694,7 @@ namespace BlocklyMruby
 
 		public node a { get { return _a; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}
@@ -2704,27 +2730,27 @@ namespace BlocklyMruby
 				return $"({key} . {value})";
 			}
 		}
-		List<kv_t> _kvs = new List<kv_t>();
+		JsArray<kv_t> _kvs = new JsArray<kv_t>();
 
 		public hash_node(IMrbParser p, node a)
 			: base(p, node_type.NODE_HASH)
 		{
 			while (a != null) {
 				var kv = new kv_t((node)((node)a.car).car, (node)((node)a.car).cdr);
-				_kvs.Add(kv);
+				_kvs.Push(kv);
 				a = (node)a.cdr;
 			}
 		}
 
-		public hash_node(IMrbParser p, List<kv_t> items)
+		public hash_node(IMrbParser p, JsArray<kv_t> items)
 			: base(p, node_type.NODE_HASH)
 		{
 			_kvs.AddRange(items);
 		}
 
-		public List<kv_t> kvs { get { return _kvs; } }
+		public JsArray<kv_t> kvs { get { return _kvs; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}
@@ -2735,7 +2761,7 @@ namespace BlocklyMruby
 				cond.write("{");
 			else
 				cond.write_line("{");
-			int i = _kvs.Count;
+			int i = _kvs.Length;
 			foreach (var kv in _kvs) {
 				kv.key.to_ruby(cond);
 				cond.write(" => ");
@@ -2771,14 +2797,14 @@ namespace BlocklyMruby
 
 		public mrb_sym name { get { return _name; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "variables_get");
 
-			var field = document.CreateElement("field");
+			var field = cond.CreateElement("field");
 			field.SetAttribute("name", "VAR");
-			field.AppendChild(document.CreateTextNode(":" + p.sym2name(_name)));
+			field.AppendChild(cond.CreateTextNode(":" + p.sym2name(_name)));
 			block.AppendChild(field);
 
 			return block;
@@ -2808,14 +2834,14 @@ namespace BlocklyMruby
 
 		public mrb_sym name { get { return _name; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "variables_get");
 
-			var field = document.CreateElement("field");
+			var field = cond.CreateElement("field");
 			field.SetAttribute("name", "VAR");
-			field.AppendChild(document.CreateTextNode(p.sym2name(_name)));
+			field.AppendChild(cond.CreateTextNode(p.sym2name(_name)));
 			block.AppendChild(field);
 
 			return block;
@@ -2845,14 +2871,14 @@ namespace BlocklyMruby
 
 		public mrb_sym name { get { return _name; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "variables_get");
 
-			var field = document.CreateElement("field");
+			var field = cond.CreateElement("field");
 			field.SetAttribute("name", "VAR");
-			field.AppendChild(document.CreateTextNode(p.sym2name(_name)));
+			field.AppendChild(cond.CreateTextNode(p.sym2name(_name)));
 			block.AppendChild(field);
 
 			return block;
@@ -2882,14 +2908,14 @@ namespace BlocklyMruby
 
 		public mrb_sym name { get { return _name; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "variables_get");
 
-			var field = document.CreateElement("field");
+			var field = cond.CreateElement("field");
 			field.SetAttribute("name", "VAR");
-			field.AppendChild(document.CreateTextNode(p.sym2name(_name)));
+			field.AppendChild(cond.CreateTextNode(p.sym2name(_name)));
 			block.AppendChild(field);
 
 			return block;
@@ -2919,14 +2945,14 @@ namespace BlocklyMruby
 
 		public mrb_sym name { get { return _name; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "variables_get");
 
-			var field = document.CreateElement("field");
+			var field = cond.CreateElement("field");
 			field.SetAttribute("name", "VAR");
-			field.AppendChild(document.CreateTextNode(p.sym2name(_name)));
+			field.AppendChild(cond.CreateTextNode(p.sym2name(_name)));
 			block.AppendChild(field);
 
 			return block;
@@ -2956,14 +2982,14 @@ namespace BlocklyMruby
 
 		public mrb_sym name { get { return _name; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "variables_get");
 
-			var field = document.CreateElement("field");
+			var field = cond.CreateElement("field");
 			field.SetAttribute("name", "VAR");
-			field.AppendChild(document.CreateTextNode(p.sym2name(_name)));
+			field.AppendChild(cond.CreateTextNode(p.sym2name(_name)));
 			block.AppendChild(field);
 
 			return block;
@@ -2983,22 +3009,22 @@ namespace BlocklyMruby
 	/* (:undef a...) */
 	class undef_node : node
 	{
-		private List<mrb_sym> _syms = new List<mrb_sym>();
+		private JsArray<mrb_sym> _syms = new JsArray<mrb_sym>();
 
 		public undef_node(IMrbParser p, mrb_sym sym)
 			: base(p, node_type.NODE_UNDEF)
 		{
-			_syms.Add(sym);
+			_syms.Push(sym);
 		}
 
-		public List<mrb_sym> syms { get { return _syms; } }
+		public JsArray<mrb_sym> syms { get { return _syms; } }
 
 		public override void append(node b)
 		{
-			_syms.Add((mrb_sym)b.car);
+			_syms.Push((mrb_sym)b.car);
 		}
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}
@@ -3006,7 +3032,7 @@ namespace BlocklyMruby
 		protected override void to_rb(ruby_code_cond cond)
 		{
 			cond.write("undef");
-			int i = _syms.Count;
+			int i = _syms.Length;
 			if (i > 0)
 				cond.write(" ");
 			foreach (var sym in _syms) {
@@ -3058,7 +3084,7 @@ namespace BlocklyMruby
 			}
 			_super = s;
 			var a = p.locals_node();
-			_arg = (a.Count == 0) ? 0 : a[0];
+			_arg = (a.Length == 0) ? 0 : a[0];
 			_body = b;
 		}
 
@@ -3067,22 +3093,22 @@ namespace BlocklyMruby
 		public node super { get { return _super; } }
 		public node body { get { return _body; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			// TODO:クラス？
-			var block = document.CreateElement("class");
+			var block = cond.CreateElement("class");
 			block.SetAttribute("name", p.sym2name(_name));
 
 			if (_super != null) {
-				var field = document.CreateElement("field");
+				var field = cond.CreateElement("field");
 				field.SetAttribute("name", "SUPER");
-				field.AppendChild(_super.to_xml(document));
+				field.AppendChild(_super.to_xml(cond));
 				block.AppendChild(field);
 			}
 
-			var statement = document.CreateElement("statement");
+			var statement = cond.CreateElement("statement");
 			statement.SetAttribute("name", "BODY");
-			statement.AppendChild(_body.to_xml(document));
+			statement.AppendChild(_body.to_xml(cond));
 			block.AppendChild(statement);
 
 			return block;
@@ -3117,7 +3143,7 @@ namespace BlocklyMruby
 	class sclass_node : node
 	{
 		private node _obj;
-		private List<mrb_sym> _super;
+		private JsArray<mrb_sym> _super;
 		private node _body;
 
 		public sclass_node(IMrbParser p, node o, node b)
@@ -3131,7 +3157,7 @@ namespace BlocklyMruby
 		public node obj { get { return _obj; } }
 		public node body { get { return _body; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}
@@ -3162,7 +3188,7 @@ namespace BlocklyMruby
 		private string _prefix;
 		private mrb_sym _name;
 		private node _type;
-		private List<mrb_sym> _super;
+		private JsArray<mrb_sym> _super;
 		private node _body;
 
 		public module_node(IMrbParser p, node m, node b)
@@ -3192,7 +3218,7 @@ namespace BlocklyMruby
 		public object type { get { return _type; } }
 		public node body { get { return _body; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}
@@ -3251,11 +3277,11 @@ namespace BlocklyMruby
 	class def_node : node
 	{
 		private mrb_sym _name;
-		private List<mrb_sym> _local_variables = new List<mrb_sym>();
-		private List<arg_node> _mandatory_args = new List<arg_node>();
-		private List<args_t> _optional_args = new List<args_t>();
+		private JsArray<mrb_sym> _local_variables = new JsArray<mrb_sym>();
+		private JsArray<arg_node> _mandatory_args = new JsArray<arg_node>();
+		private JsArray<args_t> _optional_args = new JsArray<args_t>();
 		private mrb_sym _rest;
-		private List<arg_node> _post_mandatory_args = new List<arg_node>();
+		private JsArray<arg_node> _post_mandatory_args = new JsArray<arg_node>();
 		private mrb_sym _blk;
 		private node _body;
 
@@ -3278,7 +3304,7 @@ namespace BlocklyMruby
 						var arg = new args_t(p);
 						arg.name = (mrb_sym)((node)n2.car).car;
 						arg.arg = (node)((node)n2.car).cdr;
-						_optional_args.Add(arg);
+						_optional_args.Push(arg);
 						n2 = (node)n2.cdr;
 					}
 				}
@@ -3300,7 +3326,7 @@ namespace BlocklyMruby
 			}
 		}
 
-		public def_node(IMrbParser p, mrb_sym m, List<arg_node> a, node b)
+		public def_node(IMrbParser p, mrb_sym m, JsArray<arg_node> a, node b)
 			: base(p, node_type.NODE_DEF)
 		{
 			_name = m;
@@ -3309,27 +3335,27 @@ namespace BlocklyMruby
 		}
 
 		public mrb_sym name { get { return _name; } }
-		public List<mrb_sym> local_variables { get { return _local_variables; } }
-		public List<arg_node> mandatory_args { get { return _mandatory_args; } }
-		internal List<args_t> optional_args { get { return _optional_args; } }
+		public JsArray<mrb_sym> local_variables { get { return _local_variables; } }
+		public JsArray<arg_node> mandatory_args { get { return _mandatory_args; } }
+		internal JsArray<args_t> optional_args { get { return _optional_args; } }
 		public mrb_sym rest { get { return _rest; } }
-		public List<arg_node> post_mandatory_args { get { return _post_mandatory_args; } }
+		public JsArray<arg_node> post_mandatory_args { get { return _post_mandatory_args; } }
 		public mrb_sym blk { get { return _blk; } }
 		public node body { get { return _body; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "procedures_defreturn");
 
-			var field = document.CreateElement("field");
+			var field = cond.CreateElement("field");
 			field.SetAttribute("name", "NAME");
-			field.AppendChild(document.CreateTextNode(p.sym2name(_name)));
+			field.AppendChild(cond.CreateTextNode(p.sym2name(_name)));
 			block.AppendChild(field);
 
 			Element bxml;
-			if (_body != null && (bxml = _body.to_xml(document)) != null) {
-				var statement = document.CreateElement("statement");
+			if (_body != null && (bxml = _body.to_xml(cond)) != null) {
+				var statement = cond.CreateElement("statement");
 				statement.SetAttribute("name", "STACK");
 				statement.AppendChild(bxml);
 				block.AppendChild(statement);
@@ -3342,8 +3368,8 @@ namespace BlocklyMruby
 		{
 			cond.increment_nest();
 			cond.write("def " + p.sym2name(_name) + "(");
-			int i = _mandatory_args.Count + _optional_args.Count
-				+ (_rest != 0 ? 1 : 0) + _post_mandatory_args.Count
+			int i = _mandatory_args.Length + _optional_args.Length
+				+ (_rest != 0 ? 1 : 0) + _post_mandatory_args.Length
 				+ (_blk != 0 ? 1 : 0);
 			if (i > 0) {
 				foreach (var a in _mandatory_args) {
@@ -3403,11 +3429,11 @@ namespace BlocklyMruby
 	{
 		private node _obj;
 		private mrb_sym _name;
-		private List<mrb_sym> _lv;
-		private List<arg_node> _mandatory_args = new List<arg_node>();
-		private List<args_t> _optional_args = new List<args_t>();
+		private JsArray<mrb_sym> _lv;
+		private JsArray<arg_node> _mandatory_args = new JsArray<arg_node>();
+		private JsArray<args_t> _optional_args = new JsArray<args_t>();
 		private mrb_sym _rest;
-		private List<arg_node> _post_mandatory_args = new List<arg_node>();
+		private JsArray<arg_node> _post_mandatory_args = new JsArray<arg_node>();
 		private mrb_sym _blk;
 		private node _body;
 
@@ -3431,7 +3457,7 @@ namespace BlocklyMruby
 						var arg = new args_t(p);
 						arg.name = (mrb_sym)((node)n2.car).car;
 						arg.arg = (node)((node)n2.car).cdr;
-						_optional_args.Add(arg);
+						_optional_args.Push(arg);
 						n2 = (node)n2.cdr;
 					}
 				}
@@ -3450,14 +3476,14 @@ namespace BlocklyMruby
 
 		public node obj { get { return _obj; } }
 		public mrb_sym name { get { return _name; } }
-		public List<arg_node> mandatory_args { get { return _mandatory_args; } }
-		internal List<args_t> optional_args { get { return _optional_args; } }
+		public JsArray<arg_node> mandatory_args { get { return _mandatory_args; } }
+		internal JsArray<args_t> optional_args { get { return _optional_args; } }
 		public mrb_sym rest { get { return _rest; } }
-		public List<arg_node> post_mandatory_args { get { return _post_mandatory_args; } }
+		public JsArray<arg_node> post_mandatory_args { get { return _post_mandatory_args; } }
 		public mrb_sym blk { get { return _blk; } }
 		public node body { get { return _body; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}
@@ -3466,8 +3492,8 @@ namespace BlocklyMruby
 		{
 			cond.increment_nest();
 			cond.write("def self." + p.sym2name(_name) + "(");
-			int i = _mandatory_args.Count + _optional_args.Count
-				+ (_rest != 0 ? 1 : 0) + _post_mandatory_args.Count
+			int i = _mandatory_args.Length + _optional_args.Length
+				+ (_rest != 0 ? 1 : 0) + _post_mandatory_args.Length
 				+ (_blk != 0 ? 1 : 0);
 			if (i > 0) {
 				foreach (var a in _mandatory_args) {
@@ -3532,7 +3558,7 @@ namespace BlocklyMruby
 
 		public mrb_sym name { get { return _name; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}
@@ -3561,7 +3587,7 @@ namespace BlocklyMruby
 
 		public node a { get { return _a; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}
@@ -3581,11 +3607,11 @@ namespace BlocklyMruby
 	/* (:block arg body) */
 	class block_node : node
 	{
-		private List<mrb_sym> _local_variables = new List<mrb_sym>();
-		private List<node> _mandatory_args = new List<node>();
-		private List<args_t> _optional_args = new List<args_t>();
+		private JsArray<mrb_sym> _local_variables = new JsArray<mrb_sym>();
+		private JsArray<node> _mandatory_args = new JsArray<node>();
+		private JsArray<args_t> _optional_args = new JsArray<args_t>();
 		private mrb_sym _rest;
-		private List<node> _post_mandatory_args = new List<node>();
+		private JsArray<node> _post_mandatory_args = new JsArray<node>();
 		private mrb_sym _blk;
 		private node _body;
 		private bool _brace;
@@ -3608,7 +3634,7 @@ namespace BlocklyMruby
 						var arg = new args_t(p);
 						arg.name = (mrb_sym)((node)n2.car).car;
 						arg.arg = (node)((node)n2.car).cdr;
-						_optional_args.Add(arg);
+						_optional_args.Push(arg);
 						n2 = (node)n2.cdr;
 					}
 				}
@@ -3631,7 +3657,7 @@ namespace BlocklyMruby
 			_brace = brace;
 		}
 
-		public block_node(IMrbParser p, List<node> args, node body, bool brace)
+		public block_node(IMrbParser p, JsArray<node> args, node body, bool brace)
 			: base(p, node_type.NODE_BLOCK)
 		{
 			_mandatory_args.AddRange(args);
@@ -3642,15 +3668,15 @@ namespace BlocklyMruby
 			_brace = brace;
 		}
 
-		public List<mrb_sym> local_variables { get { return _local_variables; } }
-		public List<node> mandatory_args { get { return _mandatory_args; } }
-		internal List<args_t> optional_args { get { return _optional_args; } }
+		public JsArray<mrb_sym> local_variables { get { return _local_variables; } }
+		public JsArray<node> mandatory_args { get { return _mandatory_args; } }
+		internal JsArray<args_t> optional_args { get { return _optional_args; } }
 		public mrb_sym rest { get { return _rest; } }
-		public List<node> post_mandatory_args { get { return _post_mandatory_args; } }
+		public JsArray<node> post_mandatory_args { get { return _post_mandatory_args; } }
 		public mrb_sym blk { get { return _blk; } }
 		public node body { get { return _body; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}
@@ -3669,8 +3695,8 @@ namespace BlocklyMruby
 
 			cond.increment_nest();
 			cond.write(beg);
-			int i = _mandatory_args.Count + _optional_args.Count
-				+ (_rest != 0 ? 1 : 0) + _post_mandatory_args.Count
+			int i = _mandatory_args.Length + _optional_args.Length
+				+ (_rest != 0 ? 1 : 0) + _post_mandatory_args.Length
 				+ (_blk != 0 ? 1 : 0);
 			if (i > 0) {
 				cond.write(" |");
@@ -3720,11 +3746,11 @@ namespace BlocklyMruby
 	/* (:lambda arg body) */
 	class lambda_node : node
 	{
-		private List<mrb_sym> _local_variables = new List<mrb_sym>();
-		private List<node> _mandatory_args = new List<node>();
-		private List<args_t> _optional_args = new List<args_t>();
+		private JsArray<mrb_sym> _local_variables = new JsArray<mrb_sym>();
+		private JsArray<node> _mandatory_args = new JsArray<node>();
+		private JsArray<args_t> _optional_args = new JsArray<args_t>();
 		private mrb_sym _rest;
-		private List<node> _post_mandatory_args = new List<node>();
+		private JsArray<node> _post_mandatory_args = new JsArray<node>();
 		private mrb_sym _blk;
 		private node _body;
 
@@ -3746,7 +3772,7 @@ namespace BlocklyMruby
 						var arg = new args_t(p);
 						arg.name = (mrb_sym)((node)n2.car).car;
 						arg.arg = (node)((node)n2.car).cdr;
-						_optional_args.Add(arg);
+						_optional_args.Push(arg);
 						n2 = (node)n2.cdr;
 					}
 				}
@@ -3768,15 +3794,15 @@ namespace BlocklyMruby
 			}
 		}
 
-		public List<mrb_sym> local_variables { get { return _local_variables; } }
-		public List<node> mandatory_args { get { return _mandatory_args; } }
-		internal List<args_t> optional_args { get { return _optional_args; } }
+		public JsArray<mrb_sym> local_variables { get { return _local_variables; } }
+		public JsArray<node> mandatory_args { get { return _mandatory_args; } }
+		internal JsArray<args_t> optional_args { get { return _optional_args; } }
 		public mrb_sym rest { get { return _rest; } }
-		public List<node> post_mandatory_args { get { return _post_mandatory_args; } }
+		public JsArray<node> post_mandatory_args { get { return _post_mandatory_args; } }
 		public mrb_sym blk { get { return _blk; } }
 		public node body { get { return _body; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}
@@ -3785,8 +3811,8 @@ namespace BlocklyMruby
 		{
 			cond.increment_nest();
 			cond.write("{");
-			int i = _mandatory_args.Count + _optional_args.Count
-				+ (_rest != 0 ? 1 : 0) + _post_mandatory_args.Count
+			int i = _mandatory_args.Length + _optional_args.Length
+				+ (_rest != 0 ? 1 : 0) + _post_mandatory_args.Length
 				+ (_blk != 0 ? 1 : 0);
 			if (i > 0) {
 				cond.write(" |");
@@ -3849,38 +3875,38 @@ namespace BlocklyMruby
 		public node lhs { get { return _lhs; } }
 		public node rhs { get { return _rhs; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "variables_set");
 
-			var field = document.CreateElement("field");
+			var field = cond.CreateElement("field");
 			field.SetAttribute("name", "VAR");
 			switch ((node_type)_lhs.car) {
 			case node_type.NODE_GVAR:
-				field.AppendChild(document.CreateTextNode(p.sym2name(((gvar_node)_lhs).name)));
+				field.AppendChild(cond.CreateTextNode(p.sym2name(((gvar_node)_lhs).name)));
 				break;
 			case node_type.NODE_CVAR:
-				field.AppendChild(document.CreateTextNode(p.sym2name(((cvar_node)_lhs).name)));
+				field.AppendChild(cond.CreateTextNode(p.sym2name(((cvar_node)_lhs).name)));
 				break;
 			case node_type.NODE_IVAR:
-				field.AppendChild(document.CreateTextNode(p.sym2name(((ivar_node)_lhs).name)));
+				field.AppendChild(cond.CreateTextNode(p.sym2name(((ivar_node)_lhs).name)));
 				break;
 			case node_type.NODE_LVAR:
-				field.AppendChild(document.CreateTextNode(p.sym2name(((lvar_node)_lhs).name)));
+				field.AppendChild(cond.CreateTextNode(p.sym2name(((lvar_node)_lhs).name)));
 				break;
 			default:
 				// TODO: list[0] = ...？
-				field.AppendChild(_lhs.to_xml(document));
+				field.AppendChild(_lhs.to_xml(cond));
 				break;
 			}
 			block.AppendChild(field);
 
-			var value = document.CreateElement("value");
+			var value = cond.CreateElement("value");
 			value.SetAttribute("name", "VALUE");
 			block.AppendChild(value);
 
-			value.AppendChild(_rhs.to_xml(document));
+			value.AppendChild(_rhs.to_xml(cond));
 
 			return block;
 		}
@@ -3906,10 +3932,10 @@ namespace BlocklyMruby
 	{
 		public class mlhs_t
 		{
-			public List<node> pre = new List<node>();
+			public JsArray<node> pre = new JsArray<node>();
 			public node rest;
 			public bool rest_empty;
-			public List<node> post = new List<node>();
+			public JsArray<node> post = new JsArray<node>();
 
 			public override string ToString()
 			{
@@ -3926,7 +3952,7 @@ namespace BlocklyMruby
 
 			internal void to_ruby(ruby_code_cond cond)
 			{
-				int i = pre.Count + (rest != null ? 1 : 0) + post.Count;
+				int i = pre.Length + (rest != null ? 1 : 0) + post.Length;
 				foreach (var p in pre) {
 					p.to_ruby(cond);
 					i--; if (i > 0) cond.write(", ");
@@ -3979,7 +4005,7 @@ namespace BlocklyMruby
 		public mlhs_t mlhs { get { return _mlhs; } }
 		public node mrhs { get { return _mrhs; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}
@@ -3997,7 +4023,7 @@ namespace BlocklyMruby
 			return $"(:masgn {mlhs} {mrhs})";
 		}
 
-		internal bool remove(List<mrb_sym> args)
+		internal bool remove(JsArray<mrb_sym> args)
 		{
 			bool m = false;
 			foreach (var a in _mlhs.pre) {
@@ -4053,31 +4079,31 @@ namespace BlocklyMruby
 		public mrb_sym op { get { return _op; } }
 		public node rhs { get { return _rhs; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			// TODO:Rubyの演算は数値だけとは限らない
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "math_arithmetic");
 
-			var field = document.CreateElement("field");
+			var field = cond.CreateElement("field");
 			field.SetAttribute("name", "OP");
 			switch (p.sym2name(op)) {
-			case "+": field.AppendChild(document.CreateTextNode("ADD")); break;
-			case "-": field.AppendChild(document.CreateTextNode("MINUS")); break;
-			case "*": field.AppendChild(document.CreateTextNode("MULTIPLY")); break;
-			case "/": field.AppendChild(document.CreateTextNode("DIVIDE")); break;
-			case "**": field.AppendChild(document.CreateTextNode("POWER")); break;
+			case "+": field.AppendChild(cond.CreateTextNode("ADD")); break;
+			case "-": field.AppendChild(cond.CreateTextNode("MINUS")); break;
+			case "*": field.AppendChild(cond.CreateTextNode("MULTIPLY")); break;
+			case "/": field.AppendChild(cond.CreateTextNode("DIVIDE")); break;
+			case "**": field.AppendChild(cond.CreateTextNode("POWER")); break;
 			}
 			block.AppendChild(field);
 
-			var value = document.CreateElement("value");
+			var value = cond.CreateElement("value");
 			value.SetAttribute("name", "A");
-			value.AppendChild(lhs.to_xml(document));
+			value.AppendChild(lhs.to_xml(cond));
 			block.AppendChild(value);
 
-			value = document.CreateElement("value");
+			value = cond.CreateElement("value");
 			value.SetAttribute("name", "B");
-			value.AppendChild(rhs.to_xml(document));
+			value.AppendChild(rhs.to_xml(cond));
 			block.AppendChild(value);
 
 			return block;
@@ -4111,19 +4137,19 @@ namespace BlocklyMruby
 
 		public node n { get { return _n; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "math_single");
 
-			var field = document.CreateElement("field");
+			var field = cond.CreateElement("field");
 			field.SetAttribute("name", "OP");
-			field.AppendChild(document.CreateTextNode("NEG"));
+			field.AppendChild(cond.CreateTextNode("NEG"));
 			block.AppendChild(field);
 
-			var value = document.CreateElement("value");
+			var value = cond.CreateElement("value");
 			value.SetAttribute("name", "NUM");
-			value.AppendChild(_n.to_xml(document));
+			value.AppendChild(_n.to_xml(cond));
 			block.AppendChild(value);
 
 			return block;
@@ -4164,14 +4190,14 @@ namespace BlocklyMruby
 		public Uint8Array num { get { return _s; } }
 		public int @base { get { return _base; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "math_number");
 
-			var field = document.CreateElement("field");
+			var field = cond.CreateElement("field");
 			field.SetAttribute("name", "NUM");
-			field.AppendChild(document.CreateTextNode(GetString()));
+			field.AppendChild(cond.CreateTextNode(GetString()));
 			block.AppendChild(field);
 
 			return block;
@@ -4229,9 +4255,9 @@ namespace BlocklyMruby
 			return Convert.ToInt64(str, _base);
 		}
 
-		public node evaluate(string method, List<node> args)
+		public node evaluate(string method, JsArray<node> args)
 		{
-			if (args.Count != 1)
+			if (args.Length != 1)
 				return null;
 
 			var arg = args[0];
@@ -4345,14 +4371,14 @@ namespace BlocklyMruby
 
 		public Uint8Array num { get { return _s; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "math_number");
 
-			var field = document.CreateElement("field");
+			var field = cond.CreateElement("field");
 			field.SetAttribute("name", "NUM");
-			field.AppendChild(document.CreateTextNode(MrbParser.UTF8ArrayToString(_s, 0)));
+			field.AppendChild(cond.CreateTextNode(MrbParser.UTF8ArrayToString(_s, 0)));
 			block.AppendChild(field);
 
 			return block;
@@ -4374,9 +4400,9 @@ namespace BlocklyMruby
 			return Convert.ToDouble(str);
 		}
 
-		public node evaluate(string method, List<node> args)
+		public node evaluate(string method, JsArray<node> args)
 		{
-			if (args.Count != 1)
+			if (args.Length != 1)
 				return null;
 
 			var arg = args[0];
@@ -4474,14 +4500,14 @@ namespace BlocklyMruby
 		public Uint8Array str { get { return _str; } }
 		public int len { get { return _len; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "text");
 
-			var field = document.CreateElement("field");
+			var field = cond.CreateElement("field");
 			field.SetAttribute("name", "TEXT");
-			field.AppendChild(document.CreateTextNode(MrbParser.UTF8ArrayToString(_str, 0)));
+			field.AppendChild(cond.CreateTextNode(MrbParser.UTF8ArrayToString(_str, 0)));
 			block.AppendChild(field);
 
 			return block;
@@ -4507,19 +4533,19 @@ namespace BlocklyMruby
 			return MrbParser.UTF8ArrayToString(_str, 0);
 		}
 
-		public node evaluate(string method, List<node> args)
+		public node evaluate(string method, JsArray<node> args)
 		{
 			var s = to_s();
 
 			switch (method) {
 			case "<=>": {
-					if ((args.Count != 1) || !(args[0] is str_node))
+					if ((args.Length != 1) || !(args[0] is str_node))
 						break;
 					var c = MrbParser.UTF8StringToArray(String.Compare(s, ((str_node)args[0]).to_s()).ToString());
 					return new int_node(p, c, 10);
 				}
 			case "==": {
-					if ((args.Count != 1) || !(args[0] is str_node))
+					if ((args.Length != 1) || !(args[0] is str_node))
 						break;
 					if (String.Compare(s, ((str_node)args[0]).to_s()) == 0)
 						return new true_node(p);
@@ -4527,14 +4553,14 @@ namespace BlocklyMruby
 						return new true_node(p);
 				}
 			case "+": {
-					if ((args.Count != 1) || !(args[0] is str_node))
+					if ((args.Length != 1) || !(args[0] is str_node))
 						break;
 					var t = MrbParser.UTF8StringToArray(s + ((str_node)args[0]).to_s());
 					return new str_node(p, t, t.Length - 1);
 				}
 			case "*": {
 					int a;
-					if (args.Count != 1)
+					if (args.Length != 1)
 						break;
 					if (args[0] is int_node)
 						a = (int)((int_node)args[0]).to_i();
@@ -4558,7 +4584,7 @@ namespace BlocklyMruby
 	/* (:dstr . a) */
 	class dstr_node : node
 	{
-		private List<node> _a = new List<node>();
+		private JsArray<node> _a = new JsArray<node>();
 
 		public dstr_node(IMrbParser p, node a)
 			: base(p, node_type.NODE_DSTR)
@@ -4566,9 +4592,9 @@ namespace BlocklyMruby
 			dump_recur(_a, a);
 		}
 
-		public List<node> a { get { return _a; } }
+		public JsArray<node> a { get { return _a; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}
@@ -4619,7 +4645,7 @@ namespace BlocklyMruby
 		public Uint8Array str { get { return _str; } }
 		public int len { get { return _len; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}
@@ -4640,7 +4666,7 @@ namespace BlocklyMruby
 	/* (:xstr . a) */
 	class dxstr_node : node
 	{
-		private List<node> _a = new List<node>();
+		private JsArray<node> _a = new JsArray<node>();
 
 		public dxstr_node(IMrbParser p, node a)
 			: base(p, node_type.NODE_DXSTR)
@@ -4648,9 +4674,9 @@ namespace BlocklyMruby
 			dump_recur(_a, a);
 		}
 
-		public List<node> a { get { return _a; } }
+		public JsArray<node> a { get { return _a; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}
@@ -4683,9 +4709,9 @@ namespace BlocklyMruby
 			_a = new dstr_node(p, a);
 		}
 
-		public List<node> a { get { return _a.a; } }
+		public JsArray<node> a { get { return _a.a; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}
@@ -4721,7 +4747,7 @@ namespace BlocklyMruby
 		public Uint8Array flags { get { return _flags; } }
 		public Uint8Array encp { get { return _encp; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}
@@ -4743,7 +4769,7 @@ namespace BlocklyMruby
 	/* (:dregx . a) */
 	class dregx_node : node
 	{
-		private List<node> _a = new List<node>();
+		private JsArray<node> _a = new JsArray<node>();
 		private Uint8Array _opt;
 		private Uint8Array _tail;
 
@@ -4755,11 +4781,11 @@ namespace BlocklyMruby
 			_opt = (Uint8Array)((node)b.cdr).cdr;
 		}
 
-		public List<node> a { get { return _a; } }
+		public JsArray<node> a { get { return _a; } }
 		public Uint8Array opt { get { return _opt; } }
 		public Uint8Array tail { get { return _tail; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}
@@ -4796,7 +4822,7 @@ namespace BlocklyMruby
 
 		public int n { get { return _n; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}
@@ -4825,7 +4851,7 @@ namespace BlocklyMruby
 
 		public int n { get { return _n; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}
@@ -4854,14 +4880,14 @@ namespace BlocklyMruby
 
 		public parser_heredoc_info info { get { return _info; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
-			var block = document.CreateElement("block");
+			var block = cond.CreateElement("block");
 			block.SetAttribute("type", "text");
 
-			var field = document.CreateElement("field");
+			var field = cond.CreateElement("field");
 			field.SetAttribute("name", "TEXT");
-			field.AppendChild(document.CreateTextNode(info.GetString()));
+			field.AppendChild(cond.CreateTextNode(info.GetString()));
 			block.AppendChild(field);
 
 			return block;
@@ -4885,7 +4911,7 @@ namespace BlocklyMruby
 		{
 		}
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}
@@ -4903,7 +4929,7 @@ namespace BlocklyMruby
 	/* (:words . a) */
 	class words_node : node
 	{
-		private List<node> _a = new List<node>();
+		private JsArray<node> _a = new JsArray<node>();
 
 		public words_node(IMrbParser p, node a)
 			: base(p, node_type.NODE_WORDS)
@@ -4911,9 +4937,9 @@ namespace BlocklyMruby
 			dump_recur(_a, a);
 		}
 
-		public List<node> a { get { return _a; } }
+		public JsArray<node> a { get { return _a; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}
@@ -4936,7 +4962,7 @@ namespace BlocklyMruby
 	/* (:symbols . a) */
 	class symbols_node : node
 	{
-		private List<node> _a = new List<node>();
+		private JsArray<node> _a = new JsArray<node>();
 
 		public symbols_node(IMrbParser p, node a)
 			: base(p, node_type.NODE_SYMBOLS)
@@ -4944,9 +4970,9 @@ namespace BlocklyMruby
 			dump_recur(_a, a);
 		}
 
-		public List<node> a { get { return _a; } }
+		public JsArray<node> a { get { return _a; } }
 
-		public override Element to_xml(Document document)
+		public override Element to_xml(xml_code_cond cond)
 		{
 			throw new NotImplementedException();
 		}

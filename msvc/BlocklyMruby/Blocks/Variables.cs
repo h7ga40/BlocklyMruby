@@ -49,7 +49,7 @@ namespace BlocklyMruby
 		public void init()
 		{
 			this.setHelpUrl(Msg.VARIABLES_GET_HELPURL);
-			this.setColour(Variables.HUE);
+			this.setColour(Blockly.Variables.HUE);
 			this.appendDummyInput()
 				.appendField(new FieldVariable(Blockly, 
 				Msg.VARIABLES_DEFAULT_NAME), "VAR");
@@ -73,7 +73,7 @@ namespace BlocklyMruby
 			var xmlBlock = goog.dom.createDom(Script, "block", null, xmlField);
 			xmlBlock.SetAttribute("type", this.contextMenuType_);
 			option.callback = ContextMenu.callbackFactory(this, xmlBlock);
-			options.push(option);
+			options.Push(option);
 		}
 	}
 
@@ -107,9 +107,9 @@ namespace BlocklyMruby
 						name = "VALUE"
 					}
 				},
-				previousStatement = (Any<string, string[]>)null,
-				nextStatement = (Any<string, string[]>)null,
-				colour = Variables.HUE,
+				previousStatement = (Union<string, string[]>)null,
+				nextStatement = (Union<string, string[]>)null,
+				colour = Blockly.Variables.HUE,
 				tooltip = Msg.VARIABLES_SET_TOOLTIP,
 				helpUrl = Msg.VARIABLES_SET_HELPURL
 
@@ -132,7 +132,7 @@ namespace BlocklyMruby
 			var xmlBlock = goog.dom.createDom(Script, "block", null, xmlField);
 			xmlBlock.SetAttribute("type", this.contextMenuType_);
 			option.callback = ContextMenu.callbackFactory(this, xmlBlock);
-			options.push(option);
+			options.Push(option);
 		}
 	}
 }

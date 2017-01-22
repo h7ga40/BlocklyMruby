@@ -16980,10 +16980,13 @@ Blockly.Flyout.prototype.hide = function () {
 		this.reflowWrapper_ && (this.workspace_.removeChangeListener(this.reflowWrapper_), this.reflowWrapper_ = null)
 	}
 };
+Blockly.Flyout.prototype.flyoutCategory = function (a, b) {
+	return a;
+};
 Blockly.Flyout.prototype.show = function (a) {
 	this.hide();
 	this.clearOldBlocks_();
-	a == Blockly.Variables.NAME_TYPE ? a = Blockly.Variables.flyoutCategory(this.workspace_.targetWorkspace) : a == Blockly.Procedures.NAME_TYPE && (a = Blockly.Procedures.flyoutCategory(this.workspace_.targetWorkspace));
+	a = this.flyoutCategory(a, this.workspace_.targetWorkspace);
 	this.svgGroup_.style.display = "block";
 	for (var b = [], c = [], d = this.permanentlyDisabled_.length = 0, e; e = a[d]; d++)
 		if (e.tagName) {

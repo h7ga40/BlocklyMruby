@@ -64,8 +64,8 @@ namespace BlocklyMruby
 						check = "Number"
 					}
 				},
-				previousStatement = (Any<string, string[]>)null,
-				nextStatement = (Any<string, string[]>)null,
+				previousStatement = (Union<string, string[]>)null,
+				nextStatement = (Union<string, string[]>)null,
 				colour = Loops.HUE,
 				tooltip = Msg.CONTROLS_REPEAT_TOOLTIP,
 				helpUrl = Msg.CONTROLS_REPEAT_HELPURL
@@ -103,8 +103,8 @@ namespace BlocklyMruby
 						precision = 1
 					}
 				},
-				previousStatement = (Any<string, string[]>)null,
-				nextStatement = (Any<string, string[]>)null,
+				previousStatement = (Union<string, string[]>)null,
+				nextStatement = (Union<string, string[]>)null,
 				colour = Loops.HUE,
 				tooltip = Msg.CONTROLS_REPEAT_TOOLTIP,
 				helpUrl = Msg.CONTROLS_REPEAT_HELPURL
@@ -229,7 +229,7 @@ namespace BlocklyMruby
 				var xmlBlock = goog.dom.createDom(Script, "block", null, xmlField);
 				xmlBlock.SetAttribute("type", VariablesGetBlock.type_name);
 				option.callback = ContextMenu.callbackFactory(this, xmlBlock);
-				options.push(option);
+				options.Push(option);
 			}
 		}
 	}
@@ -264,8 +264,8 @@ namespace BlocklyMruby
 						check = "Array"
 					}
 				},
-				previousStatement = (Any<string, string[]>)null,
-				nextStatement = (Any<string, string[]>)null,
+				previousStatement = (Union<string, string[]>)null,
+				nextStatement = (Union<string, string[]>)null,
 				colour = Loops.HUE,
 				helpUrl = Msg.CONTROLS_FOREACH_HELPURL
 			});
@@ -294,7 +294,7 @@ namespace BlocklyMruby
 				var xmlBlock = goog.dom.createDom(Script, "block", null, xmlField);
 				xmlBlock.SetAttribute("type", VariablesGetBlock.type_name);
 				option.callback = ContextMenu.callbackFactory(this, xmlBlock);
-				options.push(option);
+				options.Push(option);
 			}
 		}
 	}

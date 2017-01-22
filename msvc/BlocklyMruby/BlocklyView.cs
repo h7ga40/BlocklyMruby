@@ -6,6 +6,7 @@ using System.Text;
 using System.Windows.Forms;
 using Bridge;
 using Bridge.Html5;
+using Bridge.jQuery2;
 
 namespace BlocklyMruby
 {
@@ -27,7 +28,7 @@ namespace BlocklyMruby
 			Navigate("blockly.html");
 		}
 
-		protected override bool DocumentCompleted1(Uri Url)
+		protected override bool PrepareScript(Uri Url)
 		{
 			if (Url.Scheme == "about")
 				return false;
@@ -48,11 +49,122 @@ namespace BlocklyMruby
 			if (Blockly == null)
 				return;
 
-			base.DocumentCompleted(Url);
-
-			App.Init(Blockly);
+			Init();
 			InvokeScript("start_blockly");
-			App.Init2();
+			Init2();
+
+			base.DocumentCompleted(Url);
+		}
+
+		internal void Init()
+		{
+			var Script = Blockly.Script;
+			var Document = Script.Document;
+			Script.SetMessage(typeof(Msg));
+			Script.SetBlocks(new ColourPickerBlock(Blockly));
+			Script.SetBlocks(new ColourRandomBlock(Blockly));
+			Script.SetBlocks(new ColourRGBBlock(Blockly));
+			Script.SetBlocks(new ColourBlendBlock(Blockly));
+			Script.SetBlocks(new ListsCreateEmptyBlock(Blockly));
+			Script.SetBlocks(new ListsCreateWithBlock(Blockly));
+			Script.SetBlocks(new ListsCreateWithContainerBlock(Blockly));
+			Script.SetBlocks(new ListsCreateWithItemBlock(Blockly));
+			Script.SetBlocks(new ListsRepeatBlock(Blockly));
+			Script.SetBlocks(new ListsLengthBlock(Blockly));
+			Script.SetBlocks(new ListsIsEmptyBlock(Blockly));
+			Script.SetBlocks(new ListsIndexOfBlock(Blockly));
+			Script.SetBlocks(new ListsGetIndexBlock(Blockly));
+			Script.SetBlocks(new ListsSetIndexBlock(Blockly));
+			Script.SetBlocks(new ListsGetSublistBlock(Blockly));
+			Script.SetBlocks(new ListsSortBlock(Blockly));
+			Script.SetBlocks(new ListsSplitBlock(Blockly));
+			Script.SetBlocks(new ControlsIfBlock(Blockly));
+			Script.SetBlocks(new ControlsIfIfBlock(Blockly));
+			Script.SetBlocks(new ControlsIfElseIfBlock(Blockly));
+			Script.SetBlocks(new ControlsIfElseBlock(Blockly));
+			Script.SetBlocks(new SwitchCaseNumberBlock(Blockly));
+			Script.SetBlocks(new SwitchCaseNumberContainerBlock(Blockly));
+			Script.SetBlocks(new SwitchCaseNumberConstBlock(Blockly));
+			Script.SetBlocks(new SwitchCaseNumberRangeBlock(Blockly));
+			Script.SetBlocks(new SwitchCaseNumberDefaultBlock(Blockly));
+			Script.SetBlocks(new SwitchCaseTextBlock(Blockly));
+			Script.SetBlocks(new SwitchCaseTextContainerBlock(Blockly));
+			Script.SetBlocks(new SwitchCaseTextConstBlock(Blockly));
+			Script.SetBlocks(new SwitchCaseTextRangeBlock(Blockly));
+			Script.SetBlocks(new SwitchCaseTextDefaultBlock(Blockly));
+			Script.SetBlocks(new LogicCompareBlock(Blockly));
+			Script.SetBlocks(new LogicOperationBlock(Blockly));
+			Script.SetBlocks(new LogicNegateBlock(Blockly));
+			Script.SetBlocks(new LogicBooleanBlock(Blockly));
+			Script.SetBlocks(new LogicNullBlock(Blockly));
+			Script.SetBlocks(new LogicTernaryBlock(Blockly));
+			Script.SetBlocks(new ControlsRepeatExtBlock(Blockly));
+			Script.SetBlocks(new ControlsRepeatBlock(Blockly));
+			Script.SetBlocks(new ControlsWhileUntilBlock(Blockly));
+			Script.SetBlocks(new ControlsForBlock(Blockly));
+			Script.SetBlocks(new ControlsForEachBlock(Blockly));
+			Script.SetBlocks(new ControlsFlowStatementsBlock(Blockly));
+			Script.SetBlocks(new MathNumberBlock(Blockly));
+			Script.SetBlocks(new MathArithmeticBlock(Blockly));
+			Script.SetBlocks(new MathSingleBlock(Blockly));
+			Script.SetBlocks(new MathTrigBlock(Blockly));
+			Script.SetBlocks(new MathConstantBlock(Blockly));
+			Script.SetBlocks(new MathNumberPropertyBlock(Blockly));
+			Script.SetBlocks(new MathChangeBlock(Blockly));
+			Script.SetBlocks(new MathRoundBlock(Blockly));
+			Script.SetBlocks(new MathOnListBlock(Blockly));
+			Script.SetBlocks(new MathModuloBlock(Blockly));
+			Script.SetBlocks(new MathConstrainBlock(Blockly));
+			Script.SetBlocks(new MathRandomIntBlock(Blockly));
+			Script.SetBlocks(new MathRandomFloatBlock(Blockly));
+			Script.SetBlocks(new ProceduresDefnoreturnBlock(Blockly));
+			Script.SetBlocks(new ProceduresDefreturnBlock(Blockly));
+			Script.SetBlocks(new ProceduresMutatorcontainerBlock(Blockly));
+			Script.SetBlocks(new ProceduresMutatorargBlock(Blockly));
+			Script.SetBlocks(new ProceduresCallnoreturnBlock(Blockly));
+			Script.SetBlocks(new ProceduresCallreturnBlock(Blockly));
+			Script.SetBlocks(new ProceduresIfreturnBlock(Blockly));
+			Script.SetBlocks(new TextBlock(Blockly));
+			Script.SetBlocks(new TextJoinBlock(Blockly));
+			Script.SetBlocks(new TextCreateJoinContainerBlock(Blockly));
+			Script.SetBlocks(new TextCreateJoinItemBlock(Blockly));
+			Script.SetBlocks(new TextAppendBlock(Blockly));
+			Script.SetBlocks(new TextLengthBlock(Blockly));
+			Script.SetBlocks(new TextIsEmptyBlock(Blockly));
+			Script.SetBlocks(new TextIndexOfBlock(Blockly));
+			Script.SetBlocks(new TextCharAtBlock(Blockly));
+			Script.SetBlocks(new TextGetSubstringBlock(Blockly));
+			Script.SetBlocks(new TextChangeCaseBlock(Blockly));
+			Script.SetBlocks(new TextTrimBlock(Blockly));
+			Script.SetBlocks(new TextPrintBlock(Blockly));
+			Script.SetBlocks(new TextPromptExtBlock(Blockly));
+			Script.SetBlocks(new TextPromptBlock(Blockly));
+			Script.SetBlocks(new VariablesGetBlock(Blockly));
+			Script.SetBlocks(new VariablesSetBlock(Blockly));
+		}
+
+		internal void Init2()
+		{
+			var workspace = Blockly.getMainWorkspace();
+			workspace.addChangeListener(Workspace_Changed);
+		}
+
+		private void Workspace_Changed(Abstract e)
+		{
+			var Blockly = e.Blockly;
+			var Script = Blockly.Script;
+			Script.changed = true;
+		}
+
+		internal void ReloadToolbox(IClassWorkspace workspace)
+		{
+			var Document = Blockly.Document;
+			Blockly.hideChaff();
+
+			var toolbox = Document.GetElementById("toolbox");
+			workspace.ReloadToolbox(toolbox);
+
+			Blockly.mainWorkspace.updateToolbox(toolbox);
 		}
 	}
 
@@ -60,8 +172,6 @@ namespace BlocklyMruby
 	public class BlocklyScriptingHost : ScriptingHost
 	{
 		public dynamic blockly;
-		public dynamic ProceduresGetDefinition;
-		public dynamic ProceduresMutateCallers;
 		public dynamic XmlWorkspaceToDom;
 		public dynamic XmlBlockToDomWithXY;
 		public dynamic XmlBlockToDom;
@@ -82,8 +192,6 @@ namespace BlocklyMruby
 		public dynamic WorkspaceGetById;
 		public dynamic NamesEquals;
 		public dynamic MutatorReconnect;
-		public dynamic procedures;
-		public dynamic variables;
 		internal new BlocklyScript Script { get { return (BlocklyScript)base.Script; } }
 		internal Blockly Blockly { get { return ((BlocklyView)View).Blockly; } }
 
@@ -253,24 +361,23 @@ namespace BlocklyMruby
 
 		public bool names_equals(object name1, object name2)
 		{
-			return Names.equals((string)name1, (string)name2);
+			return Blockly.Names.equals((string)name1, (string)name2);
 		}
 
-		public object procedures_flyoutCategory(object workspace_)
+		public object flyoutCategory(object xmlList, object workspace_)
 		{
 			var workspace = ToWorkspace(workspace_);
-			var ret = Blockly.Procedures.flyoutCategory(workspace);
-			var result = Bridge.Script.NewArray();
-			foreach (var e in ret) {
-				Bridge.Script.Push(result, e.instance);
+			Element[] ret;
+			var name = xmlList.ToString();
+			if (name == Blockly.Procedures.NAME_TYPE) {
+				ret = Blockly.Procedures.flyoutCategory(workspace);
 			}
-			return result;
+			else if (name == Blockly.Variables.NAME_TYPE) {
+				ret = Blockly.Variables.flyoutCategory(workspace);
+			}
+			else {
+				return xmlList;
 		}
-
-		public object variables_flyoutCategory(object workspace_)
-		{
-			var workspace = ToWorkspace(workspace_);
-			var ret = Blockly.Variables.flyoutCategory(workspace);
 			var result = Bridge.Script.NewArray();
 			foreach (var e in ret) {
 				Bridge.Script.Push(result, e.instance);
@@ -320,6 +427,7 @@ namespace BlocklyMruby
 		Dictionary<string, Type> m_BlockTypes = new Dictionary<string, Type>();
 		public new BlocklyScriptingHost ScriptHost { get { return (BlocklyScriptingHost)base.ScriptHost; } }
 		public Blockly Blockly { get; }
+		public bool changed = true;
 
 		public BlocklyScript(BlocklyScriptingHost scriptHost)
 			: base(scriptHost)
@@ -371,14 +479,6 @@ namespace BlocklyMruby
 			return block;
 		}
 
-		internal void SetGenerator()
-		{
-			ScriptHost.procedures = Get(ScriptHost.blockly, "Procedures");
-			ScriptHost.variables = Get(ScriptHost.blockly, "Variables");
-			Set(ScriptHost.procedures, "NAME_TYPE", Procedures.NAME_TYPE);
-			Set(ScriptHost.variables, "NAME_TYPE", Variables.NAME_TYPE);
-		}
-
 		internal string goog_getMsg(string str, object opt_values)
 		{
 			return Bridge.goog_getMsg(str, opt_values);
@@ -397,16 +497,6 @@ namespace BlocklyMruby
 		internal bool goog_array_equals(Array a, Array b)
 		{
 			return Bridge.goog_array_equals(a, b);
-		}
-
-		internal object ProceduresGetDefinition(string name, dynamic workspace)
-		{
-			return ScriptHost.ProceduresGetDefinition(name, workspace);
-		}
-
-		internal void ProceduresMutateCallers(dynamic block)
-		{
-			ScriptHost.ProceduresMutateCallers(block);
 		}
 
 		internal object XmlWorkspaceToDom(dynamic workspace)

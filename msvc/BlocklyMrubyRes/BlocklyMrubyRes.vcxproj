@@ -147,9 +147,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ResourceCompile Include="app.rc" />
   </ItemGroup>
   <ItemGroup>
@@ -158,6 +155,7 @@
   <ItemGroup>
     <None Include="ace.html" />
     <None Include="blockly.html" />
+    <None Include="class_selector.html" />
     <None Include="js\blockly-bridge.js" />
     <None Include="js\blockly.js" />
     <None Include="js\bridge.js" />

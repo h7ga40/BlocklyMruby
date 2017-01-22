@@ -11,7 +11,7 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "switch_case_number";
 
-		internal List<Tuple<string, string>> cases_;
+		internal JsArray<Tuple<string, string>> cases_;
 		internal int defaultCount_;
 
 		public SwitchCaseNumberBlock(Blockly blockly)
@@ -33,21 +33,21 @@ namespace BlocklyMruby
 				SwitchCaseNumberRangeBlock.type_name,
 				SwitchCaseNumberDefaultBlock.type_name }));
 			setTooltip(new Func<string>(() => {
-				if ((cases_.Count == 0) && (defaultCount_ == 0)) {
+				if ((cases_.Length == 0) && (defaultCount_ == 0)) {
 					return "条件に合うブロックを実行";
 				}
-				else if ((cases_.Count == 0) && (defaultCount_ != 0)) {
+				else if ((cases_.Length == 0) && (defaultCount_ != 0)) {
 					return "条件に合うブロックを実行、合うものがなければ最後のブロックを実行";
 				}
-				else if ((cases_.Count != 0) && (defaultCount_ == 0)) {
+				else if ((cases_.Length != 0) && (defaultCount_ == 0)) {
 					return "条件に合うブロックを実行";
 				}
-				else if ((cases_.Count != 0) && (defaultCount_ != 0)) {
+				else if ((cases_.Length != 0) && (defaultCount_ != 0)) {
 					return "条件に合うブロックを実行、合うものがなければ最後のブロックを実行";
 				}
 				return "";
 			}));
-			cases_ = new List<Tuple<string, string>>() { new Tuple<string, string>("0", null) };
+			cases_ = new JsArray<Tuple<string, string>>() { new Tuple<string, string>("0", null) };
 			defaultCount_ = 0;
 			updateShape_();
 		}
@@ -58,11 +58,11 @@ namespace BlocklyMruby
 		/// <returns>XML storage element.</returns>
 		public Element mutationToDom(bool opt_caseIds)
 		{
-			if ((cases_.Count == 0) && (defaultCount_ == 0)) {
+			if ((cases_.Length == 0) && (defaultCount_ == 0)) {
 				return null;
 			}
 			var container = Document.CreateElement("mutation");
-			for (var i = 0; i < cases_.Count; i++) {
+			for (var i = 0; i < cases_.Length; i++) {
 				Element caseInfo;
 				var value = getFieldValue("CONST" + i);
 				if (value != null) {
@@ -81,9 +81,7 @@ namespace BlocklyMruby
 				}
 				container.AppendChild(caseInfo);
 			}
-			if (defaultCount_ != 0) {
-				container.SetAttribute("default", "1");
-			}
+			container.SetAttribute("default", defaultCount_.ToString());
 			return container;
 		}
 
@@ -93,18 +91,18 @@ namespace BlocklyMruby
 		/// <param name="xmlElement">XML storage element.</param>
 		public void domToMutation(Element xmlElement)
 		{
-			cases_ = new List<Tuple<string, string>>();
+			cases_ = new JsArray<Tuple<string, string>>();
 			Element childNode;
 			for (var i = 0; (childNode = (dynamic)xmlElement.ChildNodes[i]) != null; i++) {
-				if (childNode.NodeName.ToLowerCase() == "case") {
+				if (childNode.NodeName.ToLower() == "case") {
 					var value = childNode.GetAttribute("value");
 					if (value != null)
-						cases_.Add(new Tuple<string, string>(value, null));
+						cases_.Push(new Tuple<string, string>(value, null));
 					else {
 						var min = childNode.GetAttribute("minimum");
 						var max = childNode.GetAttribute("maximum");
 						if ((min != null) && (max != null)) {
-							cases_.Add(new Tuple<string, string>(min, max));
+							cases_.Push(new Tuple<string, string>(min, max));
 						}
 					}
 				}
@@ -114,16 +112,16 @@ namespace BlocklyMruby
 		}
 
 		/// <summary>
-		/// Populate the mutator"s dialog with this block"s components.
+		/// Populate the mutator's dialog with this block's components.
 		/// </summary>
-		/// <param name="workspace">Mutator"s workspace.</param>
+		/// <param name="workspace">Mutator's workspace.</param>
 		/// <returns>Root block in mutator.</returns>
 		public Block decompose(Workspace workspace)
 		{
 			var containerBlock = workspace.newBlock(SwitchCaseNumberContainerBlock.type_name);
 			containerBlock.initSvg();
 			var connection = containerBlock.getInput("STACK").connection;
-			for (var i = 0; i < cases_.Count; i++) {
+			for (var i = 0; i < cases_.Length; i++) {
 				Block caseBlock;
 				var value = getFieldValue("CONST" + i);
 				if (value != null) {
@@ -154,30 +152,30 @@ namespace BlocklyMruby
 		}
 
 		/// <summary>
-		/// Reconfigure this block based on the mutator dialog"s components.
+		/// Reconfigure this block based on the mutator dialog's components.
 		/// </summary>
 		/// <param name="containerBlock">Root block in mutator.</param>
 		public void compose(Block containerBlock)
 		{
 			var clauseBlock = containerBlock.getInputTargetBlock("STACK");
 			// Count number of inputs.
-			cases_ = new List<Tuple<string, string>>();
+			cases_ = new JsArray<Tuple<string, string>>();
 			defaultCount_ = 0;
-			var statementConnections = new List<Connection>();
+			var statementConnections = new JsArray<Connection>();
 			Connection defaultStatementConnection = null;
 			while (clauseBlock != null) {
 				switch (clauseBlock.type) {
 				case SwitchCaseNumberConstBlock.type_name: {
 						var value = clauseBlock.getFieldValue("CONST");
-						cases_.Add(new Tuple<string, string>(value, null));
-						statementConnections.Add(((SwitchCaseNumberConstBlock)clauseBlock).statementConnection_);
+						cases_.Push(new Tuple<string, string>(value, null));
+						statementConnections.Push(((SwitchCaseNumberConstBlock)clauseBlock).statementConnection_);
 					}
 					break;
 				case SwitchCaseNumberRangeBlock.type_name: {
 						var range_min = clauseBlock.getFieldValue("RANGE_MIN");
 						var range_max = clauseBlock.getFieldValue("RANGE_MAX");
-						cases_.Add(new Tuple<string, string>(range_min, range_max));
-						statementConnections.Add(((SwitchCaseNumberRangeBlock)clauseBlock).statementConnection_);
+						cases_.Push(new Tuple<string, string>(range_min, range_max));
+						statementConnections.Push(((SwitchCaseNumberRangeBlock)clauseBlock).statementConnection_);
 					}
 					break;
 				case SwitchCaseNumberDefaultBlock.type_name: {
@@ -193,7 +191,7 @@ namespace BlocklyMruby
 			}
 			updateShape_();
 			// Reconnect any child blocks.
-			for (var i = 0; i < cases_.Count; i++) {
+			for (var i = 0; i < cases_.Length; i++) {
 				Mutator.reconnect(statementConnections[i], this, "DO" + i);
 			}
 			Mutator.reconnect(defaultStatementConnection, this, "DEFAULT_DO");
@@ -389,7 +387,7 @@ namespace BlocklyMruby
 	{
 		public const string type_name = "switch_case_text";
 
-		internal List<Tuple<string, string>> cases_;
+		internal JsArray<Tuple<string, string>> cases_;
 		internal int defaultCount_;
 
 		public SwitchCaseTextBlock(Blockly blockly)
@@ -411,21 +409,21 @@ namespace BlocklyMruby
 				SwitchCaseTextRangeBlock.type_name,
 				SwitchCaseTextDefaultBlock.type_name }));
 			setTooltip(new Func<string>(() => {
-				if ((cases_.Count == 0) && (defaultCount_ == 0)) {
+				if ((cases_.Length == 0) && (defaultCount_ == 0)) {
 					return "条件に合うブロックを実行";
 				}
-				else if ((cases_.Count == 0) && (defaultCount_ != 0)) {
+				else if ((cases_.Length == 0) && (defaultCount_ != 0)) {
 					return "条件に合うブロックを実行、合うものがなければ最後のブロックを実行";
 				}
-				else if ((cases_.Count != 0) && (defaultCount_ == 0)) {
+				else if ((cases_.Length != 0) && (defaultCount_ == 0)) {
 					return "条件に合うブロックを実行";
 				}
-				else if ((cases_.Count != 0) && (defaultCount_ != 0)) {
+				else if ((cases_.Length != 0) && (defaultCount_ != 0)) {
 					return "条件に合うブロックを実行、合うものがなければ最後のブロックを実行";
 				}
 				return "";
 			}));
-			cases_ = new List<Tuple<string, string>>() { new Tuple<string, string>("0", null) };
+			cases_ = new JsArray<Tuple<string, string>>() { new Tuple<string, string>("0", null) };
 			defaultCount_ = 0;
 			updateShape_();
 		}
@@ -436,11 +434,11 @@ namespace BlocklyMruby
 		/// <returns>XML storage element.</returns>
 		public Element mutationToDom(bool opt_caseIds)
 		{
-			if ((cases_.Count == 0) && (defaultCount_ == 0)) {
+			if ((cases_.Length == 0) && (defaultCount_ == 0)) {
 				return null;
 			}
 			var container = Document.CreateElement("mutation");
-			for (var i = 0; i < cases_.Count; i++) {
+			for (var i = 0; i < cases_.Length; i++) {
 				Element caseInfo;
 				var value = getFieldValue("CONST" + i);
 				if (value != null) {
@@ -459,9 +457,7 @@ namespace BlocklyMruby
 				}
 				container.AppendChild(caseInfo);
 			}
-			if (defaultCount_ != 0) {
-				container.SetAttribute("default", "1");
-			}
+			container.SetAttribute("default", defaultCount_.ToString());
 			return container;
 		}
 
@@ -471,18 +467,18 @@ namespace BlocklyMruby
 		/// <param name="xmlElement">XML storage element.</param>
 		public void domToMutation(Element xmlElement)
 		{
-			cases_ = new List<Tuple<string, string>>();
+			cases_ = new JsArray<Tuple<string, string>>();
 			Element childNode;
 			for (var i = 0; (childNode = (dynamic)xmlElement.ChildNodes[i]) != null; i++) {
-				if (childNode.NodeName.ToLowerCase() == "case") {
+				if (childNode.NodeName.ToLower() == "case") {
 					var value = childNode.GetAttribute("value");
 					if (value != null)
-						cases_.Add(new Tuple<string, string>(value, null));
+						cases_.Push(new Tuple<string, string>(value, null));
 					else {
 						var min = childNode.GetAttribute("minimum");
 						var max = childNode.GetAttribute("maximum");
 						if ((min != null) && (max != null))
-							cases_.Add(new Tuple<string, string>(min, max));
+							cases_.Push(new Tuple<string, string>(min, max));
 					}
 				}
 			}
@@ -491,16 +487,16 @@ namespace BlocklyMruby
 		}
 
 		/// <summary>
-		/// Populate the mutator"s dialog with this block"s components.
+		/// Populate the mutator's dialog with this block's components.
 		/// </summary>
-		/// <param name="workspace">Mutator"s workspace.</param>
+		/// <param name="workspace">Mutator's workspace.</param>
 		/// <returns>Root block in mutator.</returns>
 		public Block decompose(Workspace workspace)
 		{
 			var containerBlock = workspace.newBlock(SwitchCaseTextContainerBlock.type_name);
 			containerBlock.initSvg();
 			var connection = containerBlock.getInput("STACK").connection;
-			for (var i = 0; i < cases_.Count; i++) {
+			for (var i = 0; i < cases_.Length; i++) {
 				Block caseBlock;
 				var value = getFieldValue("CONST" + i);
 				if (value != null) {
@@ -531,30 +527,30 @@ namespace BlocklyMruby
 		}
 
 		/// <summary>
-		/// Reconfigure this block based on the mutator dialog"s components.
+		/// Reconfigure this block based on the mutator dialog's components.
 		/// </summary>
 		/// <param name="containerBlock">Root block in mutator.</param>
 		public void compose(Block containerBlock)
 		{
 			var clauseBlock = containerBlock.getInputTargetBlock("STACK");
 			// Count text of inputs.
-			cases_ = new List<Tuple<string, string>>();
+			cases_ = new JsArray<Tuple<string, string>>();
 			defaultCount_ = 0;
-			var statementConnections = new List<Connection>();
+			var statementConnections = new JsArray<Connection>();
 			Connection defaultStatementConnection = null;
 			while (clauseBlock != null) {
 				switch (clauseBlock.type) {
 				case SwitchCaseTextConstBlock.type_name: {
 						var value = clauseBlock.getFieldValue("CONST");
-						cases_.Add(new Tuple<string, string>(value, null));
-						statementConnections.Add(((SwitchCaseTextConstBlock)clauseBlock).statementConnection_);
+						cases_.Push(new Tuple<string, string>(value, null));
+						statementConnections.Push(((SwitchCaseTextConstBlock)clauseBlock).statementConnection_);
 					}
 					break;
 				case SwitchCaseTextRangeBlock.type_name: {
 						var range_min = clauseBlock.getFieldValue("RANGE_MIN");
 						var range_max = clauseBlock.getFieldValue("RANGE_MAX");
-						cases_.Add(new Tuple<string, string>(range_min, range_max));
-						statementConnections.Add(((SwitchCaseTextRangeBlock)clauseBlock).statementConnection_);
+						cases_.Push(new Tuple<string, string>(range_min, range_max));
+						statementConnections.Push(((SwitchCaseTextRangeBlock)clauseBlock).statementConnection_);
 					}
 					break;
 				case SwitchCaseTextDefaultBlock.type_name: {
@@ -570,7 +566,7 @@ namespace BlocklyMruby
 			}
 			updateShape_();
 			// Reconnect any child blocks.
-			for (var i = 0; i <= cases_.Count; i++) {
+			for (var i = 0; i <= cases_.Length; i++) {
 				Mutator.reconnect(statementConnections[i], this, "DO" + i);
 			}
 			Mutator.reconnect(defaultStatementConnection, this, "DEFAULT_DO");
@@ -768,25 +764,25 @@ namespace BlocklyMruby
 			// case/when/else condition.
 			var argument0 = valueToCode(block, "SWITCH");
 			if (argument0 == null) argument0 = new int_node(this, -1);
-			List<case_node.when_t> code = new List<case_node.when_t>();
-			for (int n = 0; n <= block.cases_.Count; n++) {
+			JsArray<case_node.when_t> code = new JsArray<case_node.when_t>();
+			for (int n = 0; n <= block.cases_.Length; n++) {
 				var branch = statementToCode(block, "DO" + n);
 				if (branch == null) branch = new nil_node(this);
 				var argument1 = block.getFieldValue("CONST" + n);
 				if (argument1 != null) {
 					var when = new case_node.when_t() { body = branch };
-					when.value.Add(new int_node(this, Bridge.Script.ParseInt(argument1, 10)));
-					code.Add(when);
+					when.value.Push(new int_node(this, Bridge.Script.ParseInt(argument1, 10)));
+					code.Push(when);
 				}
 				else {
 					var min = block.getFieldValue("RANGE_MIN" + n);
 					var max = block.getFieldValue("RANGE_MAX" + n);
 					if ((min != null) && (max != null)) {
 						var when = new case_node.when_t() { body = branch };
-						when.value.Add(new dot2_node(this,
+						when.value.Push(new dot2_node(this,
 							new int_node(this, Bridge.Script.ParseInt(min, 10)),
 							new int_node(this, Bridge.Script.ParseInt(max, 10))));
-						code.Add(when);
+						code.Push(when);
 					}
 				}
 			}
@@ -794,7 +790,7 @@ namespace BlocklyMruby
 				var branch = statementToCode(block, "DEFAULT_DO");
 				if (branch != null) {
 					var when = new case_node.when_t() { body = branch };
-					code.Add(when);
+					code.Push(when);
 				}
 			}
 			return new case_node(this, argument0, code);
@@ -805,23 +801,23 @@ namespace BlocklyMruby
 			// case/when/else condition.
 			var argument0 = valueToCode(block, "SWITCH");
 			if (argument0 == null) argument0 = new str_node(this, "");
-			List<case_node.when_t> code = new List<case_node.when_t>();
-			for (int n = 0; n <= block.cases_.Count; n++) {
+			JsArray<case_node.when_t> code = new JsArray<case_node.when_t>();
+			for (int n = 0; n <= block.cases_.Length; n++) {
 				var branch = statementToCode(block, "DO" + n);
 				if (branch == null) branch = new nil_node(this);
 				var argument1 = block.getFieldValue("CONST" + n);
 				if (argument1 != null) {
 					var when = new case_node.when_t() { body = branch };
-					when.value.Add(new str_node(this, argument1));
-					code.Add(when);
+					when.value.Push(new str_node(this, argument1));
+					code.Push(when);
 				}
 				else {
 					var min = block.getFieldValue("RANGE_MIN" + n);
 					var max = block.getFieldValue("RANGE_MAX" + n);
 					if ((min != null) && (max != null)) {
 						var when = new case_node.when_t() { body = branch };
-						when.value.Add(new dot2_node(this, new str_node(this, min), new str_node(this, max)));
-						code.Add(when);
+						when.value.Push(new dot2_node(this, new str_node(this, min), new str_node(this, max)));
+						code.Push(when);
 					}
 				}
 			}
@@ -829,7 +825,7 @@ namespace BlocklyMruby
 				var branch = statementToCode(block, "DEFAULT_DO");
 				if (branch != null) {
 					var when = new case_node.when_t() { body = branch };
-					code.Add(when);
+					code.Push(when);
 				}
 			}
 			return new case_node(this, argument0, code);

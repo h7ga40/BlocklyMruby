@@ -4,7 +4,6 @@
 // MIT Lisence
 using System;
 using Bridge;
-using System.Text.RegularExpressions;
 using System.Collections.Generic;
 
 namespace BlocklyMruby
@@ -85,7 +84,7 @@ namespace BlocklyMruby
 			if (search == null) search = new str_node(this, "");
 			var text = valueToCode(block, "VALUE");
 			if (text == null) text = new str_node(this, "");
-			return new call_node(this, text, intern(finder), new List<node>() { search }, null);
+			return new call_node(this, text, intern(finder), new JsArray<node>() { search }, null);
 		}
 
 		public node text_charAt(TextCharAtBlock block)
@@ -112,15 +111,15 @@ namespace BlocklyMruby
 
 			switch (where) {
 			case "FIRST":
-				return new call_node(this, text, intern("[]"), new List<node>() { new int_node(this, 0) }, null);
+				return new call_node(this, text, intern("[]"), new JsArray<node>() { new int_node(this, 0) }, null);
 			case "LAST":
-				return new call_node(this, text, intern("[]"), new List<node>() { new int_node(this, -1) }, null);
+				return new call_node(this, text, intern("[]"), new JsArray<node>() { new int_node(this, -1) }, null);
 			case "FROM_START":
-				return new fcall_node(this, intern("text_get_from_start"), new List<node>() { text, at }, null);
+				return new fcall_node(this, intern("text_get_from_start"), new JsArray<node>() { text, at }, null);
 			case "FROM_END":
-				return new fcall_node(this, intern("text_get_from_end"), new List<node>() { text, at }, null);
+				return new fcall_node(this, intern("text_get_from_end"), new JsArray<node>() { text, at }, null);
 			case "RANDOM":
-				return new fcall_node(this, intern("text_random_letter"), new List<node>() { text }, null);
+				return new fcall_node(this, intern("text_random_letter"), new JsArray<node>() { text }, null);
 			}
 			throw new Exception("Unhandled option (text_charAt).");
 		}
@@ -182,7 +181,7 @@ namespace BlocklyMruby
 				}
 			}
 			var code = new dot2_node(this, at1, at2);
-			return new call_node(this, text, intern("[]"), new List<node>() { code }, null);
+			return new call_node(this, text, intern("[]"), new JsArray<node>() { code }, null);
 		}
 
 		public node text_changeCase(TextChangeCaseBlock block)
@@ -205,7 +204,7 @@ namespace BlocklyMruby
 				// Title case is not a native Ruby function. Define one.
 				var argument0 = valueToCode(block, "TEXT");
 				if (argument0 == null) argument0 = new str_node(this, "");
-				code = new fcall_node(this, intern("text_to_title_case"), new List<node>() { argument0 }, null);
+				code = new fcall_node(this, intern("text_to_title_case"), new JsArray<node>() { argument0 }, null);
 			}
 			return code;
 		}
@@ -229,14 +228,14 @@ namespace BlocklyMruby
 			// Print statement.
 			var argument0 = valueToCode(block, "TEXT");
 			if (argument0 == null) argument0 = new str_node(this, "");
-			return new fcall_node(this, intern("blockly_puts"), new List<node>() { argument0 }, null);
+			return new fcall_node(this, intern("blockly_puts"), new JsArray<node>() { argument0 }, null);
 		}
 
 		public node text_prompt(TextPromptBlock block)
 		{
 			// Prompt function.
 			var msg = new str_node(this, block.getFieldValue("TEXT"));
-			node code = new fcall_node(this, intern("text_prompt"), new List<node>() { msg }, null);
+			node code = new fcall_node(this, intern("text_prompt"), new JsArray<node>() { msg }, null);
 			var toNumber = block.getFieldValue("TYPE") == "NUMBER";
 			if (toNumber) {
 				code = new call_node(this, code, intern("to_f"));

@@ -61,6 +61,12 @@
     <Compile Include="Blocks\Procedures.cs" />
     <Compile Include="Blocks\Text.cs" />
     <Compile Include="Blocks\Variables.cs" />
+    <Compile Include="ClassSelectorView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ClassWorkspace.cs" />
+    <Compile Include="Collection.cs" />
+    <Compile Include="GlobalWorkspace.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>

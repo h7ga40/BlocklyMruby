@@ -120,8 +120,8 @@ namespace BlocklyMruby
 		}
 
 		/**
-		 * Populate the mutator"s dialog with this block"s components.
-		 * @param {!Workspace} workspace Mutator"s workspace.
+		 * Populate the mutator's dialog with this block's components.
+		 * @param {!Workspace} workspace Mutator's workspace.
 		 * @return {!Blockly.Block} Root block in mutator.
 		 * @this Blockly.Block
 		 */
@@ -140,7 +140,7 @@ namespace BlocklyMruby
 		}
 
 		/**
-		 * Reconfigure this block based on the mutator dialog"s components.
+		 * Reconfigure this block based on the mutator dialog's components.
 		 * @param {!Blockly.Block} containerBlock Root block in mutator.
 		 * @this Blockly.Block
 		 */
@@ -148,9 +148,9 @@ namespace BlocklyMruby
 		{
 			var itemBlock = (ListsCreateWithItemBlock)containerBlock.getInputTargetBlock("STACK");
 			// Count number of inputs.
-			var connections = new List<Connection>();
+			var connections = new JsArray<Connection>();
 			while (itemBlock != null) {
-				connections.Add(itemBlock.valueConnection_);
+				connections.Push(itemBlock.valueConnection_);
 				itemBlock = (itemBlock.nextConnection != null) ?
 					(ListsCreateWithItemBlock)itemBlock.nextConnection.targetBlock() : null;
 			}
@@ -161,7 +161,7 @@ namespace BlocklyMruby
 					connection.disconnect();
 				}
 			}
-			this.itemCount_ = connections.Count;
+			this.itemCount_ = connections.Length;
 			this.updateShape_();
 			// Reconnect any child blocks.
 			for (var i = 0; i < this.itemCount_; i++) {

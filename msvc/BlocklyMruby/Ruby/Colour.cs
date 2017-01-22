@@ -4,7 +4,6 @@
 // MIT Lisence
 using System;
 using Bridge;
-using System.Text.RegularExpressions;
 using System.Collections.Generic;
 
 namespace BlocklyMruby
@@ -21,7 +20,7 @@ namespace BlocklyMruby
 		public node colour_random(ColourRandomBlock block)
 		{
 			// Generate a random colour.
-			var p = new List<node>();
+			var p = new JsArray<node>();
 			return new fcall_node(this, intern("colour_random"), p, null);
 		}
 
@@ -34,7 +33,7 @@ namespace BlocklyMruby
 			if (g == null) g = new int_node(this, 0);
 			var b = valueToCode(block, "BLUE");
 			if (b == null) b = new int_node(this, 0);
-			var p = new List<node>() { r, g, b };
+			var p = new JsArray<node>() { r, g, b };
 			return new fcall_node(this, intern("colour_rgb"), p, null);
 		}
 
@@ -47,7 +46,7 @@ namespace BlocklyMruby
 			if (colour2 == null) colour2 = new str_node(this, "#000000");
 			var ratio = valueToCode(block, "RATIO");
 			if (ratio == null) ratio = new int_node(this, 0);
-			var p = new List<node>() { colour1, colour2, ratio };
+			var p = new JsArray<node>() { colour1, colour2, ratio };
 			return new fcall_node(this, intern("colour_blend"), p, null);
 		}
 	}

@@ -40,7 +40,12 @@ namespace BlocklyMruby
 		/// <summary>
 		/// Category to separate procedure names from variables and generated functions.
 		/// </summary>
-		public static string NAME_TYPE = "PROCEDURE";
+		public string NAME_TYPE = "PROCEDURE";
+
+		/**
+		 * Common HSV hue for all blocks in this category.
+		 */
+		public int HUE = 290;
 
 		public Procedures(Blockly Blockly)
 		{
@@ -55,28 +60,28 @@ namespace BlocklyMruby
 		/// <returns>Pair of arrays, the first contains procedures without return variables, the
 		/// second with. Each procedure is defined by a three-element list of name, parameter
 		/// list, and return value boolean.</returns>
-		public object[] allProcedures(Workspace root)
+		public Tuple<string, string[], bool>[][] allProcedures(Workspace root)
 		{
 			var blocks = root.getAllBlocks();
-			var proceduresReturn = new List<object[]>();
-			var proceduresNoReturn = new List<object[]>();
+			var proceduresReturn = new JsArray<Tuple<string, string[], bool>>();
+			var proceduresNoReturn = new JsArray<Tuple<string, string[], bool>>();
 			for (var i = 0; i < blocks.Length; i++) {
-				var block = blocks[i] as ProcedureDefBlock;
+				var block = blocks[i] as ProceduresDefBlock;
 				if (block != null) {
 					var tuple = block.getProcedureDef();
 					if (tuple != null) {
-						if ((bool)tuple[2]) {
-							proceduresReturn.Add(tuple);
+						if (tuple.Item3) {
+							proceduresReturn.Push(tuple);
 						}
 						else {
-							proceduresNoReturn.Add(tuple);
+							proceduresNoReturn.Push(tuple);
 						}
 					}
 				}
 			}
 			proceduresNoReturn.Sort(procTupleComparator_);
 			proceduresReturn.Sort(procTupleComparator_);
-			return new object[] { proceduresNoReturn.ToArray(), proceduresReturn.ToArray() };
+			return new Tuple<string, string[], bool>[][] { proceduresNoReturn.ToArray(), proceduresReturn.ToArray() };
 		}
 
 		/// <summary>
@@ -86,9 +91,9 @@ namespace BlocklyMruby
 		/// <param name="ta">First tuple.</param>
 		/// <param name="tb">Second tuple.</param>
 		/// <returns>-1, 0, or 1 to signify greater than, equality, or less than.</returns>
-		public int procTupleComparator_(object[] ta, object[] tb)
+		public int procTupleComparator_(Tuple<string, string[], bool> ta, Tuple<string, string[], bool> tb)
 		{
-			return ((string)ta[0]).ToLowerCase().LocaleCompare(((string)tb[0]).ToLowerCase());
+			return ta.Item1.ToLower().LocaleCompare(tb.Item1.ToLower());
 		}
 
 		/// <summary>
@@ -133,10 +138,10 @@ namespace BlocklyMruby
 				if (blocks[i] == opt_exclude) {
 					continue;
 				}
-				var block = blocks[i] as ProcedureDefBlock;
+				var block = blocks[i] as ProceduresDefBlock;
 				if (block != null) {
 					var procName = block.getProcedureDef();
-					if (Names.equals((string)procName[0], name)) {
+					if (Blockly.Names.equals(procName.Item1, name)) {
 						return false;
 					}
 				}
@@ -162,7 +167,7 @@ namespace BlocklyMruby
 				// Rename any callers.
 				var blocks = field.sourceBlock_.workspace.getAllBlocks();
 				for (var i = 0; i < blocks.Length; i++) {
-					var block = blocks[i] as ProcedureCallBlock;
+					var block = blocks[i] as ProceduresCallBlock;
 					if (block != null) {
 						block.renameProcedure(oldName, legalName);
 					}
@@ -178,37 +183,37 @@ namespace BlocklyMruby
 		/// <returns>Array of XML block elements.</returns>
 		public Element[] flyoutCategory(Workspace workspace)
 		{
-			var xmlList = new List<Element>();
-			if (Script.Get(Blockly.Blocks, "procedures_defnoreturn") != null) {
+			var xmlList = new JsArray<Element>();
+			if (Script.Get(Blockly.Blocks, ProceduresDefnoreturnBlock.type_name) != null) {
 				// <block type="procedures_defnoreturn" gap="16"></block>
 				var block = goog.dom.createDom(Script, "block");
-				block.SetAttribute("type", "procedures_defnoreturn");
+				block.SetAttribute("type", ProceduresDefnoreturnBlock.type_name);
 				block.SetAttribute("gap", "16");
-				xmlList.Add(block);
+				xmlList.Push(block);
 			}
-			if (Script.Get(Blockly.Blocks, "procedures_defreturn") != null) {
+			if (Script.Get(Blockly.Blocks, ProceduresDefreturnBlock.type_name) != null) {
 				// <block type="procedures_defreturn" gap="16"></block>
 				var block = goog.dom.createDom(Script, "block");
-				block.SetAttribute("type", "procedures_defreturn");
+				block.SetAttribute("type", ProceduresDefreturnBlock.type_name);
 				block.SetAttribute("gap", "16");
-				xmlList.Add(block);
+				xmlList.Push(block);
 			}
-			if (Script.Get(Blockly.Blocks, "procedures_ifreturn") != null) {
+			if (Script.Get(Blockly.Blocks, ProceduresIfreturnBlock.type_name) != null) {
 				// <block type="procedures_ifreturn" gap="16"></block>
 				var block = goog.dom.createDom(Script, "block");
-				block.SetAttribute("type", "procedures_ifreturn");
+				block.SetAttribute("type", ProceduresIfreturnBlock.type_name);
 				block.SetAttribute("gap", "16");
-				xmlList.Add(block);
+				xmlList.Push(block);
 			}
-			if (xmlList.Count != 0) {
+			if (xmlList.Length != 0) {
 				// Add slightly larger gap between system blocks and user calls.
-				xmlList[xmlList.Count - 1].SetAttribute("gap", "24");
+				xmlList[xmlList.Length - 1].SetAttribute("gap", "24");
 			}
 
-			var populateProcedures = new Action<object[][], string>((procedureList, templateName) => {
+			var populateProcedures = new Action<Tuple<string, string[], bool>[], string>((procedureList, templateName) => {
 				for (var i = 0; i < procedureList.Length; i++) {
-					var name = (string)procedureList[i][0];
-					var args = (string[])procedureList[i][1];
+					var name = procedureList[i].Item1;
+					var args = procedureList[i].Item2;
 					// <block type="procedures_callnoreturn" gap="16">
 					//   <mutation name="do something">
 					//     <arg name="x"></arg>
@@ -225,13 +230,13 @@ namespace BlocklyMruby
 						arg.SetAttribute("name", args[j]);
 						mutation.AppendChild(arg);
 					}
-					xmlList.Add(block);
+					xmlList.Push(block);
 				}
 			});
 
 			var tuple = allProcedures(workspace);
-			populateProcedures((object[][])tuple[0], "procedures_callnoreturn");
-			populateProcedures((object[][])tuple[1], "procedures_callreturn");
+			populateProcedures(tuple[0], ProceduresCallnoreturnBlock.type_name);
+			populateProcedures(tuple[1], ProceduresCallreturnBlock.type_name);
 			return xmlList.ToArray();
 		}
 
@@ -241,18 +246,18 @@ namespace BlocklyMruby
 		/// <param name="name">Name of procedure.</param>
 		/// <param name="workspace">The workspace to find callers in.</param>
 		/// <returns>Array of caller blocks.</returns>
-		public ProcedureCallBlock[] getCallers(string name, Workspace workspace)
+		public ProceduresCallBlock[] getCallers(string name, Workspace workspace)
 		{
-			var callers = new List<ProcedureCallBlock>();
+			var callers = new JsArray<ProceduresCallBlock>();
 			var blocks = workspace.getAllBlocks();
 			// Iterate through every block and check the name.
 			for (var i = 0; i < blocks.Length; i++) {
-				var block = blocks[i] as ProcedureCallBlock;
+				var block = blocks[i] as ProceduresCallBlock;
 				if (block != null) {
 					var procName = block.getProcedureCall();
 					// Procedure name may be null if the block is only half-built.
-					if (procName != null && Names.equals(procName, name)) {
-						callers.Add(block);
+					if (procName != null && Blockly.Names.equals(procName, name)) {
+						callers.Push(block);
 					}
 				}
 			}
@@ -264,10 +269,10 @@ namespace BlocklyMruby
 		/// callers.
 		/// </summary>
 		/// <param name="defBlock">Procedure definition block.</param>
-		public void mutateCallers(ProcedureDefBlock defBlock)
+		public void mutateCallers(ProceduresDefBlock defBlock)
 		{
 			var oldRecordUndo = Blockly.Events.recordUndo;
-			var name = (string)(defBlock.getProcedureDef())[0];
+			var name = defBlock.getProcedureDef().Item1;
 			var xmlElement = defBlock.mutationToDom(true);
 			var callers = getCallers(name, defBlock.workspace);
 			foreach (var caller in callers) {
@@ -299,10 +304,10 @@ namespace BlocklyMruby
 			// Assume that a procedure definition is a top block.
 			var blocks = workspace.getTopBlocks(false);
 			for (var i = 0; i < blocks.Length; i++) {
-				var block = blocks[i] as ProcedureDefBlock;
+				var block = blocks[i] as ProceduresDefBlock;
 				if (block != null) {
 					var tuple = block.getProcedureDef();
-					if (tuple != null && Names.equals((string)tuple[0], name)) {
+					if (tuple != null && Blockly.Names.equals(tuple.Item1, name)) {
 						return block;
 					}
 				}

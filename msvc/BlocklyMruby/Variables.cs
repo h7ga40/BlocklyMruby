@@ -40,12 +40,12 @@ namespace BlocklyMruby
 		/// <summary>
 		/// Category to separate variable names from procedures and generated functions.
 		/// </summary>
-		public const string NAME_TYPE = "VARIABLE";
+		public string NAME_TYPE = "VARIABLE";
 
 		/// <summary>
 		/// Common HSV hue for all blocks in this category.
 		/// </summary>
-		public const int HUE = 330;
+		public int HUE = 330;
 
 		public Variables(Blockly Blockly)
 		{
@@ -59,7 +59,7 @@ namespace BlocklyMruby
 		/// </summary>
 		/// <param name="root">Root block or workspace.</param>
 		/// <returns>Array of variable names.</returns>
-		public string[] allUsedVariables(Any<Block, Workspace> root)
+		public string[] allUsedVariables(Union<Block, Workspace> root)
 		{
 			BlockList blocks;
 			if (root.Is<Block>()) {
@@ -82,15 +82,15 @@ namespace BlocklyMruby
 						var varName = blockVariables[y];
 						// Variable name may be null if the block is only half-built.
 						if (varName != null) {
-							variableHash[varName.ToLowerCase()] = varName;
+							variableHash[varName.ToLower()] = varName;
 						}
 					}
 				}
 			}
 			// Flatten the hash into a list.
-			var variableList = new List<string>();
+			var variableList = new JsArray<string>();
 			foreach (var name in variableHash.Keys) {
-				variableList.Add(variableHash[name]);
+				variableList.Push(variableHash[name]);
 			}
 			return variableList.ToArray();
 		}
@@ -122,7 +122,7 @@ namespace BlocklyMruby
 			var variableList = workspace.variableList;
 			Array.Sort(variableList, goog.@string.caseInsensitiveCompare);
 
-			var xmlList = new List<Element>();
+			var xmlList = new JsArray<Element>();
 			var button = goog.dom.createDom(Script, "button");
 			button.SetAttribute("text", Msg.NEW_VARIABLE);
 			button.SetAttribute("callbackKey", "CREATE_VARIABLE");
@@ -131,7 +131,7 @@ namespace BlocklyMruby
 				createVariable(btn.getTargetWorkspace());
 			});
 
-			xmlList.Add(button);
+			xmlList.Push(button);
 
 			if (variableList.Length > 0) {
 				if (Script.Get(Blockly.Blocks, "variables_set") != null) {
@@ -149,7 +149,7 @@ namespace BlocklyMruby
 					var field = goog.dom.createDom(Script, "field", null, variableList[0]);
 					field.SetAttribute("name", "VAR");
 					block.AppendChild(field);
-					xmlList.Add(block);
+					xmlList.Push(block);
 				}
 				if (Script.Get(Blockly.Blocks, "math_change") != null) {
 					// <block type="math_change">
@@ -180,7 +180,7 @@ namespace BlocklyMruby
 					numberField.SetAttribute("name", "NUM");
 					shadowBlock.AppendChild(numberField);
 
-					xmlList.Add(block);
+					xmlList.Push(block);
 				}
 
 				for (var i = 0; i < variableList.Length; i++) {
@@ -196,7 +196,7 @@ namespace BlocklyMruby
 						var field = goog.dom.createDom(Script, "field", null, variableList[i]);
 						field.SetAttribute("name", "VAR");
 						block.AppendChild(field);
-						xmlList.Add(block);
+						xmlList.Push(block);
 					}
 				}
 			}
@@ -223,7 +223,7 @@ namespace BlocklyMruby
 				while (String.IsNullOrEmpty(newName)) {
 					var inUse = false;
 					for (var i = 0; i < variableList.Length; i++) {
-						if (variableList[i].ToLowerCase() == potName) {
+						if (variableList[i].ToLower() == potName) {
 							// This potential name is already used.
 							inUse = true;
 							break;
@@ -271,7 +271,7 @@ namespace BlocklyMruby
 						if (text != null) {
 							if (workspace.variableIndexOf(text) != -1) {
 								Blockly.alert(Msg.VARIABLE_ALREADY_EXISTS.Replace("%1",
-									text.ToLowerCase()),
+									text.ToLower()),
 									() => {
 										promptAndCheckWithAlert(text);  // Recurse
 									});

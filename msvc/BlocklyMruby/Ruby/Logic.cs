@@ -4,7 +4,6 @@
 // MIT Lisence
 using System;
 using Bridge;
-using System.Text.RegularExpressions;
 using System.Collections.Generic;
 
 namespace BlocklyMruby
@@ -32,13 +31,14 @@ namespace BlocklyMruby
 		public node logic_compare(LogicCompareBlock block)
 		{
 			// Comparison operator.
-			var OPERATORS = new Dictionary<string, string>();
-			OPERATORS.Add("EQ", "==");
-			OPERATORS.Add("NEQ", "!=");
-			OPERATORS.Add("LT", "<");
-			OPERATORS.Add("LTE", "<=");
-			OPERATORS.Add("GT", ">");
-			OPERATORS.Add("GTE", ">=");
+			var OPERATORS = new Dictionary<string, string>() {
+				{ "EQ", "==" },
+				{ "NEQ", "!=" },
+				{ "LT", "<" },
+				{ "LTE", "<=" },
+				{ "GT", ">" },
+				{ "GTE", ">=" },
+			};
 			var @operator = OPERATORS[block.getFieldValue("OP")];
 			var argument0 = valueToCode(block, "A");
 			if (argument0 == null) argument0 = new int_node(this, 0);

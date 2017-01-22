@@ -406,9 +406,9 @@ namespace BlocklyMruby
 						check = "Number"
 					}
 				},
-				previousStatement = (Any<string, string[]>)null,
-				nextStatement = (Any<string, string[]>)null,
-				colour = Variables.HUE,
+				previousStatement = (Union<string, string[]>)null,
+				nextStatement = (Union<string, string[]>)null,
+				colour = Blockly.Variables.HUE,
 				helpUrl = Msg.MATH_CHANGE_HELPURL
 			});
 			// Assign "this" to a variable for use in the tooltip closure below.

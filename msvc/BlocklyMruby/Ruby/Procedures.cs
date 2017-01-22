@@ -4,20 +4,19 @@
 // MIT Lisence
 using System;
 using Bridge;
-using System.Text.RegularExpressions;
 using System.Collections.Generic;
 
 namespace BlocklyMruby
 {
 	partial class Ruby
 	{
-		public node procedures_defreturn(ProcedureDefBlock block)
+		public node procedures_defreturn(ProceduresDefBlock block)
 		{
 			var lv = local_switch();
 
-			var args = new List<arg_node>();
-			for (var x = 0; x < block.arguments_.Count; x++) {
-				args.Add(new arg_node(this, local_add_f(block.arguments_[x])));
+			var args = new JsArray<arg_node>();
+			for (var x = 0; x < block.arguments_.Length; x++) {
+				args.Push(new arg_node(this, local_add_f(block.arguments_[x])));
 			}
 			var funcName = intern(block.getFieldValue("NAME"));
 			var branch = statementToCode(block, "STACK");
@@ -25,7 +24,7 @@ namespace BlocklyMruby
 			if (returnValue == null) {
 				returnValue = new return_node(this, returnValue);
 			}
-			((begin_node)branch).progs.Add(returnValue);
+			((begin_node)branch).progs.Push(returnValue);
 			var code = new def_node(this, funcName, args, branch);
 
 			local_resume(lv);
@@ -44,9 +43,9 @@ namespace BlocklyMruby
 		{
 			// Call a procedure with a return value.
 			var funcName = intern(block.getFieldValue("NAME"));
-			var args = new List<node>();
-			for (var x = 0; x < block.arguments_.Count; x++) {
-				args.Add(valueToCode(block, "ARG" + x));
+			var args = new JsArray<node>();
+			for (var x = 0; x < block.arguments_.Length; x++) {
+				args.Push(valueToCode(block, "ARG" + x));
 				if (args[x] == null)
 					args[x] = new nil_node(this);
 			}
@@ -57,9 +56,9 @@ namespace BlocklyMruby
 		{
 			// Call a procedure with no return value.
 			var funcName = intern(block.getFieldValue("NAME"));
-			var args = new List<node>();
-			for (var x = 0; x < block.arguments_.Count; x++) {
-				args.Add(valueToCode(block, "ARG" + x));
+			var args = new JsArray<node>();
+			for (var x = 0; x < block.arguments_.Length; x++) {
+				args.Push(valueToCode(block, "ARG" + x));
 				if (args[x] == null)
 					args[x] = new nil_node(this);
 			}

@@ -29,8 +29,9 @@ namespace BlocklyMruby
 		}
 
 		node tree;
-		List<node> allNodes;
+		JsArray<node> allNodes;
 		locals_node locals;
+		bool global = true;
 
 		public Ruby(Blockly blockly, string filename)
 			: base(blockly, "Ruby")
@@ -51,7 +52,7 @@ namespace BlocklyMruby
 		 * @param {string} code Generated code.
 		 * @return {string} Completed code.
 		 */
-		public override string finish(List<node> codes)
+		public override string finish(JsArray<node> codes)
 		{
 			tree = new scope_node(this, new begin_node(this, codes));
 			var cond = new ruby_code_cond(filename, INDENT);
@@ -66,7 +67,7 @@ namespace BlocklyMruby
 		 * @param {string} line Line of generated code.
 		 * @return {string} Legal line of code.
 		 */
-		public override List<node> scrubNakedValue(List<node> line)
+		public override JsArray<node> scrubNakedValue(JsArray<node> line)
 		{
 			return line;
 		}
@@ -81,7 +82,7 @@ namespace BlocklyMruby
 		 * @this {Blockly.CodeGenerator}
 		 * @private
 		 */
-		public override void scrub_(Block block, List<node> code)
+		public override void scrub_(Block block, JsArray<node> code)
 		{
 			var commentCode = "";
 			// Only collect comments for blocks that aren't inline.
@@ -118,14 +119,14 @@ namespace BlocklyMruby
 		public int column { get; set; }
 		public string filename { get; }
 
-		List<string> syms = new List<string>();
+		JsArray<string> syms = new JsArray<string>();
 
 		private mrb_sym get_sym(string str)
 		{
 			int i = syms.IndexOf(str);
 			if (i < 0) {
-				i = syms.Count;
-				syms.Add(str);
+				i = syms.Length;
+				syms.Push(str);
 			}
 			return (mrb_sym)(i + 1);
 		}
@@ -133,7 +134,7 @@ namespace BlocklyMruby
 		public string sym2name(mrb_sym sym)
 		{
 			int i = (int)sym - 1;
-			if ((i < 0) || (i >= syms.Count))
+			if ((i < 0) || (i >= syms.Length))
 				return ((int)sym).ToString();
 			return syms[i];
 		}
@@ -150,14 +151,14 @@ namespace BlocklyMruby
 			// ローカル変数なら登録されているはずなので、
 			if (i < 0)
 				// グローバル変数とする
-				return get_sym("$" + str);
+				return get_sym((global ? "$" : "@") + str);
 
 			var sym = (mrb_sym)(i + 1);
 
 			// ローカル変数でなければ、
 			if (!local_var_p(sym))
 				// グローバル変数とする
-				return get_sym("$" + str);
+				return get_sym((global ? "$" : "@") + str);
 
 			return sym;
 		}
@@ -183,7 +184,7 @@ namespace BlocklyMruby
 		{
 			var result = MrbParser.parse(num);
 			var begin = result as begin_node;
-			if ((begin != null) && (begin.progs.Count == 1))
+			if ((begin != null) && (begin.progs.Length == 1))
 				return begin.progs[0];
 			return result;
 		}
@@ -245,7 +246,7 @@ namespace BlocklyMruby
 			}
 		}
 
-		public List<mrb_sym> locals_node()
+		public JsArray<mrb_sym> locals_node()
 		{
 			return this.locals != null ? this.locals.symList : null;
 		}
@@ -273,10 +274,10 @@ namespace BlocklyMruby
 			return lhs;
 		}
 
-		public string[] GetBlockId(string filename, int lineno)
+		public Tuple<string, string>[] GetBlockId(string filename, int lineno)
 		{
 			var nodes = allNodes;
-			var result = new List<string>();
+			var result = new JsArray<Tuple<string, string>>();
 			foreach (var node in nodes) {
 				if (node.filename != filename)
 					continue;
@@ -293,15 +294,15 @@ namespace BlocklyMruby
 				if (String.IsNullOrEmpty(node.block_id))
 					continue;
 
-				result.Add(node.block_id);
+				result.Push(new Tuple<string, string>(node.workspace_id, node.block_id));
 			}
 			return result.ToArray();
 		}
 
-		public string[] GetBlockId(string filename, int lineno, int column)
+		public Tuple<string, string>[] GetBlockId(string filename, int lineno, int column)
 		{
 			var nodes = allNodes;
-			var result = new List<string>();
+			var result = new JsArray<Tuple<string, string>>();
 			foreach (var node in nodes) {
 				if (node.filename != filename)
 					continue;
@@ -322,7 +323,7 @@ namespace BlocklyMruby
 				if (String.IsNullOrEmpty(node.block_id))
 					continue;
 
-				result.Add(node.block_id);
+				result.Push(new Tuple<string, string>(node.workspace_id, node.block_id));
 			}
 			return result.ToArray();
 		}

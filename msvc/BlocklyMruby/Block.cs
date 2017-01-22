@@ -57,7 +57,7 @@ namespace BlocklyMruby
 			set { Script.Set(instance, "contextMenuMsg_", value); }
 		}
 		[External, FieldProperty]
-		internal Any<string, Comment> comment {
+		internal Union<string, Comment> comment {
 			get {
 				var str = instance.comment as string;
 				if (str != null) return str;
@@ -330,7 +330,7 @@ namespace BlocklyMruby
 		/// <param name="url">URL string for block help, or function that
 		/// returns a URL.  Null for no help.</param>
 		[External]
-		internal void setHelpUrl(Any<string, Func<string>> url)
+		internal void setHelpUrl(Union<string, Func<string>> url)
 		{
 			var func = url.As<Func<string>>();
 			if (func == null)
@@ -345,7 +345,7 @@ namespace BlocklyMruby
 		/// <param name="newTip">newTip Text for tooltip or a parent element to
 		/// link to for its tooltip.  May be a function that returns a string.</param>
 		[External]
-		internal void setTooltip(Any<string, Func<string>> newTip)
+		internal void setTooltip(Union<string, Func<string>> newTip)
 		{
 			var func = newTip.As<Func<string>>();
 			if (func == null)
@@ -372,7 +372,7 @@ namespace BlocklyMruby
 		/// </summary>
 		/// <param name="colour">HSV hue value, or #RRGGBB string.</param>
 		[External]
-		internal void setColour(Any<int, string> colour)
+		internal void setColour(Union<int, string> colour)
 		{
 			instance.setColour.call(instance, colour.Value);
 		}
@@ -398,10 +398,10 @@ namespace BlocklyMruby
 			var vars = instance.getVars.call(instance);
 			if ((vars == null) || (vars is DBNull))
 				return null;
-			var ret = new List<string>();
+			var ret = new JsArray<string>();
 			int len = vars.length;
 			for (int i = 0; i < len; i++) {
-				ret.Add(Script.Get(vars, i.ToString()));
+				ret.Push(Script.Get(vars, i.ToString()));
 			}
 			return ret.ToArray();
 		}
@@ -475,7 +475,7 @@ namespace BlocklyMruby
 		/// <param name="opt_check">Statement type or
 		/// list of statement types.  Null/undefined if any type could be connected.</param>
 		[External]
-		internal void setPreviousStatement(bool newBoolean, Any<string, string[]> opt_check = null)
+		internal void setPreviousStatement(bool newBoolean, Union<string, string[]> opt_check = null)
 		{
 			var check = opt_check == null ? null : opt_check.As<string[]>();
 			if (check != null)
@@ -491,7 +491,7 @@ namespace BlocklyMruby
 		/// <param name="opt_check">Statement type or
 		/// list of statement types.  Null/undefined if any type could be connected.</param>
 		[External]
-		internal void setNextStatement(bool newBoolean, Any<string, string[]> opt_check = null)
+		internal void setNextStatement(bool newBoolean, Union<string, string[]> opt_check = null)
 		{
 			var check = opt_check == null ? null : opt_check.As<string[]>();
 			if (check != null)
@@ -508,7 +508,7 @@ namespace BlocklyMruby
 		/// of returned types.  Null or undefined if any type could be returned
 		/// (e.g. variable get).</param>
 		[External]
-		internal void setOutput(bool newBoolean, Any<string, string[]> opt_check = null)
+		internal void setOutput(bool newBoolean, Union<string, string[]> opt_check = null)
 		{
 			var check = opt_check == null ? null : opt_check.As<string[]>();
 			if (check != null)
@@ -852,7 +852,7 @@ namespace BlocklyMruby
 		/// <param name="start">Current location.</param>
 		/// <param name="forward">If true go forward, otherwise backward.</param>
 		[External]
-		internal void tab(Any<Field, Block> start, bool forward)
+		internal void tab(Union<Field, Block> start, bool forward)
 		{
 			instance.tab.call(instance, start.Value, forward);
 		}
@@ -1054,7 +1054,7 @@ namespace BlocklyMruby
 
 		public int Length { get { return Script.Get<int>(instance, "length"); } }
 
-		internal void push(ContextMenuOption option)
+		internal void Push(ContextMenuOption option)
 		{
 			instance.push.call(instance, option.instance);
 		}

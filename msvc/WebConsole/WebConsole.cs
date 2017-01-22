@@ -39,6 +39,7 @@ namespace Bridge
 
 		public Icon Icon { get { return m_Icon; } }
 		public ScriptingHost ObjectForScripting { get { return (ScriptingHost)webBrowser1.ObjectForScripting; } }
+		public event EventHandler<EventArgs> DocumentLoaded;
 
 		public void Open(ResourceReader resourceReader, ScriptingHost scriptingHost)
 		{
@@ -55,7 +56,7 @@ namespace Bridge
 
 		public Script Script { get; private set; }
 
-		protected virtual bool DocumentCompleted1(Uri Url)
+		protected virtual bool PrepareScript(Uri Url)
 		{
 			return Url.Scheme != "about";
 		}
@@ -65,24 +66,26 @@ namespace Bridge
 			return new Script(scriptingHost);
 		}
 
+		public void SetZoom(int zoom)
+		{
+			((dynamic)webBrowser1.ActiveXInstance).ExecWB(63, 1, zoom, 0);
+		}
+
 		protected virtual void DocumentCompleted(Uri Url)
 		{
-			int zoom = (int)(Screen.FromControl(this).Bounds.Height / 9.60);
-			if (zoom > 100)
-				zoom = 100;
-			((dynamic)webBrowser1.ActiveXInstance).ExecWB(63, 1, zoom, 0);
-
 			if (Url.Scheme == "about")
 				return;
 
 			Icon favicon = m_ResourceReader.GetFavicon(Url);
 			if (favicon != null)
 				m_Icon = favicon;
+
+			DocumentLoaded?.Invoke(this, EventArgs.Empty);
 		}
 
 		private void WebBrowser1_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
 		{
-			if (DocumentCompleted1(e.Url))
+			if (PrepareScript(e.Url))
 				Script = NewScript((ScriptingHost)webBrowser1.ObjectForScripting);
 
 			DocumentCompleted(e.Url);

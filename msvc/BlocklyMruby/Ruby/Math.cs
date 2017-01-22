@@ -4,7 +4,6 @@
 // MIT Lisence
 using System;
 using Bridge;
-using System.Text.RegularExpressions;
 using System.Collections.Generic;
 
 namespace BlocklyMruby
@@ -66,19 +65,19 @@ namespace BlocklyMruby
 				code = new call_node(this, arg, intern("abs"));
 				break;
 			case "ROOT":
-				code = new call_node(this, math, intern("sqrt"), new List<node>() { arg }, null);
+				code = new call_node(this, math, intern("sqrt"), new JsArray<node>() { arg }, null);
 				break;
 			case "LN":
-				code = new call_node(this, math, intern("log"), new List<node>() { arg }, null);
+				code = new call_node(this, math, intern("log"), new JsArray<node>() { arg }, null);
 				break;
 			case "LOG10":
-				code = new call_node(this, math, intern("log10"), new List<node>() { arg }, null);
+				code = new call_node(this, math, intern("log10"), new JsArray<node>() { arg }, null);
 				break;
 			case "EXP":
-				code = new call_node(this, math, intern("exp"), new List<node>() { arg }, null);
+				code = new call_node(this, math, intern("exp"), new JsArray<node>() { arg }, null);
 				break;
 			case "POW10":
-				code = new call_node(this, new int_node(this, 10), intern("exp"), new List<node>() { arg }, null);
+				code = new call_node(this, new int_node(this, 10), intern("exp"), new JsArray<node>() { arg }, null);
 				break;
 			case "ROUND":
 				code = new call_node(this, arg, intern("round"));
@@ -92,17 +91,17 @@ namespace BlocklyMruby
 			case "SIN":
 				arg = new call_node(this, arg, intern("/"), new float_node(this, 180.0));
 				arg = new call_node(this, arg, intern("*"), new colon2_node(this, math, intern("PI")));
-				code = new call_node(this, math, intern("sin"), new List<node>() { arg }, null);
+				code = new call_node(this, math, intern("sin"), new JsArray<node>() { arg }, null);
 				break;
 			case "COS":
 				arg = new call_node(this, arg, intern("/"), new float_node(this, 180.0));
 				arg = new call_node(this, arg, intern("*"), new colon2_node(this, math, intern("PI")));
-				code = new call_node(this, math, intern("cos"), new List<node>() { arg }, null);
+				code = new call_node(this, math, intern("cos"), new JsArray<node>() { arg }, null);
 				break;
 			case "TAN":
 				arg = new call_node(this, arg, intern("/"), new float_node(this, 180.0));
 				arg = new call_node(this, arg, intern("*"), new colon2_node(this, math, intern("PI")));
-				code = new call_node(this, math, intern("tan"), new List<node>() { arg }, null);
+				code = new call_node(this, math, intern("tan"), new JsArray<node>() { arg }, null);
 				break;
 			}
 			if (code != null) {
@@ -112,17 +111,17 @@ namespace BlocklyMruby
 			// wrapping the code.
 			switch (@operator) {
 			case "ASIN":
-				code = new call_node(this, math, intern("asin"), new List<node>() { arg }, null);
+				code = new call_node(this, math, intern("asin"), new JsArray<node>() { arg }, null);
 				code = new call_node(this, code, intern("/"), new colon2_node(this, math, intern("PI")));
 				code = new call_node(this, code, intern("*"), new float_node(this, 180.0));
 				break;
 			case "ACOS":
-				code = new call_node(this, math, intern("acos"), new List<node>() { arg }, null);
+				code = new call_node(this, math, intern("acos"), new JsArray<node>() { arg }, null);
 				code = new call_node(this, code, intern("/"), new colon2_node(this, math, intern("PI")));
 				code = new call_node(this, code, intern("*"), new float_node(this, 180.0));
 				break;
 			case "ATAN":
-				code = new call_node(this, math, intern("atan"), new List<node>() { arg }, null);
+				code = new call_node(this, math, intern("atan"), new JsArray<node>() { arg }, null);
 				code = new call_node(this, code, intern("/"), new colon2_node(this, math, intern("PI")));
 				code = new call_node(this, code, intern("*"), new float_node(this, 180.0));
 				break;
@@ -144,15 +143,15 @@ namespace BlocklyMruby
 			case "E":
 				return new colon2_node(this, math, intern("E"));
 			case "GOLDEN_RATIO":
-				code = new call_node(this, math, intern("sqrt"), new List<node>() { new float_node(this, 5) }, null);
+				code = new call_node(this, math, intern("sqrt"), new JsArray<node>() { new float_node(this, 5) }, null);
 				code = new call_node(this, new float_node(this, 1), intern("+"), code);
 				code = new call_node(this, new begin_node(this, code, true), intern("/"), new float_node(this, 2));
 				return code;
 			case "SQRT2":
-				return new call_node(this, math, intern("sqrt"), new List<node>() { new float_node(this, 2) }, null);
+				return new call_node(this, math, intern("sqrt"), new JsArray<node>() { new float_node(this, 2) }, null);
 			case "SQRT1_2":
 				code = new call_node(this, new float_node(this, 1), intern("/"), new float_node(this, 2));
-				return new call_node(this, math, intern("sqrt"), new List<node>() { code }, null);
+				return new call_node(this, math, intern("sqrt"), new JsArray<node>() { code }, null);
 			case "INFINITY":
 				return new call_node(this, new float_node(this, 1), intern("/"), new float_node(this, 0));
 			}
@@ -168,7 +167,7 @@ namespace BlocklyMruby
 			var dropdown_property = block.getFieldValue("PROPERTY");
 			node code = null;
 			if (dropdown_property == "PRIME") {
-				return new fcall_node(this, intern("is_prime"), new List<node>() { number_to_check }, null);
+				return new fcall_node(this, intern("is_prime"), new JsArray<node>() { number_to_check }, null);
 			}
 			switch (dropdown_property) {
 			case "EVEN":
@@ -179,9 +178,9 @@ namespace BlocklyMruby
 				code = new call_node(this, number_to_check, intern("%"), new int_node(this, 1));
 				return new call_node(this, code, intern("=="), new int_node(this, 0));
 			case "POSITIVE":
-				return new call_node(this, number_to_check, intern(">"), new List<node>() { new int_node(this, 0) }, null);
+				return new call_node(this, number_to_check, intern(">"), new JsArray<node>() { new int_node(this, 0) }, null);
 			case "NEGATIVE":
-				return new call_node(this, number_to_check, intern("<"), new List<node>() { new int_node(this, 0) }, null);
+				return new call_node(this, number_to_check, intern("<"), new JsArray<node>() { new int_node(this, 0) }, null);
 			case "DIVISIBLE_BY":
 				var divisor = valueToCode(block, "DIVISOR");
 				// If "divisor" is some code that evals to 0, Ruby will raise an error.
@@ -214,7 +213,7 @@ namespace BlocklyMruby
 			// Math functions for lists.
 			var func = block.getFieldValue("OP");
 			var list = valueToCode(block, "LIST");
-			if (list == null) list = new array_node(this, new List<node>());
+			if (list == null) list = new array_node(this, new JsArray<node>());
 			node code;
 			switch (func) {
 			case "SUM":
@@ -238,15 +237,15 @@ namespace BlocklyMruby
 				// As a list of numbers can contain more than one mode,
 				// the returned result is provided as an array.
 				// Mode of [3, "x", "x", 1, 1, 2, "3"] -> ["x", 1].
-				code = new fcall_node(this, intern("math_modes"), new List<node>() { list }, null);
+				code = new fcall_node(this, intern("math_modes"), new JsArray<node>() { list }, null);
 				break;
 			case "STD_DEV":
 				code = new call_node(this, list, intern("standard_deviation"));
 				break;
 			case "RANDOM":
 				code = new call_node(this, list, intern("size"));
-				code = new fcall_node(this, intern("rand"), new List<node>() { code }, null);
-				code = new call_node(this, list, intern("[]"), new List<node>() { code }, null);
+				code = new fcall_node(this, intern("rand"), new JsArray<node>() { code }, null);
+				code = new call_node(this, list, intern("[]"), new JsArray<node>() { code }, null);
 				break;
 			default:
 				throw new Exception("Unknown operator: " + func);
@@ -272,10 +271,10 @@ namespace BlocklyMruby
 			var argument1 = valueToCode(block, "LOW");
 			if (argument1 == null) argument1 = new int_node(this, 0);
 			var argument2 = valueToCode(block, "HIGH");
-			if (argument2 == null) argument2 = new fcall_node(this, intern("Float"), new List<node>() { new str_node(this, "inf") }, null);
-			node code = new array_node(this, new List<node>() { argument0, argument1 });
+			if (argument2 == null) argument2 = new fcall_node(this, intern("Float"), new JsArray<node>() { new str_node(this, "inf") }, null);
+			node code = new array_node(this, new JsArray<node>() { argument0, argument1 });
 			code = new call_node(this, code, intern("max"));
-			code = new array_node(this, new List<node>() { code, argument2 });
+			code = new array_node(this, new JsArray<node>() { code, argument2 });
 			return new call_node(this, code, intern("min"));
 		}
 
@@ -287,7 +286,7 @@ namespace BlocklyMruby
 			var argument1 = valueToCode(block, "TO");
 			if (argument1 == null) argument1 = new int_node(this, 0);
 			var code = new dot2_node(this, argument0, argument1);
-			return new fcall_node(this, intern("rand"), new List<node>() { code }, null);
+			return new fcall_node(this, intern("rand"), new JsArray<node>() { code }, null);
 		}
 
 		public node math_random_float(MathRandomFloatBlock block)

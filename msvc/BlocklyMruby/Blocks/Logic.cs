@@ -122,8 +122,8 @@ namespace BlocklyMruby
 		}
 
 		/**
-		 * Populate the mutator"s dialog with this block"s components.
-		 * @param {!Workspace} workspace Mutator"s workspace.
+		 * Populate the mutator's dialog with this block's components.
+		 * @param {!Workspace} workspace Mutator's workspace.
 		 * @return {!Blockly.Block} Root block in mutator.
 		 * @this Blockly.Block
 		 */
@@ -147,7 +147,7 @@ namespace BlocklyMruby
 		}
 
 		/**
-		 * Reconfigure this block based on the mutator dialog"s components.
+		 * Reconfigure this block based on the mutator dialog's components.
 		 * @param {!Blockly.Block} containerBlock Root block in mutator.
 		 * @this Blockly.Block
 		 */
@@ -157,15 +157,15 @@ namespace BlocklyMruby
 			// Count number of inputs.
 			this.elseifCount_ = 0;
 			this.elseCount_ = 0;
-			var valueConnections = new List<Connection>() { null };
-			var statementConnections = new List<Connection>() { null };
+			var valueConnections = new JsArray<Connection>() { null };
+			var statementConnections = new JsArray<Connection>() { null };
 			var elseStatementConnection = (Connection)null;
 			while (clauseBlock != null) {
 				switch (clauseBlock.type) {
 				case ControlsIfElseIfBlock.type_name:
 					this.elseifCount_++;
-					valueConnections.Add(((ControlsIfElseIfBlock)clauseBlock).valueConnection_);
-					statementConnections.Add(((ControlsIfElseIfBlock)clauseBlock).statementConnection_);
+					valueConnections.Push(((ControlsIfElseIfBlock)clauseBlock).valueConnection_);
+					statementConnections.Push(((ControlsIfElseIfBlock)clauseBlock).statementConnection_);
 					break;
 				case ControlsIfElseBlock.type_name:
 					this.elseCount_++;

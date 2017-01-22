@@ -33,7 +33,7 @@ namespace Bridge
 			hMod = LoadLibraryEx(dllName + ".dll", IntPtr.Zero, LOAD_LIBRARY_AS_DATAFILE);
 		}
 
-		internal bool GetResource(string url, out byte[] bPtr)
+		public bool GetResource(string url, out byte[] bPtr)
 		{
 			bPtr = null;
 
@@ -53,7 +53,7 @@ namespace Bridge
 			return true;
 		}
 
-		internal Icon GetFavicon(Uri url)
+		public Icon GetFavicon(Uri url)
 		{
 			if (url.Scheme == "res") {
 				byte[] iconbuf;
