@@ -13,6 +13,12 @@ namespace BlocklyMruby
 	public class BlocklyView : WebConsole
 	{
 		public Blockly Blockly { get; private set; }
+		public Dictionary<string, FlyoutCategoryHandler> FlyoutCategoryHandlers = new Dictionary<string, FlyoutCategoryHandler>();
+		public event EventHandler<Create> BlockCreated;
+		public event EventHandler<Delete> BlockDeleted;
+		public event EventHandler<Change> BlockChanged;
+		public event EventHandler<Move> BlockMoveed;
+		public event EventHandler<Ui> UiEvent;
 
 		public BlocklyView()
 		{
@@ -141,6 +147,9 @@ namespace BlocklyMruby
 			Script.SetBlocks(new TextPromptBlock(Blockly));
 			Script.SetBlocks(new VariablesGetBlock(Blockly));
 			Script.SetBlocks(new VariablesSetBlock(Blockly));
+
+			FlyoutCategoryHandlers.Add(Blockly.Procedures.NAME_TYPE, Blockly.Procedures.flyoutCategory);
+			FlyoutCategoryHandlers.Add(Blockly.Variables.NAME_TYPE, Blockly.Variables.flyoutCategory);
 		}
 
 		internal void Init2()
@@ -154,6 +163,29 @@ namespace BlocklyMruby
 			var Blockly = e.Blockly;
 			var Script = Blockly.Script;
 			Script.changed = true;
+
+			switch (e.type) {
+			case BlocklyMruby.Events.CREATE:
+				Create cre = (Create)e;
+				BlockCreated?.Invoke(this, cre);
+				break;
+			case BlocklyMruby.Events.DELETE:
+				Delete del = (Delete)e;
+				BlockDeleted?.Invoke(this, del);
+				break;
+			case BlocklyMruby.Events.CHANGE:
+				Change chg = (Change)e;
+				BlockChanged?.Invoke(this, chg);
+				break;
+			case BlocklyMruby.Events.MOVE:
+				Move mov = (Move)e;
+				BlockMoveed?.Invoke(this, mov);
+				break;
+			case BlocklyMruby.Events.UI:
+				Ui ui = (Ui)e;
+				UiEvent?.Invoke(this, ui);
+				break;
+			}
 		}
 
 		internal void ReloadToolbox(IClassWorkspace workspace)
@@ -166,7 +198,18 @@ namespace BlocklyMruby
 
 			Blockly.mainWorkspace.updateToolbox(toolbox);
 		}
+
+		public virtual Element[] FlyoutCategory(string name, Workspace workspace)
+		{
+			FlyoutCategoryHandler handler;
+			if (FlyoutCategoryHandlers.TryGetValue(name, out handler)) {
+				return handler(workspace);
+			}
+			return new Element[0];
+		}
 	}
+
+	public delegate Element[] FlyoutCategoryHandler(Workspace workspace);
 
 	[System.Runtime.InteropServices.ComVisible(true)]
 	public class BlocklyScriptingHost : ScriptingHost
@@ -368,16 +411,13 @@ namespace BlocklyMruby
 		{
 			var workspace = ToWorkspace(workspace_);
 			Element[] ret;
-			var name = xmlList.ToString();
-			if (name == Blockly.Procedures.NAME_TYPE) {
-				ret = Blockly.Procedures.flyoutCategory(workspace);
-			}
-			else if (name == Blockly.Variables.NAME_TYPE) {
-				ret = Blockly.Variables.flyoutCategory(workspace);
+			var name = xmlList as string;
+			if (name != null) {
+				ret = ((BlocklyView)View).FlyoutCategory(name, workspace);
 			}
 			else {
 				return xmlList;
-		}
+			}
 			var result = Bridge.Script.NewArray();
 			foreach (var e in ret) {
 				Bridge.Script.Push(result, e.instance);

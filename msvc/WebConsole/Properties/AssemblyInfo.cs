@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // アセンブリに関する一般情報は以下の属性セットをとおして制御されます。
 // アセンブリに関連付けられている情報を変更するには、
 // これらの属性値を変更してください。
-[assembly: AssemblyTitle("TOPPERS/ECNL Webコントローラー")]
-[assembly: AssemblyDescription("TOPPERS/ECNL Webコントローラー")]
+[assembly: AssemblyTitle("WebConsole")]
+[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("TOPPERSプロジェクト")]
+[assembly: AssemblyCompany("コアーズ株式会社")]
 [assembly: AssemblyProduct("WebConsole")]
-[assembly: AssemblyCopyright("Copyright © 2016 by TOPPERS Project, Inc., JAPAN")]
+[assembly: AssemblyCopyright("Copyright © 2017 by Cores Co., Ltd. Japan")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -39,6 +39,11 @@ namespace BlocklyMruby
 		{
 			InvokeScript("set_text", new object[] { code });
 		}
+
+		public void MoveCursorBy(int x, int y)
+		{
+			InvokeScript("move_cursor_to", new object[] { x, y });
+		}
 	}
 
 	[System.Runtime.InteropServices.ComVisible(true)]

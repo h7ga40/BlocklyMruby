@@ -119,11 +119,16 @@ namespace BlocklyMruby
 				Script.console_warn("No workspace specified in workspaceToCode call.  Guessing.");
 				workspace = Blockly.getMainWorkspace();
 			}
-			var codes = new JsArray<node>();
 			this.init(workspace);
+			var codes = workspaceToNodes(workspace);
+			return this.finish(codes);
+		}
+
+		public JsArray<node> workspaceToNodes(Workspace workspace)
+		{
+			var nodes = new JsArray<node>();
 			var blocks = workspace.getTopBlocks(true);
-			Block block;
-			for (var x = 0; (block = blocks[x]) != null; x++) {
+			foreach (var block in blocks) {
 				var line = this.blockToCode(block);
 				if (line != null) {
 					if (block.outputConnection != null/*&& this.scrubNakedValue*/) {
@@ -131,10 +136,10 @@ namespace BlocklyMruby
 						// it wants to append a semicolon, or something.
 						line = this.scrubNakedValue(line);
 					}
-					codes.AddRange(line);
+					nodes.AddRange(line);
 				}
 			}
-			return this.finish(codes);
+			return nodes;
 		}
 
 		// The following are some helpful functions which can be used by multiple
@@ -208,8 +213,10 @@ namespace BlocklyMruby
 					result.Push(c);
 				} while ((code = code.cdr as node) != null);
 			}
-			else
+			else {
+				code.set_blockid(block.workspace.id, block.id);
 				result.Push(code);
+			}
 			this.scrub_(block, result);
 			return result;
 		}

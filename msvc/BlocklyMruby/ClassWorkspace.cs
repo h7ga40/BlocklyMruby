@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using Bridge;
 using Bridge.Html5;
 
 namespace BlocklyMruby
@@ -60,7 +61,7 @@ namespace BlocklyMruby
 
 		public void OpenModifyView(Action<bool> callback)
 		{
-			callback(false);
+			callback(true);
 		}
 
 		public void ReloadToolbox(HTMLElement toolbox)
@@ -77,16 +78,30 @@ namespace BlocklyMruby
 
 		public string ToCode(string filename)
 		{
-			rubyCode = new Ruby(view.Blockly, filename);
-			view.Blockly.Script.changed = false;
+			var _RubyCode = new Ruby(view.Blockly, filename);
+			_RubyCode.init(Workspace);
+			var result = _RubyCode.defineClass(identifier, Workspace);
+			((BlocklyScript)view.Script).changed = false;
+			return result;
+		}
+	}
 
-			var sb = new StringBuilder();
-			sb.AppendLine("class " + identifier);
-			var code = rubyCode.workspaceToCode(Workspace);
-			sb.Append(code);
-			sb.AppendLine("end");
+	public partial class Ruby
+	{
+		internal string defineClass(string identifier, Workspace workspace)
+		{
+			var nodes = new JsArray<node>();
+			global = false;
+			var lv = local_switch();
+			{
+				var body = new begin_node(this, workspaceToNodes(workspace));
+				var cls = new class_node(this, intern(identifier), null, body);
+				nodes.Add(cls);
+			}
+			local_resume(lv);
+			global = true;
 
-			return sb.ToString();
+			return finish(nodes);
 		}
 	}
 }

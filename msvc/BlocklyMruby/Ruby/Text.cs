@@ -13,7 +13,7 @@ namespace BlocklyMruby
 		public node text(TextBlock block)
 		{
 			// Text value.
-			return new str_node(this, block.getFieldValue("TEXT"));
+			return new_str_node(block.getFieldValue("TEXT"));
 		}
 
 		public node text_join(TextJoinBlock block)

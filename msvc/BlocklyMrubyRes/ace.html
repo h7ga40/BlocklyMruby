@@ -39,7 +39,12 @@
 		function set_text(text) {
 			var textEditor = external.editor;
 			textEditor.setValue(text);
-			textEditor.moveCursorTo(0, 0);
+			textEditor.clearSelection();
+		}
+		function move_cursor_to(x, y) {
+			var textEditor = external.editor;
+			textEditor.moveCursorTo(x, y);
+			textEditor.selectLine();
 		}
 		function focus_editor() {
 			var textEditor = external.editor;

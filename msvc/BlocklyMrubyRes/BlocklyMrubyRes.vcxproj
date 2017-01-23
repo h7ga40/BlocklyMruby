@@ -155,6 +155,21 @@
   <ItemGroup>
     <None Include="ace.html" />
     <None Include="blockly.html" />
+    <None Include="bootstrap\css\bootstrap-theme.css" />
+    <None Include="bootstrap\css\bootstrap-theme.min.css" />
+    <None Include="bootstrap\css\bootstrap.css" />
+    <None Include="bootstrap\css\bootstrap.min.css" />
+    <None Include="bootstrap\css\ie10-viewport-bug-workaround.css" />
+    <None Include="bootstrap\fonts\glyphicons-halflings-regular.eot" />
+    <None Include="bootstrap\fonts\glyphicons-halflings-regular.svg" />
+    <None Include="bootstrap\fonts\glyphicons-halflings-regular.woff" />
+    <None Include="bootstrap\fonts\glyphicons-halflings-regular.woff2" />
+    <None Include="bootstrap\js\bootstrap.js" />
+    <None Include="bootstrap\js\bootstrap.min.js" />
+    <None Include="bootstrap\js\ie-emulation-modes-warning.js" />
+    <None Include="bootstrap\js\ie10-viewport-bug-workaround.js" />
+    <None Include="bootstrap\js\ie8-responsive-file-warning.js" />
+    <None Include="bootstrap\js\npm.js" />
     <None Include="class_selector.html" />
     <None Include="js\blockly-bridge.js" />
     <None Include="js\blockly.js" />

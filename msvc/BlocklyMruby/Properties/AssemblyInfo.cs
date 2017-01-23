@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("BlocklyMruby")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("コアーズ株式会社")]
 [assembly: AssemblyProduct("BlocklyMruby")]
-[assembly: AssemblyCopyright("Copyright ©  2017")]
+[assembly: AssemblyCopyright("Copyright ©  2017 by Cores Co., Ltd. Japan")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

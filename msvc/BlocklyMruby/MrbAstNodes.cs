@@ -1999,6 +1999,12 @@ namespace BlocklyMruby
 			}
 		}
 
+		public super_node(IMrbParser p, JsArray<node> args)
+			: base(p, node_type.NODE_SUPER)
+		{
+			_args.AddRange(args);
+		}
+
 		public JsArray<node> args { get { return _args; } }
 		public node block { get { return _block; } }
 
@@ -2059,7 +2065,7 @@ namespace BlocklyMruby
 			foreach (var v in args) {
 				str += v.ToString() + " ";
 			}
-			return $"{block})";
+			return str + block + ")";
 		}
 
 		internal void add_block(node b)
@@ -2619,6 +2625,7 @@ namespace BlocklyMruby
 	class array_node : node
 	{
 		private JsArray<node> _array = new JsArray<node>();
+		private bool _item_per_line;
 
 		public array_node(IMrbParser p, node a)
 			: base(p, node_type.NODE_ARRAY)
@@ -2626,10 +2633,11 @@ namespace BlocklyMruby
 			dump_recur(_array, a);
 		}
 
-		public array_node(IMrbParser p, JsArray<node> a)
+		public array_node(IMrbParser p, JsArray<node> a, bool item_per_line = false)
 			: base(p, node_type.NODE_ARRAY)
 		{
 			_array.AddRange(a);
+			_item_per_line = item_per_line;
 		}
 
 
@@ -2660,12 +2668,26 @@ namespace BlocklyMruby
 		{
 			cond.increment_nest();
 			cond.write("[");
+			if (_item_per_line) {
+				cond.separate_line();
+				cond.increment_indent();
+			}
 			int i = _array.Length;
 			foreach (var item in _array) {
 				item.to_ruby(cond);
 				i--;
-				if (i > 0)
-					cond.write(", ");
+				if (i > 0) {
+					if (_item_per_line) {
+						cond.write(",");
+						cond.separate_line();
+					}
+					else
+						cond.write(", ");
+				}
+				else if (_item_per_line) {
+					cond.decrement_indent();
+					cond.separate_line();
+				}
 			}
 			cond.write("]");
 			cond.decrement_nest();
@@ -3085,6 +3107,15 @@ namespace BlocklyMruby
 			_super = s;
 			var a = p.locals_node();
 			_arg = (a.Length == 0) ? 0 : a[0];
+			_body = b;
+		}
+
+		public class_node(IMrbParser p, mrb_sym name, node s, node b)
+			: base(p, node_type.NODE_CLASS)
+		{
+			_prefix = "";
+			_name = name;
+			_super = s;
 			_body = b;
 		}
 
@@ -4180,11 +4211,31 @@ namespace BlocklyMruby
 			_base = @base;
 		}
 
-		public int_node(IMrbParser p, int i)
+		public int_node(IMrbParser p, int i, int @base = 10)
 			: base(p, node_type.NODE_INT)
 		{
-			_s = MrbParser.UTF8StringToArray(i.ToString());
-			_base = 10;
+			string str = "";
+			switch (@base) {
+			case 2:
+				for (uint b = 0x80000000u; b != 0; b >>= 1) {
+					str += (b & i) != 0 ? "1" : "0";
+				}
+				break;
+			case 8:
+				for (int s = 30; s > 0; s -= 3) {
+					str = ((i << s) & 0xE).ToString() + str;
+				}
+				break;
+			case 16:
+				str = i.ToString("X");
+				break;
+			default:
+				@base = 10;
+				str = i.ToString();
+				break;
+			}
+			_s = MrbParser.UTF8StringToArray(str);
+			_base = @base;
 		}
 
 		public Uint8Array num { get { return _s; } }

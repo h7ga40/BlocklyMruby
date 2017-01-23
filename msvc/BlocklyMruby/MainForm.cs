@@ -13,6 +13,7 @@ namespace BlocklyMruby
 	{
 		private Mruby _Mruby;
 		private JsArray<Tuple<string, string>> _BlockIds;
+		private string filename;
 
 		public MainForm()
 		{
@@ -146,14 +147,17 @@ namespace BlocklyMruby
 					using (var fs = new StreamWriter(rubyfile, false, new UTF8Encoding(false))) {
 						fs.Write(code);
 					}
+					this.filename = rubyfile;
 				}
 				else {
 					using (var fs = new StreamReader(item.RubyCode.filename, Encoding.UTF8)) {
 						code = fs.ReadToEnd();
 					}
+					this.filename = item.RubyCode.filename;
 				}
 			}
 			aceView1.SetText(code);
+			aceView1.MoveCursorBy(0, 0);
 		}
 
 		internal BlocklyView NewBlocklyView(string identifier)
@@ -482,11 +486,16 @@ namespace BlocklyMruby
 						item = null;
 				}
 				if (item == null) {
-					string code;
-					using (var fs = new StreamReader(filename, Encoding.UTF8)) {
-						code = fs.ReadToEnd();
+					if (this.filename != filename) {
+						string code;
+						using (var fs = new StreamReader(filename, Encoding.UTF8)) {
+							code = fs.ReadToEnd();
+						}
+						this.filename = filename;
+						aceView1.SetText(code);
 					}
-					aceView1.SetText(code);
+					aceView1.MoveCursorBy(lineno - 1, 0);
+					tabControl1.SelectedTab = RubyTabPage;
 				}
 
 				SetRunningMode(RunningMode.Debug);
@@ -505,7 +514,7 @@ namespace BlocklyMruby
 		private void Mruby_Stdio(object sender, StdioEventArgs e)
 		{
 			BeginInvoke(new MethodInvoker(() => {
-				xTermView1.OnTermData(e.Text);
+				xTermView1.OnTermData(e.Text.Replace("\n", "\r\n"));
 
 				_ConsoleHook?.Invoke(this, e);
 

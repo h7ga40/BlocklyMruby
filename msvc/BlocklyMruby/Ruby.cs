@@ -189,6 +189,15 @@ namespace BlocklyMruby
 			return result;
 		}
 
+		node new_str_node(string text)
+		{
+			var result = MrbParser.parse("\"" + text + "\"");
+			var begin = result as begin_node;
+			if ((begin != null) && (begin.progs.Length == 1))
+				return begin.progs[0];
+			return result;
+		}
+
 		locals_node local_switch()
 		{
 			var prev = this.locals;

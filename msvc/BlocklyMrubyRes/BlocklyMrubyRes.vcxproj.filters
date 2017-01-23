@@ -53,7 +53,49 @@
     <None Include="blockly.html">
       <Filter>リソース ファイル</Filter>
     </None>
+    <None Include="bootstrap\css\bootstrap.css">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="bootstrap\js\bootstrap.js">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="bootstrap\css\bootstrap.min.css">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="bootstrap\js\bootstrap.min.js">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="bootstrap\css\bootstrap-theme.css">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="bootstrap\css\bootstrap-theme.min.css">
+      <Filter>リソース ファイル</Filter>
+    </None>
     <None Include="js\bridge.js">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="bootstrap\fonts\glyphicons-halflings-regular.eot">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="bootstrap\fonts\glyphicons-halflings-regular.svg">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="bootstrap\fonts\glyphicons-halflings-regular.woff">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="bootstrap\fonts\glyphicons-halflings-regular.woff2">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="bootstrap\js\ie8-responsive-file-warning.js">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="bootstrap\css\ie10-viewport-bug-workaround.css">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="bootstrap\js\ie10-viewport-bug-workaround.js">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="bootstrap\js\ie-emulation-modes-warning.js">
       <Filter>リソース ファイル</Filter>
     </None>
     <None Include="js\jquery-3.1.0.js">

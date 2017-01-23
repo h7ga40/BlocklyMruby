@@ -229,7 +229,7 @@ namespace BlocklyMruby
 		public StdioEventArgs(StdioType type, string text)
 		{
 			Type = type;
-			Text = text.Replace("\n", "\r\n");
+			Text = text;
 		}
 	}
 }
