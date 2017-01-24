@@ -115,7 +115,7 @@ namespace BlocklyMruby
 					name += "2";
 				}
 				else {
-					name = r.Groups[1].Value + (Bridge.Script.ParseInt(r.Groups[2].Value, 10) + 1);
+					name = r.Groups[1].Value + (r.Groups[2].Value == null ? 0 : Bridge.Script.ParseInt(r.Groups[2].Value, 10) + 1);
 				}
 			}
 			return name;

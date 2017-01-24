@@ -143,7 +143,8 @@ namespace BlocklyMruby
 		 */
 		public void domToMutation(Element xmlElement)
 		{
-			this.itemCount_ = Bridge.Script.ParseInt(xmlElement.GetAttribute("items"), 10);
+			var count = xmlElement.GetAttribute("items");
+			this.itemCount_ = count == null ? 0 : Bridge.Script.ParseInt(count, 10);
 			this.updateShape_();
 		}
 
@@ -325,7 +326,7 @@ namespace BlocklyMruby
 			this.setColour(Texts.HUE);
 			this.appendValueInput("TEXT")
 				.appendField(Msg.TEXT_APPEND_TO)
-				.appendField(new FieldVariable(Blockly, 
+				.appendField(new FieldVariable(Blockly,
 				Msg.TEXT_APPEND_VARIABLE), "VAR")
 				.appendField(Msg.TEXT_APPEND_APPENDTEXT);
 			this.setPreviousStatement(true);

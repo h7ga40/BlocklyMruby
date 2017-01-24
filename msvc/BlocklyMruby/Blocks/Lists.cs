@@ -115,7 +115,8 @@ namespace BlocklyMruby
 		 */
 		public void domToMutation(Element xmlElement)
 		{
-			this.itemCount_ = Bridge.Script.ParseInt(xmlElement.GetAttribute("items"), 10);
+			var times = xmlElement.GetAttribute("items");
+			this.itemCount_ = times == null ? 0 : Bridge.Script.ParseInt(times, 10);
 			this.updateShape_();
 		}
 

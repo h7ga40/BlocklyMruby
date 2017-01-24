@@ -43,8 +43,7 @@
 		}
 		function move_cursor_to(x, y) {
 			var textEditor = external.editor;
-			textEditor.moveCursorTo(x, y);
-			textEditor.selectLine();
+			textEditor.gotoLine(x, y);
 		}
 		function focus_editor() {
 			var textEditor = external.editor;

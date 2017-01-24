@@ -439,7 +439,11 @@ namespace BlocklyMruby
 						var block = workspace.getBlockById(_BlockIds[0].Item2);
 						block.setWarningText(message);
 					}
+					else
+						item = null;
 				}
+				if (item == null)
+					SelectCodePos(filename, lineno);
 			}
 		}
 
@@ -447,6 +451,8 @@ namespace BlocklyMruby
 		{
 
 		}
+
+		Tuple<string, int> _LastCodePos;
 
 		public void ConsoleHookInDebuging(object sender, StdioEventArgs e)
 		{
@@ -458,9 +464,16 @@ namespace BlocklyMruby
 				var workspace = (WorkspaceSvg)item.Workspace;
 				workspace.highlightBlock(null);
 				SetRunningMode(RunningMode.DebugEnd);
+
+				if (_LastCodePos != null)
+					SelectCodePos(_LastCodePos.Item1, _LastCodePos.Item2);
 				return;
 			}
-			var match = new Regex(@"^\((.+):([0-9]+)\)", RegexOptions.Multiline).Match(e.Text);
+			var match = new Regex("^(.+):([0-9]+):", RegexOptions.Multiline).Match(e.Text);
+			if (match.Success) {
+				_LastCodePos = new Tuple<string, int>(match.Groups[1].Value, Int32.Parse(match.Groups[2].Value));
+			}
+			match = new Regex(@"^\((.+):([0-9]+)\)", RegexOptions.Multiline).Match(e.Text);
 			if (match.Success) {
 				_BlockIds = new JsArray<Tuple<string, string>>();
 				string filename = match.Groups[1].Value;
@@ -485,22 +498,26 @@ namespace BlocklyMruby
 					else
 						item = null;
 				}
-				if (item == null) {
-					if (this.filename != filename) {
-						string code;
-						using (var fs = new StreamReader(filename, Encoding.UTF8)) {
-							code = fs.ReadToEnd();
-						}
-						this.filename = filename;
-						aceView1.SetText(code);
-					}
-					aceView1.MoveCursorBy(lineno - 1, 0);
-					tabControl1.SelectedTab = RubyTabPage;
-				}
+				if (item == null)
+					SelectCodePos(filename, lineno);
 
 				SetRunningMode(RunningMode.Debug);
 				return;
 			}
+		}
+
+		private void SelectCodePos(string filename, int lineno)
+		{
+			tabControl1.SelectedTab = RubyTabPage;
+			if (this.filename != filename) {
+				string code;
+				using (var fs = new StreamReader(filename, Encoding.UTF8)) {
+					code = fs.ReadToEnd();
+				}
+				this.filename = filename;
+				aceView1.SetText(code);
+			}
+			aceView1.MoveCursorBy(lineno, 0);
 		}
 
 		private void Xterm_Stdio(object sender, StdioEventArgs e)

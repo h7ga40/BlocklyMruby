@@ -28,6 +28,8 @@ namespace BlocklyMruby
 			setColour(210);
 			appendValueInput("SWITCH")
 				.appendField("右の値が");
+			setPreviousStatement(true);
+			setNextStatement(true);
 			setMutator(new Mutator(Blockly, new[] {
 				SwitchCaseNumberConstBlock.type_name,
 				SwitchCaseNumberRangeBlock.type_name,
@@ -107,7 +109,8 @@ namespace BlocklyMruby
 					}
 				}
 			}
-			defaultCount_ = Bridge.Script.ParseInt(xmlElement.GetAttribute("default"), 10);
+			var count = xmlElement.GetAttribute("default");
+			defaultCount_ = count == null ? 0 : Bridge.Script.ParseInt(count, 10);
 			updateShape_();
 		}
 
@@ -404,6 +407,8 @@ namespace BlocklyMruby
 			setColour(210);
 			appendValueInput("SWITCH")
 				.appendField("右の値が");
+			setPreviousStatement(true);
+			setNextStatement(true);
 			setMutator(new Mutator(Blockly, new[] {
 				SwitchCaseTextConstBlock.type_name,
 				SwitchCaseTextRangeBlock.type_name,
@@ -482,7 +487,8 @@ namespace BlocklyMruby
 					}
 				}
 			}
-			defaultCount_ = Bridge.Script.ParseInt(xmlElement.GetAttribute("default"), 10);
+			var count = xmlElement.GetAttribute("default");
+			defaultCount_ = count == null ? 0 : Bridge.Script.ParseInt(count, 10);
 			updateShape_();
 		}
 
@@ -771,7 +777,7 @@ namespace BlocklyMruby
 				var argument1 = block.getFieldValue("CONST" + n);
 				if (argument1 != null) {
 					var when = new case_node.when_t() { body = branch };
-					when.value.Push(new int_node(this, Bridge.Script.ParseInt(argument1, 10)));
+					when.value.Push(new int_node(this, argument1 == null ? 0 : Bridge.Script.ParseInt(argument1, 10)));
 					code.Push(when);
 				}
 				else {
@@ -780,8 +786,8 @@ namespace BlocklyMruby
 					if ((min != null) && (max != null)) {
 						var when = new case_node.when_t() { body = branch };
 						when.value.Push(new dot2_node(this,
-							new int_node(this, Bridge.Script.ParseInt(min, 10)),
-							new int_node(this, Bridge.Script.ParseInt(max, 10))));
+							new int_node(this, min == null ? 0 : Bridge.Script.ParseInt(min, 10)),
+							new int_node(this, max == null ? 0 : Bridge.Script.ParseInt(max, 10))));
 						code.Push(when);
 					}
 				}

@@ -13,7 +13,8 @@ namespace BlocklyMruby
 		public node controls_repeat(ControlsRepeatBlock block)
 		{
 			// Repeat n times (internal number).
-			var repeats = new int_node(this, Bridge.Script.ParseInt(block.getFieldValue("TIMES"), 10));
+			var times = block.getFieldValue("TIMES");
+			var repeats = new int_node(this, times == null ? 0 : Bridge.Script.ParseInt(times, 10));
 			var branch = statementToCode(block, "DO");
 			if (branch == null) branch = new nil_node(this);
 			return new call_node(this, repeats, intern("times"), new JsArray<node>(), new block_node(this, new JsArray<node>(), branch, false));
