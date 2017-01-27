@@ -81,7 +81,7 @@ namespace BlocklyMruby
 			}
 			proceduresNoReturn.Sort(procTupleComparator_);
 			proceduresReturn.Sort(procTupleComparator_);
-			return new Tuple<string, string[], bool>[][] { proceduresNoReturn.ToArray(), proceduresReturn.ToArray() };
+			return new Tuple<string, string[], bool>[][] { proceduresNoReturn, proceduresReturn };
 		}
 
 		/// <summary>
@@ -237,7 +237,7 @@ namespace BlocklyMruby
 			var tuple = allProcedures(workspace);
 			populateProcedures(tuple[0], ProceduresCallnoreturnBlock.type_name);
 			populateProcedures(tuple[1], ProceduresCallreturnBlock.type_name);
-			return xmlList.ToArray();
+			return xmlList;
 		}
 
 		/// <summary>
@@ -261,7 +261,7 @@ namespace BlocklyMruby
 					}
 				}
 			}
-			return callers.ToArray();
+			return callers;
 		}
 
 		/// <summary>

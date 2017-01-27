@@ -327,7 +327,7 @@ namespace BlocklyMruby
 		public Action<Abstract> addChangeListener(Action<Abstract> func)
 		{
 			// Backwards compatability from before there could be multiple workspaces.
-			Console.WriteLine("Deprecated call to Blockly.addChangeListener, " +
+			App.WriteLine("Deprecated call to Blockly.addChangeListener, " +
 						 "use workspace.addChangeListener instead.");
 			return getMainWorkspace().addChangeListener(func);
 		}
@@ -659,7 +659,7 @@ namespace BlocklyMruby
 				for (int i = 0; i < len; i++) {
 					result.Push(Script.Get<string>(ret, i.ToString()));
 				}
-				return result.ToArray();
+				return result;
 			}
 		}
 
@@ -1435,7 +1435,7 @@ namespace BlocklyMruby
 				for (int i = 0; i < len; i++) {
 					result.Push(Script.Get(ret, i.ToString()));
 				}
-				return result.ToArray();
+				return result;
 			}
 			private set {
 				instance.ids = Bridge.Script.NewArray(value);
@@ -1485,7 +1485,7 @@ namespace BlocklyMruby
 				for (int i = 0; i < len; i++) {
 					result.Push(Script.Get(ret, i.ToString()));
 				}
-				return result.ToArray();
+				return result;
 			}
 			private set {
 				instance.ids = Bridge.Script.NewArray(value);
@@ -2616,7 +2616,7 @@ namespace BlocklyMruby
 				for (int i = 0; i < len; i++) {
 					result.Push(Script.Get<string>(ret, i.ToString()));
 				}
-				return result.ToArray();
+				return result;
 			}
 		}
 	}
@@ -3003,7 +3003,7 @@ namespace BlocklyMruby
 			for (int i = 0; i < len; i++) {
 				result.Push(Script.Get<string>(ret, i.ToString()));
 			}
-			return result.ToArray();
+			return result;
 		}
 
 		/// <summary>

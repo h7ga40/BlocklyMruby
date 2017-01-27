@@ -1,24 +1,23 @@
 ﻿using System;
 using System.Text;
+using Bridge;
 using Bridge.Html5;
 
 namespace BlocklyMruby
 {
 	internal class GlobalWorkspace : IClassWorkspace
 	{
-		private string identifier;
 		private BlocklyView view;
 		private Ruby rubyCode;
 
-		public GlobalWorkspace(BlocklyView view, string identifier)
+		public GlobalWorkspace(BlocklyView view)
 		{
 			this.view = view;
-			this.identifier = identifier;
 		}
 
 		public string Identifier {
 			get {
-				return identifier;
+				return view.Identifier;
 			}
 		}
 
@@ -36,7 +35,7 @@ namespace BlocklyMruby
 
 		public Workspace Workspace {
 			get {
-				return view.Blockly.getMainWorkspace();
+				return view.Workspace;
 			}
 		}
 
@@ -69,8 +68,8 @@ namespace BlocklyMruby
 
 		public string Template(string template)
 		{
-			template = template.Replace("%identifier%", identifier);
-			template = template.Replace("%attribute%", "Class1");
+			template = template.Replace("%identifier%", Identifier);
+			template = template.Replace("%attribute%", "Global");
 			template = template.Replace("%img%", GetImageUrl());
 			return template;
 		}
@@ -78,9 +77,19 @@ namespace BlocklyMruby
 		public string ToCode(string filename)
 		{
 			rubyCode = new Ruby(view.Blockly, filename);
-			view.Blockly.Script.changed = false;
+			rubyCode.init(Workspace);
+			var result = rubyCode.defineGlobal(Identifier, Workspace);
+			view.Changed = false;
+			return result;
+		}
+	}
 
-			return rubyCode.workspaceToCode(Workspace);
+	public partial class Ruby
+	{
+		internal string defineGlobal(string identifier, Workspace workspace)
+		{
+			var nodes = workspaceToNodes(workspace);
+			return finish(nodes);
 		}
 	}
 }

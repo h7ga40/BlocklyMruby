@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -36,7 +37,7 @@ namespace BlocklyMruby
 
 		public void OnTermData(string text)
 		{
-			InvokeScript("on_term_data", new object[] { text });
+			((TerminalHost)ObjectForScripting).write(text);
 		}
 
 		public event EventHandler<StdioEventArgs> Stdio;
@@ -51,12 +52,14 @@ namespace BlocklyMruby
 	public class TerminalHost : ScriptingHost
 	{
 		public dynamic term;
-		StringBuilder log = new StringBuilder();
 
 		public TerminalHost(XTermView view)
 			: base(view)
 		{
+			Out = new XTermWriter(this);
 		}
+
+		internal XTermWriter Out { get; private set; }
 
 		public void on_data(object data)
 		{
@@ -65,14 +68,32 @@ namespace BlocklyMruby
 
 		internal void flush()
 		{
-			System.Console.Write(log.ToString());
-			if (log.Length != 0)
-				log.Clear();
 		}
 
 		internal void write(string text)
 		{
-			log.Append(text);
+			term.write(text.Replace("\n", "\r\n"));
+		}
+	}
+
+	class XTermWriter : TextWriter
+	{
+		private TerminalHost term;
+
+		public XTermWriter(TerminalHost term)
+		{
+			this.term = term;
+		}
+
+		public override Encoding Encoding {
+			get {
+				return new UTF8Encoding(false);
+			}
+		}
+
+		public override void WriteLine(string value)
+		{
+			term.write(value + NewLine);
 		}
 	}
 }

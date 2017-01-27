@@ -403,7 +403,7 @@ namespace BlocklyMruby
 			for (int i = 0; i < len; i++) {
 				ret.Push(Script.Get(vars, i.ToString()));
 			}
-			return ret.ToArray();
+			return ret;
 		}
 
 		/// <summary>

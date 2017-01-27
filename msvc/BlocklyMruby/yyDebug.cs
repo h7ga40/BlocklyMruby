@@ -9,7 +9,7 @@ namespace BlocklyMruby
 
 		public yyDebugAdapter(TextWriter Out) { this.Out = Out; }
 
-		public yyDebugAdapter() : this(Console.Out) { }
+		public yyDebugAdapter() : this(App.Out) { }
 
 		public void push(int state, object value)
 		{

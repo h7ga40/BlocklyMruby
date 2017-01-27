@@ -1,6 +1,7 @@
 if (typeof external.CreateXMLHttpRequest != "undefined") {
-	window.XMLHttpRequest = function () {
-		return external.CreateXMLHttpRequest();
+	window.console = {
+		log: function (text) { external.console_log(text); },
+		warn: function (text) { external.console_warn(text); }
 	}
 	window.onerror = function (msg, src, line, column, _exc) {
 		var exc = external.new_object();
@@ -15,10 +16,29 @@ if (typeof external.CreateXMLHttpRequest != "undefined") {
 		nullPtr(); // スタックトレースを表示するためnull参照
 		return external.new_error();
 	}
-	window.console = {
-		log: function (text) { external.console_log(text); },
-		warn: function (text) { external.console_warn(text); }
-	};
+	window.XMLHttpRequest = function () {
+		var ret = {
+			instance: null,
+			abort: function (text) { this.instance.abort(text); },
+			getAllResponseHeaders: function () { return this.instance.getAllResponseHeaders(); },
+			onabort: null,
+			onload: null,
+			onreadystatechange: null,
+			open: function (type, url, async, username, password) { this.instance.open(type, url, async, username, password); },
+			overrideMimeType: function (mimeType) { this.instance.overrideMimeType(mimeType); },
+			readyState: null,
+			response: null,
+			responseText: null,
+			responseType: null,
+			send: function (header) { this.instance.send(header); },
+			setRequestHeader: function (name, value) { this.instance.setRequestHeader(name, value); },
+			status: null,
+			statusText: null,
+		}
+		ret.instance = window.external.CreateXMLHttpRequest();
+		ret.instance.instance = ret;
+		return ret;
+	}
 }
 if (typeof external.CreateWebSocket != "undefined") {
 	global.WebSocket = function (url, protocol) {
@@ -98,40 +118,40 @@ Bridge.RegExpEscape = function (s) { return RegExp.escape(s); }
 Bridge.ParseXML = function (data) {
 	return (new window.DOMParser()).parseFromString(data, "text/xml");
 }
-Bridge.jqNew = function(v) {
+Bridge.jqNew = function (v) {
 	return $(v);
 }
-Bridge.Select = function(selector) {
+Bridge.Select = function (selector) {
 	return $(selector);
 }
-Bridge.Select2 = function(selector, parent) {
+Bridge.Select2 = function (selector, parent) {
 	return $(selector, parent);
 }
-Bridge.Attr = function(obj, attr) {
+Bridge.Attr = function (obj, attr) {
 	return obj.attr(attr);
 }
-Bridge.Attr2 = function(obj, attr, val) {
+Bridge.Attr2 = function (obj, attr, val) {
 	obj.attr(attr, val);
 }
-Bridge.ReplaceWith = function(obj, str) {
+Bridge.ReplaceWith = function (obj, str) {
 	obj.replaceWith(str);
 }
-Bridge.Val = function(obj) {
+Bridge.Val = function (obj) {
 	return obj.val();
 }
-Bridge.Val1 = function(obj, val) {
+Bridge.Val1 = function (obj, val) {
 	obj.val(val);
 }
-Bridge.jqGet = function(obj) {
+Bridge.jqGet = function (obj) {
 	return obj.get();
 }
-Bridge.jqGet2 = function(obj, val) {
+Bridge.jqGet2 = function (obj, val) {
 	return obj.get(val);
 }
-Bridge.Parent = function(obj) {
+Bridge.Parent = function (obj) {
 	return obj.parent();
 }
-Bridge.AppendChild = function(obj, ele) {
+Bridge.AppendChild = function (obj, ele) {
 	obj.appendChild(ele);
 }
 Bridge.Text = function (obj) {
@@ -146,16 +166,16 @@ Bridge.Html = function (obj) {
 Bridge.Html2 = function (obj, html) {
 	obj.html(html);
 }
-Bridge.RemoveAttr = function(obj, attr) {
+Bridge.RemoveAttr = function (obj, attr) {
 	obj.removeAttr(attr);
 }
-Bridge.Click = function(obj, state, callback) {
+Bridge.Click = function (obj, state, callback) {
 	obj.click(state, callback);
 }
-Bridge.ButtonToggle = function(obj) {
+Bridge.ButtonToggle = function (obj) {
 	return obj.button('toggle');
 }
-Bridge.Is = function(obj, val) {
+Bridge.Is = function (obj, val) {
 	return obj.is(val);
 }
 Bridge.Children = function (obj) {

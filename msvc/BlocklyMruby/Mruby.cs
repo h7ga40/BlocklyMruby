@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Bridge;
 
 namespace BlocklyMruby
 {
@@ -58,7 +59,6 @@ namespace BlocklyMruby
 			_fwrite = fwrite;
 			_fflush = fflush;
 			_abort = abort;
-
 			set_func(_clearerr, _feof, _getc, _fwrite, _fflush, _abort);
 		}
 
@@ -67,77 +67,26 @@ namespace BlocklyMruby
 			Stdio?.Invoke(this, new StdioEventArgs(type, text));
 		}
 
-		public bool mruby(string[] args, Action<int> callback)
+		public bool run(string[] args, Action<int> callback)
 		{
 			if (IsRunning)
 				return false;
 
-			var temp = new List<string>();
-			temp.Add("mruby");
-			temp.AddRange(args);
-			args = temp.ToArray();
-
 			_Thread = new Thread(() => {
 				int ret = -1;
-				WriteStdout(StdioType.Out, String.Join(" ", args) + "\n");
+				WriteStdout(StdioType.Out, "> " + String.Join(" ", args) + "\n");
 				try {
-					ret = mruby_main(temp.Count, args);
-				}
-				catch (Exception) {
-					ret = -1;
-				}
-				WriteStdout(StdioType.Out, $"exit {ret}\n");
-				_Thread = null;
-				callback(ret);
-			});
-			_Thread.Start();
-
-			return true;
-		}
-
-		public bool mrbc(string[] args, Action<int> callback)
-		{
-			if (IsRunning)
-				return false;
-
-			var temp = new List<string>();
-			temp.Add("mrbc");
-			temp.AddRange(args);
-			args = temp.ToArray();
-
-			_Thread = new Thread(() => {
-				int ret = -1;
-				WriteStdout(StdioType.Out, String.Join(" ", args) + "\n");
-				try {
-					ret = mrbc_main(temp.Count, args);
-				}
-				catch (Exception) {
-					ret = -1;
-				}
-				WriteStdout(StdioType.Out, $"exit {ret}\n");
-				_Thread = null;
-				callback(ret);
-			});
-			_Thread.Start();
-
-			return true;
-		}
-
-		public bool mrdb(string[] args, Action<int> callback)
-		{
-			if (IsRunning)
-				return false;
-
-			var temp = new List<string>();
-			temp.Add("mrdb");
-			temp.AddRange(args);
-			args = temp.ToArray();
-
-			_Thread = new Thread(() => {
-				int ret = -1;
-				WriteStdout(StdioType.Out, String.Join(" ", args) + "\n");
-				try {
-					ret = mrdb_main(temp.Count, args);
+					switch (args[0]) {
+					case "mruby":
+						ret = mruby_main(args.Length, args);
+						break;
+					case "mrbc":
+						ret = mrbc_main(args.Length, args);
+						break;
+					case "mrdb":
+						ret = mrdb_main(args.Length, args);
+						break;
+					}
 				}
 				catch (Exception) {
 					ret = -1;

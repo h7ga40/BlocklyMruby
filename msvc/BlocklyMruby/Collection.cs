@@ -27,19 +27,19 @@ namespace BlocklyMruby
 		public EventHandler OnReset;
 		public EventHandler OnChange;
 
-		internal void Add(T eobject)
+		internal void Add(T item)
 		{
-			List.Push(eobject);
+			List.Push(item);
 
 			if (OnAdd != null)
 				OnAdd(this, EventArgs.Empty);
 		}
 
-		internal void Remove(T eobject)
+		internal void Remove(T item)
 		{
-			var i = List.IndexOf(eobject);
+			var i = List.IndexOf(item);
 			if (i >= 0)
-				List.RemoveAt(i);
+				List.Splice(i, 1);
 
 			if (OnRemove != null)
 				OnRemove(this, EventArgs.Empty);
@@ -47,7 +47,7 @@ namespace BlocklyMruby
 
 		internal void Reset()
 		{
-			List.Clear();
+			List.Splice(0, List.Length);
 
 			if (OnReset != null)
 				OnReset(this, EventArgs.Empty);
@@ -55,7 +55,7 @@ namespace BlocklyMruby
 
 		internal void Reset(IEnumerable<T> n)
 		{
-			List.Clear();
+			List.Splice(0, List.Length);
 			List.AddRange(n);
 
 			if (OnReset != null)

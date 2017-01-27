@@ -117,9 +117,9 @@ namespace BlocklyMruby
 		public void domToMutation(Element xmlElement)
 		{
 			var count = xmlElement.GetAttribute("elseif");
-			this.elseifCount_ = count == null ? 0 : count == null ? 0 : Bridge.Script.ParseInt(count, 10);
+			this.elseifCount_ = count == null ? 0 : Bridge.Script.ParseInt(count, 10);
 			count = xmlElement.GetAttribute("else");
-			this.elseCount_ = count == null ? 0 : count == null ? 0 : Bridge.Script.ParseInt(count, 10);
+			this.elseCount_ = count == null ? 0 : Bridge.Script.ParseInt(count, 10);
 			this.updateShape_();
 		}
 

@@ -7,19 +7,17 @@ namespace BlocklyMruby
 {
 	internal class ClassWorkspace : IClassWorkspace
 	{
-		private string identifier;
 		private BlocklyView view;
 		private Ruby rubyCode;
 
-		public ClassWorkspace(BlocklyView view, string identifier)
+		public ClassWorkspace(BlocklyView view)
 		{
 			this.view = view;
-			this.identifier = identifier;
 		}
 
 		public string Identifier {
 			get {
-				return identifier;
+				return view.Identifier;
 			}
 		}
 
@@ -37,7 +35,7 @@ namespace BlocklyMruby
 
 		public Workspace Workspace {
 			get {
-				return view.Blockly.getMainWorkspace();
+				return view.Workspace;
 			}
 		}
 
@@ -70,18 +68,18 @@ namespace BlocklyMruby
 
 		public string Template(string template)
 		{
-			template = template.Replace("%identifier%", identifier);
-			template = template.Replace("%attribute%", "Class1");
+			template = template.Replace("%identifier%", Identifier);
+			template = template.Replace("%attribute%", "Class");
 			template = template.Replace("%img%", GetImageUrl());
 			return template;
 		}
 
 		public string ToCode(string filename)
 		{
-			var _RubyCode = new Ruby(view.Blockly, filename);
-			_RubyCode.init(Workspace);
-			var result = _RubyCode.defineClass(identifier, Workspace);
-			((BlocklyScript)view.Script).changed = false;
+			rubyCode = new Ruby(view.Blockly, filename);
+			rubyCode.init(Workspace);
+			var result = rubyCode.defineClass(Identifier, Workspace);
+			view.Changed = false;
 			return result;
 		}
 	}

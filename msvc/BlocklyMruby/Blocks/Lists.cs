@@ -444,10 +444,9 @@ namespace BlocklyMruby
 			};
 			this.setHelpUrl(Msg.LISTS_GET_INDEX_HELPURL);
 			this.setColour(Lists.HUE);
-			var modeMenu = new FieldDropdown(Blockly, MODE);
-			modeMenu.setValidator((value) => {
+			var modeMenu = new FieldDropdown(Blockly, MODE, (value) => {
 				var isStatement = (value == "REMOVE");
-				((ListsGetIndexBlock)modeMenu.sourceBlock_).updateStatement_(isStatement);
+				this.updateStatement_(isStatement);
 				return Bridge.Script.Undefined;
 			});
 			this.appendValueInput("VALUE")
@@ -600,15 +599,13 @@ namespace BlocklyMruby
 			else {
 				this.appendDummyInput("AT");
 			}
-			var menu = new FieldDropdown(Blockly, this.WHERE_OPTIONS);
-			menu.setValidator((value) => {
+			var menu = new FieldDropdown(Blockly, this.WHERE_OPTIONS, (value) => {
 				var newAt = (value == "FROM_START") || (value == "FROM_END");
 				// The "isAt" variable is available due to this function being a closure.
 				if (newAt != isAt) {
-					var block = menu.sourceBlock_;
-					((ListsGetIndexBlock)block).updateAt_(newAt);
+					this.updateAt_(newAt);
 					// This menu has been destroyed and replaced.  Update the replacement.
-					block.setFieldValue(value, "WHERE");
+					this.setFieldValue(value, "WHERE");
 					return null;
 				}
 				return Bridge.Script.Undefined;
@@ -755,15 +752,13 @@ namespace BlocklyMruby
 			else {
 				this.appendDummyInput("AT");
 			}
-			var menu = new FieldDropdown(Blockly, this.WHERE_OPTIONS);
-			menu.setValidator((value) => {
+			var menu = new FieldDropdown(Blockly, this.WHERE_OPTIONS, (value) => {
 				var newAt = (value == "FROM_START") || (value == "FROM_END");
 				// The "isAt" variable is available due to this function being a closure.
 				if (newAt != isAt) {
-					var block = menu.sourceBlock_;
-					((ListsSetIndexBlock)block).updateAt_(newAt);
+					this.updateAt_(newAt);
 					// This menu has been destroyed and replaced.  Update the replacement.
-					block.setFieldValue(value, "WHERE");
+					this.setFieldValue(value, "WHERE");
 					return null;
 				}
 				return Bridge.Script.Undefined;
@@ -878,17 +873,15 @@ namespace BlocklyMruby
 			else {
 				this.appendDummyInput("AT" + n);
 			}
-			var menu = new FieldDropdown(Blockly, WHERE_OPTIONS[n - 1]);
-			menu.setValidator((value) => {
+			var menu = new FieldDropdown(Blockly, WHERE_OPTIONS[n - 1], (value) => {
 				var newAt = (value == "FROM_START") || (value == "FROM_END");
 				// The "isAt" variable is available due to this function being a
 				// closure.
 				if (newAt != isAt) {
-					var block = menu.sourceBlock_;
-					((ListsGetSublistBlock)block).updateAt_(n, newAt);
+					this.updateAt_(n, newAt);
 					// This menu has been destroyed and replaced.
 					// Update the replacement.
-					block.setFieldValue(value, "WHERE" + n);
+					this.setFieldValue(value, "WHERE" + n);
 					return null;
 				}
 				return Bridge.Script.Undefined;

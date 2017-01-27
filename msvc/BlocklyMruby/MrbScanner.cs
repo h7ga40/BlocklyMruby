@@ -3624,14 +3624,14 @@ namespace BlocklyMruby
 #if false
 		static void printf(string format, params object[] args)
 		{
-			Console.Write(format, args);
+			App.Write(format, args);
 		}
 
 		static object stdout;
 
 		static void putc(char c, object output)
 		{
-			Console.Write(c);
+			App.Write(c);
 		}
 
 		static void dump_prefix(node tree, int offset)
@@ -4554,18 +4554,12 @@ namespace BlocklyMruby
 
 		void yyConsoleOut.yyWarning(string message, object[] expected)
 		{
-			if (App.Term == null)
-				return;
-
-			App.Term.write($"{filename}({lineno},{column}): warning {String.Format(message, expected)}\r\n");
+			App.WriteLine($"{filename}({lineno},{column}): warning {String.Format(message, expected)}");
 		}
 
 		void yyConsoleOut.yyError(string message, object[] expected)
 		{
-			if (App.Term == null)
-				return;
-
-			App.Term.write($"{filename}({lineno},{column}): error {String.Format(message, expected)}\r\n");
+			App.WriteLine($"{filename}({lineno},{column}): error {String.Format(message, expected)}");
 		}
 	}
 }

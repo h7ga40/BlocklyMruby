@@ -317,10 +317,9 @@ namespace BlocklyMruby
 			this.setColour(Math.HUE);
 			this.appendValueInput("NUMBER_TO_CHECK")
 				.setCheck("Number");
-			var dropdown = new FieldDropdown(Blockly, PROPERTIES);
-			dropdown.setValidator((option) => {
+			var dropdown = new FieldDropdown(Blockly, PROPERTIES, (option) => {
 				var divisorInput = (option == "DIVISIBLE_BY");
-				((MathNumberPropertyBlock)dropdown.sourceBlock_).updateShape_(divisorInput);
+				this.updateShape_(divisorInput);
 				return Bridge.Script.Undefined;
 			});
 			this.appendDummyInput()

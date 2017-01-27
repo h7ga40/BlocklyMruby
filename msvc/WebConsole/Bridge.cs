@@ -23,14 +23,12 @@ namespace Bridge
 	{
 		public object bridge;
 		WebConsole _View;
-		WebBrowserReadyState _ReadyState;
-		int _Status;
 		string _Type;
 		string _Url;
 		bool _Async;
-		byte[] _Response;
-		string _ResponseText;
 		string _ContentType;
+
+		public dynamic instance;
 
 		public ScriptingHost(WebConsole view)
 		{
@@ -71,12 +69,18 @@ namespace Bridge
 
 		public void console_log(object text)
 		{
-			System.Diagnostics.Debug.WriteLine(text.ToString());
+			if (text == null)
+				System.Diagnostics.Debug.WriteLine("null");
+			else
+				System.Diagnostics.Debug.WriteLine(text.ToString());
 		}
 
 		public void console_warn(object text)
 		{
-			System.Diagnostics.Debug.WriteLine(text.ToString());
+			if (text == null)
+				System.Diagnostics.Debug.WriteLine("null");
+			else
+				System.Diagnostics.Debug.WriteLine(text.ToString());
 		}
 
 		public object Error { get; set; }
@@ -100,12 +104,12 @@ namespace Bridge
 
 		private void SetReadyState(WebBrowserReadyState readyState)
 		{
-			_ReadyState = readyState;
+			instance.readyState = readyState;
 			try {
-				if (onreadystatechange != null)
-					onreadystatechange.call(null, true);
+				if ((instance.onreadystatechange != null) && !(instance.onreadystatechange is DBNull))
+					instance.onreadystatechange.call(null, true);
 			}
-			catch (System.Runtime.InteropServices.COMException e) {
+			catch (COMException e) {
 				System.Diagnostics.Debug.WriteLine(e.Message);
 			}
 		}
@@ -115,16 +119,19 @@ namespace Bridge
 			if (url.StartsWith("./"))
 				url = url.Substring(2);
 
-			if (!_View.ResourceReader.GetResource(url, out _Response)) {
-				_Status = 404;
+			byte[] response;
+			if (!_View.ResourceReader.GetResource(url, out response)) {
+				instance.status = 404;
 				SetReadyState(WebBrowserReadyState.Complete);
 				return;
 			}
+			instance.response = response;
 
 			switch (System.IO.Path.GetExtension(url)) {
 			case "html": _ContentType = "text/html"; break;
 			case "css": _ContentType = "text/css"; break;
 			case "js": _ContentType = "text/javascript"; break;
+			case "xml": _ContentType = "text/xml"; break;
 			case "gif": _ContentType = "image/gif"; break;
 			case "jpeg": _ContentType = "image/jpeg"; break;
 			case "png": _ContentType = "image/png"; break;
@@ -132,21 +139,17 @@ namespace Bridge
 			case "json": _ContentType = "application/json"; break;
 			default: _ContentType = "text/plane"; break;
 			}
-			_ResponseText = Encoding.UTF8.GetString(_Response);
+			instance.responseText = Encoding.UTF8.GetString(instance.response);
 
-			_Status = 200;
+			instance.status = 200;
 			SetReadyState(WebBrowserReadyState.Complete);
-		}
-
-		public int readyState { get { return (int)_ReadyState; } }
-		public int status { get { return _Status; } }
-		public string statusText { get { return (_Status == 200) ? "OK" : "Not Found"; } }
-		public string responseText { get { return _ResponseText; } }
-		public dynamic onreadystatechange { get; set; }
-
-		public void open(string type, string url, bool async)
-		{
-			open(type, url, async, "", "");
+			try {
+				if ((instance.onload != null) && !(instance.onload is DBNull))
+					instance.onload.call(this, null);
+			}
+			catch (COMException e) {
+				System.Diagnostics.Debug.WriteLine(e.Message);
+			}
 		}
 
 		public void open(string type, string url, bool async, string username, string password)
@@ -155,11 +158,11 @@ namespace Bridge
 			_Url = url;
 			_Async = async;
 
-			_Status = 404;
+			instance.status = 404;
 			SetReadyState(WebBrowserReadyState.Loading);
 		}
 
-		public void send(object body)
+		public void send(object header)
 		{
 			SetReadyState(WebBrowserReadyState.Loaded);
 
@@ -167,6 +170,13 @@ namespace Bridge
 				_View.BeginInvoke(new MethodInvoker(() => { Load(_Url); }));
 			else
 				Load(_Url);
+		}
+
+		Dictionary<string, object> headers = new Dictionary<string, object>();
+
+		public void setRequestHeader(string name, object value)
+		{
+			headers[name] = value;
 		}
 
 		public string getAllResponseHeaders()
@@ -212,6 +222,12 @@ namespace Bridge
 		public string NullOrString(object text)
 		{
 			return ((text == null) || (text is DBNull)) ? "null" : text.ToString();
+		}
+
+		public void abort(string text)
+		{
+			if ((instance.onabort != null) && !(instance.onabort is DBNull))
+				instance.onabort.call(this);
 		}
 	}
 
@@ -641,35 +657,98 @@ namespace Bridge
 		}
 	}
 
-	public class JsArray<T> : List<T>
+	public class JsArray<T> : IEnumerable<T>
 	{
+		private List<T> _List;
+
 		public JsArray()
-			: base()
 		{
+			_List = new List<T>();
 		}
 
 		public JsArray(int capacity)
-			: base(capacity)
 		{
+			_List = new List<T>(capacity);
 		}
 
 		public JsArray(IEnumerable<T> collection)
-			: base(collection)
 		{
+			_List = new List<T>(collection);
 		}
 
-		public int Length { get { return Count; } }
+		public int Length { get { return _List.Count; } }
+
+		public bool Contains(T item)
+		{
+			return _List.Contains(item);
+		}
+
+		public T this[int index] {
+			get { return _List[index]; }
+			set { _List[index] = value; }
+		}
 
 		public void Push(T item)
 		{
-			Add(item);
+			_List.Add(item);
+		}
+
+		public void Add(T item)
+		{
+			_List.Add(item);
 		}
 
 		public JsArray<T> Concat(IEnumerable<T> items)
 		{
 			var result = new JsArray<T>(this);
-			result.AddRange(items);
+			result._List.AddRange(items);
 			return result;
+		}
+
+		public IEnumerator<T> GetEnumerator()
+		{
+			return _List.GetEnumerator();
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return _List.GetEnumerator();
+		}
+
+		public int IndexOf(T item)
+		{
+			return _List.IndexOf(item);
+		}
+
+		public void Splice(int start, int len)
+		{
+			if (start == 0 && len == _List.Count)
+				_List.Clear();
+			else {
+				for (int i = 0; i < len; i++) {
+					_List.RemoveAt(start);
+				}
+			}
+		}
+
+		public void AddRange(IEnumerable<T> collection)
+		{
+			_List.AddRange(collection);
+		}
+
+		public void Sort(Comparison<T> comparison)
+		{
+			_List.Sort(comparison);
+		}
+
+		public static implicit operator T[] (JsArray<T> target)
+		{
+			return target._List.ToArray();
+		}
+
+		public bool Remove(T name)
+		{
+			throw new NotImplementedException();
 		}
 	}
 
@@ -1381,6 +1460,7 @@ namespace Bridge.jQuery2
 	public class AjaxOptions
 	{
 		public string Url;
+		public string DataType;
 		public Action<object, string, jqXHR> Success;
 		public Action<jqXHR, string, string> Error;
 	}

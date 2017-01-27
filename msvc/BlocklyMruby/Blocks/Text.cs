@@ -549,15 +549,13 @@ namespace BlocklyMruby
 				this.appendDummyInput("TAIL")
 					.appendField(Msg.TEXT_CHARAT_TAIL);
 			}
-			var menu = new FieldDropdown(Blockly, this.WHERE_OPTIONS);
-			menu.setValidator((value) => {
+			var menu = new FieldDropdown(Blockly, this.WHERE_OPTIONS, (value) => {
 				var newAt = (value == "FROM_START") || (value == "FROM_END");
 				// The "isAt" variable is available due to this function being a closure.
 				if (newAt != isAt) {
-					var block = menu.sourceBlock_;
-					((TextCharAtBlock)block).updateAt_(newAt);
+					this.updateAt_(newAt);
 					// This menu has been destroyed and replaced.  Update the replacement.
-					block.setFieldValue(value, "WHERE");
+					this.setFieldValue(value, "WHERE");
 					return null;
 				}
 				return Bridge.Script.Undefined;
@@ -673,17 +671,15 @@ namespace BlocklyMruby
 				this.appendDummyInput("TAIL")
 					.appendField(Msg.TEXT_GET_SUBSTRING_TAIL);
 			}
-			var menu = new FieldDropdown(Blockly, WHERE_OPTIONS[n - 1]);
-			menu.setValidator((value) => {
+			var menu = new FieldDropdown(Blockly, WHERE_OPTIONS[n - 1], (value) => {
 				var newAt = (value == "FROM_START") || (value == "FROM_END");
 				// The "isAt" variable is available due to this function being a
 				// closure.
 				if (newAt != isAt) {
-					var block = menu.sourceBlock_;
-					((TextGetSubstringBlock)block).updateAt_(n, newAt);
+					this.updateAt_(n, newAt);
 					// This menu has been destroyed and replaced.
 					// Update the replacement.
-					block.setFieldValue(value, "WHERE" + n);
+					this.setFieldValue(value, "WHERE" + n);
 					return null;
 				}
 				return Bridge.Script.Undefined;

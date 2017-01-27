@@ -12,13 +12,16 @@ namespace BlocklyMruby
 {
 	public class BlocklyView : WebConsole
 	{
+		public string Identifier { get; set; }
 		public Blockly Blockly { get; private set; }
+		public WorkspaceSvg Workspace { get { return Blockly.mainWorkspace; } }
 		public Dictionary<string, FlyoutCategoryHandler> FlyoutCategoryHandlers = new Dictionary<string, FlyoutCategoryHandler>();
 		public event EventHandler<Create> BlockCreated;
 		public event EventHandler<Delete> BlockDeleted;
 		public event EventHandler<Change> BlockChanged;
 		public event EventHandler<Move> BlockMoveed;
 		public event EventHandler<Ui> UiEvent;
+		public bool Changed = true;
 
 		public BlocklyView()
 		{
@@ -154,15 +157,14 @@ namespace BlocklyMruby
 
 		internal void Init2()
 		{
-			var workspace = Blockly.getMainWorkspace();
-			workspace.addChangeListener(Workspace_Changed);
+			Workspace.addChangeListener(Workspace_Changed);
 		}
 
 		private void Workspace_Changed(Abstract e)
 		{
 			var Blockly = e.Blockly;
 			var Script = Blockly.Script;
-			Script.changed = true;
+			Changed = true;
 
 			switch (e.type) {
 			case BlocklyMruby.Events.CREATE:
@@ -196,7 +198,7 @@ namespace BlocklyMruby
 			var toolbox = Document.GetElementById("toolbox");
 			workspace.ReloadToolbox(toolbox);
 
-			Blockly.mainWorkspace.updateToolbox(toolbox);
+			Workspace.updateToolbox(toolbox);
 		}
 
 		public virtual Element[] FlyoutCategory(string name, Workspace workspace)
@@ -377,10 +379,10 @@ namespace BlocklyMruby
 		public void dump_svg_element(object obj, string text, object element)
 		{
 			var block = Script.CreateBlock(obj);
-			Console.Write(block.type + "(" + block.id + ")" + text + " :");
+			App.Write(block.type + "(" + block.id + ")" + text + " :");
 			var target = (dynamic)element;
 			var owner = target.parentNode();
-			Console.Write(" "
+			App.Write(" "
 				+ $"class: {NullOrString(target.getAttribute("class"))} "
 				+ $"stroke: {NullOrString(target.getAttribute("stroke"))} "
 				+ $"transform: {NullOrString(target.getAttribute("transform"))} "
@@ -390,7 +392,7 @@ namespace BlocklyMruby
 				+ $"d: {NullOrString(target.getAttribute("d"))} ");
 			if ((owner != null) && !(owner is DBNull)) {
 				var clsname = NullOrString(owner.getAttribute("class"));
-				Console.Write(" "
+				App.Write(" "
 					+ $"{clsname}.class: {clsname} "
 					+ $"{clsname}.transform: {NullOrString(owner.getAttribute("transform"))} "
 					+ $"{clsname}.requiredFeatures: {NullOrString(owner.getAttribute("requiredFeatures"))} "
@@ -399,7 +401,7 @@ namespace BlocklyMruby
 					+ $"{clsname}.d: {NullOrString(owner.getAttribute("d"))} "
 				);
 			}
-			Console.WriteLine();
+			App.WriteLine();
 		}
 
 		public bool names_equals(object name1, object name2)
@@ -467,7 +469,6 @@ namespace BlocklyMruby
 		Dictionary<string, Type> m_BlockTypes = new Dictionary<string, Type>();
 		public new BlocklyScriptingHost ScriptHost { get { return (BlocklyScriptingHost)base.ScriptHost; } }
 		public Blockly Blockly { get; }
-		public bool changed = true;
 
 		public BlocklyScript(BlocklyScriptingHost scriptHost)
 			: base(scriptHost)

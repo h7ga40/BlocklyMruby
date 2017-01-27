@@ -92,7 +92,7 @@ namespace BlocklyMruby
 			foreach (var name in variableHash.Keys) {
 				variableList.Push(variableHash[name]);
 			}
-			return variableList.ToArray();
+			return variableList;
 		}
 
 		/// <summary>
@@ -200,7 +200,7 @@ namespace BlocklyMruby
 					}
 				}
 			}
-			return xmlList.ToArray();
+			return xmlList;
 		}
 
 		/// <summary>

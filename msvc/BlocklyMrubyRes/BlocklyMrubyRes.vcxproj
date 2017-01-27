@@ -169,7 +169,6 @@
     <None Include="bootstrap\js\ie-emulation-modes-warning.js" />
     <None Include="bootstrap\js\ie10-viewport-bug-workaround.js" />
     <None Include="bootstrap\js\ie8-responsive-file-warning.js" />
-    <None Include="bootstrap\js\npm.js" />
     <None Include="class_selector.html" />
     <None Include="js\blockly-bridge.js" />
     <None Include="js\blockly.js" />

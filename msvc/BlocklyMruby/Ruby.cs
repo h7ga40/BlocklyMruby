@@ -305,7 +305,7 @@ namespace BlocklyMruby
 
 				result.Push(new Tuple<string, string>(node.workspace_id, node.block_id));
 			}
-			return result.ToArray();
+			return result;
 		}
 
 		public Tuple<string, string>[] GetBlockId(string filename, int lineno, int column)
@@ -334,15 +334,12 @@ namespace BlocklyMruby
 
 				result.Push(new Tuple<string, string>(node.workspace_id, node.block_id));
 			}
-			return result.ToArray();
+			return result;
 		}
 
 		public void yyError(string message, params object[] expected)
 		{
-			if (App.Term == null)
-				return;
-
-			App.Term.write($"{filename}({lineno},{column}): error {String.Format(message, expected)}\r\n");
+			App.WriteLine($"{filename}({lineno},{column}): error {String.Format(message, expected)}");
 		}
 	}
 }

@@ -23,9 +23,11 @@ namespace BlocklyMruby
 
 			SetRunningMode(RunningMode.None);
 
-			App.MainForm = this;
+			Collections.ClassWorkspaces = new Collection<IClassWorkspace>();
+			Views.MainMenuView = this;
 			Views.ClassSelectorView = classSelectorView1;
 
+			blocklyView1.Identifier = "Global";
 			blocklyView1.DocumentLoaded += BlocklyView1_DocumentLoaded;
 			classSelectorView1.DocumentLoaded += ClassSelectorView1_DocumentLoaded;
 			classSelectorView1.Selected += ClassSelectorView1_Selected;
@@ -55,7 +57,8 @@ namespace BlocklyMruby
 
 		private void BlocklyView1_DocumentLoaded(object sender, EventArgs e)
 		{
-			var workspace = new GlobalWorkspace(blocklyView1, "Global");
+			var workspace = new GlobalWorkspace(blocklyView1);
+			Collections.GlobalWorkspace = workspace;
 			Collections.ClassWorkspaces.Add(workspace);
 			blocklyView1.ReloadToolbox(workspace);
 		}
@@ -139,9 +142,9 @@ namespace BlocklyMruby
 			var item = classSelectorView1.Current;
 			if (item != null) {
 				var view = item.View;
-				if (view.Blockly.Script.changed || item.RubyCode == null) {
+				if (view.Changed || item.RubyCode == null) {
 					var rubyfile = Path.ChangeExtension(Path.GetTempFileName(), "rb");
-					var workspace = view.Blockly.getMainWorkspace();
+					var workspace = view.Workspace;
 					code = item.ToCode(rubyfile);
 
 					using (var fs = new StreamWriter(rubyfile, false, new UTF8Encoding(false))) {
@@ -163,6 +166,7 @@ namespace BlocklyMruby
 		internal BlocklyView NewBlocklyView(string identifier)
 		{
 			var view = new BlocklyView();
+			view.Identifier = identifier;
 			TabPage Tab = new TabPage(identifier);
 			Tab.Controls.Add(view);
 			view.Dock = DockStyle.Fill;
@@ -170,7 +174,7 @@ namespace BlocklyMruby
 			return view;
 		}
 
-		internal void RemoveEObjectWorkspace(IClassWorkspace item)
+		internal void RemoveWorkspace(IClassWorkspace item)
 		{
 			var view = item.View;
 			tabControl1.TabPages.Remove((TabPage)view.Parent);
@@ -187,7 +191,7 @@ namespace BlocklyMruby
 				return;
 
 			var view = item.View;
-			var workspace = view.Blockly.getMainWorkspace();
+			var workspace = view.Workspace;
 			Bridge.Html5.Element xml = null;
 			using (var fs = new StreamReader(openFileDialog1.FileName, Encoding.UTF8)) {
 				var code = fs.ReadToEnd();
@@ -208,7 +212,7 @@ namespace BlocklyMruby
 				return;
 
 			var view = item.View;
-			var workspace = view.Blockly.getMainWorkspace();
+			var workspace = view.Workspace;
 			var xml = view.Blockly.Xml.workspaceToDom(workspace);
 			var code = xml.OuterHTML;
 			using (var fs = new StreamWriter(saveFileDialog1.FileName, false, Encoding.UTF8)) {
@@ -218,20 +222,23 @@ namespace BlocklyMruby
 
 		private static void GetCompileArgs(JsArray<string> rubyfiles, out string mrbfile)
 		{
-			var i = rubyfiles.Count;
-			rubyfiles.Add("placeholder.mrb");
+			var i = rubyfiles.Length;
+			rubyfiles.Push("placeholder.mrb");
 
 			var list = new JsArray<IClassWorkspace>();
 			foreach (var item in Collections.ClassWorkspaces) {
-				list.Add(item);
+				if (item == Collections.GlobalWorkspace)
+					continue;
+				list.Push(item);
 			}
+			list.Push(Collections.GlobalWorkspace);
 
 			foreach (var item in list) {
 				string rubyfile;
 				var view = item.View;
-				if (view.Blockly.Script.changed || item.RubyCode == null) {
+				if (view.Changed || item.RubyCode == null) {
 					rubyfile = Path.ChangeExtension(Path.GetTempFileName(), "rb");
-					var workspace = view.Blockly.getMainWorkspace();
+					var workspace = view.Workspace;
 					var code = item.ToCode(rubyfile);
 
 					using (var fs = new StreamWriter(rubyfile, false, new UTF8Encoding(false))) {
@@ -252,13 +259,13 @@ namespace BlocklyMruby
 			if (Collections.ClassWorkspaces.Length == 0)
 				return;
 
-			var rubyfiles = new JsArray<string>() { "-e", "-o" };
+			var rubyfiles = new JsArray<string>() { "mrbc", "-e", "-o" };
 			string mrbfile;
 			GetCompileArgs(rubyfiles, out mrbfile);
 
 			SetRunningMode(RunningMode.Compile);
 
-			var run = _Mruby.mrbc(rubyfiles.ToArray(), (exitCode) => {
+			var run = _Mruby.run(rubyfiles, (exitCode) => {
 				BeginInvoke(new Action<string, int>(CompileDoneInRunMode), mrbfile, exitCode);
 			});
 
@@ -275,7 +282,7 @@ namespace BlocklyMruby
 
 			SetRunningMode(RunningMode.Run);
 
-			var run = _Mruby.mruby(new string[] { "-b", mrbfile }, (exitCode1) => {
+			var run = _Mruby.run(new string[] { "mruby", "-b", mrbfile }, (exitCode1) => {
 				BeginInvoke(new MethodInvoker(() => {
 					if (exitCode1 != 0) {
 						SetRunningMode(RunningMode.None);
@@ -295,13 +302,13 @@ namespace BlocklyMruby
 			if (Collections.ClassWorkspaces.Length == 0)
 				return;
 
-			var rubyfiles = new JsArray<string>() { "-e", "-g", "-o" };
+			var rubyfiles = new JsArray<string>() { "mrbc", "-e", "-g", "-o" };
 			string mrbfile;
 			GetCompileArgs(rubyfiles, out mrbfile);
 
 			SetRunningMode(RunningMode.Compile);
 
-			var run = _Mruby.mrbc(rubyfiles.ToArray(), (exitCode) => {
+			var run = _Mruby.run(rubyfiles, (exitCode) => {
 				BeginInvoke(new Action<string, int>(CompileDoneInDebugMode), mrbfile, exitCode);
 			});
 
@@ -317,7 +324,7 @@ namespace BlocklyMruby
 			}
 
 			SetRunningMode(RunningMode.Debug);
-			var run = _Mruby.mrdb(new string[] { "-b", mrbfile }, (exitCode1) => {
+			var run = _Mruby.run(new string[] { "mrdb", "-b", mrbfile }, (exitCode1) => {
 				BeginInvoke(new MethodInvoker(() => {
 					if (exitCode1 != 0) {
 						SetRunningMode(RunningMode.None);
@@ -343,8 +350,8 @@ namespace BlocklyMruby
 
 			var view = item.View;
 			string code;
-			if (view.Blockly.Script.changed || item.RubyCode == null) {
-				var workspace = view.Blockly.getMainWorkspace();
+			if (view.Changed || item.RubyCode == null) {
+				var workspace = view.Workspace;
 				code = item.ToCode(saveFileDialog2.FileName);
 			}
 			else {
@@ -531,7 +538,7 @@ namespace BlocklyMruby
 		private void Mruby_Stdio(object sender, StdioEventArgs e)
 		{
 			BeginInvoke(new MethodInvoker(() => {
-				xTermView1.OnTermData(e.Text.Replace("\n", "\r\n"));
+				xTermView1.OnTermData(e.Text);
 
 				_ConsoleHook?.Invoke(this, e);
 

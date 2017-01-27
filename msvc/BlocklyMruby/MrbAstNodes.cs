@@ -225,7 +225,7 @@ namespace BlocklyMruby
 
 		internal void claer_doc()
 		{
-			doc.Clear();
+			doc.Splice(0, doc.Length);
 		}
 
 		internal void to_ruby(ruby_code_cond cond)
