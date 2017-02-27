@@ -1,4 +1,5 @@
 require 'forwardable'
+require 'digest/md5'
 
 module MRuby
   class Command
@@ -204,10 +205,39 @@ module MRuby
     def run(outfile, objfiles)
       FileUtils.mkdir_p File.dirname(outfile)
       _pp "AR", outfile.relative_path
+
+      # reference from emar.py
+      outfilebase = File.dirname(outfile)
+      to_delete = []
+      newargs = []
+      objfiles.each do |orig_name|
+        dir_name = File.dirname(orig_name)
+        dir_name = dir_name.relative_path_from(Dir.pwd)
+        base_name = File.basename(orig_name)
+        parts = base_name.split('.')
+        # h = Digest::MD5.new.update(orig_name).to_s
+        h = Digest::MD5.new.update(orig_name).to_s.slice(0,4)
+        parts[0] += '_' + h
+        newname = parts.join('.')
+        full_newname = File.join(dir_name, newname)
+        if not File.exists?(full_newname)
+          begin # it is ok to fail here, we just don't get hashing
+            FileUtils.cp(orig_name, full_newname)
+            newargs << full_newname
+            to_delete << full_newname
+          rescue
+          end
+        end
+      end
+
       if MRUBY_BUILD_HOST_IS_CYGWIN
-        _run archive_options, { :outfile => cygwin_filename(outfile), :objs => cygwin_filename(objfiles).join(' '), :outdir => File.dirname(outfile), :outfilebase => File.basename(outfile, ".*") }
+        _run archive_options, { :outfile => cygwin_filename(outfile), :objs => cygwin_filename(newargs).join(' '), :outdir => File.dirname(outfile), :outfilebase => File.basename(outfile, ".*") }
       else
-        _run archive_options, { :outfile => filename(outfile), :objs => filename(objfiles).join(' '), :outdir => File.dirname(outfile), :outfilebase => File.basename(outfile, ".*") }
+        _run archive_options, { :outfile => filename(outfile), :objs => filename(newargs).join(' '), :outdir => File.dirname(outfile), :outfilebase => File.basename(outfile, ".*") }
+      end
+
+      to_delete.each do |d|
+        FileUtils.rm(d)
       end
     end
   end

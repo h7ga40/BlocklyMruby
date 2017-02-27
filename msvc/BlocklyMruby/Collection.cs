@@ -56,7 +56,7 @@ namespace BlocklyMruby
 		internal void Reset(IEnumerable<T> n)
 		{
 			List.Splice(0, List.Length);
-			List.AddRange(n);
+			List = (JsArray<T>)List.Concat(n);
 
 			if (OnReset != null)
 				OnReset(this, EventArgs.Empty);

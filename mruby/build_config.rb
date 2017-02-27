@@ -138,3 +138,50 @@ end
 #   conf.test_runner.command = 'env'
 #
 # end
+=begin
+MRuby::CrossBuild.new("emscripten") do |conf|
+  toolchain :emscripten
+
+  conf.archiver.command = "llvm-ar"
+  conf.linker.flags << '--save-bc %{outfile}.bc --pre-js ../test/webmrbc/pre.js --post-js ../test/webmrbc/post.js --use-preload-plugins'
+
+  enable_debug
+
+  # include the default GEMs
+  conf.gembox 'default'
+  conf.gem :core => 'mruby-bin-mrbc'
+
+  conf.gem '../mrbgems/mruby-blockly'
+  conf.gem '../mrbgems/mruby-io'
+  conf.gem '../mrbgems/mruby-pack'
+  conf.gem '../mrbgems/mruby-socket'
+
+  # C compiler settings
+  conf.cc.defines = %w(MRB_ENABLE_DEBUG_HOOK)
+
+  # Generate mruby debugger command (require mruby-eval)
+  conf.gem :core => "mruby-bin-debugger"
+end
+
+MRuby::CrossBuild.new("emscripten_min") do |conf|
+  toolchain :emscripten
+
+  conf.cc do |cc|
+    cc.flags[0].delete_at(cc.flags[0].rindex("-g"))
+    cc.flags[1].delete_at(cc.flags[1].rindex("-O0"))
+    cc.flags << "-Oz"
+  end
+
+  conf.cxx do |cxx| 
+    cxx.flags[0].delete_at(cxx.flags[0].rindex("-g"))
+    cxx.flags[1].delete_at(cxx.flags[1].rindex("-O0"))
+    cxx.flags << "-Oz"
+  end
+
+  conf.gembox 'default'
+
+  conf.gem :core => 'mruby-bin-mrbc'
+
+  conf.linker.flags << '--save-bc %{outfile}.bc --pre-js ../test/webmrbc/pre.js --post-js ../test/webmrbc/post.js --use-preload-plugins --closure 1'
+end
+=end

@@ -376,7 +376,7 @@ namespace BlocklyMruby
 		 */
 		public override Tuple<string, string[], bool> getProcedureDef()
 		{
-			return new Tuple<string, string[], bool>(this.getFieldValue("NAME"), this.arguments_.ToArray(), false);
+			return new Tuple<string, string[], bool>(this.getFieldValue("NAME"), this.arguments_, false);
 		}
 	}
 
@@ -433,7 +433,7 @@ namespace BlocklyMruby
 		 */
 		public override Tuple<string, string[], bool> getProcedureDef()
 		{
-			return new Tuple<string, string[], bool>(this.getFieldValue("NAME"), this.arguments_.ToArray(), true);
+			return new Tuple<string, string[], bool>(this.getFieldValue("NAME"), this.arguments_, true);
 		}
 	}
 
@@ -648,7 +648,7 @@ namespace BlocklyMruby
 			}
 			// Rebuild the block's arguments.
 			this.arguments_ = new JsArray<string>();
-			this.arguments_.AddRange(paramNames);
+			this.arguments_ = (JsArray<string>)this.arguments_.Concat(paramNames);
 			this.updateShape_();
 			this.quarkIds_ = paramIds;
 			// Reconnect any child blocks.

@@ -248,21 +248,21 @@ namespace BlocklyMruby
 
 	public class xml_code_cond
 	{
-		private Document document;
+		private Document Document;
 
 		public xml_code_cond(Document document)
 		{
-			this.document = document;
+			this.Document = document;
 		}
 
 		internal Element CreateElement(string tagname)
 		{
-			return document.CreateElement(tagname);
+			return Document.CreateElement(tagname);
 		}
 
 		internal Node CreateTextNode(string text)
 		{
-			return document.CreateTextNode(text);
+			return Document.CreateTextNode(text);
 		}
 	}
 
@@ -536,7 +536,7 @@ namespace BlocklyMruby
 		public scope_node(IMrbParser p, node body)
 			: base(p, node_type.NODE_SCOPE)
 		{
-			_local_variables.AddRange(p.locals_node());
+			_local_variables = (JsArray<mrb_sym>)_local_variables.Concat(p.locals_node());
 			_body = body;
 		}
 
@@ -570,7 +570,7 @@ namespace BlocklyMruby
 	}
 
 	/* (:begin prog...) */
-	class begin_node : node
+	public class begin_node : node
 	{
 		private JsArray<node> _progs = new JsArray<node>();
 		bool _parentheses;
@@ -588,7 +588,7 @@ namespace BlocklyMruby
 		public begin_node(IMrbParser p, JsArray<node> progs)
 			: base(p, node_type.NODE_BEGIN)
 		{
-			_progs.AddRange(progs);
+			_progs = (JsArray<node>)_progs.Concat(progs);
 		}
 
 		public JsArray<node> progs { get { return _progs; } }
@@ -1438,7 +1438,7 @@ namespace BlocklyMruby
 			: base(p, node_type.NODE_CASE)
 		{
 			_arg = a;
-			_when.AddRange(b);
+			_when = (JsArray<when_t>)_when.Concat(b);
 		}
 
 		public node arg { get { return _arg; } }
@@ -1631,7 +1631,7 @@ namespace BlocklyMruby
 			_obj = a;
 			_method = b;
 			if (args != null)
-				_args.AddRange(args);
+				_args = (JsArray<node>)_args.Concat(args);
 			_block = block;
 		}
 
@@ -1886,7 +1886,7 @@ namespace BlocklyMruby
 			_self = new self_node(p);
 			_method = b;
 			if (args != null)
-				_args.AddRange(args);
+				_args = (JsArray<node>)_args.Concat(args);
 			_block = block;
 		}
 
@@ -2002,7 +2002,7 @@ namespace BlocklyMruby
 		public super_node(IMrbParser p, JsArray<node> args)
 			: base(p, node_type.NODE_SUPER)
 		{
-			_args.AddRange(args);
+			_args = (JsArray<node>)_args.Concat(args);
 		}
 
 		public JsArray<node> args { get { return _args; } }
@@ -2636,7 +2636,7 @@ namespace BlocklyMruby
 		public array_node(IMrbParser p, JsArray<node> a, bool item_per_line = false)
 			: base(p, node_type.NODE_ARRAY)
 		{
-			_array.AddRange(a);
+			_array = (JsArray<node>)_array.Concat(a);
 			_item_per_line = item_per_line;
 		}
 
@@ -2767,7 +2767,7 @@ namespace BlocklyMruby
 		public hash_node(IMrbParser p, JsArray<kv_t> items)
 			: base(p, node_type.NODE_HASH)
 		{
-			_kvs.AddRange(items);
+			_kvs = (JsArray<kv_t>)_kvs.Concat(items);
 		}
 
 		public JsArray<kv_t> kvs { get { return _kvs; } }
@@ -3320,7 +3320,7 @@ namespace BlocklyMruby
 			: base(p, node_type.NODE_DEF)
 		{
 			_name = m;
-			_local_variables.AddRange(p.locals_node());
+			_local_variables = (JsArray<mrb_sym>)_local_variables.Concat(p.locals_node());
 			if (a != null) {
 				node n = a;
 
@@ -3361,7 +3361,7 @@ namespace BlocklyMruby
 			: base(p, node_type.NODE_DEF)
 		{
 			_name = m;
-			_mandatory_args.AddRange(a);
+			_mandatory_args = (JsArray<arg_node>)_mandatory_args.Concat(a);
 			_body = b;
 		}
 
@@ -3650,7 +3650,7 @@ namespace BlocklyMruby
 		public block_node(IMrbParser p, node args, node body, bool brace)
 			: base(p, node_type.NODE_BLOCK)
 		{
-			_local_variables.AddRange(p.locals_node());
+			_local_variables = (JsArray<mrb_sym>)_local_variables.Concat(p.locals_node());
 			if (args != null) {
 				node n = args;
 
@@ -3691,7 +3691,7 @@ namespace BlocklyMruby
 		public block_node(IMrbParser p, JsArray<node> args, node body, bool brace)
 			: base(p, node_type.NODE_BLOCK)
 		{
-			_mandatory_args.AddRange(args);
+			_mandatory_args = (JsArray<node>)_mandatory_args.Concat(args);
 			_body = body;
 			if (_body is ensure_node) {
 				((ensure_node)_body).def = true;
@@ -3788,7 +3788,7 @@ namespace BlocklyMruby
 		public lambda_node(IMrbParser p, node a, node b)
 			: base(p, node_type.NODE_LAMBDA)
 		{
-			_local_variables.AddRange(p.locals_node());
+			_local_variables = (JsArray<mrb_sym>)_local_variables.Concat(p.locals_node());
 			if (a != null) {
 				node n = a;
 

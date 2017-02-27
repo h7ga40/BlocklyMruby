@@ -16,7 +16,6 @@ namespace BlocklyMruby
 			var times = block.getFieldValue("TIMES");
 			var repeats = new int_node(this, times == null ? 0 : Bridge.Script.ParseInt(times, 10));
 			var branch = statementToCode(block, "DO");
-			if (branch == null) branch = new nil_node(this);
 			return new call_node(this, repeats, intern("times"), new JsArray<node>(), new block_node(this, new JsArray<node>(), branch, false));
 		}
 
@@ -31,7 +30,6 @@ namespace BlocklyMruby
 				repeats = new call_node(this, repeats, intern("to_i"));
 			}
 			var branch = statementToCode(block, "DO");
-			if (branch == null) branch = new nil_node(this);
 			return new call_node(this, repeats, intern("times"), new JsArray<node>(), new block_node(this, new JsArray<node>(), branch, false));
 		}
 
@@ -42,7 +40,6 @@ namespace BlocklyMruby
 			var argument0 = valueToCode(block, "BOOL");
 			if (argument0 == null) argument0 = new false_node(this);
 			var branch = statementToCode(block, "DO");
-			if (branch == null) branch = new nil_node(this);
 			if (until)
 				return new until_node(this, argument0, branch);
 			else
@@ -61,7 +58,6 @@ namespace BlocklyMruby
 			if (toVal == null) toVal = new int_node(this, 0);
 			var increment = valueToCode(block, "BY");
 			var branch = statementToCode(block, "DO");
-			if (branch == null) branch = new nil_node(this);
 
 			if (fromVal is int_node && toVal is int_node &&
 				(increment == null || increment is int_node)) {
@@ -99,7 +95,6 @@ namespace BlocklyMruby
 			var argument0 = valueToCode(block, "LIST");
 			if (argument0 == null) argument0 = new array_node(this, new JsArray<node>());
 			var branch = statementToCode(block, "DO");
-			if (branch == null) branch = new nil_node(this);
 
 			local_resume(lv);
 

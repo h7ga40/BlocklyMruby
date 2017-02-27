@@ -1447,7 +1447,7 @@ block_param     : f_arg ',' f_block_optarg ',' f_rest_arg opt_f_block_arg
                     }
                 | f_arg ','
                     {
-                      $$ = new_args($1, null, (mrb_sym)1, null, 0);
+                      $$ = new_args($1, null, (mrb_sym)0, null, 0);
                     }
                 | f_arg ',' f_rest_arg ',' f_arg opt_f_block_arg
                     {

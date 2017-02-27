@@ -22,7 +22,6 @@ namespace BlocklyMruby
 				var argument = valueToCode(block, "IF" + n);
 				if (argument == null) argument = new false_node(this);
 				var branch = statementToCode(block, "DO" + n);
-				if (branch == null) branch = new nil_node(this);
 				code = new if_node(this, argument, branch, code, false);
 			}
 			return code;

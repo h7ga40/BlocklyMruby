@@ -7,7 +7,6 @@
 // [this has not been done here to stress-test the skeleton]
 using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using Bridge;
 using Bridge.Html5;
 
@@ -136,7 +135,7 @@ namespace BlocklyMruby
 		tUMINUS_NUM = 372,
 		tLAST_TOKEN = 373,
 		yyErrorCode = 256
-#line 169 "mrb_parse.jay"
+#line 167 "mrb_parse.jay"
 	}
 
 	/// <summary>
@@ -6558,58 +6557,58 @@ namespace BlocklyMruby
 					yyVal = yyDefault(yyV > yyTop ? null : yyVals[yyV]);
 					switch (yyN) {
 					case 1:
-#line 183 "mrb_parse.jay"
+#line 181 "mrb_parse.jay"
 						{
 							this.lstate = mrb_lex_state_enum.EXPR_BEG;
 							if (this.locals == null) this.locals = new locals_node(null);
 						}
 						break;
 					case 2:
-#line 188 "mrb_parse.jay"
+#line 186 "mrb_parse.jay"
 						{
 							this.tree = new_scope(((node)yyVals[0 + yyTop]));
 							this.tree.NODE_LINENO(((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 3:
-#line 195 "mrb_parse.jay"
+#line 193 "mrb_parse.jay"
 						{
 							yyVal = ((node)yyVals[-1 + yyTop]);
 						}
 						break;
 					case 4:
-#line 201 "mrb_parse.jay"
+#line 199 "mrb_parse.jay"
 						{
 							yyVal = new_begin(null);
 						}
 						break;
 					case 5:
-#line 205 "mrb_parse.jay"
+#line 203 "mrb_parse.jay"
 						{
 							yyVal = new_begin(((node)yyVals[0 + yyTop]));
 							((node)yyVal).NODE_LINENO(((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 6:
-#line 210 "mrb_parse.jay"
+#line 208 "mrb_parse.jay"
 						{
 							yyVal = push(((node)yyVals[-2 + yyTop]), newline_node(((node)yyVals[0 + yyTop])));
 						}
 						break;
 					case 7:
-#line 214 "mrb_parse.jay"
+#line 212 "mrb_parse.jay"
 						{
 							yyVal = new_begin(null);
 						}
 						break;
 					case 9:
-#line 221 "mrb_parse.jay"
+#line 219 "mrb_parse.jay"
 						{
 							yyVal = local_switch();
 						}
 						break;
 					case 10:
-#line 225 "mrb_parse.jay"
+#line 223 "mrb_parse.jay"
 						{
 							yyError("BEGIN not supported");
 							local_resume(((locals_node)yyVals[-3 + yyTop]));
@@ -6617,7 +6616,7 @@ namespace BlocklyMruby
 						}
 						break;
 					case 11:
-#line 236 "mrb_parse.jay"
+#line 234 "mrb_parse.jay"
 						{
 							if (((node)yyVals[-2 + yyTop]) != null) {
 								yyVal = new_rescue(((node)yyVals[-3 + yyTop]), ((node)yyVals[-2 + yyTop]), ((node)yyVals[-1 + yyTop]));
@@ -6641,195 +6640,195 @@ namespace BlocklyMruby
 						}
 						break;
 					case 12:
-#line 260 "mrb_parse.jay"
+#line 258 "mrb_parse.jay"
 						{
 							yyVal = ((node)yyVals[-1 + yyTop]);
 						}
 						break;
 					case 13:
-#line 266 "mrb_parse.jay"
+#line 264 "mrb_parse.jay"
 						{
 							yyVal = new_begin(null);
 						}
 						break;
 					case 14:
-#line 270 "mrb_parse.jay"
+#line 268 "mrb_parse.jay"
 						{
 							yyVal = new_begin(((node)yyVals[0 + yyTop]));
 							((node)yyVal).NODE_LINENO(((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 15:
-#line 275 "mrb_parse.jay"
+#line 273 "mrb_parse.jay"
 						{
 							yyVal = push(((node)yyVals[-2 + yyTop]), newline_node(((node)yyVals[0 + yyTop])));
 						}
 						break;
 					case 16:
-#line 279 "mrb_parse.jay"
+#line 277 "mrb_parse.jay"
 						{
 							yyVal = new_begin(((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 17:
-#line 284 "mrb_parse.jay"
+#line 282 "mrb_parse.jay"
 						{ this.lstate = mrb_lex_state_enum.EXPR_FNAME; }
 						break;
 					case 18:
-#line 285 "mrb_parse.jay"
+#line 283 "mrb_parse.jay"
 						{
 							yyVal = new_alias(((mrb_sym)yyVals[-2 + yyTop]), ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 19:
-#line 289 "mrb_parse.jay"
+#line 287 "mrb_parse.jay"
 						{
 							yyVal = ((node)yyVals[0 + yyTop]);
 						}
 						break;
 					case 20:
-#line 293 "mrb_parse.jay"
+#line 291 "mrb_parse.jay"
 						{
 							yyVal = new_if(cond(((node)yyVals[0 + yyTop])), ((node)yyVals[-2 + yyTop]), null);
 						}
 						break;
 					case 21:
-#line 297 "mrb_parse.jay"
+#line 295 "mrb_parse.jay"
 						{
 							yyVal = new_unless(cond(((node)yyVals[0 + yyTop])), ((node)yyVals[-2 + yyTop]), null);
 						}
 						break;
 					case 22:
-#line 301 "mrb_parse.jay"
+#line 299 "mrb_parse.jay"
 						{
 							yyVal = new_while(cond(((node)yyVals[0 + yyTop])), ((node)yyVals[-2 + yyTop]));
 						}
 						break;
 					case 23:
-#line 305 "mrb_parse.jay"
+#line 303 "mrb_parse.jay"
 						{
 							yyVal = new_until(cond(((node)yyVals[0 + yyTop])), ((node)yyVals[-2 + yyTop]));
 						}
 						break;
 					case 24:
-#line 309 "mrb_parse.jay"
+#line 307 "mrb_parse.jay"
 						{
 							yyVal = new_mod_rescue(((node)yyVals[-2 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 25:
-#line 313 "mrb_parse.jay"
+#line 311 "mrb_parse.jay"
 						{
 							yyError("END not supported");
 							yyVal = new_postexe(((node)yyVals[-1 + yyTop]));
 						}
 						break;
 					case 27:
-#line 319 "mrb_parse.jay"
+#line 317 "mrb_parse.jay"
 						{
 							yyVal = new_masgn(((node)yyVals[-2 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 28:
-#line 323 "mrb_parse.jay"
+#line 321 "mrb_parse.jay"
 						{
 							yyVal = new_asgn(((node)yyVals[-2 + yyTop]), new_array(((node)yyVals[0 + yyTop])));
 						}
 						break;
 					case 29:
-#line 327 "mrb_parse.jay"
+#line 325 "mrb_parse.jay"
 						{
 							yyVal = new_masgn(((node)yyVals[-2 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 30:
-#line 331 "mrb_parse.jay"
+#line 329 "mrb_parse.jay"
 						{
 							yyVal = new_masgn(((node)yyVals[-2 + yyTop]), new_array(((node)yyVals[0 + yyTop])));
 						}
 						break;
 					case 32:
-#line 338 "mrb_parse.jay"
+#line 336 "mrb_parse.jay"
 						{
 							yyVal = new_asgn(((node)yyVals[-2 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 33:
-#line 342 "mrb_parse.jay"
+#line 340 "mrb_parse.jay"
 						{
 							yyVal = new_op_asgn(((node)yyVals[-2 + yyTop]), ((mrb_sym)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 34:
-#line 346 "mrb_parse.jay"
+#line 344 "mrb_parse.jay"
 						{
 							yyVal = new_op_asgn(new_call(((node)yyVals[-5 + yyTop]), intern("[]", 2), ((node)yyVals[-3 + yyTop]), (MrbTokens)'.'), ((mrb_sym)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 35:
-#line 350 "mrb_parse.jay"
+#line 348 "mrb_parse.jay"
 						{
 							yyVal = new_op_asgn(new_call(((node)yyVals[-4 + yyTop]), ((mrb_sym)yyVals[-2 + yyTop]), null, ((MrbTokens)yyVals[-3 + yyTop])), ((mrb_sym)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 36:
-#line 354 "mrb_parse.jay"
+#line 352 "mrb_parse.jay"
 						{
 							yyVal = new_op_asgn(new_call(((node)yyVals[-4 + yyTop]), ((mrb_sym)yyVals[-2 + yyTop]), null, ((MrbTokens)yyVals[-3 + yyTop])), ((mrb_sym)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 37:
-#line 358 "mrb_parse.jay"
+#line 356 "mrb_parse.jay"
 						{
 							yyError("constant re-assignment");
 							yyVal = null;
 						}
 						break;
 					case 38:
-#line 363 "mrb_parse.jay"
+#line 361 "mrb_parse.jay"
 						{
 							yyVal = new_op_asgn(new_call(((node)yyVals[-4 + yyTop]), ((mrb_sym)yyVals[-2 + yyTop]), null, MrbTokens.tCOLON2), ((mrb_sym)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 39:
-#line 367 "mrb_parse.jay"
+#line 365 "mrb_parse.jay"
 						{
 							backref_error(((node)yyVals[-2 + yyTop]));
 							yyVal = new_begin(null);
 						}
 						break;
 					case 41:
-#line 375 "mrb_parse.jay"
+#line 373 "mrb_parse.jay"
 						{
 							yyVal = new_mod_rescue(((node)yyVals[-2 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 44:
-#line 384 "mrb_parse.jay"
+#line 382 "mrb_parse.jay"
 						{
 							yyVal = new_and(((node)yyVals[-2 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 45:
-#line 388 "mrb_parse.jay"
+#line 386 "mrb_parse.jay"
 						{
 							yyVal = new_or(((node)yyVals[-2 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 46:
-#line 392 "mrb_parse.jay"
+#line 390 "mrb_parse.jay"
 						{
 							yyVal = call_uni_op(cond(((node)yyVals[0 + yyTop])), "!");
 						}
 						break;
 					case 47:
-#line 396 "mrb_parse.jay"
+#line 394 "mrb_parse.jay"
 						{
 							yyVal = call_uni_op(cond(((node)yyVals[0 + yyTop])), "!");
 						}
 						break;
 					case 49:
-#line 403 "mrb_parse.jay"
+#line 401 "mrb_parse.jay"
 						{
 							if (((node)yyVals[0 + yyTop]) == null) yyVal = new_nil();
 							else {
@@ -6839,227 +6838,227 @@ namespace BlocklyMruby
 						}
 						break;
 					case 54:
-#line 421 "mrb_parse.jay"
+#line 419 "mrb_parse.jay"
 						{
 							local_nest();
 						}
 						break;
 					case 55:
-#line 427 "mrb_parse.jay"
+#line 425 "mrb_parse.jay"
 						{
 							yyVal = new_block(((node)yyVals[-2 + yyTop]), ((node)yyVals[-1 + yyTop]), true);
 							local_unnest();
 						}
 						break;
 					case 56:
-#line 434 "mrb_parse.jay"
+#line 432 "mrb_parse.jay"
 						{
 							yyVal = new_fcall(((mrb_sym)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 57:
-#line 438 "mrb_parse.jay"
+#line 436 "mrb_parse.jay"
 						{
 							args_with_block(((node)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop]));
 							yyVal = new_fcall(((mrb_sym)yyVals[-2 + yyTop]), ((node)yyVals[-1 + yyTop]));
 						}
 						break;
 					case 58:
-#line 443 "mrb_parse.jay"
+#line 441 "mrb_parse.jay"
 						{
 							yyVal = new_call(((node)yyVals[-3 + yyTop]), ((mrb_sym)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop]), ((MrbTokens)yyVals[-2 + yyTop]));
 						}
 						break;
 					case 59:
-#line 447 "mrb_parse.jay"
+#line 445 "mrb_parse.jay"
 						{
 							args_with_block(((node)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop]));
 							yyVal = new_call(((node)yyVals[-4 + yyTop]), ((mrb_sym)yyVals[-2 + yyTop]), ((node)yyVals[-1 + yyTop]), ((MrbTokens)yyVals[-3 + yyTop]));
 						}
 						break;
 					case 60:
-#line 452 "mrb_parse.jay"
+#line 450 "mrb_parse.jay"
 						{
 							yyVal = new_call(((node)yyVals[-3 + yyTop]), ((mrb_sym)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop]), MrbTokens.tCOLON2);
 						}
 						break;
 					case 61:
-#line 456 "mrb_parse.jay"
+#line 454 "mrb_parse.jay"
 						{
 							args_with_block(((node)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop]));
 							yyVal = new_call(((node)yyVals[-4 + yyTop]), ((mrb_sym)yyVals[-2 + yyTop]), ((node)yyVals[-1 + yyTop]), MrbTokens.tCOLON2);
 						}
 						break;
 					case 62:
-#line 461 "mrb_parse.jay"
+#line 459 "mrb_parse.jay"
 						{
 							yyVal = new_super(((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 63:
-#line 465 "mrb_parse.jay"
+#line 463 "mrb_parse.jay"
 						{
 							yyVal = new_yield(((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 64:
-#line 469 "mrb_parse.jay"
+#line 467 "mrb_parse.jay"
 						{
 							yyVal = new_return(ret_args(((node)yyVals[0 + yyTop])));
 						}
 						break;
 					case 65:
-#line 473 "mrb_parse.jay"
+#line 471 "mrb_parse.jay"
 						{
 							yyVal = new_break(ret_args(((node)yyVals[0 + yyTop])));
 						}
 						break;
 					case 66:
-#line 477 "mrb_parse.jay"
+#line 475 "mrb_parse.jay"
 						{
 							yyVal = new_next(ret_args(((node)yyVals[0 + yyTop])));
 						}
 						break;
 					case 67:
-#line 483 "mrb_parse.jay"
+#line 481 "mrb_parse.jay"
 						{
 							yyVal = ((node)yyVals[0 + yyTop]);
 						}
 						break;
 					case 68:
-#line 487 "mrb_parse.jay"
+#line 485 "mrb_parse.jay"
 						{
 							yyVal = ((node)yyVals[-1 + yyTop]);
 						}
 						break;
 					case 70:
-#line 494 "mrb_parse.jay"
+#line 492 "mrb_parse.jay"
 						{
 							yyVal = ((node)yyVals[-1 + yyTop]);
 						}
 						break;
 					case 71:
-#line 500 "mrb_parse.jay"
+#line 498 "mrb_parse.jay"
 						{
 							yyVal = list1(((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 72:
-#line 504 "mrb_parse.jay"
+#line 502 "mrb_parse.jay"
 						{
 							yyVal = list1(push(((node)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop])));
 						}
 						break;
 					case 73:
-#line 508 "mrb_parse.jay"
+#line 506 "mrb_parse.jay"
 						{
 							yyVal = list2(((node)yyVals[-2 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 74:
-#line 512 "mrb_parse.jay"
+#line 510 "mrb_parse.jay"
 						{
 							yyVal = list3(((node)yyVals[-4 + yyTop]), ((node)yyVals[-2 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 75:
-#line 516 "mrb_parse.jay"
+#line 514 "mrb_parse.jay"
 						{
 							yyVal = list2(((node)yyVals[-1 + yyTop]), new_nil());
 						}
 						break;
 					case 76:
-#line 520 "mrb_parse.jay"
+#line 518 "mrb_parse.jay"
 						{
 							yyVal = list3(((node)yyVals[-3 + yyTop]), new_nil(), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 77:
-#line 524 "mrb_parse.jay"
+#line 522 "mrb_parse.jay"
 						{
 							yyVal = list2(null, ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 78:
-#line 528 "mrb_parse.jay"
+#line 526 "mrb_parse.jay"
 						{
 							yyVal = list3(null, ((node)yyVals[-2 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 79:
-#line 532 "mrb_parse.jay"
+#line 530 "mrb_parse.jay"
 						{
 							yyVal = list2(null, new_nil());
 						}
 						break;
 					case 80:
-#line 536 "mrb_parse.jay"
+#line 534 "mrb_parse.jay"
 						{
 							yyVal = list3(null, new_nil(), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 82:
-#line 543 "mrb_parse.jay"
+#line 541 "mrb_parse.jay"
 						{
 							yyVal = new_masgn(((node)yyVals[-1 + yyTop]), null);
 						}
 						break;
 					case 83:
-#line 549 "mrb_parse.jay"
+#line 547 "mrb_parse.jay"
 						{
 							yyVal = list1(((node)yyVals[-1 + yyTop]));
 						}
 						break;
 					case 84:
-#line 553 "mrb_parse.jay"
+#line 551 "mrb_parse.jay"
 						{
 							yyVal = push(((node)yyVals[-2 + yyTop]), ((node)yyVals[-1 + yyTop]));
 						}
 						break;
 					case 85:
-#line 559 "mrb_parse.jay"
+#line 557 "mrb_parse.jay"
 						{
 							yyVal = list1(((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 86:
-#line 563 "mrb_parse.jay"
+#line 561 "mrb_parse.jay"
 						{
 							yyVal = push(((node)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 87:
-#line 569 "mrb_parse.jay"
+#line 567 "mrb_parse.jay"
 						{
 							assignable(((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 88:
-#line 573 "mrb_parse.jay"
+#line 571 "mrb_parse.jay"
 						{
 							yyVal = new_call(((node)yyVals[-3 + yyTop]), intern("[]", 2), ((node)yyVals[-1 + yyTop]), (MrbTokens)'.');
 						}
 						break;
 					case 89:
-#line 577 "mrb_parse.jay"
+#line 575 "mrb_parse.jay"
 						{
 							yyVal = new_call(((node)yyVals[-2 + yyTop]), ((mrb_sym)yyVals[0 + yyTop]), null, ((MrbTokens)yyVals[-1 + yyTop]));
 						}
 						break;
 					case 90:
-#line 581 "mrb_parse.jay"
+#line 579 "mrb_parse.jay"
 						{
 							yyVal = new_call(((node)yyVals[-2 + yyTop]), ((mrb_sym)yyVals[0 + yyTop]), null, MrbTokens.tCOLON2);
 						}
 						break;
 					case 91:
-#line 585 "mrb_parse.jay"
+#line 583 "mrb_parse.jay"
 						{
 							yyVal = new_call(((node)yyVals[-2 + yyTop]), ((mrb_sym)yyVals[0 + yyTop]), null, ((MrbTokens)yyVals[-1 + yyTop]));
 						}
 						break;
 					case 92:
-#line 589 "mrb_parse.jay"
+#line 587 "mrb_parse.jay"
 						{
 							if (this.in_def != 0 || this.in_single != 0)
 								yyError("dynamic constant assignment");
@@ -7067,7 +7066,7 @@ namespace BlocklyMruby
 						}
 						break;
 					case 93:
-#line 595 "mrb_parse.jay"
+#line 593 "mrb_parse.jay"
 						{
 							if (this.in_def != 0 || this.in_single != 0)
 								yyError("dynamic constant assignment");
@@ -7075,44 +7074,44 @@ namespace BlocklyMruby
 						}
 						break;
 					case 94:
-#line 601 "mrb_parse.jay"
+#line 599 "mrb_parse.jay"
 						{
 							backref_error(((node)yyVals[0 + yyTop]));
 							yyVal = null;
 						}
 						break;
 					case 95:
-#line 608 "mrb_parse.jay"
+#line 606 "mrb_parse.jay"
 						{
 							assignable(((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 96:
-#line 612 "mrb_parse.jay"
+#line 610 "mrb_parse.jay"
 						{
 							yyVal = new_call(((node)yyVals[-3 + yyTop]), intern("[]", 2), ((node)yyVals[-1 + yyTop]), (MrbTokens)'.');
 						}
 						break;
 					case 97:
-#line 616 "mrb_parse.jay"
+#line 614 "mrb_parse.jay"
 						{
 							yyVal = new_call(((node)yyVals[-2 + yyTop]), ((mrb_sym)yyVals[0 + yyTop]), null, ((MrbTokens)yyVals[-1 + yyTop]));
 						}
 						break;
 					case 98:
-#line 620 "mrb_parse.jay"
+#line 618 "mrb_parse.jay"
 						{
 							yyVal = new_call(((node)yyVals[-2 + yyTop]), ((mrb_sym)yyVals[0 + yyTop]), null, MrbTokens.tCOLON2);
 						}
 						break;
 					case 99:
-#line 624 "mrb_parse.jay"
+#line 622 "mrb_parse.jay"
 						{
 							yyVal = new_call(((node)yyVals[-2 + yyTop]), ((mrb_sym)yyVals[0 + yyTop]), null, ((MrbTokens)yyVals[-1 + yyTop]));
 						}
 						break;
 					case 100:
-#line 628 "mrb_parse.jay"
+#line 626 "mrb_parse.jay"
 						{
 							if (this.in_def != 0 || this.in_single != 0)
 								yyError("dynamic constant assignment");
@@ -7120,7 +7119,7 @@ namespace BlocklyMruby
 						}
 						break;
 					case 101:
-#line 634 "mrb_parse.jay"
+#line 632 "mrb_parse.jay"
 						{
 							if (this.in_def != 0 || this.in_single != 0)
 								yyError("dynamic constant assignment");
@@ -7128,567 +7127,567 @@ namespace BlocklyMruby
 						}
 						break;
 					case 102:
-#line 640 "mrb_parse.jay"
+#line 638 "mrb_parse.jay"
 						{
 							backref_error(((node)yyVals[0 + yyTop]));
 							yyVal = null;
 						}
 						break;
 					case 103:
-#line 647 "mrb_parse.jay"
+#line 645 "mrb_parse.jay"
 						{
 							yyError("class/module name must be CONSTANT");
 						}
 						break;
 					case 105:
-#line 654 "mrb_parse.jay"
+#line 652 "mrb_parse.jay"
 						{
 							yyVal = cons(1, ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 106:
-#line 658 "mrb_parse.jay"
+#line 656 "mrb_parse.jay"
 						{
 							yyVal = cons(0, ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 107:
-#line 662 "mrb_parse.jay"
+#line 660 "mrb_parse.jay"
 						{
 							yyVal = cons(((node)yyVals[-2 + yyTop]), ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 111:
-#line 671 "mrb_parse.jay"
+#line 669 "mrb_parse.jay"
 						{
 							this.lstate = mrb_lex_state_enum.EXPR_ENDFN;
 							yyVal = ((mrb_sym)yyVals[0 + yyTop]);
 						}
 						break;
 					case 112:
-#line 676 "mrb_parse.jay"
+#line 674 "mrb_parse.jay"
 						{
 							this.lstate = mrb_lex_state_enum.EXPR_ENDFN;
 							yyVal = ((mrb_sym)yyVals[0 + yyTop]);
 						}
 						break;
 					case 115:
-#line 687 "mrb_parse.jay"
+#line 685 "mrb_parse.jay"
 						{
 							yyVal = new_undef(((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 116:
-#line 690 "mrb_parse.jay"
+#line 688 "mrb_parse.jay"
 						{ this.lstate = mrb_lex_state_enum.EXPR_FNAME; }
 						break;
 					case 117:
-#line 691 "mrb_parse.jay"
+#line 689 "mrb_parse.jay"
 						{
 							yyVal = push(((node)yyVals[-3 + yyTop]), ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 118:
-#line 696 "mrb_parse.jay"
+#line 694 "mrb_parse.jay"
 						{ yyVal = intern_c('|'); }
 						break;
 					case 119:
-#line 697 "mrb_parse.jay"
+#line 695 "mrb_parse.jay"
 						{ yyVal = intern_c('^'); }
 						break;
 					case 120:
-#line 698 "mrb_parse.jay"
+#line 696 "mrb_parse.jay"
 						{ yyVal = intern_c('&'); }
 						break;
 					case 121:
-#line 699 "mrb_parse.jay"
+#line 697 "mrb_parse.jay"
 						{ yyVal = intern("<=>", 3); }
 						break;
 					case 122:
-#line 700 "mrb_parse.jay"
+#line 698 "mrb_parse.jay"
 						{ yyVal = intern("==", 2); }
 						break;
 					case 123:
-#line 701 "mrb_parse.jay"
+#line 699 "mrb_parse.jay"
 						{ yyVal = intern("===", 3); }
 						break;
 					case 124:
-#line 702 "mrb_parse.jay"
+#line 700 "mrb_parse.jay"
 						{ yyVal = intern("=~", 2); }
 						break;
 					case 125:
-#line 703 "mrb_parse.jay"
+#line 701 "mrb_parse.jay"
 						{ yyVal = intern("!~", 2); }
 						break;
 					case 126:
-#line 704 "mrb_parse.jay"
+#line 702 "mrb_parse.jay"
 						{ yyVal = intern_c('>'); }
 						break;
 					case 127:
-#line 705 "mrb_parse.jay"
+#line 703 "mrb_parse.jay"
 						{ yyVal = intern(">=", 2); }
 						break;
 					case 128:
-#line 706 "mrb_parse.jay"
+#line 704 "mrb_parse.jay"
 						{ yyVal = intern_c('<'); }
 						break;
 					case 129:
-#line 707 "mrb_parse.jay"
+#line 705 "mrb_parse.jay"
 						{ yyVal = intern("<=", 2); }
 						break;
 					case 130:
-#line 708 "mrb_parse.jay"
+#line 706 "mrb_parse.jay"
 						{ yyVal = intern("!=", 2); }
 						break;
 					case 131:
-#line 709 "mrb_parse.jay"
+#line 707 "mrb_parse.jay"
 						{ yyVal = intern("<<", 2); }
 						break;
 					case 132:
-#line 710 "mrb_parse.jay"
+#line 708 "mrb_parse.jay"
 						{ yyVal = intern(">>", 2); }
 						break;
 					case 133:
-#line 711 "mrb_parse.jay"
+#line 709 "mrb_parse.jay"
 						{ yyVal = intern_c('+'); }
 						break;
 					case 134:
-#line 712 "mrb_parse.jay"
+#line 710 "mrb_parse.jay"
 						{ yyVal = intern_c('-'); }
 						break;
 					case 135:
-#line 713 "mrb_parse.jay"
+#line 711 "mrb_parse.jay"
 						{ yyVal = intern_c('*'); }
 						break;
 					case 136:
-#line 714 "mrb_parse.jay"
+#line 712 "mrb_parse.jay"
 						{ yyVal = intern_c('*'); }
 						break;
 					case 137:
-#line 715 "mrb_parse.jay"
+#line 713 "mrb_parse.jay"
 						{ yyVal = intern_c('/'); }
 						break;
 					case 138:
-#line 716 "mrb_parse.jay"
+#line 714 "mrb_parse.jay"
 						{ yyVal = intern_c('%'); }
 						break;
 					case 139:
-#line 717 "mrb_parse.jay"
+#line 715 "mrb_parse.jay"
 						{ yyVal = intern("**", 2); }
 						break;
 					case 140:
-#line 718 "mrb_parse.jay"
+#line 716 "mrb_parse.jay"
 						{ yyVal = intern_c('!'); }
 						break;
 					case 141:
-#line 719 "mrb_parse.jay"
+#line 717 "mrb_parse.jay"
 						{ yyVal = intern_c('~'); }
 						break;
 					case 142:
-#line 720 "mrb_parse.jay"
+#line 718 "mrb_parse.jay"
 						{ yyVal = intern("+@", 2); }
 						break;
 					case 143:
-#line 721 "mrb_parse.jay"
+#line 719 "mrb_parse.jay"
 						{ yyVal = intern("-@", 2); }
 						break;
 					case 144:
-#line 722 "mrb_parse.jay"
+#line 720 "mrb_parse.jay"
 						{ yyVal = intern("[]", 2); }
 						break;
 					case 145:
-#line 723 "mrb_parse.jay"
+#line 721 "mrb_parse.jay"
 						{ yyVal = intern("[]=", 3); }
 						break;
 					case 146:
-#line 724 "mrb_parse.jay"
+#line 722 "mrb_parse.jay"
 						{ yyVal = intern_c('`'); }
 						break;
 					case 187:
-#line 742 "mrb_parse.jay"
+#line 740 "mrb_parse.jay"
 						{
 							yyVal = new_asgn(((node)yyVals[-2 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 188:
-#line 746 "mrb_parse.jay"
+#line 744 "mrb_parse.jay"
 						{
 							yyVal = new_op_asgn(((node)yyVals[-2 + yyTop]), ((mrb_sym)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 189:
-#line 750 "mrb_parse.jay"
+#line 748 "mrb_parse.jay"
 						{
 							yyVal = new_op_asgn(new_call(((node)yyVals[-5 + yyTop]), intern("[]", 2), ((node)yyVals[-3 + yyTop]), (MrbTokens)'.'), ((mrb_sym)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 190:
-#line 754 "mrb_parse.jay"
+#line 752 "mrb_parse.jay"
 						{
 							yyVal = new_op_asgn(new_call(((node)yyVals[-4 + yyTop]), ((mrb_sym)yyVals[-2 + yyTop]), null, ((MrbTokens)yyVals[-3 + yyTop])), ((mrb_sym)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 191:
-#line 758 "mrb_parse.jay"
+#line 756 "mrb_parse.jay"
 						{
 							yyVal = new_op_asgn(new_call(((node)yyVals[-4 + yyTop]), ((mrb_sym)yyVals[-2 + yyTop]), null, ((MrbTokens)yyVals[-3 + yyTop])), ((mrb_sym)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 192:
-#line 762 "mrb_parse.jay"
+#line 760 "mrb_parse.jay"
 						{
 							yyVal = new_op_asgn(new_call(((node)yyVals[-4 + yyTop]), ((mrb_sym)yyVals[-2 + yyTop]), null, MrbTokens.tCOLON2), ((mrb_sym)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 193:
-#line 766 "mrb_parse.jay"
+#line 764 "mrb_parse.jay"
 						{
 							yyError("constant re-assignment");
 							yyVal = new_begin(null);
 						}
 						break;
 					case 194:
-#line 771 "mrb_parse.jay"
+#line 769 "mrb_parse.jay"
 						{
 							yyError("constant re-assignment");
 							yyVal = new_begin(null);
 						}
 						break;
 					case 195:
-#line 776 "mrb_parse.jay"
+#line 774 "mrb_parse.jay"
 						{
 							backref_error(((node)yyVals[-2 + yyTop]));
 							yyVal = new_begin(null);
 						}
 						break;
 					case 196:
-#line 781 "mrb_parse.jay"
+#line 779 "mrb_parse.jay"
 						{
 							yyVal = new_dot2(((node)yyVals[-2 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 197:
-#line 785 "mrb_parse.jay"
+#line 783 "mrb_parse.jay"
 						{
 							yyVal = new_dot3(((node)yyVals[-2 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 198:
-#line 789 "mrb_parse.jay"
+#line 787 "mrb_parse.jay"
 						{
 							yyVal = call_bin_op(((node)yyVals[-2 + yyTop]), "+", ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 199:
-#line 793 "mrb_parse.jay"
+#line 791 "mrb_parse.jay"
 						{
 							yyVal = call_bin_op(((node)yyVals[-2 + yyTop]), "-", ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 200:
-#line 797 "mrb_parse.jay"
+#line 795 "mrb_parse.jay"
 						{
 							yyVal = call_bin_op(((node)yyVals[-2 + yyTop]), "*", ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 201:
-#line 801 "mrb_parse.jay"
+#line 799 "mrb_parse.jay"
 						{
 							yyVal = call_bin_op(((node)yyVals[-2 + yyTop]), "/", ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 202:
-#line 805 "mrb_parse.jay"
+#line 803 "mrb_parse.jay"
 						{
 							yyVal = call_bin_op(((node)yyVals[-2 + yyTop]), "%", ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 203:
-#line 809 "mrb_parse.jay"
+#line 807 "mrb_parse.jay"
 						{
 							yyVal = call_bin_op(((node)yyVals[-2 + yyTop]), "**", ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 204:
-#line 813 "mrb_parse.jay"
+#line 811 "mrb_parse.jay"
 						{
 							yyVal = call_uni_op(call_bin_op(((node)yyVals[-2 + yyTop]), "**", ((node)yyVals[0 + yyTop])), "-@");
 						}
 						break;
 					case 205:
-#line 817 "mrb_parse.jay"
+#line 815 "mrb_parse.jay"
 						{
 							yyVal = call_uni_op(call_bin_op(((node)yyVals[-2 + yyTop]), "**", ((node)yyVals[0 + yyTop])), "-@");
 						}
 						break;
 					case 206:
-#line 821 "mrb_parse.jay"
+#line 819 "mrb_parse.jay"
 						{
 							yyVal = call_uni_op(((node)yyVals[0 + yyTop]), "+@");
 						}
 						break;
 					case 207:
-#line 825 "mrb_parse.jay"
+#line 823 "mrb_parse.jay"
 						{
 							yyVal = call_uni_op(((node)yyVals[0 + yyTop]), "-@");
 						}
 						break;
 					case 208:
-#line 829 "mrb_parse.jay"
+#line 827 "mrb_parse.jay"
 						{
 							yyVal = call_bin_op(((node)yyVals[-2 + yyTop]), "|", ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 209:
-#line 833 "mrb_parse.jay"
+#line 831 "mrb_parse.jay"
 						{
 							yyVal = call_bin_op(((node)yyVals[-2 + yyTop]), "^", ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 210:
-#line 837 "mrb_parse.jay"
+#line 835 "mrb_parse.jay"
 						{
 							yyVal = call_bin_op(((node)yyVals[-2 + yyTop]), "&", ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 211:
-#line 841 "mrb_parse.jay"
+#line 839 "mrb_parse.jay"
 						{
 							yyVal = call_bin_op(((node)yyVals[-2 + yyTop]), "<=>", ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 212:
-#line 845 "mrb_parse.jay"
+#line 843 "mrb_parse.jay"
 						{
 							yyVal = call_bin_op(((node)yyVals[-2 + yyTop]), ">", ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 213:
-#line 849 "mrb_parse.jay"
+#line 847 "mrb_parse.jay"
 						{
 							yyVal = call_bin_op(((node)yyVals[-2 + yyTop]), ">=", ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 214:
-#line 853 "mrb_parse.jay"
+#line 851 "mrb_parse.jay"
 						{
 							yyVal = call_bin_op(((node)yyVals[-2 + yyTop]), "<", ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 215:
-#line 857 "mrb_parse.jay"
+#line 855 "mrb_parse.jay"
 						{
 							yyVal = call_bin_op(((node)yyVals[-2 + yyTop]), "<=", ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 216:
-#line 861 "mrb_parse.jay"
+#line 859 "mrb_parse.jay"
 						{
 							yyVal = call_bin_op(((node)yyVals[-2 + yyTop]), "==", ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 217:
-#line 865 "mrb_parse.jay"
+#line 863 "mrb_parse.jay"
 						{
 							yyVal = call_bin_op(((node)yyVals[-2 + yyTop]), "===", ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 218:
-#line 869 "mrb_parse.jay"
+#line 867 "mrb_parse.jay"
 						{
 							yyVal = call_bin_op(((node)yyVals[-2 + yyTop]), "!=", ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 219:
-#line 873 "mrb_parse.jay"
+#line 871 "mrb_parse.jay"
 						{
 							yyVal = call_bin_op(((node)yyVals[-2 + yyTop]), "=~", ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 220:
-#line 877 "mrb_parse.jay"
+#line 875 "mrb_parse.jay"
 						{
 							yyVal = call_bin_op(((node)yyVals[-2 + yyTop]), "!~", ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 221:
-#line 881 "mrb_parse.jay"
+#line 879 "mrb_parse.jay"
 						{
 							yyVal = call_uni_op(cond(((node)yyVals[0 + yyTop])), "!");
 						}
 						break;
 					case 222:
-#line 885 "mrb_parse.jay"
+#line 883 "mrb_parse.jay"
 						{
 							yyVal = call_uni_op(cond(((node)yyVals[0 + yyTop])), "~");
 						}
 						break;
 					case 223:
-#line 889 "mrb_parse.jay"
+#line 887 "mrb_parse.jay"
 						{
 							yyVal = call_bin_op(((node)yyVals[-2 + yyTop]), "<<", ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 224:
-#line 893 "mrb_parse.jay"
+#line 891 "mrb_parse.jay"
 						{
 							yyVal = call_bin_op(((node)yyVals[-2 + yyTop]), ">>", ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 225:
-#line 897 "mrb_parse.jay"
+#line 895 "mrb_parse.jay"
 						{
 							yyVal = new_and(((node)yyVals[-2 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 226:
-#line 901 "mrb_parse.jay"
+#line 899 "mrb_parse.jay"
 						{
 							yyVal = new_or(((node)yyVals[-2 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 227:
-#line 905 "mrb_parse.jay"
+#line 903 "mrb_parse.jay"
 						{
 							yyVal = new_if(cond(((node)yyVals[-5 + yyTop])), ((node)yyVals[-3 + yyTop]), ((node)yyVals[0 + yyTop]), true);
 						}
 						break;
 					case 228:
-#line 909 "mrb_parse.jay"
+#line 907 "mrb_parse.jay"
 						{
 							yyVal = ((node)yyVals[0 + yyTop]);
 						}
 						break;
 					case 230:
-#line 916 "mrb_parse.jay"
+#line 914 "mrb_parse.jay"
 						{
 							yyVal = ((node)yyVals[-1 + yyTop]);
 							((node)yyVal).NODE_LINENO(((node)yyVals[-1 + yyTop]));
 						}
 						break;
 					case 231:
-#line 921 "mrb_parse.jay"
+#line 919 "mrb_parse.jay"
 						{
 							yyVal = push(((node)yyVals[-3 + yyTop]), new_hash(((node)yyVals[-1 + yyTop])));
 						}
 						break;
 					case 232:
-#line 925 "mrb_parse.jay"
+#line 923 "mrb_parse.jay"
 						{
 							yyVal = cons(new_hash(((node)yyVals[-1 + yyTop])), null);
 							((node)yyVal).NODE_LINENO(((node)yyVals[-1 + yyTop]));
 						}
 						break;
 					case 233:
-#line 932 "mrb_parse.jay"
+#line 930 "mrb_parse.jay"
 						{
 							void_expr_error(((node)yyVals[0 + yyTop]));
 							yyVal = ((node)yyVals[0 + yyTop]);
 						}
 						break;
 					case 234:
-#line 937 "mrb_parse.jay"
+#line 935 "mrb_parse.jay"
 						{
 							void_expr_error(((node)yyVals[-2 + yyTop]));
 							yyVal = new_mod_rescue(((node)yyVals[-2 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 235:
-#line 944 "mrb_parse.jay"
+#line 942 "mrb_parse.jay"
 						{
 							yyVal = ((node)yyVals[-1 + yyTop]);
 						}
 						break;
 					case 240:
-#line 956 "mrb_parse.jay"
+#line 954 "mrb_parse.jay"
 						{
 							yyVal = cons(((node)yyVals[-1 + yyTop]), null);
 							((node)yyVal).NODE_LINENO(((node)yyVals[-1 + yyTop]));
 						}
 						break;
 					case 241:
-#line 961 "mrb_parse.jay"
+#line 959 "mrb_parse.jay"
 						{
 							yyVal = cons(push(((node)yyVals[-3 + yyTop]), new_hash(((node)yyVals[-1 + yyTop]))), null);
 							((node)yyVal).NODE_LINENO(((node)yyVals[-3 + yyTop]));
 						}
 						break;
 					case 242:
-#line 966 "mrb_parse.jay"
+#line 964 "mrb_parse.jay"
 						{
 							yyVal = cons(list1(new_hash(((node)yyVals[-1 + yyTop]))), null);
 							((node)yyVal).NODE_LINENO(((node)yyVals[-1 + yyTop]));
 						}
 						break;
 					case 243:
-#line 973 "mrb_parse.jay"
+#line 971 "mrb_parse.jay"
 						{
 							yyVal = cons(list1(((node)yyVals[0 + yyTop])), null);
 							((node)yyVal).NODE_LINENO(((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 244:
-#line 978 "mrb_parse.jay"
+#line 976 "mrb_parse.jay"
 						{
 							yyVal = cons(((node)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop]));
 							((node)yyVal).NODE_LINENO(((node)yyVals[-1 + yyTop]));
 						}
 						break;
 					case 245:
-#line 983 "mrb_parse.jay"
+#line 981 "mrb_parse.jay"
 						{
 							yyVal = cons(list1(new_hash(((node)yyVals[-1 + yyTop]))), ((node)yyVals[0 + yyTop]));
 							((node)yyVal).NODE_LINENO(((node)yyVals[-1 + yyTop]));
 						}
 						break;
 					case 246:
-#line 988 "mrb_parse.jay"
+#line 986 "mrb_parse.jay"
 						{
 							yyVal = cons(push(((node)yyVals[-3 + yyTop]), new_hash(((node)yyVals[-1 + yyTop]))), ((node)yyVals[0 + yyTop]));
 							((node)yyVal).NODE_LINENO(((node)yyVals[-3 + yyTop]));
 						}
 						break;
 					case 247:
-#line 993 "mrb_parse.jay"
+#line 991 "mrb_parse.jay"
 						{
 							yyVal = cons(null, ((node)yyVals[0 + yyTop]));
 							((node)yyVal).NODE_LINENO(((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 248:
-#line 999 "mrb_parse.jay"
+#line 997 "mrb_parse.jay"
 						{
 							yyVal = (stack_type)this.cmdarg_stack;
 							CMDARG_PUSH(1);
 						}
 						break;
 					case 249:
-#line 1004 "mrb_parse.jay"
+#line 1002 "mrb_parse.jay"
 						{
 							this.cmdarg_stack = ((stack_type)yyVals[-1 + yyTop]);
 							yyVal = ((node)yyVals[0 + yyTop]);
 						}
 						break;
 					case 250:
-#line 1011 "mrb_parse.jay"
+#line 1009 "mrb_parse.jay"
 						{
 							yyVal = new_block_arg((node)((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 251:
-#line 1017 "mrb_parse.jay"
+#line 1015 "mrb_parse.jay"
 						{
 							yyVal = ((node)yyVals[0 + yyTop]);
 						}
 						break;
 					case 252:
-#line 1021 "mrb_parse.jay"
+#line 1019 "mrb_parse.jay"
 						{
 							yyVal = null;
 						}
 						break;
 					case 255:
-#line 1031 "mrb_parse.jay"
+#line 1029 "mrb_parse.jay"
 						{
 							void_expr_error(((node)yyVals[0 + yyTop]));
 							yyVal = cons(((node)yyVals[0 + yyTop]), null);
@@ -7696,7 +7695,7 @@ namespace BlocklyMruby
 						}
 						break;
 					case 256:
-#line 1037 "mrb_parse.jay"
+#line 1035 "mrb_parse.jay"
 						{
 							void_expr_error(((node)yyVals[0 + yyTop]));
 							yyVal = cons(new_splat(((node)yyVals[0 + yyTop])), null);
@@ -7704,159 +7703,159 @@ namespace BlocklyMruby
 						}
 						break;
 					case 257:
-#line 1043 "mrb_parse.jay"
+#line 1041 "mrb_parse.jay"
 						{
 							void_expr_error(((node)yyVals[0 + yyTop]));
 							yyVal = push(((node)yyVals[-2 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 258:
-#line 1048 "mrb_parse.jay"
+#line 1046 "mrb_parse.jay"
 						{
 							void_expr_error(((node)yyVals[0 + yyTop]));
 							yyVal = push(((node)yyVals[-3 + yyTop]), new_splat(((node)yyVals[0 + yyTop])));
 						}
 						break;
 					case 259:
-#line 1055 "mrb_parse.jay"
+#line 1053 "mrb_parse.jay"
 						{
 							void_expr_error(((node)yyVals[0 + yyTop]));
 							yyVal = push(((node)yyVals[-2 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 260:
-#line 1060 "mrb_parse.jay"
+#line 1058 "mrb_parse.jay"
 						{
 							void_expr_error(((node)yyVals[0 + yyTop]));
 							yyVal = push(((node)yyVals[-3 + yyTop]), new_splat(((node)yyVals[0 + yyTop])));
 						}
 						break;
 					case 261:
-#line 1065 "mrb_parse.jay"
+#line 1063 "mrb_parse.jay"
 						{
 							void_expr_error(((node)yyVals[0 + yyTop]));
 							yyVal = list1(new_splat(((node)yyVals[0 + yyTop])));
 						}
 						break;
 					case 269:
-#line 1079 "mrb_parse.jay"
+#line 1077 "mrb_parse.jay"
 						{
 							yyVal = new_fcall(((mrb_sym)yyVals[0 + yyTop]), null);
 						}
 						break;
 					case 270:
-#line 1083 "mrb_parse.jay"
+#line 1081 "mrb_parse.jay"
 						{
 							yyVal = (stack_type)this.cmdarg_stack;
 							this.cmdarg_stack = 0;
 						}
 						break;
 					case 271:
-#line 1089 "mrb_parse.jay"
+#line 1087 "mrb_parse.jay"
 						{
 							this.cmdarg_stack = ((stack_type)yyVals[-2 + yyTop]);
 							yyVal = ((node)yyVals[-1 + yyTop]);
 						}
 						break;
 					case 272:
-#line 1094 "mrb_parse.jay"
+#line 1092 "mrb_parse.jay"
 						{
 							yyVal = (stack_type)this.cmdarg_stack;
 							this.cmdarg_stack = 0;
 						}
 						break;
 					case 273:
-#line 1098 "mrb_parse.jay"
+#line 1096 "mrb_parse.jay"
 						{ this.lstate = mrb_lex_state_enum.EXPR_ENDARG; }
 						break;
 					case 274:
-#line 1099 "mrb_parse.jay"
+#line 1097 "mrb_parse.jay"
 						{
 							this.cmdarg_stack = ((stack_type)yyVals[-3 + yyTop]);
 							yyVal = ((node)yyVals[-2 + yyTop]);
 						}
 						break;
 					case 275:
-#line 1103 "mrb_parse.jay"
+#line 1101 "mrb_parse.jay"
 						{ this.lstate = mrb_lex_state_enum.EXPR_ENDARG; }
 						break;
 					case 276:
-#line 1104 "mrb_parse.jay"
+#line 1102 "mrb_parse.jay"
 						{
 							yyVal = new_nil();
 						}
 						break;
 					case 277:
-#line 1108 "mrb_parse.jay"
+#line 1106 "mrb_parse.jay"
 						{
 							yyVal = ((node)yyVals[-1 + yyTop]);
 						}
 						break;
 					case 278:
-#line 1112 "mrb_parse.jay"
+#line 1110 "mrb_parse.jay"
 						{
 							yyVal = new_colon2(((node)yyVals[-2 + yyTop]), ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 279:
-#line 1116 "mrb_parse.jay"
+#line 1114 "mrb_parse.jay"
 						{
 							yyVal = new_colon3(((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 280:
-#line 1120 "mrb_parse.jay"
+#line 1118 "mrb_parse.jay"
 						{
 							yyVal = new_array(((node)yyVals[-1 + yyTop]));
 							((node)yyVal).NODE_LINENO(((node)yyVals[-1 + yyTop]));
 						}
 						break;
 					case 281:
-#line 1125 "mrb_parse.jay"
+#line 1123 "mrb_parse.jay"
 						{
 							yyVal = new_hash(((node)yyVals[-1 + yyTop]));
 							((node)yyVal).NODE_LINENO(((node)yyVals[-1 + yyTop]));
 						}
 						break;
 					case 282:
-#line 1130 "mrb_parse.jay"
+#line 1128 "mrb_parse.jay"
 						{
 							yyVal = new_return(null);
 						}
 						break;
 					case 283:
-#line 1134 "mrb_parse.jay"
+#line 1132 "mrb_parse.jay"
 						{
 							yyVal = new_yield(((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 284:
-#line 1138 "mrb_parse.jay"
+#line 1136 "mrb_parse.jay"
 						{
 							yyVal = call_uni_op(cond(((node)yyVals[-1 + yyTop])), "!");
 						}
 						break;
 					case 285:
-#line 1142 "mrb_parse.jay"
+#line 1140 "mrb_parse.jay"
 						{
 							yyVal = call_uni_op(new_nil(), "!");
 						}
 						break;
 					case 286:
-#line 1146 "mrb_parse.jay"
+#line 1144 "mrb_parse.jay"
 						{
 							yyVal = new_fcall(((mrb_sym)yyVals[-1 + yyTop]), cons(null, ((node)yyVals[0 + yyTop])));
 						}
 						break;
 					case 288:
-#line 1151 "mrb_parse.jay"
+#line 1149 "mrb_parse.jay"
 						{
 							call_with_block(((node)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop]));
 							yyVal = ((node)yyVals[-1 + yyTop]);
 						}
 						break;
 					case 289:
-#line 1156 "mrb_parse.jay"
+#line 1154 "mrb_parse.jay"
 						{
 							local_nest();
 							yyVal = (int)this.lpar_beg;
@@ -7864,14 +7863,14 @@ namespace BlocklyMruby
 						}
 						break;
 					case 290:
-#line 1162 "mrb_parse.jay"
+#line 1160 "mrb_parse.jay"
 						{
 							yyVal = (stack_type)this.cmdarg_stack;
 							this.cmdarg_stack = 0;
 						}
 						break;
 					case 291:
-#line 1167 "mrb_parse.jay"
+#line 1165 "mrb_parse.jay"
 						{
 							this.lpar_beg = ((int)yyVals[-3 + yyTop]);
 							yyVal = new_lambda(((node)yyVals[-2 + yyTop]), ((node)yyVals[0 + yyTop]));
@@ -7881,78 +7880,78 @@ namespace BlocklyMruby
 						}
 						break;
 					case 292:
-#line 1178 "mrb_parse.jay"
+#line 1176 "mrb_parse.jay"
 						{
 							yyVal = new_if(cond(((node)yyVals[-4 + yyTop])), ((node)yyVals[-2 + yyTop]), ((node)yyVals[-1 + yyTop]));
 							((node)yyVal).SET_LINENO(((int)yyVals[-5 + yyTop]));
 						}
 						break;
 					case 293:
-#line 1186 "mrb_parse.jay"
+#line 1184 "mrb_parse.jay"
 						{
 							yyVal = new_unless(cond(((node)yyVals[-4 + yyTop])), ((node)yyVals[-2 + yyTop]), ((node)yyVals[-1 + yyTop]));
 							((node)yyVal).SET_LINENO(((int)yyVals[-5 + yyTop]));
 						}
 						break;
 					case 294:
-#line 1190 "mrb_parse.jay"
+#line 1188 "mrb_parse.jay"
 						{ COND_PUSH(1); }
 						break;
 					case 295:
-#line 1190 "mrb_parse.jay"
+#line 1188 "mrb_parse.jay"
 						{ COND_POP(); }
 						break;
 					case 296:
-#line 1193 "mrb_parse.jay"
+#line 1191 "mrb_parse.jay"
 						{
 							yyVal = new_while(cond(((node)yyVals[-4 + yyTop])), ((node)yyVals[-1 + yyTop]));
 							((node)yyVal).SET_LINENO(((int)yyVals[-6 + yyTop]));
 						}
 						break;
 					case 297:
-#line 1197 "mrb_parse.jay"
+#line 1195 "mrb_parse.jay"
 						{ COND_PUSH(1); }
 						break;
 					case 298:
-#line 1197 "mrb_parse.jay"
+#line 1195 "mrb_parse.jay"
 						{ COND_POP(); }
 						break;
 					case 299:
-#line 1200 "mrb_parse.jay"
+#line 1198 "mrb_parse.jay"
 						{
 							yyVal = new_until(cond(((node)yyVals[-4 + yyTop])), ((node)yyVals[-1 + yyTop]));
 							((node)yyVal).SET_LINENO(((int)yyVals[-6 + yyTop]));
 						}
 						break;
 					case 300:
-#line 1207 "mrb_parse.jay"
+#line 1205 "mrb_parse.jay"
 						{
 							yyVal = new_case(((node)yyVals[-3 + yyTop]), ((node)yyVals[-1 + yyTop]));
 						}
 						break;
 					case 301:
-#line 1211 "mrb_parse.jay"
+#line 1209 "mrb_parse.jay"
 						{
 							yyVal = new_case(null, ((node)yyVals[-1 + yyTop]));
 						}
 						break;
 					case 302:
-#line 1215 "mrb_parse.jay"
+#line 1213 "mrb_parse.jay"
 						{ COND_PUSH(1); }
 						break;
 					case 303:
-#line 1217 "mrb_parse.jay"
+#line 1215 "mrb_parse.jay"
 						{ COND_POP(); }
 						break;
 					case 304:
-#line 1220 "mrb_parse.jay"
+#line 1218 "mrb_parse.jay"
 						{
 							yyVal = new_for(((node)yyVals[-7 + yyTop]), ((node)yyVals[-4 + yyTop]), ((node)yyVals[-1 + yyTop]));
 							((node)yyVal).SET_LINENO(((int)yyVals[-8 + yyTop]));
 						}
 						break;
 					case 305:
-#line 1226 "mrb_parse.jay"
+#line 1224 "mrb_parse.jay"
 						{
 							if (this.in_def != 0 || this.in_single != 0)
 								yyError("class definition in method body");
@@ -7960,7 +7959,7 @@ namespace BlocklyMruby
 						}
 						break;
 					case 306:
-#line 1233 "mrb_parse.jay"
+#line 1231 "mrb_parse.jay"
 						{
 							yyVal = new_class(((node)yyVals[-4 + yyTop]), ((node)yyVals[-3 + yyTop]), ((node)yyVals[-1 + yyTop]));
 							((node)yyVal).SET_LINENO(((int)yyVals[-5 + yyTop]));
@@ -7968,21 +7967,21 @@ namespace BlocklyMruby
 						}
 						break;
 					case 307:
-#line 1240 "mrb_parse.jay"
+#line 1238 "mrb_parse.jay"
 						{
 							yyVal = (int)this.in_def;
 							this.in_def = 0;
 						}
 						break;
 					case 308:
-#line 1245 "mrb_parse.jay"
+#line 1243 "mrb_parse.jay"
 						{
 							yyVal = cons(local_switch(), this.in_single);
 							this.in_single = 0;
 						}
 						break;
 					case 309:
-#line 1251 "mrb_parse.jay"
+#line 1249 "mrb_parse.jay"
 						{
 							yyVal = new_sclass(((node)yyVals[-5 + yyTop]), ((node)yyVals[-1 + yyTop]));
 							((node)yyVal).SET_LINENO(((int)yyVals[-7 + yyTop]));
@@ -7992,7 +7991,7 @@ namespace BlocklyMruby
 						}
 						break;
 					case 310:
-#line 1260 "mrb_parse.jay"
+#line 1258 "mrb_parse.jay"
 						{
 							if (this.in_def != 0 || this.in_single != 0)
 								yyError("module definition in method body");
@@ -8000,7 +7999,7 @@ namespace BlocklyMruby
 						}
 						break;
 					case 311:
-#line 1267 "mrb_parse.jay"
+#line 1265 "mrb_parse.jay"
 						{
 							yyVal = new_module(((node)yyVals[-3 + yyTop]), ((node)yyVals[-1 + yyTop]));
 							((node)yyVal).SET_LINENO(((int)yyVals[-4 + yyTop]));
@@ -8008,21 +8007,21 @@ namespace BlocklyMruby
 						}
 						break;
 					case 312:
-#line 1273 "mrb_parse.jay"
+#line 1271 "mrb_parse.jay"
 						{
 							yyVal = (stack_type)this.cmdarg_stack;
 							this.cmdarg_stack = 0;
 						}
 						break;
 					case 313:
-#line 1277 "mrb_parse.jay"
+#line 1275 "mrb_parse.jay"
 						{
 							this.in_def++;
 							yyVal = local_switch();
 						}
 						break;
 					case 314:
-#line 1284 "mrb_parse.jay"
+#line 1282 "mrb_parse.jay"
 						{
 							yyVal = new_def(((mrb_sym)yyVals[-5 + yyTop]), ((node)yyVals[-2 + yyTop]), ((node)yyVals[-1 + yyTop]));
 							((node)yyVal).SET_LINENO(((int)yyVals[-6 + yyTop]));
@@ -8032,7 +8031,7 @@ namespace BlocklyMruby
 						}
 						break;
 					case 315:
-#line 1292 "mrb_parse.jay"
+#line 1290 "mrb_parse.jay"
 						{
 							this.lstate = mrb_lex_state_enum.EXPR_FNAME;
 							yyVal = (stack_type)this.cmdarg_stack;
@@ -8040,7 +8039,7 @@ namespace BlocklyMruby
 						}
 						break;
 					case 316:
-#line 1298 "mrb_parse.jay"
+#line 1296 "mrb_parse.jay"
 						{
 							this.in_single++;
 							this.lstate = mrb_lex_state_enum.EXPR_ENDFN; /* force for args */
@@ -8048,7 +8047,7 @@ namespace BlocklyMruby
 						}
 						break;
 					case 317:
-#line 1306 "mrb_parse.jay"
+#line 1304 "mrb_parse.jay"
 						{
 							yyVal = new_sdef(((node)yyVals[-7 + yyTop]), ((mrb_sym)yyVals[-4 + yyTop]), ((node)yyVals[-2 + yyTop]), ((node)yyVals[-1 + yyTop]));
 							((node)yyVal).SET_LINENO(((int)yyVals[-8 + yyTop]));
@@ -8058,305 +8057,305 @@ namespace BlocklyMruby
 						}
 						break;
 					case 318:
-#line 1314 "mrb_parse.jay"
+#line 1312 "mrb_parse.jay"
 						{
 							yyVal = new_break(null);
 						}
 						break;
 					case 319:
-#line 1318 "mrb_parse.jay"
+#line 1316 "mrb_parse.jay"
 						{
 							yyVal = new_next(null);
 						}
 						break;
 					case 320:
-#line 1322 "mrb_parse.jay"
+#line 1320 "mrb_parse.jay"
 						{
 							yyVal = new_redo();
 						}
 						break;
 					case 321:
-#line 1326 "mrb_parse.jay"
+#line 1324 "mrb_parse.jay"
 						{
 							yyVal = new_retry();
 						}
 						break;
 					case 322:
-#line 1332 "mrb_parse.jay"
+#line 1330 "mrb_parse.jay"
 						{
 							yyVal = ((node)yyVals[0 + yyTop]);
 							if (yyVal == null) yyVal = new_nil();
 						}
 						break;
 					case 329:
-#line 1351 "mrb_parse.jay"
+#line 1349 "mrb_parse.jay"
 						{
 							yyVal = new_if(cond(((node)yyVals[-3 + yyTop])), ((node)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 331:
-#line 1358 "mrb_parse.jay"
+#line 1356 "mrb_parse.jay"
 						{
 							yyVal = ((node)yyVals[0 + yyTop]);
 						}
 						break;
 					case 332:
-#line 1364 "mrb_parse.jay"
+#line 1362 "mrb_parse.jay"
 						{
 							yyVal = list1(list1(((node)yyVals[0 + yyTop])));
 						}
 						break;
 					case 334:
-#line 1371 "mrb_parse.jay"
+#line 1369 "mrb_parse.jay"
 						{
 							yyVal = new_arg(((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 335:
-#line 1375 "mrb_parse.jay"
+#line 1373 "mrb_parse.jay"
 						{
 							yyVal = new_masgn(((node)yyVals[-1 + yyTop]), null);
 						}
 						break;
 					case 336:
-#line 1381 "mrb_parse.jay"
+#line 1379 "mrb_parse.jay"
 						{
 							yyVal = list1(((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 337:
-#line 1385 "mrb_parse.jay"
+#line 1383 "mrb_parse.jay"
 						{
 							yyVal = push(((node)yyVals[-2 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 338:
-#line 1391 "mrb_parse.jay"
+#line 1389 "mrb_parse.jay"
 						{
 							yyVal = list3(((node)yyVals[0 + yyTop]), null, null);
 						}
 						break;
 					case 339:
-#line 1395 "mrb_parse.jay"
+#line 1393 "mrb_parse.jay"
 						{
 							yyVal = list3(((node)yyVals[-3 + yyTop]), new_arg(((mrb_sym)yyVals[0 + yyTop])), null);
 						}
 						break;
 					case 340:
-#line 1399 "mrb_parse.jay"
+#line 1397 "mrb_parse.jay"
 						{
 							yyVal = list3(((node)yyVals[-5 + yyTop]), new_arg(((mrb_sym)yyVals[-2 + yyTop])), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 341:
-#line 1403 "mrb_parse.jay"
+#line 1401 "mrb_parse.jay"
 						{
 							yyVal = list3(((node)yyVals[-2 + yyTop]), -1, null);
 						}
 						break;
 					case 342:
-#line 1407 "mrb_parse.jay"
+#line 1405 "mrb_parse.jay"
 						{
 							yyVal = list3(((node)yyVals[-4 + yyTop]), -1, ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 343:
-#line 1411 "mrb_parse.jay"
+#line 1409 "mrb_parse.jay"
 						{
 							yyVal = list3(null, new_arg(((mrb_sym)yyVals[0 + yyTop])), null);
 						}
 						break;
 					case 344:
-#line 1415 "mrb_parse.jay"
+#line 1413 "mrb_parse.jay"
 						{
 							yyVal = list3(null, new_arg(((mrb_sym)yyVals[-2 + yyTop])), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 345:
-#line 1419 "mrb_parse.jay"
+#line 1417 "mrb_parse.jay"
 						{
 							yyVal = list3(null, -1, null);
 						}
 						break;
 					case 346:
-#line 1423 "mrb_parse.jay"
+#line 1421 "mrb_parse.jay"
 						{
 							yyVal = list3(null, -1, ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 347:
-#line 1429 "mrb_parse.jay"
+#line 1427 "mrb_parse.jay"
 						{
 							yyVal = new_args(((node)yyVals[-5 + yyTop]), ((node)yyVals[-3 + yyTop]), ((mrb_sym)yyVals[-1 + yyTop]), null, ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 348:
-#line 1433 "mrb_parse.jay"
+#line 1431 "mrb_parse.jay"
 						{
 							yyVal = new_args(((node)yyVals[-7 + yyTop]), ((node)yyVals[-5 + yyTop]), ((mrb_sym)yyVals[-3 + yyTop]), ((node)yyVals[-1 + yyTop]), ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 349:
-#line 1437 "mrb_parse.jay"
+#line 1435 "mrb_parse.jay"
 						{
 							yyVal = new_args(((node)yyVals[-3 + yyTop]), ((node)yyVals[-1 + yyTop]), 0, null, ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 350:
-#line 1441 "mrb_parse.jay"
+#line 1439 "mrb_parse.jay"
 						{
 							yyVal = new_args(((node)yyVals[-5 + yyTop]), ((node)yyVals[-3 + yyTop]), 0, ((node)yyVals[-1 + yyTop]), ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 351:
-#line 1445 "mrb_parse.jay"
+#line 1443 "mrb_parse.jay"
 						{
 							yyVal = new_args(((node)yyVals[-3 + yyTop]), null, ((mrb_sym)yyVals[-1 + yyTop]), null, ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 352:
-#line 1449 "mrb_parse.jay"
+#line 1447 "mrb_parse.jay"
 						{
-							yyVal = new_args(((node)yyVals[-1 + yyTop]), null, (mrb_sym)1, null, 0);
+							yyVal = new_args(((node)yyVals[-1 + yyTop]), null, (mrb_sym)0, null, 0);
 						}
 						break;
 					case 353:
-#line 1453 "mrb_parse.jay"
+#line 1451 "mrb_parse.jay"
 						{
 							yyVal = new_args(((node)yyVals[-5 + yyTop]), null, ((mrb_sym)yyVals[-3 + yyTop]), ((node)yyVals[-1 + yyTop]), ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 354:
-#line 1457 "mrb_parse.jay"
+#line 1455 "mrb_parse.jay"
 						{
 							yyVal = new_args(((node)yyVals[-1 + yyTop]), null, 0, null, ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 355:
-#line 1461 "mrb_parse.jay"
+#line 1459 "mrb_parse.jay"
 						{
 							yyVal = new_args(null, ((node)yyVals[-3 + yyTop]), ((mrb_sym)yyVals[-1 + yyTop]), null, ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 356:
-#line 1465 "mrb_parse.jay"
+#line 1463 "mrb_parse.jay"
 						{
 							yyVal = new_args(null, ((node)yyVals[-5 + yyTop]), ((mrb_sym)yyVals[-3 + yyTop]), ((node)yyVals[-1 + yyTop]), ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 357:
-#line 1469 "mrb_parse.jay"
+#line 1467 "mrb_parse.jay"
 						{
 							yyVal = new_args(null, ((node)yyVals[-1 + yyTop]), 0, null, ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 358:
-#line 1473 "mrb_parse.jay"
+#line 1471 "mrb_parse.jay"
 						{
 							yyVal = new_args(null, ((node)yyVals[-3 + yyTop]), 0, ((node)yyVals[-1 + yyTop]), ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 359:
-#line 1477 "mrb_parse.jay"
+#line 1475 "mrb_parse.jay"
 						{
 							yyVal = new_args(null, null, ((mrb_sym)yyVals[-1 + yyTop]), null, ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 360:
-#line 1481 "mrb_parse.jay"
+#line 1479 "mrb_parse.jay"
 						{
 							yyVal = new_args(null, null, ((mrb_sym)yyVals[-3 + yyTop]), ((node)yyVals[-1 + yyTop]), ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 361:
-#line 1485 "mrb_parse.jay"
+#line 1483 "mrb_parse.jay"
 						{
 							yyVal = new_args(null, null, 0, null, ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 363:
-#line 1492 "mrb_parse.jay"
+#line 1490 "mrb_parse.jay"
 						{
 							this.cmd_start = true;
 							yyVal = ((node)yyVals[0 + yyTop]);
 						}
 						break;
 					case 364:
-#line 1499 "mrb_parse.jay"
+#line 1497 "mrb_parse.jay"
 						{
 							yyVal = null;
 						}
 						break;
 					case 365:
-#line 1503 "mrb_parse.jay"
+#line 1501 "mrb_parse.jay"
 						{
 							yyVal = null;
 						}
 						break;
 					case 366:
-#line 1507 "mrb_parse.jay"
+#line 1505 "mrb_parse.jay"
 						{
 							yyVal = ((node)yyVals[-2 + yyTop]);
 						}
 						break;
 					case 367:
-#line 1514 "mrb_parse.jay"
+#line 1512 "mrb_parse.jay"
 						{
 							yyVal = null;
 						}
 						break;
 					case 368:
-#line 1518 "mrb_parse.jay"
+#line 1516 "mrb_parse.jay"
 						{
 							yyVal = null;
 						}
 						break;
 					case 371:
-#line 1528 "mrb_parse.jay"
+#line 1526 "mrb_parse.jay"
 						{
 							local_add_f(((mrb_sym)yyVals[0 + yyTop]));
 							new_bv(((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 373:
-#line 1536 "mrb_parse.jay"
+#line 1534 "mrb_parse.jay"
 						{
 							yyVal = ((node)yyVals[-2 + yyTop]);
 						}
 						break;
 					case 374:
-#line 1540 "mrb_parse.jay"
+#line 1538 "mrb_parse.jay"
 						{
 							yyVal = ((node)yyVals[0 + yyTop]);
 						}
 						break;
 					case 375:
-#line 1546 "mrb_parse.jay"
+#line 1544 "mrb_parse.jay"
 						{
 							yyVal = ((node)yyVals[-1 + yyTop]);
 						}
 						break;
 					case 376:
-#line 1550 "mrb_parse.jay"
+#line 1548 "mrb_parse.jay"
 						{
 							yyVal = ((node)yyVals[-1 + yyTop]);
 						}
 						break;
 					case 377:
-#line 1556 "mrb_parse.jay"
+#line 1554 "mrb_parse.jay"
 						{
 							local_nest();
 						}
 						break;
 					case 378:
-#line 1562 "mrb_parse.jay"
+#line 1560 "mrb_parse.jay"
 						{
 							yyVal = new_block(((node)yyVals[-2 + yyTop]), ((node)yyVals[-1 + yyTop]), false);
 							local_unnest();
 						}
 						break;
 					case 379:
-#line 1569 "mrb_parse.jay"
+#line 1567 "mrb_parse.jay"
 						{
 							if ((node_type)((node)yyVals[-1 + yyTop]).car == node_type.NODE_YIELD) {
 								yyError("block given to yield");
@@ -8368,88 +8367,88 @@ namespace BlocklyMruby
 						}
 						break;
 					case 380:
-#line 1579 "mrb_parse.jay"
+#line 1577 "mrb_parse.jay"
 						{
 							yyVal = new_call(((node)yyVals[-3 + yyTop]), ((mrb_sym)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop]), ((MrbTokens)yyVals[-2 + yyTop]));
 						}
 						break;
 					case 381:
-#line 1583 "mrb_parse.jay"
+#line 1581 "mrb_parse.jay"
 						{
 							yyVal = new_call(((node)yyVals[-4 + yyTop]), ((mrb_sym)yyVals[-2 + yyTop]), ((node)yyVals[-1 + yyTop]), ((MrbTokens)yyVals[-3 + yyTop]));
 							call_with_block((node)yyVal, ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 382:
-#line 1588 "mrb_parse.jay"
+#line 1586 "mrb_parse.jay"
 						{
 							yyVal = new_call(((node)yyVals[-4 + yyTop]), ((mrb_sym)yyVals[-2 + yyTop]), ((node)yyVals[-1 + yyTop]), ((MrbTokens)yyVals[-3 + yyTop]));
 							call_with_block((node)yyVal, ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 383:
-#line 1595 "mrb_parse.jay"
+#line 1593 "mrb_parse.jay"
 						{
 							yyVal = new_fcall(((mrb_sym)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 384:
-#line 1599 "mrb_parse.jay"
+#line 1597 "mrb_parse.jay"
 						{
 							yyVal = new_call(((node)yyVals[-3 + yyTop]), ((mrb_sym)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop]), ((MrbTokens)yyVals[-2 + yyTop]));
 						}
 						break;
 					case 385:
-#line 1603 "mrb_parse.jay"
+#line 1601 "mrb_parse.jay"
 						{
 							yyVal = new_call(((node)yyVals[-3 + yyTop]), ((mrb_sym)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop]), MrbTokens.tCOLON2);
 						}
 						break;
 					case 386:
-#line 1607 "mrb_parse.jay"
+#line 1605 "mrb_parse.jay"
 						{
 							yyVal = new_call(((node)yyVals[-2 + yyTop]), ((mrb_sym)yyVals[0 + yyTop]), null, MrbTokens.tCOLON2);
 						}
 						break;
 					case 387:
-#line 1611 "mrb_parse.jay"
+#line 1609 "mrb_parse.jay"
 						{
 							yyVal = new_call(((node)yyVals[-2 + yyTop]), intern("call", 4), ((node)yyVals[0 + yyTop]), ((MrbTokens)yyVals[-1 + yyTop]));
 						}
 						break;
 					case 388:
-#line 1615 "mrb_parse.jay"
+#line 1613 "mrb_parse.jay"
 						{
 							yyVal = new_call(((node)yyVals[-2 + yyTop]), intern("call", 4), ((node)yyVals[0 + yyTop]), MrbTokens.tCOLON2);
 						}
 						break;
 					case 389:
-#line 1619 "mrb_parse.jay"
+#line 1617 "mrb_parse.jay"
 						{
 							yyVal = new_super(((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 390:
-#line 1623 "mrb_parse.jay"
+#line 1621 "mrb_parse.jay"
 						{
 							yyVal = new_zsuper();
 						}
 						break;
 					case 391:
-#line 1627 "mrb_parse.jay"
+#line 1625 "mrb_parse.jay"
 						{
 							yyVal = new_call(((node)yyVals[-3 + yyTop]), intern("[]", 2), ((node)yyVals[-1 + yyTop]), (MrbTokens)'.');
 						}
 						break;
 					case 392:
-#line 1633 "mrb_parse.jay"
+#line 1631 "mrb_parse.jay"
 						{
 							local_nest();
 							yyVal = (int)this.lineno;
 						}
 						break;
 					case 393:
-#line 1639 "mrb_parse.jay"
+#line 1637 "mrb_parse.jay"
 						{
 							yyVal = new_block(((node)yyVals[-2 + yyTop]), ((node)yyVals[-1 + yyTop]), true);
 							((node)yyVal).SET_LINENO(((int)yyVals[-3 + yyTop]));
@@ -8457,14 +8456,14 @@ namespace BlocklyMruby
 						}
 						break;
 					case 394:
-#line 1645 "mrb_parse.jay"
+#line 1643 "mrb_parse.jay"
 						{
 							local_nest();
 							yyVal = (int)this.lineno;
 						}
 						break;
 					case 395:
-#line 1651 "mrb_parse.jay"
+#line 1649 "mrb_parse.jay"
 						{
 							yyVal = new_block(((node)yyVals[-2 + yyTop]), ((node)yyVals[-1 + yyTop]), false);
 							((node)yyVal).SET_LINENO(((int)yyVals[-3 + yyTop]));
@@ -8472,13 +8471,13 @@ namespace BlocklyMruby
 						}
 						break;
 					case 396:
-#line 1661 "mrb_parse.jay"
+#line 1659 "mrb_parse.jay"
 						{
 							yyVal = cons(cons(((node)yyVals[-3 + yyTop]), ((node)yyVals[-1 + yyTop])), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 397:
-#line 1667 "mrb_parse.jay"
+#line 1665 "mrb_parse.jay"
 						{
 							if (((node)yyVals[0 + yyTop]) != null) {
 								yyVal = cons(cons(null, ((node)yyVals[0 + yyTop])), null);
@@ -8489,106 +8488,106 @@ namespace BlocklyMruby
 						}
 						break;
 					case 399:
-#line 1681 "mrb_parse.jay"
+#line 1679 "mrb_parse.jay"
 						{
 							yyVal = list1(list3(((node)yyVals[-4 + yyTop]), ((node)yyVals[-3 + yyTop]), ((node)yyVals[-1 + yyTop])));
 							if (((node)yyVals[0 + yyTop]) != null) yyVal = append(((node)yyVal), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 401:
-#line 1689 "mrb_parse.jay"
+#line 1687 "mrb_parse.jay"
 						{
 							yyVal = list1(((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 404:
-#line 1697 "mrb_parse.jay"
+#line 1695 "mrb_parse.jay"
 						{
 							yyVal = ((node)yyVals[0 + yyTop]);
 						}
 						break;
 					case 406:
-#line 1704 "mrb_parse.jay"
+#line 1702 "mrb_parse.jay"
 						{
 							yyVal = ((node)yyVals[0 + yyTop]);
 						}
 						break;
 					case 414:
-#line 1719 "mrb_parse.jay"
+#line 1717 "mrb_parse.jay"
 						{
 							yyVal = ((node)yyVals[0 + yyTop]);
 						}
 						break;
 					case 415:
-#line 1723 "mrb_parse.jay"
+#line 1721 "mrb_parse.jay"
 						{
 							yyVal = new_dstr(push(((node)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop])));
 						}
 						break;
 					case 417:
-#line 1730 "mrb_parse.jay"
+#line 1728 "mrb_parse.jay"
 						{
 							yyVal = append(((node)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 418:
-#line 1736 "mrb_parse.jay"
+#line 1734 "mrb_parse.jay"
 						{
 							yyVal = list1(((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 419:
-#line 1740 "mrb_parse.jay"
+#line 1738 "mrb_parse.jay"
 						{
 							yyVal = (node)this.lex_strterm;
 							this.lex_strterm = null;
 						}
 						break;
 					case 420:
-#line 1746 "mrb_parse.jay"
+#line 1744 "mrb_parse.jay"
 						{
 							this.lex_strterm = ((node)yyVals[-2 + yyTop]);
 							yyVal = list2(((node)yyVals[-3 + yyTop]), ((node)yyVals[-1 + yyTop]));
 						}
 						break;
 					case 421:
-#line 1751 "mrb_parse.jay"
+#line 1749 "mrb_parse.jay"
 						{
 							yyVal = list1(new_literal_delim());
 						}
 						break;
 					case 422:
-#line 1755 "mrb_parse.jay"
+#line 1753 "mrb_parse.jay"
 						{
 							yyVal = list1(new_literal_delim());
 						}
 						break;
 					case 423:
-#line 1761 "mrb_parse.jay"
+#line 1759 "mrb_parse.jay"
 						{
 							yyVal = ((node)yyVals[0 + yyTop]);
 						}
 						break;
 					case 424:
-#line 1765 "mrb_parse.jay"
+#line 1763 "mrb_parse.jay"
 						{
 							yyVal = new_dxstr(push(((node)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop])));
 						}
 						break;
 					case 425:
-#line 1771 "mrb_parse.jay"
+#line 1769 "mrb_parse.jay"
 						{
 							yyVal = ((node)yyVals[0 + yyTop]);
 						}
 						break;
 					case 426:
-#line 1775 "mrb_parse.jay"
+#line 1773 "mrb_parse.jay"
 						{
 							yyVal = new_dregx(((node)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 430:
-#line 1788 "mrb_parse.jay"
+#line 1786 "mrb_parse.jay"
 						{
 							parser_heredoc_info inf = parsing_heredoc_inf();
 							inf.push_doc(new_str(new Uint8Array(0), 0));
@@ -8596,13 +8595,13 @@ namespace BlocklyMruby
 						}
 						break;
 					case 431:
-#line 1794 "mrb_parse.jay"
+#line 1792 "mrb_parse.jay"
 						{
 							heredoc_end();
 						}
 						break;
 					case 434:
-#line 1804 "mrb_parse.jay"
+#line 1802 "mrb_parse.jay"
 						{
 							parser_heredoc_info inf = parsing_heredoc_inf();
 							inf.push_doc(((node)yyVals[0 + yyTop]));
@@ -8610,14 +8609,14 @@ namespace BlocklyMruby
 						}
 						break;
 					case 435:
-#line 1810 "mrb_parse.jay"
+#line 1808 "mrb_parse.jay"
 						{
 							yyVal = (node)this.lex_strterm;
 							this.lex_strterm = null;
 						}
 						break;
 					case 436:
-#line 1816 "mrb_parse.jay"
+#line 1814 "mrb_parse.jay"
 						{
 							parser_heredoc_info inf = parsing_heredoc_inf();
 							this.lex_strterm = ((node)yyVals[-2 + yyTop]);
@@ -8626,141 +8625,141 @@ namespace BlocklyMruby
 						}
 						break;
 					case 437:
-#line 1825 "mrb_parse.jay"
+#line 1823 "mrb_parse.jay"
 						{
 							yyVal = new_words(list1(((node)yyVals[0 + yyTop])));
 						}
 						break;
 					case 438:
-#line 1829 "mrb_parse.jay"
+#line 1827 "mrb_parse.jay"
 						{
 							yyVal = new_words(push(((node)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop])));
 						}
 						break;
 					case 439:
-#line 1836 "mrb_parse.jay"
+#line 1834 "mrb_parse.jay"
 						{
 							yyVal = new_sym(((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 440:
-#line 1840 "mrb_parse.jay"
+#line 1838 "mrb_parse.jay"
 						{
 							this.lstate = mrb_lex_state_enum.EXPR_END;
 							yyVal = new_dsym(push(((node)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop])));
 						}
 						break;
 					case 441:
-#line 1847 "mrb_parse.jay"
+#line 1845 "mrb_parse.jay"
 						{
 							this.lstate = mrb_lex_state_enum.EXPR_END;
 							yyVal = ((mrb_sym)yyVals[0 + yyTop]);
 						}
 						break;
 					case 446:
-#line 1858 "mrb_parse.jay"
+#line 1856 "mrb_parse.jay"
 						{
 							yyVal = new_strsym(((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 447:
-#line 1862 "mrb_parse.jay"
+#line 1860 "mrb_parse.jay"
 						{
 							yyVal = new_strsym(((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 448:
-#line 1868 "mrb_parse.jay"
+#line 1866 "mrb_parse.jay"
 						{
 							yyVal = new_symbols(list1(((node)yyVals[0 + yyTop])));
 						}
 						break;
 					case 449:
-#line 1872 "mrb_parse.jay"
+#line 1870 "mrb_parse.jay"
 						{
 							yyVal = new_symbols(push(((node)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop])));
 						}
 						break;
 					case 452:
-#line 1880 "mrb_parse.jay"
+#line 1878 "mrb_parse.jay"
 						{
 							yyVal = negate_lit(((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 453:
-#line 1884 "mrb_parse.jay"
+#line 1882 "mrb_parse.jay"
 						{
 							yyVal = negate_lit(((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 454:
-#line 1890 "mrb_parse.jay"
+#line 1888 "mrb_parse.jay"
 						{
 							yyVal = new_lvar(((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 455:
-#line 1894 "mrb_parse.jay"
+#line 1892 "mrb_parse.jay"
 						{
 							yyVal = new_ivar(((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 456:
-#line 1898 "mrb_parse.jay"
+#line 1896 "mrb_parse.jay"
 						{
 							yyVal = new_gvar(((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 457:
-#line 1902 "mrb_parse.jay"
+#line 1900 "mrb_parse.jay"
 						{
 							yyVal = new_cvar(((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 458:
-#line 1906 "mrb_parse.jay"
+#line 1904 "mrb_parse.jay"
 						{
 							yyVal = new_const(((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 459:
-#line 1912 "mrb_parse.jay"
+#line 1910 "mrb_parse.jay"
 						{
 							assignable(((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 460:
-#line 1918 "mrb_parse.jay"
+#line 1916 "mrb_parse.jay"
 						{
 							yyVal = var_reference(((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 461:
-#line 1922 "mrb_parse.jay"
+#line 1920 "mrb_parse.jay"
 						{
 							yyVal = new_nil();
 						}
 						break;
 					case 462:
-#line 1926 "mrb_parse.jay"
+#line 1924 "mrb_parse.jay"
 						{
 							yyVal = new_self();
 						}
 						break;
 					case 463:
-#line 1930 "mrb_parse.jay"
+#line 1928 "mrb_parse.jay"
 						{
 							yyVal = new_true();
 						}
 						break;
 					case 464:
-#line 1934 "mrb_parse.jay"
+#line 1932 "mrb_parse.jay"
 						{
 							yyVal = new_false();
 						}
 						break;
 					case 465:
-#line 1938 "mrb_parse.jay"
+#line 1936 "mrb_parse.jay"
 						{
 							if (this.filename == null) {
 								this.mrb_parser_set_filename("(null)");
@@ -8769,32 +8768,32 @@ namespace BlocklyMruby
 						}
 						break;
 					case 466:
-#line 1945 "mrb_parse.jay"
+#line 1943 "mrb_parse.jay"
 						{
 							yyVal = new_lineno(this.lineno);
 						}
 						break;
 					case 469:
-#line 1955 "mrb_parse.jay"
+#line 1953 "mrb_parse.jay"
 						{
 							yyVal = null;
 						}
 						break;
 					case 470:
-#line 1959 "mrb_parse.jay"
+#line 1957 "mrb_parse.jay"
 						{
 							this.lstate = mrb_lex_state_enum.EXPR_BEG;
 							this.cmd_start = true;
 						}
 						break;
 					case 471:
-#line 1964 "mrb_parse.jay"
+#line 1962 "mrb_parse.jay"
 						{
 							yyVal = ((node)yyVals[-1 + yyTop]);
 						}
 						break;
 					case 472:
-#line 1975 "mrb_parse.jay"
+#line 1973 "mrb_parse.jay"
 						{
 							yyVal = ((node)yyVals[-1 + yyTop]);
 							this.lstate = mrb_lex_state_enum.EXPR_BEG;
@@ -8802,257 +8801,257 @@ namespace BlocklyMruby
 						}
 						break;
 					case 473:
-#line 1981 "mrb_parse.jay"
+#line 1979 "mrb_parse.jay"
 						{
 							yyVal = ((node)yyVals[-1 + yyTop]);
 						}
 						break;
 					case 474:
-#line 1987 "mrb_parse.jay"
+#line 1985 "mrb_parse.jay"
 						{
 							yyVal = new_args(((node)yyVals[-5 + yyTop]), ((node)yyVals[-3 + yyTop]), ((mrb_sym)yyVals[-1 + yyTop]), null, ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 475:
-#line 1991 "mrb_parse.jay"
+#line 1989 "mrb_parse.jay"
 						{
 							yyVal = new_args(((node)yyVals[-7 + yyTop]), ((node)yyVals[-5 + yyTop]), ((mrb_sym)yyVals[-3 + yyTop]), ((node)yyVals[-1 + yyTop]), ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 476:
-#line 1995 "mrb_parse.jay"
+#line 1993 "mrb_parse.jay"
 						{
 							yyVal = new_args(((node)yyVals[-3 + yyTop]), ((node)yyVals[-1 + yyTop]), 0, null, ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 477:
-#line 1999 "mrb_parse.jay"
+#line 1997 "mrb_parse.jay"
 						{
 							yyVal = new_args(((node)yyVals[-5 + yyTop]), ((node)yyVals[-3 + yyTop]), 0, ((node)yyVals[-1 + yyTop]), ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 478:
-#line 2003 "mrb_parse.jay"
+#line 2001 "mrb_parse.jay"
 						{
 							yyVal = new_args(((node)yyVals[-3 + yyTop]), null, ((mrb_sym)yyVals[-1 + yyTop]), null, ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 479:
-#line 2007 "mrb_parse.jay"
+#line 2005 "mrb_parse.jay"
 						{
 							yyVal = new_args(((node)yyVals[-5 + yyTop]), null, ((mrb_sym)yyVals[-3 + yyTop]), ((node)yyVals[-1 + yyTop]), ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 480:
-#line 2011 "mrb_parse.jay"
+#line 2009 "mrb_parse.jay"
 						{
 							yyVal = new_args(((node)yyVals[-1 + yyTop]), null, 0, null, ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 481:
-#line 2015 "mrb_parse.jay"
+#line 2013 "mrb_parse.jay"
 						{
 							yyVal = new_args(null, ((node)yyVals[-3 + yyTop]), ((mrb_sym)yyVals[-1 + yyTop]), null, ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 482:
-#line 2019 "mrb_parse.jay"
+#line 2017 "mrb_parse.jay"
 						{
 							yyVal = new_args(null, ((node)yyVals[-5 + yyTop]), ((mrb_sym)yyVals[-3 + yyTop]), ((node)yyVals[-1 + yyTop]), ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 483:
-#line 2023 "mrb_parse.jay"
+#line 2021 "mrb_parse.jay"
 						{
 							yyVal = new_args(null, ((node)yyVals[-1 + yyTop]), 0, null, ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 484:
-#line 2027 "mrb_parse.jay"
+#line 2025 "mrb_parse.jay"
 						{
 							yyVal = new_args(null, ((node)yyVals[-3 + yyTop]), 0, ((node)yyVals[-1 + yyTop]), ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 485:
-#line 2031 "mrb_parse.jay"
+#line 2029 "mrb_parse.jay"
 						{
 							yyVal = new_args(null, null, ((mrb_sym)yyVals[-1 + yyTop]), null, ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 486:
-#line 2035 "mrb_parse.jay"
+#line 2033 "mrb_parse.jay"
 						{
 							yyVal = new_args(null, null, ((mrb_sym)yyVals[-3 + yyTop]), ((node)yyVals[-1 + yyTop]), ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 487:
-#line 2039 "mrb_parse.jay"
+#line 2037 "mrb_parse.jay"
 						{
 							yyVal = new_args(null, null, 0, null, ((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 488:
-#line 2043 "mrb_parse.jay"
+#line 2041 "mrb_parse.jay"
 						{
 							local_add_f(0);
 							yyVal = new_args(null, null, 0, null, 0);
 						}
 						break;
 					case 489:
-#line 2050 "mrb_parse.jay"
+#line 2048 "mrb_parse.jay"
 						{
 							yyError("formal argument cannot be a constant");
 							yyVal = null;
 						}
 						break;
 					case 490:
-#line 2055 "mrb_parse.jay"
+#line 2053 "mrb_parse.jay"
 						{
 							yyError("formal argument cannot be an instance variable");
 							yyVal = null;
 						}
 						break;
 					case 491:
-#line 2060 "mrb_parse.jay"
+#line 2058 "mrb_parse.jay"
 						{
 							yyError("formal argument cannot be a global variable");
 							yyVal = null;
 						}
 						break;
 					case 492:
-#line 2065 "mrb_parse.jay"
+#line 2063 "mrb_parse.jay"
 						{
 							yyError("formal argument cannot be a class variable");
 							yyVal = null;
 						}
 						break;
 					case 493:
-#line 2072 "mrb_parse.jay"
+#line 2070 "mrb_parse.jay"
 						{
 							yyVal = null;
 						}
 						break;
 					case 494:
-#line 2076 "mrb_parse.jay"
+#line 2074 "mrb_parse.jay"
 						{
 							local_add_f(((mrb_sym)yyVals[0 + yyTop]));
 							yyVal = ((mrb_sym)yyVals[0 + yyTop]);
 						}
 						break;
 					case 495:
-#line 2083 "mrb_parse.jay"
+#line 2081 "mrb_parse.jay"
 						{
 							yyVal = new_arg(((mrb_sym)yyVals[0 + yyTop]));
 						}
 						break;
 					case 496:
-#line 2087 "mrb_parse.jay"
+#line 2085 "mrb_parse.jay"
 						{
 							yyVal = new_masgn(((node)yyVals[-1 + yyTop]), null);
 						}
 						break;
 					case 497:
-#line 2093 "mrb_parse.jay"
+#line 2091 "mrb_parse.jay"
 						{
 							yyVal = list1(((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 498:
-#line 2097 "mrb_parse.jay"
+#line 2095 "mrb_parse.jay"
 						{
 							yyVal = push(((node)yyVals[-2 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 499:
-#line 2103 "mrb_parse.jay"
+#line 2101 "mrb_parse.jay"
 						{
 							local_add_f(((mrb_sym)yyVals[-1 + yyTop]));
 							yyVal = ((mrb_sym)yyVals[-1 + yyTop]);
 						}
 						break;
 					case 500:
-#line 2110 "mrb_parse.jay"
+#line 2108 "mrb_parse.jay"
 						{
 							yyVal = cons(((mrb_sym)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 501:
-#line 2116 "mrb_parse.jay"
+#line 2114 "mrb_parse.jay"
 						{
 							yyVal = cons(((mrb_sym)yyVals[-1 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 502:
-#line 2122 "mrb_parse.jay"
+#line 2120 "mrb_parse.jay"
 						{
 							yyVal = list1(((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 503:
-#line 2126 "mrb_parse.jay"
+#line 2124 "mrb_parse.jay"
 						{
 							yyVal = push(((node)yyVals[-2 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 504:
-#line 2132 "mrb_parse.jay"
+#line 2130 "mrb_parse.jay"
 						{
 							yyVal = list1(((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 505:
-#line 2136 "mrb_parse.jay"
+#line 2134 "mrb_parse.jay"
 						{
 							yyVal = push(((node)yyVals[-2 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 508:
-#line 2146 "mrb_parse.jay"
+#line 2144 "mrb_parse.jay"
 						{
 							local_add_f(((mrb_sym)yyVals[0 + yyTop]));
 							yyVal = ((mrb_sym)yyVals[0 + yyTop]);
 						}
 						break;
 					case 509:
-#line 2151 "mrb_parse.jay"
+#line 2149 "mrb_parse.jay"
 						{
 							local_add_f(0);
 							yyVal = -1;
 						}
 						break;
 					case 512:
-#line 2162 "mrb_parse.jay"
+#line 2160 "mrb_parse.jay"
 						{
 							local_add_f(((mrb_sym)yyVals[0 + yyTop]));
 							yyVal = ((mrb_sym)yyVals[0 + yyTop]);
 						}
 						break;
 					case 513:
-#line 2169 "mrb_parse.jay"
+#line 2167 "mrb_parse.jay"
 						{
 							yyVal = ((mrb_sym)yyVals[0 + yyTop]);
 						}
 						break;
 					case 514:
-#line 2173 "mrb_parse.jay"
+#line 2171 "mrb_parse.jay"
 						{
 							local_add_f(0);
 							yyVal = 0;
 						}
 						break;
 					case 515:
-#line 2180 "mrb_parse.jay"
+#line 2178 "mrb_parse.jay"
 						{
 							yyVal = ((node)yyVals[0 + yyTop]);
 							if (yyVal == null) yyVal = new_nil();
 						}
 						break;
 					case 516:
-#line 2184 "mrb_parse.jay"
+#line 2182 "mrb_parse.jay"
 						{ this.lstate = mrb_lex_state_enum.EXPR_BEG; }
 						break;
 					case 517:
-#line 2185 "mrb_parse.jay"
+#line 2183 "mrb_parse.jay"
 						{
 							if (((int)yyVals[-1 + yyTop]) == 0) {
 								yyError("can't define singleton method for ().");
@@ -9078,85 +9077,85 @@ namespace BlocklyMruby
 						}
 						break;
 					case 519:
-#line 2212 "mrb_parse.jay"
+#line 2210 "mrb_parse.jay"
 						{
 							yyVal = ((node)yyVals[-1 + yyTop]);
 						}
 						break;
 					case 520:
-#line 2218 "mrb_parse.jay"
+#line 2216 "mrb_parse.jay"
 						{
 							yyVal = list1(((node)yyVals[0 + yyTop]));
 							((node)yyVal).NODE_LINENO(((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 521:
-#line 2223 "mrb_parse.jay"
+#line 2221 "mrb_parse.jay"
 						{
 							yyVal = push(((node)yyVals[-2 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 522:
-#line 2229 "mrb_parse.jay"
+#line 2227 "mrb_parse.jay"
 						{
 							yyVal = cons(((node)yyVals[-2 + yyTop]), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 523:
-#line 2233 "mrb_parse.jay"
+#line 2231 "mrb_parse.jay"
 						{
 							yyVal = cons(new_sym(((mrb_sym)yyVals[-1 + yyTop])), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 524:
-#line 2237 "mrb_parse.jay"
+#line 2235 "mrb_parse.jay"
 						{
 							yyVal = cons(new_sym(new_strsym(((node)yyVals[-1 + yyTop]))), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 525:
-#line 2241 "mrb_parse.jay"
+#line 2239 "mrb_parse.jay"
 						{
 							yyVal = cons(new_sym(new_strsym(((node)yyVals[-1 + yyTop]))), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 526:
-#line 2245 "mrb_parse.jay"
+#line 2243 "mrb_parse.jay"
 						{
 							yyVal = cons(new_dsym(push(((node)yyVals[-2 + yyTop]), ((node)yyVals[-1 + yyTop]))), ((node)yyVals[0 + yyTop]));
 						}
 						break;
 					case 539:
-#line 2271 "mrb_parse.jay"
+#line 2269 "mrb_parse.jay"
 						{
 							yyVal = (MrbTokens)'.';
 						}
 						break;
 					case 540:
-#line 2275 "mrb_parse.jay"
+#line 2273 "mrb_parse.jay"
 						{
 							yyVal = (MrbTokens)0;
 						}
 						break;
 					case 542:
-#line 2282 "mrb_parse.jay"
+#line 2280 "mrb_parse.jay"
 						{
 							yyVal = MrbTokens.tCOLON2;
 						}
 						break;
 					case 552:
-#line 2306 "mrb_parse.jay"
+#line 2304 "mrb_parse.jay"
 						{ yyErrorFlag = 0; }
 						break;
 					case 555:
-#line 2312 "mrb_parse.jay"
+#line 2310 "mrb_parse.jay"
 						{
 							this.lineno++;
 							this.column = 0;
 						}
 						break;
 					case 558:
-#line 2323 "mrb_parse.jay"
+#line 2321 "mrb_parse.jay"
 						{
 							yyVal = null;
 						}
@@ -9191,7 +9190,7 @@ namespace BlocklyMruby
 				}
 			}
 		}
-#line 2328 "mrb_parse.jay"
+#line 2326 "mrb_parse.jay"
 
 	} // must specify trailing } for parser class
 } // must specify trailing } for namespace, if any

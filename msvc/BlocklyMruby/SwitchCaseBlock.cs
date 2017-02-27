@@ -773,7 +773,6 @@ namespace BlocklyMruby
 			JsArray<case_node.when_t> code = new JsArray<case_node.when_t>();
 			for (int n = 0; n <= block.cases_.Length; n++) {
 				var branch = statementToCode(block, "DO" + n);
-				if (branch == null) branch = new nil_node(this);
 				var argument1 = block.getFieldValue("CONST" + n);
 				if (argument1 != null) {
 					var when = new case_node.when_t() { body = branch };
@@ -810,7 +809,6 @@ namespace BlocklyMruby
 			JsArray<case_node.when_t> code = new JsArray<case_node.when_t>();
 			for (int n = 0; n <= block.cases_.Length; n++) {
 				var branch = statementToCode(block, "DO" + n);
-				if (branch == null) branch = new nil_node(this);
 				var argument1 = block.getFieldValue("CONST" + n);
 				if (argument1 != null) {
 					var when = new case_node.when_t() { body = branch };

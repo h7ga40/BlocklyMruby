@@ -12,7 +12,16 @@ namespace BlocklyMruby
 {
 	public class BlocklyView : WebConsole
 	{
-		public string Identifier { get; set; }
+		string identifier;
+		public string Identifier {
+			get { return identifier; }
+			set {
+				if (identifier != value) {
+					identifier = value;
+					IdentifierChanged?.Invoke(this, EventArgs.Empty);
+				}
+			}
+		}
 		public Blockly Blockly { get; private set; }
 		public WorkspaceSvg Workspace { get { return Blockly.mainWorkspace; } }
 		public Dictionary<string, FlyoutCategoryHandler> FlyoutCategoryHandlers = new Dictionary<string, FlyoutCategoryHandler>();
@@ -21,6 +30,7 @@ namespace BlocklyMruby
 		public event EventHandler<Change> BlockChanged;
 		public event EventHandler<Move> BlockMoveed;
 		public event EventHandler<Ui> UiEvent;
+		public event EventHandler<EventArgs> IdentifierChanged;
 		public bool Changed = true;
 
 		public BlocklyView()
@@ -60,7 +70,8 @@ namespace BlocklyMruby
 
 			Init();
 			InvokeScript("start_blockly");
-			Init2();
+
+			Workspace.addChangeListener(Workspace_Changed);
 
 			base.DocumentCompleted(Url);
 		}
@@ -153,11 +164,6 @@ namespace BlocklyMruby
 
 			FlyoutCategoryHandlers.Add(Blockly.Procedures.NAME_TYPE, Blockly.Procedures.flyoutCategory);
 			FlyoutCategoryHandlers.Add(Blockly.Variables.NAME_TYPE, Blockly.Variables.flyoutCategory);
-		}
-
-		internal void Init2()
-		{
-			Workspace.addChangeListener(Workspace_Changed);
 		}
 
 		private void Workspace_Changed(Abstract e)
@@ -429,22 +435,36 @@ namespace BlocklyMruby
 
 		public object variables_allUsedVariablesBlock(object block_)
 		{
-			var block = ToBlock(block_);
-			var ret = Blockly.Variables.allUsedVariables(block);
-			var result = Bridge.Script.NewArray();
-			foreach (var s in ret) {
-				Bridge.Script.Push(result, s);
+			object result;
+			try {
+				var block = ToBlock(block_);
+				var ret = Blockly.Variables.allUsedVariables(block);
+				result = Bridge.Script.NewArray();
+				foreach (var s in ret) {
+					Bridge.Script.Push(result, s);
+				}
+			}
+			catch (Exception e) {
+				System.Diagnostics.Debug.WriteLine(e);
+				return null;
 			}
 			return result;
 		}
 
 		public object variables_allUsedVariablesWorkspace(object workspace_)
 		{
-			var workspace = ToWorkspace(workspace_);
-			var ret = Blockly.Variables.allUsedVariables(workspace);
-			var result = Bridge.Script.NewArray();
-			foreach (var s in ret) {
-				Bridge.Script.Push(result, s);
+			object result;
+			try {
+				var workspace = ToWorkspace(workspace_);
+				var ret = Blockly.Variables.allUsedVariables(workspace);
+				result = Bridge.Script.NewArray();
+				foreach (var s in ret) {
+					Bridge.Script.Push(result, s);
+				}
+			}
+			catch (Exception e) {
+				System.Diagnostics.Debug.WriteLine(e);
+				return null;
 			}
 			return result;
 		}

@@ -105,7 +105,7 @@ namespace BlocklyMruby
 		{
 			if (root is Block) {
 				// Root is Block.
-				Script.console_warn("Deprecated call to Variables.allVariables " +
+				App.WriteLine("Deprecated call to Variables.allVariables " +
 							 "with a block instead of a workspace.  You may want " +
 							 "Variables.allUsedVariables");
 			}

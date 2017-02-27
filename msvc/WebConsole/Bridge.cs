@@ -11,6 +11,8 @@ using Bridge.Html5;
 
 namespace Bridge
 {
+	public delegate int LoadEvent(ScriptingHost sender, string url, object data);
+
 	/// <summary>
 	/// WebBrowserのJavaScriptから呼ばれる関数の定義
 	/// </summary>
@@ -23,10 +25,7 @@ namespace Bridge
 	{
 		public object bridge;
 		WebConsole _View;
-		string _Type;
-		string _Url;
 		bool _Async;
-		string _ContentType;
 
 		public dynamic instance;
 
@@ -36,13 +35,19 @@ namespace Bridge
 		}
 
 		public WebConsole View { get { return _View; } }
-
 		public Script Script { get { return _View.Script; } }
 		public Document Document { get { return _View.Script.Document; } }
+		public string Type { get; private set; }
+		public string Url { get; private set; }
+		public string ContentType { get; private set; }
+		public string Username { get; private set; }
+		public string Password { get; private set; }
 
 		public object CreateXMLHttpRequest()
 		{
-			return new ScriptingHost(_View);
+			var result = new ScriptingHost(_View);
+			result.OnLoad = OnLoad;
+			return result;
 		}
 
 		public object new_array()
@@ -114,8 +119,34 @@ namespace Bridge
 			}
 		}
 
-		private void Load(string url)
+		public LoadEvent OnLoad;
+
+		private void Load(object data)
 		{
+			switch (System.IO.Path.GetExtension(Url)) {
+			case "html": ContentType = "text/html"; break;
+			case "css": ContentType = "text/css"; break;
+			case "js": ContentType = "text/javascript"; break;
+			case "xml": ContentType = "text/xml"; break;
+			case "gif": ContentType = "image/gif"; break;
+			case "jpeg": ContentType = "image/jpeg"; break;
+			case "png": ContentType = "image/png"; break;
+			case "svg": ContentType = "image/svg+xml"; break;
+			case "json": ContentType = "application/json"; break;
+			default: ContentType = "text/plane"; break;
+			}
+
+			if ((data != null) && !(data is DBNull)) {
+				var ret = OnLoad == null ? 404 : OnLoad(this, Url, data);
+				// 0以下の場合は
+				if (ret > 0) {
+					instance.status = ret;
+					SetReadyState(WebBrowserReadyState.Complete);
+				}
+				return;
+			}
+
+			var url = Url;
 			if (url.StartsWith("./"))
 				url = url.Substring(2);
 
@@ -126,23 +157,10 @@ namespace Bridge
 				return;
 			}
 			instance.response = response;
-
-			switch (System.IO.Path.GetExtension(url)) {
-			case "html": _ContentType = "text/html"; break;
-			case "css": _ContentType = "text/css"; break;
-			case "js": _ContentType = "text/javascript"; break;
-			case "xml": _ContentType = "text/xml"; break;
-			case "gif": _ContentType = "image/gif"; break;
-			case "jpeg": _ContentType = "image/jpeg"; break;
-			case "png": _ContentType = "image/png"; break;
-			case "svg": _ContentType = "image/svg+xml"; break;
-			case "json": _ContentType = "application/json"; break;
-			default: _ContentType = "text/plane"; break;
-			}
 			instance.responseText = Encoding.UTF8.GetString(instance.response);
-
 			instance.status = 200;
 			SetReadyState(WebBrowserReadyState.Complete);
+
 			try {
 				if ((instance.onload != null) && !(instance.onload is DBNull))
 					instance.onload.call(this, null);
@@ -152,24 +170,46 @@ namespace Bridge
 			}
 		}
 
+		public void LoadDane(int status)
+		{
+			instance.status = status;
+			SetReadyState(WebBrowserReadyState.Complete);
+
+			try {
+				if (status == 200) {
+					if ((instance.onload != null) && !(instance.onload is DBNull))
+						instance.onload.call(this, null);
+				}
+				else {
+					if ((instance.onload != null) && !(instance.onload is DBNull))
+						instance.onload.call(this, null);
+				}
+			}
+			catch (COMException e) {
+				System.Diagnostics.Debug.WriteLine(e.Message);
+			}
+		}
+
 		public void open(string type, string url, bool async, string username, string password)
 		{
-			_Type = type;
-			_Url = url;
+			Type = type;
+			Url = url;
 			_Async = async;
+			Username = username;
+			Password = password;
 
 			instance.status = 404;
 			SetReadyState(WebBrowserReadyState.Loading);
 		}
 
-		public void send(object header)
+		public void send(object data)
 		{
 			SetReadyState(WebBrowserReadyState.Loaded);
 
 			if (_Async)
-				_View.BeginInvoke(new MethodInvoker(() => { Load(_Url); }));
+				_View.BeginInvoke(new MethodInvoker(() => { Load(data); }));
 			else
-				Load(_Url);
+				Load(data);
 		}
 
 		Dictionary<string, object> headers = new Dictionary<string, object>();
@@ -182,7 +222,7 @@ namespace Bridge
 		public string getAllResponseHeaders()
 		{
 			return
-				"Content-Type: " + _ContentType + "\n" +
+				"Content-Type: " + ContentType + "\n" +
 				"Last-Modified: Tue, 11 Nov 2014 00:00:00 GMT\n" +
 				"Accept-Ranges: bytes\n" +
 				"Server: Microsoft-IIS/8.0\n" +
@@ -587,6 +627,70 @@ namespace Bridge
 		}
 	}
 
+	public class Union<T1, T2, T3, T4>
+	{
+		object value;
+
+		public Union(object value)
+		{
+			if (value is T1 || value is T2 || value is T3 || value is T4)
+				this.value = value;
+			else
+				throw new ArgumentException();
+		}
+
+		public object Value { get { return value; } }
+
+		public T As<T>() { if (value is T) return (T)value; else return default(T); }
+
+		public bool Is<T>() { return value is T; }
+
+		public static implicit operator Union<T1, T2, T3, T4>(T1 value)
+		{
+			return new Union<T1, T2, T3, T4>(value);
+		}
+
+		public static implicit operator Union<T1, T2, T3, T4>(T2 value)
+		{
+			return new Union<T1, T2, T3, T4>(value);
+		}
+
+		public static implicit operator Union<T1, T2, T3, T4>(T3 value)
+		{
+			return new Union<T1, T2, T3, T4>(value);
+		}
+
+		public static implicit operator Union<T1, T2, T3, T4>(T4 value)
+		{
+			return new Union<T1, T2, T3, T4>(value);
+		}
+
+		public static explicit operator T1(Union<T1, T2, T3, T4> any)
+		{
+			return (T1)any.value;
+		}
+
+		public static explicit operator T2(Union<T1, T2, T3, T4> any)
+		{
+			return (T2)any.value;
+		}
+
+		public static explicit operator T3(Union<T1, T2, T3, T4> any)
+		{
+			return (T3)any.value;
+		}
+
+		public static explicit operator T4(Union<T1, T2, T3, T4> any)
+		{
+			return (T4)any.value;
+		}
+
+		public override string ToString()
+		{
+			return value.ToString();
+		}
+	}
+
 	public static class StringExtention
 	{
 		public static string Replace(this string str, Text.RegularExpressions.Regex regex, string dst)
@@ -657,7 +761,21 @@ namespace Bridge
 		}
 	}
 
-	public class JsArray<T> : IEnumerable<T>
+	public interface IJsArray<T> : IEnumerable<T>
+	{
+		int Length { get; }
+		T this[int index] { get; set; }
+		void Push(T item);
+		void PushRange(IEnumerable<T> items);
+	}
+
+	public interface IReadOnlyJsArray<out T> : IEnumerable<T>
+	{
+		int Length { get; }
+		T this[int index] { get; }
+	}
+
+	public class JsArray<T> : IJsArray<T>, IReadOnlyJsArray<T>
 	{
 		private List<T> _List;
 
@@ -691,6 +809,16 @@ namespace Bridge
 		public void Push(T item)
 		{
 			_List.Add(item);
+		}
+
+		public void PushRange(IEnumerable<T> items)
+		{
+			_List.AddRange(items);
+		}
+
+		public void Pop()
+		{
+			_List.RemoveAt(_List.Count - 1);
 		}
 
 		public void Add(T item)
@@ -731,11 +859,6 @@ namespace Bridge
 			}
 		}
 
-		public void AddRange(IEnumerable<T> collection)
-		{
-			_List.AddRange(collection);
-		}
-
 		public void Sort(Comparison<T> comparison)
 		{
 			_List.Sort(comparison);
@@ -746,9 +869,9 @@ namespace Bridge
 			return target._List.ToArray();
 		}
 
-		public bool Remove(T name)
+		public bool Remove(T item)
 		{
-			throw new NotImplementedException();
+			return _List.Remove(item);
 		}
 	}
 

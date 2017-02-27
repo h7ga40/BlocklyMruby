@@ -105,7 +105,7 @@ namespace BlocklyMruby
 		public abstract void init(Workspace workspace);
 		public abstract string finish(JsArray<node> code);
 		public abstract JsArray<node> scrubNakedValue(JsArray<node> line);
-		public abstract void scrub_(Block block, JsArray<node> code);
+		public abstract JsArray<node> scrub_(Block block, JsArray<node> code);
 
 		/// <summary>
 		/// Generate code for all blocks in the workspace to the specified language.
@@ -136,7 +136,7 @@ namespace BlocklyMruby
 						// it wants to append a semicolon, or something.
 						line = this.scrubNakedValue(line);
 					}
-					nodes.AddRange(line);
+					nodes = (JsArray<node>)nodes.Concat(line);
 				}
 			}
 			return nodes;
@@ -217,8 +217,7 @@ namespace BlocklyMruby
 				code.set_blockid(block.workspace.id, block.id);
 				result.Push(code);
 			}
-			this.scrub_(block, result);
-			return result;
+			return this.scrub_(block, result);
 		}
 
 		/// <summary>
@@ -236,7 +235,10 @@ namespace BlocklyMruby
 				return null;
 			}
 			var code = this.blockToCode(targetBlock);
-			if (code.Length == 1) {
+			if(code == null) {
+				return null;
+			}
+			else if (code.Length == 1) {
 				return code[0];
 			}
 			else {
@@ -250,7 +252,7 @@ namespace BlocklyMruby
 		/// <param name="block">The block containing the input.</param>
 		/// <param name="name">The name of the input.</param>
 		/// <returns>Generated code or '' if no blocks are connected.</returns>
-		public node statementToCode(Block block, string name)
+		public begin_node statementToCode(Block block, string name)
 		{
 			var targetBlock = block.getInputTargetBlock(name);
 			var code = this.blockToCode(targetBlock);

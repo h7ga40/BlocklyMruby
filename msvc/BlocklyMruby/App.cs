@@ -35,27 +35,27 @@ namespace BlocklyMruby
 
 		internal static void Write(string text)
 		{
-			Term?.write(text);
+			Out.Write(text);
 		}
 
 		internal static void Write(string text, params object[] args)
 		{
-			Term?.write(String.Format(text, args));
+			Out.Write(String.Format(text, args));
 		}
 
 		internal static void WriteLine()
 		{
-			Term?.write("");
+			Out.Write("");
 		}
 
 		internal static void WriteLine(string text)
 		{
-			Term?.write(text + "\n");
+			Out.Write(text + "\n");
 		}
 
 		internal static void WriteLine(string text, params object[] args)
 		{
-			Term?.write(String.Format(text, args) + "\n");
+			Out.Write(String.Format(text, args) + "\n");
 		}
 
 		internal static string ReadLine()

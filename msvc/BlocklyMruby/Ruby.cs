@@ -82,7 +82,7 @@ namespace BlocklyMruby
 		 * @this {Blockly.CodeGenerator}
 		 * @private
 		 */
-		public override void scrub_(Block block, JsArray<node> code)
+		public override JsArray<node> scrub_(Block block, JsArray<node> code)
 		{
 			var commentCode = "";
 			// Only collect comments for blocks that aren't inline.
@@ -111,8 +111,9 @@ namespace BlocklyMruby
 			if (block.nextConnection != null)
 				nextBlock = block.nextConnection.targetBlock();
 			var nextCode = blockToCode(nextBlock);
-			if (nextCode != null)
-				code.AddRange(nextCode);
+			if (nextCode == null)
+				return code;
+			return (JsArray<node>)code.Concat(nextCode);
 		}
 
 		public int lineno { get; set; }

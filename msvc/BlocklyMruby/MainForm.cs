@@ -27,8 +27,9 @@ namespace BlocklyMruby
 			Views.MainMenuView = this;
 			Views.ClassSelectorView = classSelectorView1;
 
-			blocklyView1.Identifier = "Global";
+			blocklyView1.IdentifierChanged += BlocklyView_IdentifierChanged;
 			blocklyView1.DocumentLoaded += BlocklyView1_DocumentLoaded;
+			blocklyView1.Identifier = "Global";
 			classSelectorView1.DocumentLoaded += ClassSelectorView1_DocumentLoaded;
 			classSelectorView1.Selected += ClassSelectorView1_Selected;
 			classSelectorView1.Removed += ClassSelectorView1_Removed;
@@ -53,6 +54,18 @@ namespace BlocklyMruby
 
 			xTermView1.Stdio -= Xterm_Stdio;
 			_Mruby.Stdio -= Mruby_Stdio;
+		}
+
+		private void BlocklyView_IdentifierChanged(object sender, EventArgs e)
+		{
+			var view = sender as BlocklyView;
+			foreach (TabPage tab in tabControl1.TabPages) {
+				if (!tab.Controls.Contains(view))
+					continue;
+
+				tab.Text = view.Identifier;
+				break;
+			}
 		}
 
 		private void BlocklyView1_DocumentLoaded(object sender, EventArgs e)
@@ -166,6 +179,7 @@ namespace BlocklyMruby
 		internal BlocklyView NewBlocklyView(string identifier)
 		{
 			var view = new BlocklyView();
+			view.IdentifierChanged += BlocklyView_IdentifierChanged;
 			view.Identifier = identifier;
 			TabPage Tab = new TabPage(identifier);
 			Tab.Controls.Add(view);
@@ -436,7 +450,7 @@ namespace BlocklyMruby
 				if (item != null) {
 					var rubyCode = item.RubyCode;
 					do {
-						_BlockIds.AddRange(rubyCode.GetBlockId(filename, lineno, column));
+						_BlockIds = (JsArray<Tuple<string, string>>)_BlockIds.Concat(rubyCode.GetBlockId(filename, lineno, column));
 						match = match.NextMatch();
 					} while (match.Success);
 
@@ -490,7 +504,7 @@ namespace BlocklyMruby
 				if (item != null) {
 					var rubyCode = item.RubyCode;
 					do {
-						_BlockIds.AddRange(rubyCode.GetBlockId(filename, lineno));
+						_BlockIds = (JsArray<Tuple<string, string>>)_BlockIds.Concat(rubyCode.GetBlockId(filename, lineno));
 						match = match.NextMatch();
 					} while (match.Success);
 
