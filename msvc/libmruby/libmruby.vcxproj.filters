@@ -186,6 +186,7 @@
     <None Include="..\..\mruby\mrbgems\mruby-toplevel-ext\mrblib\toplevel.rb">
       <Filter>Ruby ファイル</Filter>
     </None>
+    <None Include="..\..\mrbgems\mruby-blockly\mrblib\blockly.rb" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\mruby\mrbgems\mruby-objectspace\src\mruby_objectspace.c">

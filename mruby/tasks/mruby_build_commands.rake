@@ -132,7 +132,8 @@ module MRuby
     def get_dependencies(file)
       file = file.ext('d') unless File.extname(file) == '.d'
       if File.exist?(file)
-        File.read(file).gsub("\\\n ", "").scan(/^\S+:\s+(.+)$/).flatten.map {|s| s.split(' ') }.flatten
+        deps = File.read(file).gsub("\\\n ", "").scan(/^\S+:\s+(.+)$/).flatten.map {|s| s.split(/(?<!\\) /) }.flatten
+        deps.collect{ |f| f.gsub(/(\\ )/, " ") }.flatten
       else
         []
       end + [ MRUBY_CONFIG ]
