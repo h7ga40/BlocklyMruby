@@ -7,9 +7,9 @@
 #include "mrdb.h"
 #include "mrdberror.h"
 #include "apilist.h"
-#include "mruby/compile.h"
-#include "mruby/irep.h"
-#include "mruby/debug.h"
+#include <mruby/compile.h>
+#include <mruby/irep.h>
+#include <mruby/debug.h>
 
 #define LINE_BUF_SIZE MAX_COMMAND_LINE
 
@@ -73,7 +73,7 @@ dirname(mrb_state *mrb, const wchar_t *path)
   }
 
   p = wcsrchr(path, L'/');
-  len = p != NULL ? p - path : wcslen(path);
+  len = p != NULL ? (size_t)(p - path) : wcslen(path);
 
   dir = (wchar_t *)mrb_malloc(mrb, (len + 1) * sizeof(wchar_t));
   wcsncpy_s(dir, len + 1, path, len);
@@ -85,7 +85,7 @@ dirname(mrb_state *mrb, const wchar_t *path)
 static source_file*
 source_file_new(mrb_state *mrb, mrb_debug_context *dbg, wchar_t *filename)
 {
-  source_file *file = NULL;
+  source_file *file;
 
   file = (source_file *)mrb_malloc(mrb, sizeof(source_file));
 
@@ -176,8 +176,12 @@ mrb_debug_get_source(mrb_state *mrb, mrdb_state *mrdb, const wchar_t *srcpath, c
   int i;
   FILE *fp;
   const wchar_t *search_path[3];
-  wchar_t *refname = mrb_wchar_from_utf8(mrb_debug_get_filename(mrdb->dbg->root_irep, 0), -1);
+  wchar_t *refname = mrb_wchar_from_utf8(mrb_debug_get_filename(mrdb->dbg->irep, 0), -1);
   wchar_t *path = NULL;
+  const wchar_t *srcname = wcsrchr(filename, L'/');
+
+  if (srcname) srcname++;
+  else srcname = filename;
 
   search_path[0] = srcpath;
   search_path[1] = dirname(mrb, refname);
@@ -188,7 +192,7 @@ mrb_debug_get_source(mrb_state *mrb, mrdb_state *mrdb, const wchar_t *srcpath, c
       continue;
     }
 
-    if ((path = build_path(mrb, search_path[i], filename)) == NULL) {
+    if ((path = build_path(mrb, search_path[i], srcname)) == NULL) {
       continue;
     }
 

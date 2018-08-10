@@ -6,7 +6,7 @@
 #include "stdafx.h"
 
 #include "apilist.h"
-#include "mruby/compile.h"
+#include <mruby/compile.h>
 
 wchar_t *mrb_wchar_from_utf8(const char *mbsp, size_t mbssize);
 

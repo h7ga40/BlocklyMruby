@@ -7,7 +7,7 @@
 #ifndef MRUBY_VERSION_H
 #define MRUBY_VERSION_H
 
-#include "mruby/common.h"
+#include "common.h"
 
 /**
  * mruby version definition macros
@@ -42,12 +42,12 @@ MRB_BEGIN_DECL
 /*
  * Minor release version number.
  */
-#define MRUBY_RELEASE_MINOR 2
+#define MRUBY_RELEASE_MINOR 4
 
 /*
  * Tiny release version number.
  */
-#define MRUBY_RELEASE_TEENY 0
+#define MRUBY_RELEASE_TEENY 1
 
 /*
  * The mruby version.
@@ -62,17 +62,17 @@ MRB_BEGIN_DECL
 /*
  * Release year.
  */
-#define MRUBY_RELEASE_YEAR 2015
+#define MRUBY_RELEASE_YEAR 2018
 
 /*
  * Release month.
  */
-#define MRUBY_RELEASE_MONTH 11
+#define MRUBY_RELEASE_MONTH 4
 
 /*
  * Release day.
  */
-#define MRUBY_RELEASE_DAY 17
+#define MRUBY_RELEASE_DAY 27
 
 /*
  * Release date as a string.

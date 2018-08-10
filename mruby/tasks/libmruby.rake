@@ -4,7 +4,6 @@ MRuby.each_target do
   end
 
   file "#{build_dir}/lib/libmruby.flags.mak" => [__FILE__, libfile("#{build_dir}/lib/libmruby")] do |t|
-    FileUtils.mkdir_p File.dirname t.name
     open(t.name, 'w') do |f|
       f.puts "MRUBY_CFLAGS = #{cc.all_flags.gsub('"', '\\"')}"
 

@@ -5,14 +5,14 @@
 
 #include "stdafx.h"
 
-#include "mruby.h"
-#include "mruby/irep.h"
+#include <mruby.h>
+#include <mruby/irep.h>
 #include "mrdb.h"
-#include "mruby/debug.h"
-#include "mruby/opcode.h"
-#include "mruby/class.h"
-#include "mruby/proc.h"
-#include "mruby/variable.h"
+#include <mruby/debug.h>
+#include <mruby/opcode.h>
+#include <mruby/class.h>
+#include <mruby/proc.h>
+#include <mruby/variable.h>
 #include "mrdberror.h"
 #include "apibreak.h"
 
@@ -44,7 +44,7 @@ check_lineno( mrb_irep_debug_info_file *info_file, uint16_t lineno )
 }
 
 static int32_t
-get_break_index( mrb_debug_context *dbg, int32_t bpno )
+get_break_index( mrb_debug_context *dbg, uint32_t bpno )
 {
   uint32_t i;
   int32_t index;
@@ -112,23 +112,12 @@ check_file_lineno( struct mrb_irep *irep, const char *file, uint16_t lineno )
   return result;
 }
 
-static const char*
-get_class_name( mrb_state *mrb, struct RClass *class_obj )
-{
-  struct RClass *outer;
-  mrb_sym class_sym;
-
-  outer = mrb_class_outer_module(mrb, class_obj);
-  class_sym = mrb_class_sym(mrb, class_obj, outer);
-  return mrb_sym2name(mrb, class_sym);
-}
-
 static int32_t
 compare_break_method( mrb_state *mrb, mrb_debug_breakpoint *bp, struct RClass *class_obj, mrb_sym method_sym, mrb_bool* isCfunc )
 {
   const char* class_name;
   const char* method_name;
-  struct RProc* m;
+  mrb_method_t m;
   struct RClass* sc;
   const char* sn;
   mrb_sym ssym;
@@ -139,7 +128,7 @@ compare_break_method( mrb_state *mrb, mrb_debug_breakpoint *bp, struct RClass *c
 
   method_p = &bp->point.methodpoint;
   if(strcmp(method_p->method_name, method_name) == 0) {
-    class_name = get_class_name(mrb, class_obj);
+    class_name = mrb_class_name(mrb, class_obj);
     if(class_name == NULL) {
       if(method_p->class_name == NULL) {
         return bp->bpno;
@@ -147,10 +136,10 @@ compare_break_method( mrb_state *mrb, mrb_debug_breakpoint *bp, struct RClass *c
     }
     else if(method_p->class_name != NULL) {
       m = mrb_method_search_vm(mrb, &class_obj, method_sym);
-      if(m == NULL) {
+      if(MRB_METHOD_UNDEF_P(m)) {
         return MRB_DEBUG_OK;
       }
-      if(MRB_PROC_CFUNC_P(m)) {
+      if(MRB_METHOD_CFUNC_P(m)) {
         *isCfunc = TRUE;
       }
 
@@ -162,12 +151,12 @@ compare_break_method( mrb_state *mrb, mrb_debug_breakpoint *bp, struct RClass *c
       sc = mrb_class_get(mrb, method_p->class_name);
       ssym = mrb_symbol(mrb_check_intern_cstr(mrb, method_p->method_name));
       m = mrb_method_search_vm(mrb, &sc, ssym);
-      if(m == NULL) {
+      if(MRB_METHOD_UNDEF_P(m)) {
         return MRB_DEBUG_OK;
       }
 
-      class_name = get_class_name(mrb, class_obj);
-      sn = get_class_name(mrb, sc);
+      class_name = mrb_class_name(mrb, class_obj);
+      sn = mrb_class_name(mrb, sc);
       if(strcmp(sn, class_name) == 0) {
         return bp->bpno;
       }
@@ -443,7 +432,7 @@ static mrb_bool
 check_start_pc_for_line( mrb_irep *irep, mrb_code *pc, uint16_t line )
 {
   if( pc > irep->iseq ) {
-    if( line == mrb_debug_get_line(irep, (uint32_t)(pc - irep->iseq - 1))) {
+    if( line == mrb_debug_get_line(irep, pc - irep->iseq - 1)) {
       return FALSE;
     }
   }
@@ -455,7 +444,7 @@ mrb_debug_check_breakpoint_line( mrb_state *mrb, mrb_debug_context *dbg, const c
 {
   mrb_debug_breakpoint *bp;
   mrb_debug_linepoint *line_p;
-  int i;
+  uint32_t i;
 
   if((mrb == NULL) || (dbg == NULL) || (file == NULL) || (line <= 0)) {
     return MRB_DEBUG_INVALID_ARGUMENT;
@@ -493,7 +482,7 @@ mrb_debug_check_breakpoint_method( mrb_state *mrb, mrb_debug_context *dbg, struc
 {
   mrb_debug_breakpoint *bp;
   int32_t bpno;
-  int i;
+  uint32_t i;
 
   if((mrb == NULL) || (dbg == NULL) || (class_obj == NULL)) {
     return MRB_DEBUG_INVALID_ARGUMENT;
@@ -517,5 +506,3 @@ mrb_debug_check_breakpoint_method( mrb_state *mrb, mrb_debug_context *dbg, struc
 
   return 0;
 }
-
-

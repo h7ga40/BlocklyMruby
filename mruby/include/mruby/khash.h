@@ -9,8 +9,8 @@
 
 #include <string.h>
 
-#include "mruby.h"
-#include "mruby/common.h"
+#include <mruby.h>
+#include "common.h"
 
 /**
  * khash definitions used in mruby's hash table.
@@ -99,7 +99,7 @@ kh_fill_flags(uint8_t *p, uint8_t c, size_t len)
   {                                                                     \
     khint_t sz = h->n_buckets;                                          \
     size_t len = sizeof(khkey_t) + (kh_is_map ? sizeof(khval_t) : 0);   \
-    uint8_t *p = (uint8_t*)mrb_malloc(mrb, sizeof(uint8_t)*sz/4+len*sz); \
+    uint8_t *p = (uint8_t*)mrb_calloc(mrb, 1, sizeof(uint8_t)*sz/4+len*sz); \
     h->size = h->n_occupied = 0;                                        \
     h->keys = (khkey_t *)p;                                             \
     h->vals = kh_is_map ? (khval_t *)(p+sizeof(khkey_t)*sz) : NULL;     \

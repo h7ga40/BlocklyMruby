@@ -260,7 +260,7 @@ if not exist $(Configuration) mkdir $(Configuration)
 copy /B /Y ..\..\mruby\build\host-debug\lib\$(TargetName).lib $(Configuration)\
 copy /B /Y ..\..\mruby\build\host-debug\vc140.pdb $(Configuration)\$(TargetName).pdb
 copy /B /Y ..\..\mruby\build\host-debug\vc140.idb $(Configuration)\$(TargetName).idb</NMakeReBuildCommandLine>
-    <NMakePreprocessorDefinitions>WIN32;_DEBUG;ECHONET_CONTROLLER_EXTENTION;MRB_GC_STRESS;MRB_USE_PRESET_SYMBOLS;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakePreprocessorDefinitions>WIN32;_DEBUG;ECHONET_CONTROLLER_EXTENTION;MRB_GC_STRESS;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <OutDir>$(ProjectDir)\</OutDir>
     <NMakeIncludeSearchPath>..\..\mruby\include;..\..\asp\arch;..\..\asp\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
   </PropertyGroup>
@@ -290,7 +290,7 @@ if not exist $(Configuration) mkdir $(Configuration)
 copy /B /Y ..\..\mruby\build\host-debug\lib\$(TargetName).lib $(Configuration)\
 copy /B /Y ..\..\mruby\build\host-debug\vc140.pdb $(Configuration)\$(TargetName).pdb
 copy /B /Y ..\..\mruby\build\host-debug\vc140.idb $(Configuration)\$(TargetName).idb</NMakeReBuildCommandLine>
-    <NMakePreprocessorDefinitions>WIN32;_DEBUG;ECHONET_CONTROLLER_EXTENTION;MRB_GC_STRESS;MRB_USE_PRESET_SYMBOLS;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakePreprocessorDefinitions>WIN32;_DEBUG;ECHONET_CONTROLLER_EXTENTION;MRB_GC_STRESS;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <OutDir>$(ProjectDir)\</OutDir>
     <NMakeIncludeSearchPath>..\..\mruby\include;..\..\asp\arch;..\..\asp\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
   </PropertyGroup>
