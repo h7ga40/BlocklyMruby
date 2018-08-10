@@ -108,7 +108,7 @@ MRuby::Build.new('host-debug') do |conf|
   # bintest
   # conf.enable_bintest
 end
-
+=begin
 MRuby::Build.new('test') do |conf|
   # Gets set by the VS command prompts.
   if ENV['VisualStudioVersion'] || ENV['VSINSTALLDIR']
@@ -123,7 +123,7 @@ MRuby::Build.new('test') do |conf|
 
   conf.gembox 'default'
 end
-
+=end
 # Define cross build settings
 # MRuby::CrossBuild.new('32bit') do |conf|
 #   toolchain :gcc

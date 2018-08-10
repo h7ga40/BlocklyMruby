@@ -1,5 +1,5 @@
-load "#{MRUBY_ROOT}/tasks/mruby_build_gem.rake"
-load "#{MRUBY_ROOT}/tasks/mruby_build_commands.rake"
+require "mruby/build/load_gems"
+require "mruby/build/command"
 
 module MRuby
   class << self
@@ -83,8 +83,9 @@ module MRuby
         @bins = []
         @gems, @libmruby = MRuby::Gem::List.new, []
         @build_mrbtest_lib_only = false
-        @cxx_abi_enabled = false
+        @cxx_exception_enabled = false
         @cxx_exception_disabled = false
+        @cxx_abi_enabled = false
         @enable_bintest = false
         @enable_test = false
         @toolchains = []
@@ -110,7 +111,28 @@ module MRuby
     end
 
     def disable_cxx_exception
+      if @cxx_exception_enabled or @cxx_abi_enabled
+        raise "cxx_exception already enabled"
+      end
       @cxx_exception_disabled = true
+    end
+
+    def enable_cxx_exception
+      return if @cxx_exception_enabled
+      return if @cxx_abi_enabled
+      if @cxx_exception_disabled
+        raise "cxx_exception disabled"
+      end
+      @cxx_exception_enabled = true
+      compilers.each { |c|
+        c.defines += %w(MRB_ENABLE_CXX_EXCEPTION)
+        c.flags << c.cxx_exception_flag
+      }
+      linker.command = cxx.command if toolchains.find { |v| v == 'gcc' }
+    end
+
+    def cxx_exception_enabled?
+      @cxx_exception_enabled
     end
 
     def cxx_abi_enabled?
@@ -118,8 +140,15 @@ module MRuby
     end
 
     def enable_cxx_abi
-      return if @cxx_exception_disabled or @cxx_abi_enabled
-      compilers.each { |c| c.defines += %w(MRB_ENABLE_CXX_EXCEPTION) }
+      return if @cxx_abi_enabled
+      if @cxx_exception_enabled
+        raise "cxx_exception already enabled"
+      end
+      compilers.each { |c|
+        c.defines += %w(MRB_ENABLE_CXX_EXCEPTION MRB_ENABLE_CXX_ABI)
+        c.flags << c.cxx_compile_flag
+      }
+      compilers.each { |c| c.flags << c.cxx_compile_flag }
       linker.command = cxx.command if toolchains.find { |v| v == 'gcc' }
       @cxx_abi_enabled = true
     end
@@ -135,11 +164,13 @@ module MRuby
 #define __STDC_CONSTANT_MACROS
 #define __STDC_LIMIT_MACROS
 
+#ifndef MRB_ENABLE_CXX_ABI
 extern "C" {
+#endif
 #include "#{src}"
+#ifndef MRB_ENABLE_CXX_ABI
 }
-
-#{src == "#{MRUBY_ROOT}/src/error.c"? 'mrb_int mrb_jmpbuf::jmpbuf_id = 0;' : ''}
+#endif
 EOS
       end
 
@@ -210,7 +241,7 @@ EOS
         else
           compiler.defines += %w(DISABLE_GEMS)
         end
-        compiler.define_rules build_dir, File.expand_path(File.join(File.dirname(__FILE__), '..'))
+        compiler.define_rules build_dir, File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))
       end
     end
 
@@ -267,7 +298,6 @@ EOS
       mrbtest = exefile("#{build_dir}/bin/mrbtest")
       sh "#{filename mrbtest.relative_path}#{$verbose ? ' -v' : ''}"
       puts
-      run_bintest if bintest_enabled?
     end
 
     def run_bintest
@@ -303,6 +333,7 @@ EOS
     attr_accessor :host_target, :build_target
 
     def initialize(name, build_dir=nil, &block)
+      @endian = nil
       @test_runner = Command::CrossTestRunner.new(self)
       super
     end
@@ -312,6 +343,7 @@ EOS
     end
 
     def run_test
+      @test_runner.runner_options << ' -v' if $verbose
       mrbtest = exefile("#{build_dir}/bin/mrbtest")
       if (@test_runner.command == nil)
         puts "You should run #{mrbtest} on target device."
@@ -319,6 +351,27 @@ EOS
       else
         @test_runner.run(mrbtest)
       end
+    end
+
+    def big_endian
+      if @endian
+        puts "Endian has already specified as #{@endian}."
+        return
+      end
+      @endian = :big
+      @mrbc.compile_options += ' -E'
+      compilers.each do |c|
+        c.defines += %w(MRB_ENDIAN_BIG)
+      end
+    end
+
+    def little_endian
+      if @endian
+        puts "Endian has already specified as #{@endian}."
+        return
+      end
+      @endian = :little
+      @mrbc.compile_options += ' -e'
     end
   end # CrossBuild
 end # MRuby
