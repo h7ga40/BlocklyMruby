@@ -697,8 +697,10 @@ l_restart:
 	mrdb->dbg->ccnt = 1;
 
 	/* setup hook functions */
+#ifdef MRB_ENABLE_DEBUG_HOOK
 	mrb->code_fetch_hook = mrb_code_fetch_hook;
 	mrdb->dbg->break_hook = mrb_debug_break_hook;
+#endif
 
 	if (args.mrbfile) { /* .mrb */
 		v = mrb_load_irep_file(mrb, args.rfp);

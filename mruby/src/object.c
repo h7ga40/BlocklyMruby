@@ -66,7 +66,7 @@ mrb_equal(mrb_state *mrb, mrb_value obj1, mrb_value obj2)
  * Only the object <i>nil</i> responds <code>true</code> to <code>nil?</code>.
  */
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_true(mrb_state *mrb, mrb_value obj)
 {
   return mrb_true_value();
@@ -80,13 +80,13 @@ mrb_true(mrb_state *mrb, mrb_value obj)
  *  Always returns the empty string.
  */
 
-static mrb_value
+PRESET_REF mrb_value
 nil_to_s(mrb_state *mrb, mrb_value obj)
 {
   return mrb_str_new(mrb, 0, 0);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 nil_inspect(mrb_state *mrb, mrb_value obj)
 {
   return mrb_str_new_lit(mrb, "nil");
@@ -130,7 +130,7 @@ true_and(mrb_state *mrb, mrb_value obj)
  *  otherwise.
  */
 
-static mrb_value
+PRESET_REF mrb_value
 true_xor(mrb_state *mrb, mrb_value obj)
 {
   mrb_bool obj2;
@@ -147,7 +147,7 @@ true_xor(mrb_state *mrb, mrb_value obj)
  * The string representation of <code>true</code> is "true".
  */
 
-static mrb_value
+PRESET_REF mrb_value
 true_to_s(mrb_state *mrb, mrb_value obj)
 {
   return mrb_str_new_lit(mrb, "true");
@@ -170,7 +170,7 @@ true_to_s(mrb_state *mrb, mrb_value obj)
  *     or
  */
 
-static mrb_value
+PRESET_REF mrb_value
 true_or(mrb_state *mrb, mrb_value obj)
 {
   return mrb_true_value();
@@ -198,7 +198,7 @@ true_or(mrb_state *mrb, mrb_value obj)
  *  short-circuit evaluation in this case.
  */
 
-static mrb_value
+PRESET_REF mrb_value
 false_and(mrb_state *mrb, mrb_value obj)
 {
   return mrb_false_value();
@@ -217,7 +217,7 @@ false_and(mrb_state *mrb, mrb_value obj)
  *
  */
 
-static mrb_value
+PRESET_REF mrb_value
 false_xor(mrb_state *mrb, mrb_value obj)
 {
   mrb_bool obj2;
@@ -254,7 +254,7 @@ false_or(mrb_state *mrb, mrb_value obj)
  * 'nuf said...
  */
 
-static mrb_value
+PRESET_REF mrb_value
 false_to_s(mrb_state *mrb, mrb_value obj)
 {
   return mrb_str_new_lit(mrb, "false");

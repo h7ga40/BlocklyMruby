@@ -1090,7 +1090,7 @@ alias:
   *flagsp = flags;
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_pack_pack(mrb_state *mrb, mrb_value ary)
 {
   mrb_value o, result;
@@ -1187,7 +1187,7 @@ mrb_pack_pack(mrb_state *mrb, mrb_value ary)
   return result;
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_pack_unpack(mrb_state *mrb, mrb_value str)
 {
   mrb_value result;

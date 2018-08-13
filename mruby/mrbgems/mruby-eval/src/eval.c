@@ -287,7 +287,7 @@ exec_irep(mrb_state *mrb, mrb_value self, struct RProc *proc)
   return mrb_exec_irep(mrb, self, proc);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 f_eval(mrb_state *mrb, mrb_value self)
 {
   char *s;
@@ -304,7 +304,7 @@ f_eval(mrb_state *mrb, mrb_value self)
   return exec_irep(mrb, self, proc);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 f_instance_eval(mrb_state *mrb, mrb_value self)
 {
   mrb_value b;

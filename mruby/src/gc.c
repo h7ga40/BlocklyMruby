@@ -867,6 +867,8 @@ root_scan_phase(mrb_state *mrb, mrb_gc *gc)
   for (i=0,e=gc->arena_idx; i<e; i++) {
     mrb_gc_mark(mrb, gc->arena[i]);
   }
+
+#ifndef MRB_USE_PRESET_SYMBOLS
   /* mark class hierarchy */
   mrb_gc_mark(mrb, (struct RBasic*)mrb->object_class);
 
@@ -901,6 +903,7 @@ root_scan_phase(mrb_state *mrb, mrb_gc *gc)
   mrb_gc_mark(mrb, (struct RBasic*)mrb->stack_err);
 #ifdef MRB_GC_FIXED_ARENA
   mrb_gc_mark(mrb, (struct RBasic*)mrb->arena_err);
+#endif
 #endif
 
   mark_context(mrb, mrb->c);
@@ -1329,7 +1332,7 @@ mrb_write_barrier(mrb_state *mrb, struct RBasic *obj)
  *
  */
 
-static mrb_value
+PRESET_REF mrb_value
 gc_start(mrb_state *mrb, mrb_value obj)
 {
   mrb_full_gc(mrb);
@@ -1349,7 +1352,7 @@ gc_start(mrb_state *mrb, mrb_value obj)
  *
  */
 
-static mrb_value
+PRESET_REF mrb_value
 gc_enable(mrb_state *mrb, mrb_value obj)
 {
   mrb_bool old = mrb->gc.disabled;
@@ -1371,7 +1374,7 @@ gc_enable(mrb_state *mrb, mrb_value obj)
  *
  */
 
-static mrb_value
+PRESET_REF mrb_value
 gc_disable(mrb_state *mrb, mrb_value obj)
 {
   mrb_bool old = mrb->gc.disabled;
@@ -1389,7 +1392,7 @@ gc_disable(mrb_state *mrb, mrb_value obj)
  *
  */
 
-static mrb_value
+PRESET_REF mrb_value
 gc_interval_ratio_get(mrb_state *mrb, mrb_value obj)
 {
   return mrb_fixnum_value(mrb->gc.interval_ratio);
@@ -1404,7 +1407,7 @@ gc_interval_ratio_get(mrb_state *mrb, mrb_value obj)
  *
  */
 
-static mrb_value
+PRESET_REF mrb_value
 gc_interval_ratio_set(mrb_state *mrb, mrb_value obj)
 {
   mrb_int ratio;
@@ -1422,7 +1425,7 @@ gc_interval_ratio_set(mrb_state *mrb, mrb_value obj)
  *
  */
 
-static mrb_value
+PRESET_REF mrb_value
 gc_step_ratio_get(mrb_state *mrb, mrb_value obj)
 {
   return mrb_fixnum_value(mrb->gc.step_ratio);
@@ -1437,7 +1440,7 @@ gc_step_ratio_get(mrb_state *mrb, mrb_value obj)
  *
  */
 
-static mrb_value
+PRESET_REF mrb_value
 gc_step_ratio_set(mrb_state *mrb, mrb_value obj)
 {
   mrb_int ratio;
@@ -1475,7 +1478,7 @@ change_gen_gc_mode(mrb_state *mrb, mrb_gc *gc, mrb_bool enable)
  *
  */
 
-static mrb_value
+PRESET_REF mrb_value
 gc_generational_mode_get(mrb_state *mrb, mrb_value self)
 {
   return mrb_bool_value(mrb->gc.generational);
@@ -1489,7 +1492,7 @@ gc_generational_mode_get(mrb_state *mrb, mrb_value self)
  *
  */
 
-static mrb_value
+PRESET_REF mrb_value
 gc_generational_mode_set(mrb_state *mrb, mrb_value self)
 {
   mrb_bool enable;

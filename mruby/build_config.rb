@@ -105,7 +105,8 @@ MRuby::Build.new('host-debug') do |conf|
   conf.cc.defines = %w(MRB_ENABLE_DEBUG_HOOK)
 
   # Generate mruby debugger command (require mruby-eval)
-  conf.gem :core => "mruby-bin-debugger"
+  #conf.gem :core => "mruby-bin-debugger"
+  conf.gem :core => "mruby-eval"
 
   # bintest
   # conf.enable_bintest

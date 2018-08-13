@@ -291,7 +291,7 @@ mrb_range_beg_len(mrb_state *mrb, mrb_value range, mrb_int *begp, mrb_int *lenp,
  * Convert this range object to a printable form.
  */
 
-static mrb_value
+PRESET_REF mrb_value
 range_to_s(mrb_state *mrb, mrb_value range)
 {
   mrb_value str, str2;
@@ -316,7 +316,7 @@ range_to_s(mrb_state *mrb, mrb_value range)
  * objects).
  */
 
-static mrb_value
+PRESET_REF mrb_value
 range_inspect(mrb_state *mrb, mrb_value range)
 {
   mrb_value str, str2;
@@ -346,7 +346,7 @@ range_inspect(mrb_state *mrb, mrb_value range)
  *
  */
 
-static mrb_value
+PRESET_REF mrb_value
 range_eql(mrb_state *mrb, mrb_value range)
 {
   mrb_value obj;
@@ -371,7 +371,7 @@ range_eql(mrb_state *mrb, mrb_value range)
 }
 
 /* 15.2.14.4.15(x) */
-static mrb_value
+PRESET_REF mrb_value
 range_initialize_copy(mrb_state *mrb, mrb_value copy)
 {
   mrb_value src;

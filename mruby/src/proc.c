@@ -9,7 +9,7 @@
 #include <mruby/proc.h>
 #include <mruby/opcode.h>
 
-static mrb_code call_iseq[] = {
+PRESET_REF mrb_code call_iseq[] = {
   MKOP_A(OP_CALL, 0),
 };
 
@@ -175,7 +175,7 @@ mrb_proc_copy(struct RProc *a, struct RProc *b)
   /* a->e.target_class = a->e.target_class; */
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_proc_s_new(mrb_state *mrb, mrb_value proc_class)
 {
   mrb_value blk;
@@ -198,7 +198,7 @@ mrb_proc_s_new(mrb_state *mrb, mrb_value proc_class)
   return proc;
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_proc_init_copy(mrb_state *mrb, mrb_value self)
 {
   mrb_value proc;
@@ -218,7 +218,7 @@ mrb_proc_cfunc_p(struct RProc *p)
 }
 
 /* 15.2.17.4.2 */
-static mrb_value
+PRESET_REF mrb_value
 mrb_proc_arity(mrb_state *mrb, mrb_value self)
 {
   struct RProc *p = mrb_proc_ptr(self);
@@ -262,7 +262,7 @@ mrb_proc_arity(mrb_state *mrb, mrb_value self)
  * Equivalent to <code>Proc.new</code>, except the resulting Proc objects
  * check the number of parameters passed when called.
  */
-static mrb_value
+PRESET_REF mrb_value
 proc_lambda(mrb_state *mrb, mrb_value self)
 {
   mrb_value blk;

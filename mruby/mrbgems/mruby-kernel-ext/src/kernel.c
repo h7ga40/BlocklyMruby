@@ -4,7 +4,7 @@
 #include <mruby/hash.h>
 #include <mruby/range.h>
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_f_caller(mrb_state *mrb, mrb_value self)
 {
   mrb_value bt, v, length;
@@ -70,7 +70,7 @@ mrb_f_caller(mrb_state *mrb, mrb_value self)
  *  If called outside of a method, it returns <code>nil</code>.
  *
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_f_method(mrb_state *mrb, mrb_value self)
 {
   mrb_callinfo *ci = mrb->c->ci;
@@ -104,7 +104,7 @@ mrb_f_method(mrb_state *mrb, mrb_value self)
  *     Integer("111", 2)   #=> 7
  *     Integer(nil)        #=> TypeError
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_f_integer(mrb_state *mrb, mrb_value self)
 {
   mrb_value arg;
@@ -127,7 +127,7 @@ mrb_f_integer(mrb_state *mrb, mrb_value self)
  *     Float("123.456")   #=> 123.456
  *     Float(nil)         #=> TypeError
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_f_float(mrb_state *mrb, mrb_value self)
 {
   mrb_value arg;
@@ -149,7 +149,7 @@ mrb_f_float(mrb_state *mrb, mrb_value self)
  *     String(self.class)  #=> "Object"
  *     String(123456)      #=> "123456"
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_f_string(mrb_state *mrb, mrb_value self)
 {
   mrb_value arg, tmp;
@@ -173,7 +173,7 @@ mrb_f_string(mrb_state *mrb, mrb_value self)
  *     Array(1..5)   #=> [1, 2, 3, 4, 5]
  *
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_f_array(mrb_state *mrb, mrb_value self)
 {
   mrb_value arg, tmp;
@@ -204,7 +204,7 @@ mrb_f_array(mrb_state *mrb, mrb_value self)
  *      Hash([1, 2, 3])   #=> TypeError
  *
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_f_hash(mrb_state *mrb, mrb_value self)
 {
   mrb_value arg, tmp;

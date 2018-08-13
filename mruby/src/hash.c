@@ -158,7 +158,7 @@ mrb_hash_new(mrb_state *mrb)
   return mrb_hash_new_capa(mrb, 0);
 }
 
-static mrb_value mrb_hash_default(mrb_state *mrb, mrb_value hash);
+PRESET_REF mrb_value mrb_hash_default(mrb_state *mrb, mrb_value hash);
 static mrb_value hash_default(mrb_state *mrb, mrb_value hash, mrb_value key);
 
 MRB_API mrb_value
@@ -225,7 +225,7 @@ mrb_hash_set(mrb_state *mrb, mrb_value hash, mrb_value key, mrb_value val)
   return;
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_hash_dup(mrb_state *mrb, mrb_value hash)
 {
   struct RHash* ret;
@@ -327,7 +327,7 @@ mrb_hash_modify(mrb_state *mrb, mrb_value hash)
  *
  */
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_hash_init(mrb_state *mrb, mrb_value hash)
 {
   mrb_value block, ifnone;
@@ -364,7 +364,7 @@ mrb_hash_init(mrb_state *mrb, mrb_value hash)
  *     h["c"]   #=> nil
  *
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_hash_aget(mrb_state *mrb, mrb_value self)
 {
   mrb_value key;
@@ -409,7 +409,7 @@ hash_default(mrb_state *mrb, mrb_value hash, mrb_value key)
  *     h.default(2)                            #=> 20
  */
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_hash_default(mrb_state *mrb, mrb_value hash)
 {
   mrb_value key;
@@ -449,7 +449,7 @@ mrb_hash_default(mrb_state *mrb, mrb_value hash)
  *     h["cat"]   #=> #<Proc:0x401b3948@-:6>
  */
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_hash_set_default(mrb_state *mrb, mrb_value hash)
 {
   mrb_value ifnone;
@@ -483,7 +483,7 @@ mrb_hash_set_default(mrb_state *mrb, mrb_value hash)
  */
 
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_hash_default_proc(mrb_state *mrb, mrb_value hash)
 {
   if (MRB_RHASH_PROCDEFAULT_P(hash)) {
@@ -505,7 +505,7 @@ mrb_hash_default_proc(mrb_state *mrb, mrb_value hash)
  *     h["cat"]   #=> "catcat"
  */
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_hash_set_default_proc(mrb_state *mrb, mrb_value hash)
 {
   mrb_value ifnone;
@@ -569,7 +569,7 @@ mrb_hash_delete_key(mrb_state *mrb, mrb_value hash, mrb_value key)
  *      h.delete("z") { |el| "#{el} not found" }   #=> "z not found"
  *
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_hash_delete(mrb_state *mrb, mrb_value self)
 {
   mrb_value key;
@@ -593,7 +593,7 @@ mrb_hash_delete(mrb_state *mrb, mrb_value self)
  *      h         #=> {2=>"b", 3=>"c"}
  */
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_hash_shift(mrb_state *mrb, mrb_value hash)
 {
   khash_t(ht) *h = RHASH_TBL(hash);
@@ -666,7 +666,7 @@ mrb_hash_clear(mrb_state *mrb, mrb_value hash)
  *      h   #=> {"a"=>9, "b"=>200, "c"=>4}
  *
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_hash_aset(mrb_state *mrb, mrb_value self)
 {
   mrb_value key, val;
@@ -690,7 +690,7 @@ mrb_hash_aset(mrb_state *mrb, mrb_value self)
  *     h.delete("a")   #=> 200
  *     h.length        #=> 3
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_hash_size_m(mrb_state *mrb, mrb_value self)
 {
   khash_t(ht) *h = RHASH_TBL(self);
@@ -726,7 +726,7 @@ mrb_hash_empty_p(mrb_state *mrb, mrb_value self)
  * Returns +self+.
  */
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_hash_to_hash(mrb_state *mrb, mrb_value hash)
 {
   return hash;
@@ -826,7 +826,7 @@ mrb_hash_values(mrb_state *mrb, mrb_value hash)
  *
  */
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_hash_has_key(mrb_state *mrb, mrb_value hash)
 {
   mrb_value key;
@@ -858,7 +858,7 @@ mrb_hash_has_key(mrb_state *mrb, mrb_value hash)
  *     h.has_value?(999)   #=> false
  */
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_hash_has_value(mrb_state *mrb, mrb_value hash)
 {
   mrb_value val;

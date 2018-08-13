@@ -24,7 +24,7 @@
  *     a.assoc("foo")      #=> nil
  */
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_assoc(mrb_state *mrb, mrb_value ary)
 {
   mrb_int i;
@@ -55,7 +55,7 @@ mrb_ary_assoc(mrb_state *mrb, mrb_value ary)
  *     a.rassoc("four")   #=> nil
  */
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_rassoc(mrb_state *mrb, mrb_value ary)
 {
   mrb_int i;
@@ -86,7 +86,7 @@ mrb_ary_rassoc(mrb_state *mrb, mrb_value ary)
  *     a.at(-1)    #=> "e"
  */
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_at(mrb_state *mrb, mrb_value ary)
 {
   mrb_int pos;
@@ -95,7 +95,7 @@ mrb_ary_at(mrb_state *mrb, mrb_value ary)
   return mrb_ary_entry(ary, pos);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_values_at(mrb_state *mrb, mrb_value self)
 {
   mrb_int argc;
@@ -118,7 +118,7 @@ mrb_ary_values_at(mrb_state *mrb, mrb_value self)
  *
  */
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_to_h(mrb_state *mrb, mrb_value ary)
 {
   mrb_int i;
@@ -171,7 +171,7 @@ mrb_ary_to_h(mrb_state *mrb, mrb_value ary)
  *     a               #=> ["a"]
  */
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_slice_bang(mrb_state *mrb, mrb_value self)
 {
   struct RArray *a = mrb_ary_ptr(self);

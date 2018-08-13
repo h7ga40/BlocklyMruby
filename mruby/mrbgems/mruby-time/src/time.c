@@ -337,7 +337,7 @@ current_mrb_time(mrb_state *mrb)
 }
 
 /* Allocates a new Time object with given millis value. */
-static mrb_value
+PRESET_REF mrb_value
 mrb_time_now(mrb_state *mrb, mrb_value self)
 {
   return mrb_time_wrap(mrb, mrb_class_ptr(self), current_mrb_time(mrb));
@@ -345,7 +345,7 @@ mrb_time_now(mrb_state *mrb, mrb_value self)
 
 /* 15.2.19.6.1 */
 /* Creates an instance of time at the given time in seconds, etc. */
-static mrb_value
+PRESET_REF mrb_value
 mrb_time_at(mrb_state *mrb, mrb_value self)
 {
   mrb_float f, f2 = 0;
@@ -393,7 +393,7 @@ time_mktime(mrb_state *mrb, mrb_int ayear, mrb_int amonth, mrb_int aday,
 
 /* 15.2.19.6.2 */
 /* Creates an instance of time at the given time in UTC. */
-static mrb_value
+PRESET_REF mrb_value
 mrb_time_gm(mrb_state *mrb, mrb_value self)
 {
   mrb_int ayear = 0, amonth = 1, aday = 1, ahour = 0, amin = 0, asec = 0, ausec = 0;
@@ -407,7 +407,7 @@ mrb_time_gm(mrb_state *mrb, mrb_value self)
 
 /* 15.2.19.6.3 */
 /* Creates an instance of time at the given time in local time zone. */
-static mrb_value
+PRESET_REF mrb_value
 mrb_time_local(mrb_state *mrb, mrb_value self)
 {
   mrb_int ayear = 0, amonth = 1, aday = 1, ahour = 0, amin = 0, asec = 0, ausec = 0;
@@ -430,7 +430,7 @@ time_get_ptr(mrb_state *mrb, mrb_value time)
   return tm;
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_time_eq(mrb_state *mrb, mrb_value self)
 {
   mrb_value other;
@@ -445,7 +445,7 @@ mrb_time_eq(mrb_state *mrb, mrb_value self)
   return mrb_bool_value(eq_p);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_time_cmp(mrb_state *mrb, mrb_value self)
 {
   mrb_value other;
@@ -471,7 +471,7 @@ mrb_time_cmp(mrb_state *mrb, mrb_value self)
   return mrb_fixnum_value(0);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_time_plus(mrb_state *mrb, mrb_value self)
 {
   mrb_float f;
@@ -482,7 +482,7 @@ mrb_time_plus(mrb_state *mrb, mrb_value self)
   return mrb_time_make(mrb, mrb_obj_class(mrb, self), (double)tm->sec+f, (double)tm->usec, tm->timezone);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_time_minus(mrb_state *mrb, mrb_value self)
 {
   mrb_float f;
@@ -505,7 +505,7 @@ mrb_time_minus(mrb_state *mrb, mrb_value self)
 
 /* 15.2.19.7.30 */
 /* Returns week day number of time. */
-static mrb_value
+PRESET_REF mrb_value
 mrb_time_wday(mrb_state *mrb, mrb_value self)
 {
   struct mrb_time *tm;
@@ -516,7 +516,7 @@ mrb_time_wday(mrb_state *mrb, mrb_value self)
 
 /* 15.2.19.7.31 */
 /* Returns year day number of time. */
-static mrb_value
+PRESET_REF mrb_value
 mrb_time_yday(mrb_state *mrb, mrb_value self)
 {
   struct mrb_time *tm;
@@ -527,7 +527,7 @@ mrb_time_yday(mrb_state *mrb, mrb_value self)
 
 /* 15.2.19.7.32 */
 /* Returns year of time. */
-static mrb_value
+PRESET_REF mrb_value
 mrb_time_year(mrb_state *mrb, mrb_value self)
 {
   struct mrb_time *tm;
@@ -538,7 +538,7 @@ mrb_time_year(mrb_state *mrb, mrb_value self)
 
 /* 15.2.19.7.33 */
 /* Returns name of time's timezone. */
-static mrb_value
+PRESET_REF mrb_value
 mrb_time_zone(mrb_state *mrb, mrb_value self)
 {
   struct mrb_time *tm;
@@ -553,7 +553,7 @@ mrb_time_zone(mrb_state *mrb, mrb_value self)
 
 /* 15.2.19.7.4 */
 /* Returns a string that describes the time. */
-static mrb_value
+PRESET_REF mrb_value
 mrb_time_asctime(mrb_state *mrb, mrb_value self)
 {
   struct mrb_time *tm = time_get_ptr(mrb, self);
@@ -595,7 +595,7 @@ mrb_time_day(mrb_state *mrb, mrb_value self)
 
 /* 15.2.19.7.7 */
 /* Returns true if daylight saving was applied for this time. */
-static mrb_value
+PRESET_REF mrb_value
 mrb_time_dst_p(mrb_state *mrb, mrb_value self)
 {
   struct mrb_time *tm;
@@ -607,7 +607,7 @@ mrb_time_dst_p(mrb_state *mrb, mrb_value self)
 /* 15.2.19.7.8 */
 /* 15.2.19.7.10 */
 /* Returns the Time object of the UTC(GMT) timezone. */
-static mrb_value
+PRESET_REF mrb_value
 mrb_time_getutc(mrb_state *mrb, mrb_value self)
 {
   struct mrb_time *tm, *tm2;
@@ -622,7 +622,7 @@ mrb_time_getutc(mrb_state *mrb, mrb_value self)
 
 /* 15.2.19.7.9 */
 /* Returns the Time object of the LOCAL timezone. */
-static mrb_value
+PRESET_REF mrb_value
 mrb_time_getlocal(mrb_state *mrb, mrb_value self)
 {
   struct mrb_time *tm, *tm2;
@@ -637,7 +637,7 @@ mrb_time_getlocal(mrb_state *mrb, mrb_value self)
 
 /* 15.2.19.7.15 */
 /* Returns hour of time. */
-static mrb_value
+PRESET_REF mrb_value
 mrb_time_hour(mrb_state *mrb, mrb_value self)
 {
   struct mrb_time *tm;
@@ -648,7 +648,7 @@ mrb_time_hour(mrb_state *mrb, mrb_value self)
 
 /* 15.2.19.7.16 */
 /* Initializes a time by setting the amount of milliseconds since the epoch.*/
-static mrb_value
+PRESET_REF mrb_value
 mrb_time_initialize(mrb_state *mrb, mrb_value self)
 {
   mrb_int ayear = 0, amonth = 1, aday = 1, ahour = 0,
@@ -676,7 +676,7 @@ mrb_time_initialize(mrb_state *mrb, mrb_value self)
 
 /* 15.2.19.7.17(x) */
 /* Initializes a copy of this time object. */
-static mrb_value
+PRESET_REF mrb_value
 mrb_time_initialize_copy(mrb_state *mrb, mrb_value copy)
 {
   mrb_value src;
@@ -702,7 +702,7 @@ mrb_time_initialize_copy(mrb_state *mrb, mrb_value copy)
 
 /* 15.2.19.7.18 */
 /* Sets the timezone attribute of the Time object to LOCAL. */
-static mrb_value
+PRESET_REF mrb_value
 mrb_time_localtime(mrb_state *mrb, mrb_value self)
 {
   struct mrb_time *tm;
@@ -715,7 +715,7 @@ mrb_time_localtime(mrb_state *mrb, mrb_value self)
 
 /* 15.2.19.7.19 */
 /* Returns day of month of time. */
-static mrb_value
+PRESET_REF mrb_value
 mrb_time_mday(mrb_state *mrb, mrb_value self)
 {
   struct mrb_time *tm;
@@ -726,7 +726,7 @@ mrb_time_mday(mrb_state *mrb, mrb_value self)
 
 /* 15.2.19.7.20 */
 /* Returns minutes of time. */
-static mrb_value
+PRESET_REF mrb_value
 mrb_time_min(mrb_state *mrb, mrb_value self)
 {
   struct mrb_time *tm;
@@ -737,7 +737,7 @@ mrb_time_min(mrb_state *mrb, mrb_value self)
 
 /* 15.2.19.7.21 and 15.2.19.7.22 */
 /* Returns month of time. */
-static mrb_value
+PRESET_REF mrb_value
 mrb_time_mon(mrb_state *mrb, mrb_value self)
 {
   struct mrb_time *tm;
@@ -748,7 +748,7 @@ mrb_time_mon(mrb_state *mrb, mrb_value self)
 
 /* 15.2.19.7.23 */
 /* Returns seconds in minute of time. */
-static mrb_value
+PRESET_REF mrb_value
 mrb_time_sec(mrb_state *mrb, mrb_value self)
 {
   struct mrb_time *tm;
@@ -760,7 +760,7 @@ mrb_time_sec(mrb_state *mrb, mrb_value self)
 
 /* 15.2.19.7.24 */
 /* Returns a Float with the time since the epoch in seconds. */
-static mrb_value
+PRESET_REF mrb_value
 mrb_time_to_f(mrb_state *mrb, mrb_value self)
 {
   struct mrb_time *tm;
@@ -771,7 +771,7 @@ mrb_time_to_f(mrb_state *mrb, mrb_value self)
 
 /* 15.2.19.7.25 */
 /* Returns a Fixnum with the time since the epoch in seconds. */
-static mrb_value
+PRESET_REF mrb_value
 mrb_time_to_i(mrb_state *mrb, mrb_value self)
 {
   struct mrb_time *tm;
@@ -785,7 +785,7 @@ mrb_time_to_i(mrb_state *mrb, mrb_value self)
 
 /* 15.2.19.7.26 */
 /* Returns a Float with the time since the epoch in microseconds. */
-static mrb_value
+PRESET_REF mrb_value
 mrb_time_usec(mrb_state *mrb, mrb_value self)
 {
   struct mrb_time *tm;
@@ -799,7 +799,7 @@ mrb_time_usec(mrb_state *mrb, mrb_value self)
 
 /* 15.2.19.7.27 */
 /* Sets the timezone attribute of the Time object to UTC. */
-static mrb_value
+PRESET_REF mrb_value
 mrb_time_utc(mrb_state *mrb, mrb_value self)
 {
   struct mrb_time *tm;
@@ -812,7 +812,7 @@ mrb_time_utc(mrb_state *mrb, mrb_value self)
 
 /* 15.2.19.7.28 */
 /* Returns true if this time is in the UTC timezone false if not. */
-static mrb_value
+PRESET_REF mrb_value
 mrb_time_utc_p(mrb_state *mrb, mrb_value self)
 {
   struct mrb_time *tm;

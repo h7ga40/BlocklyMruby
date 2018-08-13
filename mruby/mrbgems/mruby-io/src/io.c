@@ -262,7 +262,7 @@ mrb_io_free(mrb_state *mrb, void *ptr)
   }
 }
 
-static struct mrb_io *
+PRESET_REF struct mrb_io *
 mrb_io_alloc(mrb_state *mrb)
 {
   struct mrb_io *fptr;
@@ -1039,7 +1039,7 @@ mrb_io_s_pipe(mrb_state *mrb, mrb_value klass)
 }
 #endif
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_io_s_select(mrb_state *mrb, mrb_value klass)
 {
   mrb_value *argv;

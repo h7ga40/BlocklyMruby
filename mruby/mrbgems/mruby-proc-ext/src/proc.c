@@ -5,14 +5,14 @@
 #include <mruby/string.h>
 #include <mruby/debug.h>
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_proc_lambda(mrb_state *mrb, mrb_value self)
 {
   struct RProc *p = mrb_proc_ptr(self);
   return mrb_bool_value(MRB_PROC_STRICT_P(p));
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_proc_source_location(mrb_state *mrb, mrb_value self)
 {
   struct RProc *p = mrb_proc_ptr(self);
@@ -33,7 +33,7 @@ mrb_proc_source_location(mrb_state *mrb, mrb_value self)
   }
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_proc_inspect(mrb_state *mrb, mrb_value self)
 {
   struct RProc *p = mrb_proc_ptr(self);
@@ -67,7 +67,7 @@ mrb_proc_inspect(mrb_state *mrb, mrb_value self)
   return str;
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_kernel_proc(mrb_state *mrb, mrb_value self)
 {
   mrb_value blk;
@@ -90,7 +90,7 @@ mrb_kernel_proc(mrb_state *mrb, mrb_value self)
  *    prc.parameters  #=> [[:req, :x], [:opt, :y], [:rest, :other]]
  */
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_proc_parameters(mrb_state *mrb, mrb_value self)
 {
   struct parameters_type {

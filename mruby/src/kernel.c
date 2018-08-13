@@ -81,7 +81,7 @@ mrb_obj_inspect(mrb_state *mrb, mrb_value obj)
  *  as calling  <code>#==</code>, but typically overridden by descendants
  *  to provide meaningful semantics in <code>case</code> statements.
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_equal_m(mrb_state *mrb, mrb_value self)
 {
   mrb_value arg;
@@ -137,7 +137,7 @@ mrb_obj_id_m(mrb_state *mrb, mrb_value self)
  *     try { "hello" }      #=> "hello"
  *     try do "hello" end   #=> "hello"
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_f_block_given_p_m(mrb_state *mrb, mrb_value self)
 {
   mrb_callinfo *ci = &mrb->c->ci[-1];
@@ -204,7 +204,7 @@ mrb_f_block_given_p_m(mrb_state *mrb, mrb_value self)
  *     1.class      #=> Fixnum
  *     self.class   #=> Object
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_obj_class_m(mrb_state *mrb, mrb_value self)
 {
   return mrb_obj_value(mrb_obj_class(mrb, self));
@@ -428,7 +428,7 @@ mrb_obj_extend(mrb_state *mrb, mrb_int argc, mrb_value *argv, mrb_value obj)
  *     k.extend(Mod)   #=> #<Klass:0x401b3bc8>
  *     k.hello         #=> "Hello from Mod.\n"
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_obj_extend_m(mrb_state *mrb, mrb_value self)
 {
   mrb_value *argv;
@@ -438,7 +438,7 @@ mrb_obj_extend_m(mrb_state *mrb, mrb_value self)
   return mrb_obj_extend(mrb, argc, argv, self);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_obj_freeze(mrb_state *mrb, mrb_value self)
 {
   struct RBasic *b;
@@ -463,7 +463,7 @@ mrb_obj_freeze(mrb_state *mrb, mrb_value self)
   return self;
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_obj_frozen(mrb_state *mrb, mrb_value self)
 {
   struct RBasic *b;
@@ -506,7 +506,7 @@ mrb_obj_hash(mrb_state *mrb, mrb_value self)
 }
 
 /* 15.3.1.3.16 */
-static mrb_value
+PRESET_REF mrb_value
 mrb_obj_init_copy(mrb_state *mrb, mrb_value self)
 {
   mrb_value orig;
@@ -535,7 +535,7 @@ mrb_obj_is_instance_of(mrb_state *mrb, mrb_value obj, struct RClass* c)
  *  Returns <code>true</code> if <i>obj</i> is an instance of the given
  *  class. See also <code>Object#kind_of?</code>.
  */
-static mrb_value
+PRESET_REF mrb_value
 obj_is_instance_of(mrb_state *mrb, mrb_value self)
 {
   mrb_value arg;
@@ -563,7 +563,7 @@ obj_is_instance_of(mrb_state *mrb, mrb_value self)
  *     fred.instance_variable_defined?("@b")   #=> true
  *     fred.instance_variable_defined?("@c")   #=> false
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_obj_ivar_defined(mrb_state *mrb, mrb_value self)
 {
   mrb_sym sym;
@@ -593,7 +593,7 @@ mrb_obj_ivar_defined(mrb_state *mrb, mrb_value self)
  *     fred.instance_variable_get(:@a)    #=> "cat"
  *     fred.instance_variable_get("@b")   #=> 99
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_obj_ivar_get(mrb_state *mrb, mrb_value self)
 {
   mrb_sym iv_name;
@@ -623,7 +623,7 @@ mrb_obj_ivar_get(mrb_state *mrb, mrb_value self)
  *     fred.instance_variable_set(:@c, 'cat')   #=> "cat"
  *     fred.inspect                             #=> "#<Fred:0x401b3da8 @a=\"dog\", @b=99, @c=\"cat\">"
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_obj_ivar_set(mrb_state *mrb, mrb_value self)
 {
   mrb_sym iv_name;
@@ -662,7 +662,7 @@ mrb_obj_ivar_set(mrb_state *mrb, mrb_value self)
  *     b.kind_of? C       #=> false
  *     b.kind_of? M       #=> true
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_obj_is_kind_of_m(mrb_state *mrb, mrb_value self)
 {
   mrb_value arg;
@@ -816,7 +816,7 @@ mrb_false(mrb_state *mrb, mrb_value self)
  *  the <i>all</i> parameter is set to <code>false</code>, only those methods
  *  in the receiver will be listed.
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_obj_private_methods(mrb_state *mrb, mrb_value self)
 {
   mrb_bool recur = TRUE;
@@ -833,7 +833,7 @@ mrb_obj_private_methods(mrb_state *mrb, mrb_value self)
  *  the <i>all</i> parameter is set to <code>false</code>, only those methods
  *  in the receiver will be listed.
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_obj_protected_methods(mrb_state *mrb, mrb_value self)
 {
   mrb_bool recur = TRUE;
@@ -850,7 +850,7 @@ mrb_obj_protected_methods(mrb_state *mrb, mrb_value self)
  *  the <i>all</i> parameter is set to <code>false</code>, only those methods
  *  in the receiver will be listed.
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_obj_public_methods(mrb_state *mrb, mrb_value self)
 {
   mrb_bool recur = TRUE;
@@ -906,7 +906,7 @@ mrb_f_raise(mrb_state *mrb, mrb_value self)
   return mrb_nil_value();            /* not reached */
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_krn_class_defined(mrb_state *mrb, mrb_value self)
 {
   mrb_value str;
@@ -938,7 +938,7 @@ mrb_krn_class_defined(mrb_state *mrb, mrb_value self)
  *     d.remove   #=> 99
  *     d.var      #=> nil
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_obj_remove_instance_variable(mrb_state *mrb, mrb_value self)
 {
   mrb_sym sym;
@@ -1028,7 +1028,7 @@ basic_obj_respond_to(mrb_state *mrb, mrb_value obj, mrb_sym id, int pub)
  *  If the method is not defined, <code>respond_to_missing?</code>
  *  method is called and the result is returned.
  */
-static mrb_value
+PRESET_REF mrb_value
 obj_respond_to(mrb_state *mrb, mrb_value self)
 {
   mrb_value mid;
@@ -1111,7 +1111,7 @@ obj_respond_to(mrb_state *mrb, mrb_value self)
  *     a.singleton_methods(false)  #=> [:two, :one]
  *     a.singleton_methods         #=> [:two, :one, :three]
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_obj_singleton_methods_m(mrb_state *mrb, mrb_value self)
 {
   mrb_bool recur = TRUE;
@@ -1119,7 +1119,7 @@ mrb_obj_singleton_methods_m(mrb_state *mrb, mrb_value self)
   return mrb_obj_singleton_methods(mrb, recur, self);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mod_define_singleton_method(mrb_state *mrb, mrb_value self)
 {
   struct RProc *p;
@@ -1139,7 +1139,7 @@ mod_define_singleton_method(mrb_state *mrb, mrb_value self)
   return mrb_symbol_value(mid);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_obj_ceqq(mrb_state *mrb, mrb_value self)
 {
   mrb_value v;
@@ -1168,7 +1168,7 @@ mrb_obj_ceqq(mrb_state *mrb, mrb_value self)
  *  compiled binary files using `mruby-strip -l`, this
  *  method always returns an empty array.
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_local_variables(mrb_state *mrb, mrb_value self)
 {
   struct RProc *proc;

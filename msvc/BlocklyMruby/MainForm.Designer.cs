@@ -38,16 +38,17 @@
 			this.ContinueBtn = new System.Windows.Forms.Button();
 			this.BreakBtn = new System.Windows.Forms.Button();
 			this.QuitBtn = new System.Windows.Forms.Button();
+			this.ObjDump = new System.Windows.Forms.Button();
 			this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
 			this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
 			this.saveFileDialog2 = new System.Windows.Forms.SaveFileDialog();
 			this.tabControl1 = new System.Windows.Forms.TabControl();
 			this.RubyTabPage = new System.Windows.Forms.TabPage();
+			this.aceView1 = new BlocklyMruby.AceView();
 			this.BlockTabPage = new System.Windows.Forms.TabPage();
+			this.blocklyView1 = new BlocklyMruby.BlocklyView();
 			this.splitter1 = new System.Windows.Forms.Splitter();
 			this.splitter2 = new System.Windows.Forms.Splitter();
-			this.aceView1 = new BlocklyMruby.AceView();
-			this.blocklyView1 = new BlocklyMruby.BlocklyView();
 			this.classSelectorView1 = new BlocklyMruby.ClassSelectorView();
 			this.xTermView1 = new BlocklyMruby.XTermView();
 			this.flowLayoutPanel1.SuspendLayout();
@@ -70,6 +71,7 @@
 			this.flowLayoutPanel1.Controls.Add(this.ContinueBtn);
 			this.flowLayoutPanel1.Controls.Add(this.BreakBtn);
 			this.flowLayoutPanel1.Controls.Add(this.QuitBtn);
+			this.flowLayoutPanel1.Controls.Add(this.ObjDump);
 			this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Top;
 			this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
 			this.flowLayoutPanel1.Name = "flowLayoutPanel1";
@@ -196,6 +198,18 @@
 			this.QuitBtn.UseVisualStyleBackColor = true;
 			this.QuitBtn.Click += new System.EventHandler(this.QuitBtn_Click);
 			// 
+			// ObjDump
+			// 
+			this.ObjDump.AutoSize = true;
+			this.ObjDump.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+			this.ObjDump.Location = new System.Drawing.Point(533, 3);
+			this.ObjDump.Name = "ObjDump";
+			this.ObjDump.Size = new System.Drawing.Size(42, 22);
+			this.ObjDump.TabIndex = 10;
+			this.ObjDump.Text = "ダンプ";
+			this.ObjDump.UseVisualStyleBackColor = true;
+			this.ObjDump.Click += new System.EventHandler(this.ObjDump_Click);
+			// 
 			// openFileDialog1
 			// 
 			this.openFileDialog1.DefaultExt = "xml";
@@ -236,6 +250,14 @@
 			this.RubyTabPage.Text = "Ruby";
 			this.RubyTabPage.UseVisualStyleBackColor = true;
 			// 
+			// aceView1
+			// 
+			this.aceView1.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.aceView1.Location = new System.Drawing.Point(0, 0);
+			this.aceView1.Name = "aceView1";
+			this.aceView1.Size = new System.Drawing.Size(773, 488);
+			this.aceView1.TabIndex = 0;
+			// 
 			// BlockTabPage
 			// 
 			this.BlockTabPage.Controls.Add(this.blocklyView1);
@@ -245,6 +267,15 @@
 			this.BlockTabPage.TabIndex = 0;
 			this.BlockTabPage.Text = "ブロック";
 			this.BlockTabPage.UseVisualStyleBackColor = true;
+			// 
+			// blocklyView1
+			// 
+			this.blocklyView1.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.blocklyView1.Identifier = null;
+			this.blocklyView1.Location = new System.Drawing.Point(0, 0);
+			this.blocklyView1.Name = "blocklyView1";
+			this.blocklyView1.Size = new System.Drawing.Size(773, 488);
+			this.blocklyView1.TabIndex = 0;
 			// 
 			// splitter1
 			// 
@@ -262,22 +293,6 @@
 			this.splitter2.Size = new System.Drawing.Size(984, 3);
 			this.splitter2.TabIndex = 5;
 			this.splitter2.TabStop = false;
-			// 
-			// aceView1
-			// 
-			this.aceView1.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.aceView1.Location = new System.Drawing.Point(0, 0);
-			this.aceView1.Name = "aceView1";
-			this.aceView1.Size = new System.Drawing.Size(773, 488);
-			this.aceView1.TabIndex = 0;
-			// 
-			// blocklyView1
-			// 
-			this.blocklyView1.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.blocklyView1.Location = new System.Drawing.Point(0, 0);
-			this.blocklyView1.Name = "blocklyView1";
-			this.blocklyView1.Size = new System.Drawing.Size(773, 488);
-			this.blocklyView1.TabIndex = 0;
 			// 
 			// classSelectorView1
 			// 
@@ -346,6 +361,7 @@
 		private ClassSelectorView classSelectorView1;
 		private System.Windows.Forms.Splitter splitter1;
 		private System.Windows.Forms.Splitter splitter2;
+		private System.Windows.Forms.Button ObjDump;
 	}
 }
 

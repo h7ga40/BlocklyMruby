@@ -39,7 +39,7 @@ r_lt(mrb_state *mrb, mrb_value a, mrb_value b)
  *     ("a".."z").cover?("5")    #=> false
  *     ("a".."z").cover?("cc")   #=> true
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_range_cover(mrb_state *mrb, mrb_value range)
 {
   mrb_value val;
@@ -81,7 +81,7 @@ mrb_range_cover(mrb_state *mrb, mrb_value range)
  *    (10..20).last(3)   #=> [18, 19, 20]
  *    (10...20).last(3)  #=> [17, 18, 19]
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_range_last(mrb_state *mrb, mrb_value range)
 {
   mrb_value num;
@@ -107,7 +107,7 @@ mrb_range_last(mrb_state *mrb, mrb_value range)
  *    ('a'..'z').size  #=> nil
  */
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_range_size(mrb_state *mrb, mrb_value range)
 {
   struct RRange *r = mrb_range_ptr(mrb, range);

@@ -54,7 +54,7 @@ mrb_to_flo(mrb_state *mrb, mrb_value val)
  *
  *    2.0**3      #=> 8.0
  */
-static mrb_value
+PRESET_REF mrb_value
 num_pow(mrb_state *mrb, mrb_value x)
 {
   mrb_value y;
@@ -134,7 +134,7 @@ mrb_num_div(mrb_state *mrb, mrb_value x, mrb_value y)
  *  Returns most exact division.
  */
 
-static mrb_value
+PRESET_REF mrb_value
 num_div(mrb_state *mrb, mrb_value x)
 {
 #ifdef MRB_WITHOUT_FLOAT
@@ -174,7 +174,7 @@ num_div(mrb_state *mrb, mrb_value x)
  *  "<code>-Infinity</code>".
  */
 
-static mrb_value
+PRESET_REF mrb_value
 flo_to_s(mrb_state *mrb, mrb_value flt)
 {
   if (isnan(mrb_float(flt))) {
@@ -192,7 +192,7 @@ flo_to_s(mrb_state *mrb, mrb_value flt)
  * and <code>other</code>.
  */
 
-static mrb_value
+PRESET_REF mrb_value
 flo_minus(mrb_state *mrb, mrb_value x)
 {
   mrb_value y;
@@ -210,7 +210,7 @@ flo_minus(mrb_state *mrb, mrb_value x)
  * and <code>other</code>.
  */
 
-static mrb_value
+PRESET_REF mrb_value
 flo_mul(mrb_state *mrb, mrb_value x)
 {
   mrb_value y;
@@ -259,7 +259,7 @@ flodivmod(mrb_state *mrb, mrb_float x, mrb_float y, mrb_float *divp, mrb_float *
  *     6543.21.modulo(137.24)   #=> 92.9299999999996
  */
 
-static mrb_value
+PRESET_REF mrb_value
 flo_mod(mrb_state *mrb, mrb_value x)
 {
   mrb_value y;
@@ -284,7 +284,7 @@ flo_mod(mrb_state *mrb, mrb_value x)
  *     1.eql?(1.0)       #=> false
  *     (1.0).eql?(1.0)   #=> true
  */
-static mrb_value
+PRESET_REF mrb_value
 fix_eql(mrb_state *mrb, mrb_value x)
 {
   mrb_value y;
@@ -295,7 +295,7 @@ fix_eql(mrb_state *mrb, mrb_value x)
 }
 
 #ifndef MRB_WITHOUT_FLOAT
-static mrb_value
+PRESET_REF mrb_value
 flo_eql(mrb_state *mrb, mrb_value x)
 {
   mrb_value y;
@@ -318,7 +318,7 @@ flo_eql(mrb_state *mrb, mrb_value x)
  *
  */
 
-static mrb_value
+PRESET_REF mrb_value
 flo_eq(mrb_state *mrb, mrb_value x)
 {
   mrb_value y;
@@ -360,7 +360,7 @@ int64_value(mrb_state *mrb, int64_t v)
   return mrb_float_value(mrb, (mrb_float)v);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 flo_rev(mrb_state *mrb, mrb_value x)
 {
   int64_t v1;
@@ -369,7 +369,7 @@ flo_rev(mrb_state *mrb, mrb_value x)
   return int64_value(mrb, ~v1);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 flo_and(mrb_state *mrb, mrb_value x)
 {
   mrb_value y;
@@ -381,7 +381,7 @@ flo_and(mrb_state *mrb, mrb_value x)
   return int64_value(mrb, v1 & v2);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 flo_or(mrb_state *mrb, mrb_value x)
 {
   mrb_value y;
@@ -393,7 +393,7 @@ flo_or(mrb_state *mrb, mrb_value x)
   return int64_value(mrb, v1 | v2);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 flo_xor(mrb_state *mrb, mrb_value x)
 {
   mrb_value y;
@@ -442,7 +442,7 @@ flo_shift(mrb_state *mrb, mrb_value x, mrb_int width)
   return mrb_float_value(mrb, val);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 flo_lshift(mrb_state *mrb, mrb_value x)
 {
   mrb_int width;
@@ -451,7 +451,7 @@ flo_lshift(mrb_state *mrb, mrb_value x)
   return flo_shift(mrb, x, -width);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 flo_rshift(mrb_state *mrb, mrb_value x)
 {
   mrb_int width;
@@ -487,7 +487,7 @@ flo_to_f(mrb_state *mrb, mrb_value num)
  *     (+1.0/0.0).infinite?   #=> 1
  */
 
-static mrb_value
+PRESET_REF mrb_value
 flo_infinite_p(mrb_state *mrb, mrb_value num)
 {
   mrb_float value = mrb_float(num);
@@ -509,7 +509,7 @@ flo_infinite_p(mrb_state *mrb, mrb_value num)
  *
  */
 
-static mrb_value
+PRESET_REF mrb_value
 flo_finite_p(mrb_state *mrb, mrb_value num)
 {
   return mrb_bool_value(isfinite(mrb_float(num)));
@@ -539,7 +539,7 @@ mrb_check_num_exact(mrb_state *mrb, mrb_float num)
  *     (-2.0).floor   #=> -2
  */
 
-static mrb_value
+PRESET_REF mrb_value
 flo_floor(mrb_state *mrb, mrb_value num)
 {
   mrb_float f = floor(mrb_float(num));
@@ -565,7 +565,7 @@ flo_floor(mrb_state *mrb, mrb_value num)
  *     (-2.0).ceil   #=> -2
  */
 
-static mrb_value
+PRESET_REF mrb_value
 flo_ceil(mrb_state *mrb, mrb_value num)
 {
   mrb_float f = ceil(mrb_float(num));
@@ -608,7 +608,7 @@ flo_ceil(mrb_state *mrb, mrb_value num)
  *
  */
 
-static mrb_value
+PRESET_REF mrb_value
 flo_round(mrb_state *mrb, mrb_value num)
 {
   double number, f;
@@ -669,7 +669,7 @@ flo_round(mrb_state *mrb, mrb_value num)
  *  Returns <i>flt</i> truncated to an <code>Integer</code>.
  */
 
-static mrb_value
+PRESET_REF mrb_value
 flo_truncate(mrb_state *mrb, mrb_value num)
 {
   mrb_float f = mrb_float(num);
@@ -684,7 +684,7 @@ flo_truncate(mrb_state *mrb, mrb_value num)
   return mrb_fixnum_value((mrb_int)f);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 flo_nan_p(mrb_state *mrb, mrb_value num)
 {
   return mrb_bool_value(isnan(mrb_float(num)));
@@ -709,7 +709,7 @@ flo_nan_p(mrb_state *mrb, mrb_value num)
  *  methods simply return the receiver.
  */
 
-static mrb_value
+PRESET_REF mrb_value
 int_to_i(mrb_state *mrb, mrb_value num)
 {
   return num;
@@ -750,7 +750,7 @@ mrb_fixnum_mul(mrb_state *mrb, mrb_value x, mrb_value y)
  * result.
  */
 
-static mrb_value
+PRESET_REF mrb_value
 fix_mul(mrb_state *mrb, mrb_value x)
 {
   mrb_value y;
@@ -797,7 +797,7 @@ fixdivmod(mrb_state *mrb, mrb_int x, mrb_int y, mrb_int *divp, mrb_int *modp)
  *  See <code>numeric.divmod</code> for more information.
  */
 
-static mrb_value
+PRESET_REF mrb_value
 fix_mod(mrb_state *mrb, mrb_value x)
 {
   mrb_value y;
@@ -837,7 +837,7 @@ fix_mod(mrb_state *mrb, mrb_value x)
  *
  *  See <code>Numeric#divmod</code>.
  */
-static mrb_value
+PRESET_REF mrb_value
 fix_divmod(mrb_state *mrb, mrb_value x)
 {
   mrb_value y;
@@ -876,7 +876,7 @@ fix_divmod(mrb_state *mrb, mrb_value x)
 }
 
 #ifndef MRB_WITHOUT_FLOAT
-static mrb_value
+PRESET_REF mrb_value
 flo_divmod(mrb_state *mrb, mrb_value x)
 {
   mrb_value y;
@@ -904,7 +904,7 @@ flo_divmod(mrb_state *mrb, mrb_value x)
  *   1 == 1.0    #=> true
  */
 
-static mrb_value
+PRESET_REF mrb_value
 fix_equal(mrb_state *mrb, mrb_value x)
 {
   mrb_value y;
@@ -933,7 +933,7 @@ fix_equal(mrb_state *mrb, mrb_value x)
  *   ex.0---00100 (4)-> 1---11011 (-5)
  */
 
-static mrb_value
+PRESET_REF mrb_value
 fix_rev(mrb_state *mrb, mrb_value num)
 {
   mrb_int val = mrb_fixnum(num);
@@ -946,9 +946,9 @@ fix_rev(mrb_state *mrb, mrb_value num)
   return mrb_fixnum_value(mrb_fixnum(x) op2 mrb_fixnum(y));\
 } while(0)
 #else
-static mrb_value flo_and(mrb_state *mrb, mrb_value x);
-static mrb_value flo_or(mrb_state *mrb, mrb_value x);
-static mrb_value flo_xor(mrb_state *mrb, mrb_value x);
+PRESET_REF mrb_value flo_and(mrb_state *mrb, mrb_value x);
+PRESET_REF mrb_value flo_or(mrb_state *mrb, mrb_value x);
+PRESET_REF mrb_value flo_xor(mrb_state *mrb, mrb_value x);
 #define bit_op(x,y,op1,op2) do {\
   if (mrb_fixnum_p(y)) return mrb_fixnum_value(mrb_fixnum(x) op2 mrb_fixnum(y));\
   return flo_ ## op1(mrb, mrb_float_value(mrb, (mrb_float)mrb_fixnum(x)));\
@@ -963,7 +963,7 @@ static mrb_value flo_xor(mrb_state *mrb, mrb_value x);
  * Bitwise AND.
  */
 
-static mrb_value
+PRESET_REF mrb_value
 fix_and(mrb_state *mrb, mrb_value x)
 {
   mrb_value y;
@@ -980,7 +980,7 @@ fix_and(mrb_state *mrb, mrb_value x)
  * Bitwise OR.
  */
 
-static mrb_value
+PRESET_REF mrb_value
 fix_or(mrb_state *mrb, mrb_value x)
 {
   mrb_value y;
@@ -997,7 +997,7 @@ fix_or(mrb_state *mrb, mrb_value x)
  * Bitwise EXCLUSIVE OR.
  */
 
-static mrb_value
+PRESET_REF mrb_value
 fix_xor(mrb_state *mrb, mrb_value x)
 {
   mrb_value y;
@@ -1076,7 +1076,7 @@ rshift(mrb_int val, mrb_int width)
  * Shifts _fix_ left _count_ positions (right if _count_ is negative).
  */
 
-static mrb_value
+PRESET_REF mrb_value
 fix_lshift(mrb_state *mrb, mrb_value x)
 {
   mrb_int width, val;
@@ -1101,7 +1101,7 @@ fix_lshift(mrb_state *mrb, mrb_value x)
  * Shifts _fix_ right _count_ positions (left if _count_ is negative).
  */
 
-static mrb_value
+PRESET_REF mrb_value
 fix_rshift(mrb_state *mrb, mrb_value x)
 {
   mrb_int width, val;
@@ -1128,7 +1128,7 @@ fix_rshift(mrb_state *mrb, mrb_value x)
  */
 
 #ifndef MRB_WITHOUT_FLOAT
-static mrb_value
+PRESET_REF mrb_value
 fix_to_f(mrb_state *mrb, mrb_value num)
 {
   return mrb_float_value(mrb, (mrb_float)mrb_fixnum(num));
@@ -1211,7 +1211,7 @@ mrb_fixnum_plus(mrb_state *mrb, mrb_value x, mrb_value y)
  * the class of <code>numeric</code> and on the magnitude of the
  * result.
  */
-static mrb_value
+PRESET_REF mrb_value
 fix_plus(mrb_state *mrb, mrb_value self)
 {
   mrb_value other;
@@ -1254,7 +1254,7 @@ mrb_fixnum_minus(mrb_state *mrb, mrb_value x, mrb_value y)
  * the class of <code>numeric</code> and on the magnitude of the
  * result.
  */
-static mrb_value
+PRESET_REF mrb_value
 fix_minus(mrb_state *mrb, mrb_value self)
 {
   mrb_value other;
@@ -1309,7 +1309,7 @@ mrb_fixnum_to_str(mrb_state *mrb, mrb_value x, mrb_int base)
  *     12345.to_s(36)   #=> "9ix"
  *
  */
-static mrb_value
+PRESET_REF mrb_value
 fix_to_s(mrb_state *mrb, mrb_value self)
 {
   mrb_int base = 10;
@@ -1369,7 +1369,7 @@ cmpnum(mrb_state *mrb, mrb_value v1, mrb_value v2)
  *  less than, equal to, or greater than <i>numeric</i>. This is the
  *  basis for the tests in <code>Comparable</code>.
  */
-static mrb_value
+PRESET_REF mrb_value
 num_cmp(mrb_state *mrb, mrb_value self)
 {
   mrb_value other;
@@ -1389,7 +1389,7 @@ cmperr(mrb_state *mrb, mrb_value v1, mrb_value v2)
              mrb_obj_value(mrb_class(mrb, v2)));
 }
 
-static mrb_value
+PRESET_REF mrb_value
 num_lt(mrb_state *mrb, mrb_value self)
 {
   mrb_value other;
@@ -1402,7 +1402,7 @@ num_lt(mrb_state *mrb, mrb_value self)
   return mrb_false_value();
 }
 
-static mrb_value
+PRESET_REF mrb_value
 num_le(mrb_state *mrb, mrb_value self)
 {
   mrb_value other;
@@ -1415,7 +1415,7 @@ num_le(mrb_state *mrb, mrb_value self)
   return mrb_false_value();
 }
 
-static mrb_value
+PRESET_REF mrb_value
 num_gt(mrb_state *mrb, mrb_value self)
 {
   mrb_value other;
@@ -1428,7 +1428,7 @@ num_gt(mrb_state *mrb, mrb_value self)
   return mrb_false_value();
 }
 
-static mrb_value
+PRESET_REF mrb_value
 num_ge(mrb_state *mrb, mrb_value self)
 {
   mrb_value other;
@@ -1441,14 +1441,14 @@ num_ge(mrb_state *mrb, mrb_value self)
   return mrb_false_value();
 }
 
-static mrb_value
+PRESET_REF mrb_value
 num_finite_p(mrb_state *mrb, mrb_value self)
 {
   mrb_get_args(mrb, "");
   return mrb_true_value();
 }
 
-static mrb_value
+PRESET_REF mrb_value
 num_infinite_p(mrb_state *mrb, mrb_value self)
 {
   mrb_get_args(mrb, "");
@@ -1464,7 +1464,7 @@ num_infinite_p(mrb_state *mrb, mrb_value self)
  * and <code>other</code>.
  */
 #ifndef MRB_WITHOUT_FLOAT
-static mrb_value
+PRESET_REF mrb_value
 flo_plus(mrb_state *mrb, mrb_value x)
 {
   mrb_value y;

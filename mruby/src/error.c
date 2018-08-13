@@ -40,7 +40,7 @@ mrb_exc_new_str(mrb_state *mrb, struct RClass* c, mrb_value str)
  *  a message.
  */
 
-static mrb_value
+PRESET_REF mrb_value
 exc_initialize(mrb_state *mrb, mrb_value exc)
 {
   mrb_value mesg;
@@ -66,7 +66,7 @@ exc_initialize(mrb_state *mrb, mrb_value exc)
  *
  */
 
-static mrb_value
+PRESET_REF mrb_value
 exc_exception(mrb_state *mrb, mrb_value self)
 {
   mrb_value exc;
@@ -90,7 +90,7 @@ exc_exception(mrb_state *mrb, mrb_value self)
  * no message is set).
  */
 
-static mrb_value
+PRESET_REF mrb_value
 exc_to_s(mrb_state *mrb, mrb_value exc)
 {
   mrb_value mesg = mrb_attr_get(mrb, exc, mrb_intern_lit(mrb, "mesg"));
@@ -114,7 +114,7 @@ exc_to_s(mrb_state *mrb, mrb_value exc)
  * Normally this returns the exception's message or name.
  */
 
-static mrb_value
+PRESET_REF mrb_value
 exc_message(mrb_state *mrb, mrb_value exc)
 {
   return mrb_funcall(mrb, exc, "to_s", 0);
@@ -130,7 +130,7 @@ exc_message(mrb_state *mrb, mrb_value exc)
  * returns message and class name.
  */
 
-static mrb_value
+PRESET_REF mrb_value
 exc_inspect(mrb_state *mrb, mrb_value exc)
 {
   mrb_value str, mesg, file, line;
@@ -184,7 +184,7 @@ set_backtrace(mrb_state *mrb, mrb_value exc, mrb_value backtrace)
   mrb_iv_set(mrb, exc, mrb_intern_lit(mrb, "backtrace"), backtrace);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 exc_set_backtrace(mrb_state *mrb, mrb_value exc)
 {
   mrb_value backtrace;

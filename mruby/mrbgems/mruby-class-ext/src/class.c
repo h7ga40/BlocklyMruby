@@ -2,14 +2,14 @@
 #include "mruby/class.h"
 #include "mruby/string.h"
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_mod_name(mrb_state *mrb, mrb_value self)
 {
   mrb_value name = mrb_class_path(mrb, mrb_class_ptr(self));
   return mrb_nil_p(name)? name : mrb_str_dup(mrb, name);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_mod_singleton_class_p(mrb_state *mrb, mrb_value self)
 {
   return mrb_bool_value(mrb_type(self) == MRB_TT_SCLASS);
@@ -34,7 +34,7 @@ mrb_mod_singleton_class_p(mrb_state *mrb, mrb_value self)
  *     puts Thing.new.hello()
  */
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_mod_module_exec(mrb_state *mrb, mrb_value self)
 {
   const mrb_value *argv;

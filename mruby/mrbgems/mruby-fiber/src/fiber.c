@@ -61,7 +61,7 @@
  *    resuming dead fiber (FiberError)
  *
  */
-static mrb_value
+PRESET_REF mrb_value
 fiber_init(mrb_state *mrb, mrb_value self)
 {
   static const struct mrb_context mrb_context_zero = { 0 };
@@ -243,7 +243,7 @@ fiber_switch(mrb_state *mrb, mrb_value self, mrb_int len, const mrb_value *a, mr
  *  or to the block value if it runs to completion without any
  *  <code>Fiber.yield</code>
  */
-static mrb_value
+PRESET_REF mrb_value
 fiber_resume(mrb_state *mrb, mrb_value self)
 {
   mrb_value *a;
@@ -279,7 +279,7 @@ mrb_fiber_alive_p(mrb_state *mrb, mrb_value self)
 }
 #define fiber_alive_p mrb_fiber_alive_p
 
-static mrb_value
+PRESET_REF mrb_value
 fiber_eq(mrb_state *mrb, mrb_value self)
 {
   mrb_value other;
@@ -303,7 +303,7 @@ fiber_eq(mrb_state *mrb, mrb_value self)
  * cause double resume error. Though when the fiber is re-transferred
  * and <code>Fiber.yield</code> is called, the fiber would be resumable.
  */
-static mrb_value
+PRESET_REF mrb_value
 fiber_transfer(mrb_state *mrb, mrb_value self)
 {
   struct mrb_context *c = fiber_check(mrb, self);
@@ -363,7 +363,7 @@ mrb_fiber_yield(mrb_state *mrb, mrb_int len, const mrb_value *a)
  *  mruby limitation: Fiber resume/yield cannot cross C function boundary.
  *  thus you cannot yield from #initialize which is called by mrb_funcall().
  */
-static mrb_value
+PRESET_REF mrb_value
 fiber_yield(mrb_state *mrb, mrb_value self)
 {
   mrb_value *a;
@@ -380,7 +380,7 @@ fiber_yield(mrb_state *mrb, mrb_value self)
  *  Returns the current fiber. If you are not running in the context of
  *  a fiber this method will return the root fiber.
  */
-static mrb_value
+PRESET_REF mrb_value
 fiber_current(mrb_state *mrb, mrb_value self)
 {
   if (!mrb->c->fib) {

@@ -198,8 +198,13 @@ typedef void (*mrb_atexit_func)(struct mrb_state*);
 
 #ifdef MRB_USE_PRESET_SYMBOLS
 extern const int mrb_preset_symbols_count;
-mrb_sym mrb_preset_sym_intern(mrb_state *mrb, const char *name, size_t len, mrb_bool lit);
+struct mrb_state* mrb_init(mrb_allocf f, void *ud);
+int mrb_is_preset_area(struct mrb_state *mrb, void *p);
+mrb_sym mrb_preset_sym_intern(struct mrb_state *mrb, const char *name, size_t len, mrb_bool lit);
 const char *mrb_preset_sym2name(mrb_sym sym, mrb_int *lenp);
+#define PRESET_REF
+#else
+#define PRESET_REF static
 #endif
 
 #define MRB_STATE_NO_REGEXP 1
@@ -1045,9 +1050,6 @@ MRB_API mrb_state* mrb_open_allocf(mrb_allocf f, void *ud);
  *      Pointer to the newly created mrb_state.
  */
 MRB_API mrb_state* mrb_open_core(mrb_allocf f, void *ud);
-
-MRB_API void mrb_init(mrb_state* mrb, mrb_allocf f, void *ud);
-void mrb_init_mrbgems(mrb_state*);
 
 /**
  * Closes and frees a mrb_state.

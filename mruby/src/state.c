@@ -13,6 +13,10 @@
 #include <mruby/string.h>
 #include <mruby/class.h>
 
+#ifdef MRB_USE_PRESET_SYMBOLS
+mrb_state mrb_preset_state;
+#endif
+
 void mrb_init_core(mrb_state*);
 void mrb_init_mrbgems(mrb_state*);
 
@@ -22,21 +26,13 @@ void mrb_gc_destroy(mrb_state*, mrb_gc *gc);
 MRB_API mrb_state*
 mrb_open_core(mrb_allocf f, void *ud)
 {
+#ifndef MRB_USE_PRESET_SYMBOLS
+  static const mrb_state mrb_state_zero = { 0 };
+  static const struct mrb_context mrb_context_zero = { 0 };
   mrb_state *mrb;
 
   mrb = (mrb_state *)(f)(NULL, NULL, sizeof(mrb_state), ud);
   if (mrb == NULL) return NULL;
-
-  mrb_init(mrb, f, ud);
-
-  return mrb;
-}
-
-MRB_API void
-mrb_init(mrb_state *mrb, mrb_allocf f, void *ud)
-{
-  static const mrb_state mrb_state_zero = { 0 };
-  static const struct mrb_context mrb_context_zero = { 0 };
 
   *mrb = mrb_state_zero;
   mrb->allocf_ud = ud;
@@ -47,14 +43,21 @@ mrb_init(mrb_state *mrb, mrb_allocf f, void *ud)
   mrb->c = (struct mrb_context*)mrb_malloc(mrb, sizeof(struct mrb_context));
   *mrb->c = mrb_context_zero;
   mrb->root_c = mrb->c;
-
   mrb_init_core(mrb);
+#else
+  mrb_state *mrb = mrb_init(f, ud);
+#endif
+  return mrb;
 }
 
 void*
 mrb_default_allocf(mrb_state *mrb, void *p, size_t size, void *ud)
 {
   if (size == 0) {
+#ifdef MRB_USE_PRESET_SYMBOLS
+    if (mrb_is_preset_area(mrb, p))
+      return NULL;
+#endif // DEBUG
     free(p);
     return NULL;
   }
@@ -112,7 +115,7 @@ mrb_open_allocf(mrb_allocf f, void *ud)
     return NULL;
   }
 
-#ifndef DISABLE_GEMS
+#if !defined(DISABLE_GEMS) && !defined(MRB_USE_PRESET_SYMBOLS)
   mrb_init_mrbgems(mrb);
   mrb_gc_arena_restore(mrb, 0);
 #endif

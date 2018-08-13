@@ -5,7 +5,7 @@
 #include <mruby/string.h>
 #include <mruby/range.h>
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_getbyte(mrb_state *mrb, mrb_value str)
 {
   mrb_int pos;
@@ -19,7 +19,7 @@ mrb_str_getbyte(mrb_state *mrb, mrb_value str)
   return mrb_fixnum_value((unsigned char)RSTRING_PTR(str)[pos]);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_setbyte(mrb_state *mrb, mrb_value str)
 {
   mrb_int pos, byte;
@@ -39,7 +39,7 @@ mrb_str_setbyte(mrb_state *mrb, mrb_value str)
   return mrb_fixnum_value((unsigned char)byte);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_byteslice(mrb_state *mrb, mrb_value str)
 {
   mrb_value a1;
@@ -90,7 +90,7 @@ mrb_str_byteslice(mrb_state *mrb, mrb_value str)
  *  place, returning <i>str</i>, or <code>nil</code> if no changes were made.
  *  Note: case conversion is effective only in ASCII region.
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_swapcase_bang(mrb_state *mrb, mrb_value str)
 {
   char *p, *pend;
@@ -127,7 +127,7 @@ mrb_str_swapcase_bang(mrb_state *mrb, mrb_value str)
  *     "Hello".swapcase          #=> "hELLO"
  *     "cYbEr_PuNk11".swapcase   #=> "CyBeR_pUnK11"
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_swapcase(mrb_state *mrb, mrb_value self)
 {
   mrb_value str;
@@ -137,7 +137,7 @@ mrb_str_swapcase(mrb_state *mrb, mrb_value self)
   return str;
 }
 
-static mrb_value mrb_fixnum_chr(mrb_state *mrb, mrb_value num);
+PRESET_REF mrb_value mrb_fixnum_chr(mrb_state *mrb, mrb_value num);
 
 /*
  *  call-seq:
@@ -154,7 +154,7 @@ static mrb_value mrb_fixnum_chr(mrb_state *mrb, mrb_value num);
  *     a << "world"   #=> "hello world"
  *     a.concat(33)   #=> "hello world!"
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_concat_m(mrb_state *mrb, mrb_value self)
 {
   mrb_value str;
@@ -181,7 +181,7 @@ mrb_str_concat_m(mrb_state *mrb, mrb_value self)
  *    "hello".start_with?("heaven", "paradise") #=> false
  *    "h".start_with?("heaven", "hell")         #=> false
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_start_with(mrb_state *mrb, mrb_value self)
 {
   mrb_value *argv, sub;
@@ -210,7 +210,7 @@ mrb_str_start_with(mrb_state *mrb, mrb_value self)
  *
  *  Returns true if +str+ ends with one of the +suffixes+ given.
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_end_with(mrb_state *mrb, mrb_value self)
 {
   mrb_value *argv, sub;
@@ -235,13 +235,13 @@ mrb_str_end_with(mrb_state *mrb, mrb_value self)
   return mrb_false_value();
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_hex(mrb_state *mrb, mrb_value self)
 {
   return mrb_str_to_inum(mrb, self, 16, FALSE);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_oct(mrb_state *mrb, mrb_value self)
 {
   return mrb_str_to_inum(mrb, self, 8, FALSE);
@@ -256,13 +256,13 @@ mrb_str_oct(mrb_state *mrb, mrb_value self)
  *     a = "abcde"
  *     a.chr    #=> "a"
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_chr(mrb_state *mrb, mrb_value self)
 {
   return mrb_str_substr(mrb, self, 0, 1);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_fixnum_chr(mrb_state *mrb, mrb_value num)
 {
   mrb_int cp = mrb_fixnum(num);
@@ -316,7 +316,7 @@ mrb_fixnum_chr(mrb_state *mrb, mrb_value num)
  *     a = "abc\ndef"
  *     a.lines    #=> ["abc\n", "def"]
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_lines(mrb_state *mrb, mrb_value self)
 {
   mrb_value result;
@@ -370,7 +370,7 @@ mrb_str_lines(mrb_state *mrb, mrb_value self)
  *     a = "abc"
  *     a.succ    #=> "abd"
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_succ_bang(mrb_state *mrb, mrb_value self)
 {
   mrb_value result;
@@ -448,7 +448,7 @@ mrb_str_succ_bang(mrb_state *mrb, mrb_value self)
   return self;
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_succ(mrb_state *mrb, mrb_value self)
 {
   mrb_value str;
@@ -507,7 +507,7 @@ utf8code(unsigned char* p)
   return p[0];
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_ord(mrb_state* mrb, mrb_value str)
 {
   if (RSTRING_LEN(str) == 0)
@@ -515,7 +515,7 @@ mrb_str_ord(mrb_state* mrb, mrb_value str)
   return mrb_fixnum_value(utf8code((unsigned char*) RSTRING_PTR(str)));
 }
 #else
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_ord(mrb_state* mrb, mrb_value str)
 {
   if (RSTRING_LEN(str) == 0)
@@ -565,7 +565,7 @@ all_digits_p(const char *s, mrb_int len)
  *     "25".upto("5").to_a   #=> []
  *     "07".upto("11").to_a  #=> ["07", "08", "09", "10", "11"]
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_upto(mrb_state *mrb, mrb_value beg)
 {
   mrb_value end;
@@ -663,7 +663,7 @@ mrb_str_upto(mrb_state *mrb, mrb_value beg)
  *     "hello".delete_prefix!("hel") #=> "lo"
  *     "hello".delete_prefix!("llo") #=> nil
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_del_prefix_bang(mrb_state *mrb, mrb_value self)
 {
   mrb_int plen, slen;
@@ -696,7 +696,7 @@ mrb_str_del_prefix_bang(mrb_state *mrb, mrb_value self)
  *     "hello".delete_prefix("hel") #=> "lo"
  *     "hello".delete_prefix("llo") #=> "hello"
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_del_prefix(mrb_state *mrb, mrb_value self)
 {
   mrb_int plen, slen;
@@ -720,7 +720,7 @@ mrb_str_del_prefix(mrb_state *mrb, mrb_value self)
  *     "hello".delete_suffix!("llo") #=> "he"
  *     "hello".delete_suffix!("hel") #=> nil
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_del_suffix_bang(mrb_state *mrb, mrb_value self)
 {
   mrb_int plen, slen;
@@ -751,7 +751,7 @@ mrb_str_del_suffix_bang(mrb_state *mrb, mrb_value self)
  *     "hello".delete_suffix("hel") #=> "lo"
  *     "hello".delete_suffix("llo") #=> "hello"
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_del_suffix(mrb_state *mrb, mrb_value self)
 {
   mrb_int plen, slen;

@@ -82,7 +82,7 @@ KHASH_DECLARE(n2s, mrb_sym, mrb_sym, FALSE)
 KHASH_DEFINE (n2s, mrb_sym, mrb_sym, FALSE, sym_hash_func, sym_hash_equal)
 /* ------------------------------------------------------ */
 
-static void
+PRESET_REF void
 sym_validate_len(mrb_state *mrb, size_t len)
 {
   if (len >= RITE_LV_NULL_MARK) {
@@ -249,9 +249,6 @@ mrb_free_symtbl(mrb_state *mrb)
 void
 mrb_init_symtbl(mrb_state *mrb)
 {
-#ifdef MRB_USE_PRESET_SYMBOLS
-  mrb->symidx = mrb_preset_symbols_count;
-#endif
   mrb->name2sym = kh_init(n2s, mrb);
 }
 
@@ -298,7 +295,7 @@ mrb_init_symtbl(mrb_state *mrb)
  *  symbol, returns <code>true</code>.
  */
 
-static mrb_value
+PRESET_REF mrb_value
 sym_equal(mrb_state *mrb, mrb_value sym1)
 {
   mrb_value sym2;
@@ -319,7 +316,7 @@ sym_equal(mrb_state *mrb, mrb_value sym1)
  *
  *     :fred.id2name   #=> "fred"
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_sym_to_s(mrb_state *mrb, mrb_value sym)
 {
   mrb_sym id = mrb_symbol(sym);
@@ -473,7 +470,7 @@ id:
   return *m ? FALSE : TRUE;
 }
 
-static mrb_value
+PRESET_REF mrb_value
 sym_inspect(mrb_state *mrb, mrb_value sym)
 {
   mrb_value str;
@@ -525,7 +522,7 @@ mrb_sym2name(mrb_state *mrb, mrb_sym sym)
 
 #define lesser(a,b) (((a)>(b))?(b):(a))
 
-static mrb_value
+PRESET_REF mrb_value
 sym_cmp(mrb_state *mrb, mrb_value s1)
 {
   mrb_value s2;

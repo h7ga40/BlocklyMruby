@@ -779,7 +779,7 @@ mrb_str_plus(mrb_state *mrb, mrb_value a, mrb_value b)
  *
  *  Returns a new string object containing a copy of <i>str</i>.
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_plus_m(mrb_state *mrb, mrb_value self)
 {
   mrb_value str;
@@ -796,14 +796,14 @@ mrb_str_plus_m(mrb_state *mrb, mrb_value self)
  *
  *  Returns the length of string.
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_size(mrb_state *mrb, mrb_value self)
 {
   mrb_int len = RSTRING_CHAR_LEN(self);
   return mrb_fixnum_value(len);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_bytesize(mrb_state *mrb, mrb_value self)
 {
   mrb_int len = RSTRING_LEN(self);
@@ -820,7 +820,7 @@ mrb_str_bytesize(mrb_state *mrb, mrb_value self)
  *
  *     "Ho! " * 3   #=> "Ho! Ho! Ho! "
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_times(mrb_state *mrb, mrb_value self)
 {
   mrb_int n,len,times;
@@ -909,7 +909,7 @@ mrb_str_cmp(mrb_state *mrb, mrb_value str1, mrb_value str2)
  *     "abcdef" <=> "abcdefg"   #=> -1
  *     "abcdef" <=> "ABCDEF"    #=> 1
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_cmp_m(mrb_state *mrb, mrb_value str1)
 {
   mrb_value str2;
@@ -976,7 +976,7 @@ mrb_str_equal(mrb_state *mrb, mrb_value str1, mrb_value str2)
  *
  *   caution:if <i>str</i> <code><=></code> <i>obj</i> returns zero.
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_equal_m(mrb_state *mrb, mrb_value str1)
 {
   mrb_value str2;
@@ -1127,7 +1127,7 @@ num_index:
  *     a["lo"]                #=> "lo"
  *     a["bye"]               #=> nil
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_aref_m(mrb_state *mrb, mrb_value str)
 {
   mrb_value a1, a2;
@@ -1160,7 +1160,7 @@ mrb_str_aref_m(mrb_state *mrb, mrb_value str)
  *     a               #=> "Hello"
  *     a.capitalize!   #=> nil
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_capitalize_bang(mrb_state *mrb, mrb_value str)
 {
   char *p, *pend;
@@ -1196,7 +1196,7 @@ mrb_str_capitalize_bang(mrb_state *mrb, mrb_value str)
  *     "HELLO".capitalize    #=> "Hello"
  *     "123ABC".capitalize   #=> "123abc"
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_capitalize(mrb_state *mrb, mrb_value self)
 {
   mrb_value str;
@@ -1214,7 +1214,7 @@ mrb_str_capitalize(mrb_state *mrb, mrb_value self)
  *  Modifies <i>str</i> in place as described for <code>String#chomp</code>,
  *  returning <i>str</i>, or <code>nil</code> if no modifications were made.
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_chomp_bang(mrb_state *mrb, mrb_value str)
 {
   mrb_value rs;
@@ -1301,7 +1301,7 @@ mrb_str_chomp_bang(mrb_state *mrb, mrb_value str)
  *     "hello \n there".chomp   #=> "hello \n there"
  *     "hello".chomp("llo")     #=> "he"
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_chomp(mrb_state *mrb, mrb_value self)
 {
   mrb_value str;
@@ -1320,7 +1320,7 @@ mrb_str_chomp(mrb_state *mrb, mrb_value self)
  *  or <code>nil</code> if <i>str</i> is the empty string.  See also
  *  <code>String#chomp!</code>.
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_chop_bang(mrb_state *mrb, mrb_value str)
 {
   struct RString *s = mrb_str_ptr(str);
@@ -1370,7 +1370,7 @@ mrb_str_chop_bang(mrb_state *mrb, mrb_value str)
  *     "string".chop       #=> "strin"
  *     "x".chop            #=> ""
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_chop(mrb_state *mrb, mrb_value self)
 {
   mrb_value str;
@@ -1387,7 +1387,7 @@ mrb_str_chop(mrb_state *mrb, mrb_value self)
  *  Downcases the contents of <i>str</i>, returning <code>nil</code> if no
  *  changes were made.
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_downcase_bang(mrb_state *mrb, mrb_value str)
 {
   char *p, *pend;
@@ -1420,7 +1420,7 @@ mrb_str_downcase_bang(mrb_state *mrb, mrb_value str)
  *
  *     "hEllO".downcase   #=> "hello"
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_downcase(mrb_state *mrb, mrb_value self)
 {
   mrb_value str;
@@ -1440,7 +1440,7 @@ mrb_str_downcase(mrb_state *mrb, mrb_value self)
  *     "hello".empty?   #=> false
  *     "".empty?        #=> true
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_empty_p(mrb_state *mrb, mrb_value self)
 {
   struct RString *s = mrb_str_ptr(self);
@@ -1455,7 +1455,7 @@ mrb_str_empty_p(mrb_state *mrb, mrb_value self)
  *
  * Two strings are equal if the have the same length and content.
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_eql(mrb_state *mrb, mrb_value self)
 {
   mrb_value str2;
@@ -1496,7 +1496,7 @@ mrb_str_hash(mrb_state *mrb, mrb_value str)
  *
  * Return a hash based on the string's length and content.
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_hash_m(mrb_state *mrb, mrb_value self)
 {
   mrb_int key = mrb_str_hash(mrb, self);
@@ -1516,7 +1516,7 @@ mrb_str_hash_m(mrb_state *mrb, mrb_value self)
  *     "hello".include? "ol"   #=> false
  *     "hello".include? ?h     #=> true
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_include(mrb_state *mrb, mrb_value self)
 {
   mrb_value str2;
@@ -1548,7 +1548,7 @@ mrb_str_include(mrb_state *mrb, mrb_value self)
  *     "hello".index(101)             #=> 1(101=0x65='e')
  *     "hello".index(/[aeiou]/, -3)   #=> 4
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_index_m(mrb_state *mrb, mrb_value str)
 {
   mrb_value *argv;
@@ -1611,7 +1611,7 @@ mrb_str_index_m(mrb_state *mrb, mrb_value str)
  *     s = "hello"         #=> "hello"
  *     s.replace "world"   #=> "world"
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_replace(mrb_state *mrb, mrb_value str)
 {
   mrb_value str2;
@@ -1627,7 +1627,7 @@ mrb_str_replace(mrb_state *mrb, mrb_value str)
  *
  *  Returns a new string object containing a copy of <i>str</i>.
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_init(mrb_state *mrb, mrb_value self)
 {
   mrb_value str2;
@@ -1730,7 +1730,7 @@ mrb_check_string_type(mrb_state *mrb, mrb_value str)
  *
  *  Reverses <i>str</i> in place.
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_reverse_bang(mrb_state *mrb, mrb_value str)
 {
 #ifdef MRB_UTF8_STRING
@@ -1792,7 +1792,7 @@ mrb_str_reverse_bang(mrb_state *mrb, mrb_value str)
  *
  *     "stressed".reverse   #=> "desserts"
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_reverse(mrb_state *mrb, mrb_value str)
 {
   mrb_value str2 = mrb_str_dup(mrb, str);
@@ -1819,7 +1819,7 @@ mrb_str_reverse(mrb_state *mrb, mrb_value str)
  *     "hello".rindex(101)             #=> 1
  *     "hello".rindex(/[aeiou]/, -2)   #=> 1
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_rindex(mrb_state *mrb, mrb_value str)
 {
   mrb_value *argv;
@@ -1914,7 +1914,7 @@ mrb_str_rindex(mrb_state *mrb, mrb_value str)
  *     "1,2,,3,4,,".split(',', -4)     #=> ["1", "2", "", "3", "4", "", ""]
  */
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_split_m(mrb_state *mrb, mrb_value str)
 {
   mrb_int argc;
@@ -2251,7 +2251,7 @@ mrb_str_to_inum(mrb_state *mrb, mrb_value str, mrb_int base, mrb_bool badcheck)
  *     "1100101".to_i(10)       #=> 1100101
  *     "1100101".to_i(16)       #=> 17826049
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_to_i(mrb_state *mrb, mrb_value self)
 {
   mrb_int base = 10;
@@ -2362,7 +2362,7 @@ mrb_str_to_dbl(mrb_state *mrb, mrb_value str, mrb_bool badcheck)
  *     "45.67 degrees".to_f   #=> 45.67
  *     "thx1138".to_f         #=> 0.0
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_to_f(mrb_state *mrb, mrb_value self)
 {
   return mrb_float_value(mrb, mrb_str_to_dbl(mrb, self, FALSE));
@@ -2377,7 +2377,7 @@ mrb_str_to_f(mrb_state *mrb, mrb_value self)
  *
  *  Returns the receiver.
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_to_s(mrb_state *mrb, mrb_value self)
 {
   if (mrb_obj_class(mrb, self) != mrb->string_class) {
@@ -2394,7 +2394,7 @@ mrb_str_to_s(mrb_state *mrb, mrb_value self)
  *  Upcases the contents of <i>str</i>, returning <code>nil</code> if no changes
  *  were made.
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_upcase_bang(mrb_state *mrb, mrb_value str)
 {
   struct RString *s = mrb_str_ptr(str);
@@ -2427,7 +2427,7 @@ mrb_str_upcase_bang(mrb_state *mrb, mrb_value str)
  *
  *     "hEllO".upcase   #=> "HELLO"
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_upcase(mrb_state *mrb, mrb_value self)
 {
   mrb_value str;
@@ -2711,7 +2711,7 @@ mrb_str_inspect(mrb_state *mrb, mrb_value str)
  *    str = "hello"
  *    str.bytes       #=> [104, 101, 108, 108, 111]
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_str_bytes(mrb_state *mrb, mrb_value str)
 {
   struct RString *s = mrb_str_ptr(str);

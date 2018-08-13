@@ -10,7 +10,7 @@
  *  Always returns an empty array.
  */
 
-static mrb_value
+PRESET_REF mrb_value
 nil_to_a(mrb_state *mrb, mrb_value obj)
 {
   return mrb_ary_new(mrb);
@@ -24,7 +24,7 @@ nil_to_a(mrb_state *mrb, mrb_value obj)
  *  Always returns zero.
  */
 
-static mrb_value
+PRESET_REF mrb_value
 nil_to_f(mrb_state *mrb, mrb_value obj)
 {
   return mrb_float_value(mrb, 0.0);
@@ -62,7 +62,7 @@ nil_to_i(mrb_state *mrb, mrb_value obj)
  *     k.instance_exec(5) {|x| @secret+x }   #=> 104
  */
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_obj_instance_exec(mrb_state *mrb, mrb_value self)
 {
   const mrb_value *argv;

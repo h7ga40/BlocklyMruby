@@ -187,6 +187,37 @@
       <Filter>Ruby ファイル</Filter>
     </None>
     <None Include="..\..\mrbgems\mruby-blockly\mrblib\blockly.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-socket\test\udpsocket.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-socket\test\unix.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-socket\test\socket.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-socket\test\tcpsocket.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-socket\test\ipsocket.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-socket\test\addrinfo.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-socket\test\basicsocket.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-socket\src\gen.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-socket\src\const.cstub" />
+    <None Include="..\..\mruby\mrbgems\mruby-socket\run_test.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-socket\mrblib\socket.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-range-ext\mrblib\range.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-pack\test\pack.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-pack\run_test.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-pack\packtest.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-method\test\method.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-method\mrblib\unbound_method.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-method\mrblib\method.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-method\mrblib\kernel.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-kernel-ext\mrblib\kernel.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-io\test\io.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-io\test\file.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-io\test\file_test.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-io\run_test.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-io\mrblib\kernel.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-io\mrblib\io.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-io\mrblib\file_constants.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-io\mrblib\file.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-inline-struct\test\inline.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-compar-ext\mrblib\compar.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-class-ext\test\module.rb" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\mruby\mrbgems\mruby-objectspace\src\mruby_objectspace.c">
@@ -396,6 +427,39 @@
     <ClCompile Include="..\..\mruby\mrbgems\mruby-sprintf\src\kernel.c">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-socket\src\socket.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-method\src\method.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-io\src\io.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-io\src\file_test.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-io\src\file.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-class-ext\src\class.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-pack\src\pack.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-socket\test\sockettest.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-io\test\mruby_io_test.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-io\src\mruby_io_gem.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-inline-struct\test\inline.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\mruby\mrbgems\mruby-bin-debugger\tools\mrdb\apiprint.h">
@@ -516,6 +580,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="..\..\mruby\src\value_array.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\mruby\mrbgems\mruby-io\include\mruby\ext\io.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

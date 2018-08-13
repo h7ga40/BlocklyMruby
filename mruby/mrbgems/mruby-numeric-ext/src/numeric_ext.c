@@ -22,7 +22,7 @@ to_int(mrb_value x)
  *     65.chr    #=> "A"
  *     230.chr   #=> "\xE6"
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_int_chr(mrb_state *mrb, mrb_value x)
 {
   mrb_int chr;
@@ -43,7 +43,7 @@ mrb_int_chr(mrb_state *mrb, mrb_value x)
  *
  *  Returns +true+ if all bits of <code>+int+ & +mask+</code> are 1.
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_int_allbits(mrb_state *mrb, mrb_value self)
 {
   mrb_int n, m;
@@ -59,7 +59,7 @@ mrb_int_allbits(mrb_state *mrb, mrb_value self)
  *
  *  Returns +true+ if any bits of <code>+int+ & +mask+</code> are 1.
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_int_anybits(mrb_state *mrb, mrb_value self)
 {
   mrb_int n, m;
@@ -75,7 +75,7 @@ mrb_int_anybits(mrb_state *mrb, mrb_value self)
  *
  *  Returns +true+ if no bits of <code>+int+ & +mask+</code> are 1.
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_int_nobits(mrb_state *mrb, mrb_value self)
 {
   mrb_int n, m;

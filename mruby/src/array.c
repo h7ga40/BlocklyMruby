@@ -276,7 +276,7 @@ mrb_ary_resize(mrb_state *mrb, mrb_value ary, mrb_int new_len)
   return ary;
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_s_create(mrb_state *mrb, mrb_value klass)
 {
   mrb_value ary;
@@ -325,7 +325,7 @@ mrb_ary_concat(mrb_state *mrb, mrb_value self, mrb_value other)
   ary_concat(mrb, mrb_ary_ptr(self), a2);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_concat_m(mrb_state *mrb, mrb_value self)
 {
   mrb_value ary;
@@ -335,7 +335,7 @@ mrb_ary_concat_m(mrb_state *mrb, mrb_value self)
   return self;
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_plus(mrb_state *mrb, mrb_value self)
 {
   struct RArray *a1 = mrb_ary_ptr(self);
@@ -407,7 +407,7 @@ mrb_ary_replace(mrb_state *mrb, mrb_value self, mrb_value other)
   }
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_replace_m(mrb_state *mrb, mrb_value self)
 {
   mrb_value other;
@@ -418,7 +418,7 @@ mrb_ary_replace_m(mrb_state *mrb, mrb_value self)
   return self;
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_times(mrb_state *mrb, mrb_value self)
 {
   struct RArray *a1 = mrb_ary_ptr(self);
@@ -446,7 +446,7 @@ mrb_ary_times(mrb_state *mrb, mrb_value self)
   return mrb_obj_value(a2);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_reverse_bang(mrb_state *mrb, mrb_value self)
 {
   struct RArray *a = mrb_ary_ptr(self);
@@ -468,7 +468,7 @@ mrb_ary_reverse_bang(mrb_state *mrb, mrb_value self)
   return self;
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_reverse(mrb_state *mrb, mrb_value self)
 {
   struct RArray *a = mrb_ary_ptr(self), *b = ary_new_capa(mrb, ARY_LEN(a));
@@ -502,7 +502,7 @@ mrb_ary_push(mrb_state *mrb, mrb_value ary, mrb_value elem)
   mrb_field_write_barrier_value(mrb, (struct RBasic*)a, elem);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_push_m(mrb_state *mrb, mrb_value self)
 {
   mrb_value *argv;
@@ -604,7 +604,7 @@ mrb_ary_unshift(mrb_state *mrb, mrb_value self, mrb_value item)
   return self;
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_unshift_m(mrb_state *mrb, mrb_value self)
 {
   struct RArray *a = mrb_ary_ptr(self);
@@ -846,7 +846,7 @@ aget_index(mrb_state *mrb, mrb_value index)
  *
  */
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_aget(mrb_state *mrb, mrb_value self)
 {
   struct RArray *a = mrb_ary_ptr(self);
@@ -915,7 +915,7 @@ mrb_ary_aget(mrb_state *mrb, mrb_value self)
  *     a[3, 0] = "B"               #=> [1, 2, "A", "B"]
  */
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_aset(mrb_state *mrb, mrb_value self)
 {
   mrb_value v1, v2, v3;
@@ -943,7 +943,7 @@ mrb_ary_aset(mrb_state *mrb, mrb_value self)
   return v3;
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_delete_at(mrb_state *mrb, mrb_value self)
 {
   struct RArray *a = mrb_ary_ptr(self);
@@ -973,7 +973,7 @@ mrb_ary_delete_at(mrb_state *mrb, mrb_value self)
   return val;
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_first(mrb_state *mrb, mrb_value self)
 {
   struct RArray *a = mrb_ary_ptr(self);
@@ -994,7 +994,7 @@ mrb_ary_first(mrb_state *mrb, mrb_value self)
   return mrb_ary_new_from_values(mrb, size, ARY_PTR(a));
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_last(mrb_state *mrb, mrb_value self)
 {
   struct RArray *a = mrb_ary_ptr(self);
@@ -1013,7 +1013,7 @@ mrb_ary_last(mrb_state *mrb, mrb_value self)
   return mrb_ary_new_from_values(mrb, size, ARY_PTR(a) + alen - size);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_index_m(mrb_state *mrb, mrb_value self)
 {
   mrb_value obj;
@@ -1028,7 +1028,7 @@ mrb_ary_index_m(mrb_state *mrb, mrb_value self)
   return mrb_nil_value();
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_rindex_m(mrb_state *mrb, mrb_value self)
 {
   mrb_value obj;
@@ -1078,7 +1078,7 @@ mrb_ary_splat(mrb_state *mrb, mrb_value v)
   }
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_size(mrb_state *mrb, mrb_value self)
 {
   struct RArray *a = mrb_ary_ptr(self);
@@ -1104,7 +1104,7 @@ mrb_ary_clear(mrb_state *mrb, mrb_value self)
   return self;
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_empty_p(mrb_state *mrb, mrb_value self)
 {
   struct RArray *a = mrb_ary_ptr(self);
@@ -1207,7 +1207,7 @@ mrb_ary_join(mrb_state *mrb, mrb_value ary, mrb_value sep)
  *     [ "a", "b", "c" ].join("-")   #=> "a-b-c"
  */
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_join_m(mrb_state *mrb, mrb_value ary)
 {
   mrb_value sep = mrb_nil_value();
@@ -1216,7 +1216,7 @@ mrb_ary_join_m(mrb_state *mrb, mrb_value ary)
   return mrb_ary_join(mrb, ary, sep);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_eq(mrb_state *mrb, mrb_value ary1)
 {
   mrb_value ary2;
@@ -1231,7 +1231,7 @@ mrb_ary_eq(mrb_state *mrb, mrb_value ary1)
   return ary2;
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_cmp(mrb_state *mrb, mrb_value ary1)
 {
   mrb_value ary2;
@@ -1246,7 +1246,7 @@ mrb_ary_cmp(mrb_state *mrb, mrb_value ary1)
 }
 
 /* internal method to convert multi-value to single value */
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_svalue(mrb_state *mrb, mrb_value ary)
 {
   mrb_get_args(mrb, "");

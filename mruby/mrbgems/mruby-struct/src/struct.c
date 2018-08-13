@@ -108,7 +108,7 @@ mrb_struct_modify(mrb_state *mrb, mrb_value strct)
  *     joe.members   #=> [:name, :address, :zip]
  */
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_struct_members(mrb_state *mrb, mrb_value obj)
 {
   return mrb_struct_s_members_m(mrb, mrb_obj_value(mrb_obj_class(mrb, obj)));
@@ -271,7 +271,7 @@ make_struct(mrb_state *mrb, mrb_value name, mrb_value members, struct RClass *kl
  *     Customer = Struct.new(:name, :address)     #=> Customer
  *     Customer.new("Dave", "123 Main")           #=> #<struct Customer name="Dave", address="123 Main">
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_struct_s_def(mrb_state *mrb, mrb_value klass)
 {
   mrb_value name, rest;
@@ -351,7 +351,7 @@ mrb_struct_initialize_withArg(mrb_state *mrb, mrb_int argc, mrb_value *argv, mrb
   return self;
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_struct_initialize(mrb_state *mrb, mrb_value self)
 {
   mrb_value *argv;
@@ -363,7 +363,7 @@ mrb_struct_initialize(mrb_state *mrb, mrb_value self)
 
 /* 15.2.18.4.9  */
 /* :nodoc: */
-static mrb_value
+PRESET_REF mrb_value
 mrb_struct_init_copy(mrb_state *mrb, mrb_value copy)
 {
   mrb_value s;
@@ -436,7 +436,7 @@ struct_aref_int(mrb_state *mrb, mrb_value s, mrb_int i)
  *     joe[:name]    #=> "Joe Smith"
  *     joe[0]        #=> "Joe Smith"
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_struct_aref(mrb_state *mrb, mrb_value s)
 {
   mrb_value idx;
@@ -500,7 +500,7 @@ mrb_struct_aset_sym(mrb_state *mrb, mrb_value s, mrb_sym id, mrb_value val)
  *     joe.zip    #=> "90210"
  */
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_struct_aset(mrb_state *mrb, mrb_value s)
 {
   mrb_int i;
@@ -555,7 +555,7 @@ mrb_struct_aset(mrb_state *mrb, mrb_value s)
  *     joe == jane    #=> false
  */
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_struct_equal(mrb_state *mrb, mrb_value s)
 {
   mrb_value s2;
@@ -592,7 +592,7 @@ mrb_struct_equal(mrb_state *mrb, mrb_value s)
  * Two structures are equal if they are the same object, or if all their
  * fields are equal (using <code>eql?</code>).
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_struct_eql(mrb_state *mrb, mrb_value s)
 {
   mrb_value s2;
@@ -628,7 +628,7 @@ mrb_struct_eql(mrb_state *mrb, mrb_value s)
  *
  * Returns number of struct members.
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_struct_len(mrb_state *mrb, mrb_value self)
 {
   return mrb_fixnum_value(RSTRUCT_LEN(self));
@@ -641,7 +641,7 @@ mrb_struct_len(mrb_state *mrb, mrb_value self)
  *
  * Create an array from struct values.
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_struct_to_a(mrb_state *mrb, mrb_value self)
 {
   return mrb_ary_new_from_values(mrb, RSTRUCT_LEN(self), RSTRUCT_PTR(self));
@@ -653,7 +653,7 @@ mrb_struct_to_a(mrb_state *mrb, mrb_value self)
  *
  * Create a hash from member names and struct values.
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_struct_to_h(mrb_state *mrb, mrb_value self)
 {
   mrb_value members, ret;
@@ -669,7 +669,7 @@ mrb_struct_to_h(mrb_state *mrb, mrb_value self)
   return ret;
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_struct_values_at(mrb_state *mrb, mrb_value self)
 {
   mrb_int argc;

@@ -19,7 +19,7 @@
  *   h.values_at("cow", "cat")  #=> ["bovine", "feline"]
  */
 
-static mrb_value
+PRESET_REF mrb_value
 hash_values_at(mrb_state *mrb, mrb_value hash)
 {
   mrb_value *argv, result;
@@ -45,7 +45,7 @@ hash_values_at(mrb_state *mrb, mrb_value hash)
  *   h = { a: 1, b: false, c: nil }
  *   h.compact!     #=> { a: 1, b: false }
  */
-static mrb_value
+PRESET_REF mrb_value
 hash_compact_bang(mrb_state *mrb, mrb_value hash)
 {
   khiter_t k;
@@ -82,7 +82,7 @@ hash_compact_bang(mrb_state *mrb, mrb_value hash)
  *     h.slice(:a)           #=> {:a=>100}
  *     h.slice(:b, :c, :d)   #=> {:b=>200, :c=>300}
  */
-static mrb_value
+PRESET_REF mrb_value
 hash_slice(mrb_state *mrb, mrb_value hash)
 {
   khash_t(ht) *h = RHASH_TBL(hash);

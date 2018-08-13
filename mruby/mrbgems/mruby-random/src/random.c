@@ -15,12 +15,12 @@
 
 static char const MT_STATE_KEY[] = "$mrb_i_mt_state";
 
-static const struct mrb_data_type mt_state_type = {
+PRESET_REF const struct mrb_data_type mt_state_type = {
   MT_STATE_KEY, mrb_free,
 };
 
-static mrb_value mrb_random_rand(mrb_state *mrb, mrb_value self);
-static mrb_value mrb_random_srand(mrb_state *mrb, mrb_value self);
+PRESET_REF mrb_value mrb_random_rand(mrb_state *mrb, mrb_value self);
+PRESET_REF mrb_value mrb_random_srand(mrb_state *mrb, mrb_value self);
 
 static void
 mt_srand(mt_state *t, unsigned long seed)
@@ -40,7 +40,7 @@ mt_rand_real(mt_state *t)
   return mrb_random_genrand_real1(t);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_random_mt_srand(mrb_state *mrb, mt_state *t, mrb_value seed)
 {
   if (mrb_nil_p(seed)) {
@@ -104,21 +104,21 @@ get_random_state(mrb_state *mrb)
   return DATA_GET_PTR(mrb, random_val, &mt_state_type, mt_state);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_random_g_rand(mrb_state *mrb, mrb_value self)
 {
   mrb_value random = get_random(mrb);
   return mrb_random_rand(mrb, random);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_random_g_srand(mrb_state *mrb, mrb_value self)
 {
   mrb_value random = get_random(mrb);
   return mrb_random_srand(mrb, random);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_random_init(mrb_state *mrb, mrb_value self)
 {
   mrb_value seed;
@@ -159,7 +159,7 @@ mrb_random_rand_seed(mrb_state *mrb, mt_state *t)
   }
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_random_rand(mrb_state *mrb, mrb_value self)
 {
   mrb_value max;
@@ -170,7 +170,7 @@ mrb_random_rand(mrb_state *mrb, mrb_value self)
   return mrb_random_mt_rand(mrb, t, max);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_random_srand(mrb_state *mrb, mrb_value self)
 {
   mrb_value seed;
@@ -199,7 +199,7 @@ mrb_random_srand(mrb_state *mrb, mrb_value self)
  *  Shuffles elements in self in place.
  */
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_shuffle_bang(mrb_state *mrb, mrb_value ary)
 {
   mrb_int i;
@@ -239,7 +239,7 @@ mrb_ary_shuffle_bang(mrb_state *mrb, mrb_value ary)
  *  Returns a new array with elements of self shuffled.
  */
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_shuffle(mrb_state *mrb, mrb_value ary)
 {
   mrb_value new_ary = mrb_ary_new_from_values(mrb, RARRAY_LEN(ary), RARRAY_PTR(ary));
@@ -263,7 +263,7 @@ mrb_ary_shuffle(mrb_state *mrb, mrb_value ary)
  *  returns an empty array.
  */
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_sample(mrb_state *mrb, mrb_value ary)
 {
   mrb_int n = 0;

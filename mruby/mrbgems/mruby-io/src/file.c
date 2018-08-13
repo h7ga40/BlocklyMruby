@@ -104,7 +104,7 @@ mrb_file_s_umask(mrb_state *mrb, mrb_value klass)
 #endif
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_file_s_unlink(mrb_state *mrb, mrb_value obj)
 {
   mrb_value *argv;
@@ -125,7 +125,7 @@ mrb_file_s_unlink(mrb_state *mrb, mrb_value obj)
   return mrb_fixnum_value(argc);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_file_s_rename(mrb_state *mrb, mrb_value obj)
 {
   mrb_value from, to;
@@ -151,7 +151,7 @@ mrb_file_s_rename(mrb_state *mrb, mrb_value obj)
   return mrb_fixnum_value(0);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_file_dirname(mrb_state *mrb, mrb_value klass)
 {
 #if defined(_WIN32) || defined(_WIN64)
@@ -191,7 +191,7 @@ mrb_file_dirname(mrb_state *mrb, mrb_value klass)
 #endif
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_file_basename(mrb_state *mrb, mrb_value klass)
 {
   // NOTE: Do not use mrb_locale_from_utf8 here
@@ -232,7 +232,7 @@ mrb_file_basename(mrb_state *mrb, mrb_value klass)
 #endif
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_file_realpath(mrb_state *mrb, mrb_value klass)
 {
   mrb_value pathname, dir_string, s, result;
@@ -278,7 +278,7 @@ mrb_file_is_absolute_path(const char *path)
   return (path[0] == '/');
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_file__gethome(mrb_state *mrb, mrb_value klass)
 {
   mrb_int argc;
@@ -332,7 +332,7 @@ mrb_file__gethome(mrb_state *mrb, mrb_value klass)
 #endif
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_file_mtime(mrb_state *mrb, mrb_value self)
 {
   mrb_value obj;
@@ -380,7 +380,7 @@ mrb_file_flock(mrb_state *mrb, mrb_value self)
   return mrb_fixnum_value(0);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_file_s_symlink(mrb_state *mrb, mrb_value klass)
 {
 #if defined(_WIN32) || defined(_WIN64)
@@ -406,7 +406,7 @@ mrb_file_s_symlink(mrb_state *mrb, mrb_value klass)
   return mrb_fixnum_value(0);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_file_s_chmod(mrb_state *mrb, mrb_value klass) {
   mrb_int mode;
   mrb_int argc, i;
@@ -427,7 +427,7 @@ mrb_file_s_chmod(mrb_state *mrb, mrb_value klass) {
   return mrb_fixnum_value(argc);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_file_s_readlink(mrb_state *mrb, mrb_value klass) {
 #if defined(_WIN32) || defined(_WIN64)
   mrb_raise(mrb, E_NOTIMP_ERROR, "readlink is not supported on this platform");

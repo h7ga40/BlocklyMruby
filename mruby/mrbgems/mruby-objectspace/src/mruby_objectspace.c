@@ -46,7 +46,7 @@ os_count_object_type(mrb_state *mrb, struct RBasic *obj, void *data)
  *
  */
 
-static mrb_value
+PRESET_REF mrb_value
 os_count_objects(mrb_state *mrb, mrb_value self)
 {
   struct os_count_struct obj_count = { 0 };
@@ -156,7 +156,7 @@ os_each_object_cb(mrb_state *mrb, struct RBasic *obj, void *ud)
  *
  */
 
-static mrb_value
+PRESET_REF mrb_value
 os_each_object(mrb_state *mrb, mrb_value self)
 {
   mrb_value cls = mrb_nil_value();

@@ -182,7 +182,7 @@ log2(double x)
  *  Computes the sine of <i>x</i> (expressed in radians). Returns
  *  -1..1.
  */
-static mrb_value
+PRESET_REF mrb_value
 math_sin(mrb_state *mrb, mrb_value obj)
 {
   mrb_float x;
@@ -200,7 +200,7 @@ math_sin(mrb_state *mrb, mrb_value obj)
  *  Computes the cosine of <i>x</i> (expressed in radians). Returns
  *  -1..1.
  */
-static mrb_value
+PRESET_REF mrb_value
 math_cos(mrb_state *mrb, mrb_value obj)
 {
   mrb_float x;
@@ -217,7 +217,7 @@ math_cos(mrb_state *mrb, mrb_value obj)
  *
  *  Returns the tangent of <i>x</i> (expressed in radians).
  */
-static mrb_value
+PRESET_REF mrb_value
 math_tan(mrb_state *mrb, mrb_value obj)
 {
   mrb_float x;
@@ -239,7 +239,7 @@ math_tan(mrb_state *mrb, mrb_value obj)
  *  Computes the arc sine of <i>x</i>.
  *  @return computed value between `-(PI/2)` and `(PI/2)`.
  */
-static mrb_value
+PRESET_REF mrb_value
 math_asin(mrb_state *mrb, mrb_value obj)
 {
   mrb_float x;
@@ -259,7 +259,7 @@ math_asin(mrb_state *mrb, mrb_value obj)
  *
  *  Computes the arc cosine of <i>x</i>. Returns 0..PI.
  */
-static mrb_value
+PRESET_REF mrb_value
 math_acos(mrb_state *mrb, mrb_value obj)
 {
   mrb_float x;
@@ -279,7 +279,7 @@ math_acos(mrb_state *mrb, mrb_value obj)
  *
  *  Computes the arc tangent of <i>x</i>. Returns `-(PI/2) .. (PI/2)`.
  */
-static mrb_value
+PRESET_REF mrb_value
 math_atan(mrb_state *mrb, mrb_value obj)
 {
   mrb_float x;
@@ -309,7 +309,7 @@ math_atan(mrb_state *mrb, mrb_value obj)
  *    Math.atan2(0.0, -1.0)  #=> 3.141592653589793
  *
  */
-static mrb_value
+PRESET_REF mrb_value
 math_atan2(mrb_state *mrb, mrb_value obj)
 {
   mrb_float x, y;
@@ -332,7 +332,7 @@ math_atan2(mrb_state *mrb, mrb_value obj)
  *  Computes the hyperbolic sine of <i>x</i> (expressed in
  *  radians).
  */
-static mrb_value
+PRESET_REF mrb_value
 math_sinh(mrb_state *mrb, mrb_value obj)
 {
   mrb_float x;
@@ -349,7 +349,7 @@ math_sinh(mrb_state *mrb, mrb_value obj)
  *
  *  Computes the hyperbolic cosine of <i>x</i> (expressed in radians).
  */
-static mrb_value
+PRESET_REF mrb_value
 math_cosh(mrb_state *mrb, mrb_value obj)
 {
   mrb_float x;
@@ -367,7 +367,7 @@ math_cosh(mrb_state *mrb, mrb_value obj)
  *  Computes the hyperbolic tangent of <i>x</i> (expressed in
  *  radians).
  */
-static mrb_value
+PRESET_REF mrb_value
 math_tanh(mrb_state *mrb, mrb_value obj)
 {
   mrb_float x;
@@ -389,7 +389,7 @@ math_tanh(mrb_state *mrb, mrb_value obj)
  *
  *  Computes the inverse hyperbolic sine of <i>x</i>.
  */
-static mrb_value
+PRESET_REF mrb_value
 math_asinh(mrb_state *mrb, mrb_value obj)
 {
   mrb_float x;
@@ -407,7 +407,7 @@ math_asinh(mrb_state *mrb, mrb_value obj)
  *
  *  Computes the inverse hyperbolic cosine of <i>x</i>.
  */
-static mrb_value
+PRESET_REF mrb_value
 math_acosh(mrb_state *mrb, mrb_value obj)
 {
   mrb_float x;
@@ -427,7 +427,7 @@ math_acosh(mrb_state *mrb, mrb_value obj)
  *
  *  Computes the inverse hyperbolic tangent of <i>x</i>.
  */
-static mrb_value
+PRESET_REF mrb_value
 math_atanh(mrb_state *mrb, mrb_value obj)
 {
   mrb_float x;
@@ -456,7 +456,7 @@ math_atanh(mrb_state *mrb, mrb_value obj)
  *    Math.exp(1.5)     #=> 4.4816890703380645
  *
  */
-static mrb_value
+PRESET_REF mrb_value
 math_exp(mrb_state *mrb, mrb_value obj)
 {
   mrb_float x;
@@ -482,7 +482,7 @@ math_exp(mrb_state *mrb, mrb_value obj)
  *    Math.log(12,3)       #=> 2.2618595071429146
  *
  */
-static mrb_value
+PRESET_REF mrb_value
 math_log(mrb_state *mrb, mrb_value obj)
 {
   mrb_float x, base;
@@ -514,7 +514,7 @@ math_log(mrb_state *mrb, mrb_value obj)
  *    Math.log2(65536)  #=> 16.0
  *
  */
-static mrb_value
+PRESET_REF mrb_value
 math_log2(mrb_state *mrb, mrb_value obj)
 {
   mrb_float x;
@@ -539,7 +539,7 @@ math_log2(mrb_state *mrb, mrb_value obj)
  *    Math.log10(10**100) #=> 100.0
  *
  */
-static mrb_value
+PRESET_REF mrb_value
 math_log10(mrb_state *mrb, mrb_value obj)
 {
   mrb_float x;
@@ -560,7 +560,7 @@ math_log10(mrb_state *mrb, mrb_value obj)
  *  Returns the square root of <i>numeric</i>.
  *
  */
-static mrb_value
+PRESET_REF mrb_value
 math_sqrt(mrb_state *mrb, mrb_value obj)
 {
   mrb_float x;
@@ -606,7 +606,7 @@ math_sqrt(mrb_state *mrb, mrb_value obj)
  *    [9, 2.0800838230519, 9.0]
  *
  */
-static mrb_value
+PRESET_REF mrb_value
 math_cbrt(mrb_state *mrb, mrb_value obj)
 {
   mrb_float x;
@@ -629,7 +629,7 @@ math_cbrt(mrb_state *mrb, mrb_value obj)
  *     fraction, exponent = Math.frexp(1234)   #=> [0.6025390625, 11]
  *     fraction * 2**exponent                  #=> 1234.0
  */
-static mrb_value
+PRESET_REF mrb_value
 math_frexp(mrb_state *mrb, mrb_value obj)
 {
   mrb_float x;
@@ -650,7 +650,7 @@ math_frexp(mrb_state *mrb, mrb_value obj)
  *     fraction, exponent = Math.frexp(1234)
  *     Math.ldexp(fraction, exponent)   #=> 1234.0
  */
-static mrb_value
+PRESET_REF mrb_value
 math_ldexp(mrb_state *mrb, mrb_value obj)
 {
   mrb_float x;
@@ -671,7 +671,7 @@ math_ldexp(mrb_state *mrb, mrb_value obj)
  *
  *     Math.hypot(3, 4)   #=> 5.0
  */
-static mrb_value
+PRESET_REF mrb_value
 math_hypot(mrb_state *mrb, mrb_value obj)
 {
   mrb_float x, y;
@@ -688,7 +688,7 @@ math_hypot(mrb_state *mrb, mrb_value obj)
  *
  *  Calculates the error function of x.
  */
-static mrb_value
+PRESET_REF mrb_value
 math_erf(mrb_state *mrb, mrb_value obj)
 {
   mrb_float x;
@@ -706,7 +706,7 @@ math_erf(mrb_state *mrb, mrb_value obj)
  *
  *  Calculates the complementary error function of x.
  */
-static mrb_value
+PRESET_REF mrb_value
 math_erfc(mrb_state *mrb, mrb_value obj)
 {
   mrb_float x;
