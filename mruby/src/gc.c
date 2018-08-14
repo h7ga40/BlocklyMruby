@@ -1316,6 +1316,9 @@ mrb_write_barrier(mrb_state *mrb, struct RBasic *obj)
   mrb_gc *gc = &mrb->gc;
 
   if (!is_black(obj)) return;
+#ifdef MRB_USE_PRESET_SYMBOLS
+  if (mrb_is_preset_const(mrb, obj)) return;
+#endif
 
   mrb_assert(!is_dead(gc, obj));
   mrb_assert(is_generational(gc) || gc->state != MRB_GC_STATE_ROOT);

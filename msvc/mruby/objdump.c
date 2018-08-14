@@ -99,6 +99,13 @@ struct array_list {
 	struct RArray *array;
 };
 
+struct stack_list {
+	struct stack_list *next;
+	int no;
+	mrb_value *base;
+	mrb_value *end;
+};
+
 struct iv_tbl_list {
 	struct iv_tbl_list *next;
 	int no;
@@ -115,6 +122,13 @@ struct context_list {
 	struct context_list *next;
 	int no;
 	struct mrb_context *context;
+};
+
+struct callinfo_list {
+	struct callinfo_list *next;
+	int no;
+	mrb_callinfo *base;
+	mrb_callinfo *end;
 };
 
 struct os_each_object_data {
@@ -134,12 +148,16 @@ struct os_each_object_data {
 	struct debug_info_file_list *debug_info_files;
 	int array_count;
 	struct array_list *arrays;
+	int stack_count;
+	struct stack_list *stacks;
 	int iv_tbl_count;
 	struct iv_tbl_list *iv_tbls;
 	int kh_mt_count;
 	struct kh_mt_list *kh_mts;
 	int context_count;
 	struct context_list *contexts;
+	int callinfo_count;
+	struct callinfo_list *callinfos;
 };
 
 extern int __ImageBase;
@@ -529,9 +547,92 @@ add_irep(struct os_each_object_data *d, mrb_irep *irep)
 	}
 }
 
-static void
-add_stack(struct os_each_object_data *d, struct REnv *env, mrb_value *stack)
+static struct stack_list *
+search_stackno(struct os_each_object_data *d, mrb_value *stack)
 {
+	struct stack_list *stacks = d->stacks;
+	if (stacks == NULL)
+		return NULL;
+
+	struct stack_list *first = stacks->next, *item = first;
+	do {
+		if ((stack >= item->base) && (stack < item->end))
+			return item;
+		item = item->next;
+	} while (item != first);
+
+	return NULL;
+}
+
+static void
+add_stack(struct os_each_object_data *d, mrb_value *base, mrb_value *end)
+{
+	struct stack_list *item;
+
+	if (base == NULL)
+		return;
+
+	item = search_stackno(d, base);
+	if (item != NULL)
+		return;
+
+	item = malloc(sizeof(struct stack_list));
+	item->next = NULL;
+	item->base = base;
+	item->end = end;
+	item->no = d->stack_count;
+
+	d->stack_count++;
+	enqueue(&d->stacks, item);
+
+	for (mrb_value *pos = base; pos < end; pos++) {
+		prepare_value(d, *pos);
+	}
+}
+
+static struct callinfo_list *
+search_callinfono(struct os_each_object_data *d, mrb_callinfo *callinfo)
+{
+	struct callinfo_list *callinfos = d->callinfos;
+	if (callinfos == NULL)
+		return NULL;
+
+	struct callinfo_list *first = callinfos->next, *item = first;
+	do {
+		if ((callinfo >= item->base) && (callinfo < item->end))
+			return item;
+		item = item->next;
+	} while (item != first);
+
+	return NULL;
+}
+
+static void
+add_callinfo(struct os_each_object_data *d, mrb_callinfo *base, mrb_callinfo *end)
+{
+	struct callinfo_list *item;
+
+	if (base == NULL)
+		return;
+
+	item = search_callinfono(d, base);
+	if (item != NULL)
+		return;
+
+	item = malloc(sizeof(struct callinfo_list));
+	item->next = NULL;
+	item->base = base;
+	item->end = end;
+	item->no = d->callinfo_count;
+
+	d->callinfo_count++;
+	enqueue(&d->callinfos, item);
+
+	for (mrb_callinfo *pos = base; pos < end; pos++) {
+		add_obj(d, pos->proc);
+		add_obj(d, pos->env);
+		add_obj(d, pos->target_class);
+	}
 }
 
 static int
@@ -568,6 +669,8 @@ add_context(struct os_each_object_data *d, struct mrb_context *context)
 	d->context_count++;
 	enqueue(&d->contexts, item);
 
+	add_stack(d, context->stbase, context->stend);
+	add_callinfo(d, context->cibase, context->ciend);
 }
 
 static int
@@ -797,9 +900,8 @@ add_obj(struct os_each_object_data *d, struct RBasic *obj)
 		}
 		break;
 	case MRB_TT_ENV:
-		for (int i = 0; i < obj->flags; i++) {
-			add_stack(d, &val->env, &val->env.stack[i]);
-		}
+		//if(obj->flags != 0)
+		//	add_stack(d, &val->env, &val->env.stack[0], &val->env.stack[obj->flags]);
 		add_context(d, val->env.cxt);
 		break;
 	case MRB_TT_ARRAY:
@@ -961,7 +1063,7 @@ sprint_value_str(struct os_each_object_data *d, char *buf, int len, mrb_value va
 	case MRB_TT_UNDEF:
 		return sprintf_s(buf, len, ".i = %d", mrb_fixnum(val));
 	case MRB_TT_FLOAT:
-		if(mrb_float(val) == INFINITY)
+		if (mrb_float(val) == INFINITY)
 			return sprintf_s(buf, len, ".f = INFINITY");
 		else if (mrb_float(val) == NAN)
 			return sprintf_s(buf, len, ".f = NAN");
@@ -1005,7 +1107,7 @@ print_each_irep_pool(struct os_each_object_data *d, struct irep_list *item)
 	if (irep->plen <= 0)
 		return;
 
-	fprintf(d->wfile, "const mrb_value mrb_preset_irep_%d_pool[] = {\n", item->no);
+	fprintf(d->wfile, "PRESET_CONST mrb_value mrb_preset_irep_%d_pool[] = {\n", item->no);
 
 	for (int i = 0; i < irep->plen; i++) {
 		mrb_value val = irep->pool[i];
@@ -1031,7 +1133,7 @@ print_each_irep_syms(struct os_each_object_data *d, struct irep_list *item)
 	if (irep->slen <= 0)
 		return;
 
-	fprintf(d->wfile, "const mrb_sym mrb_preset_irep_%d_syms[] = { ", item->no);
+	fprintf(d->wfile, "PRESET_CONST mrb_sym mrb_preset_irep_%d_syms[] = { ", item->no);
 
 	for (int i = 0; i < irep->slen; i++) {
 		mrb_sym sym = irep->syms[i];
@@ -1049,7 +1151,7 @@ print_each_irep_reps(struct os_each_object_data *d, struct irep_list *item)
 	if (irep->rlen <= 0)
 		return;
 
-	fprintf(d->wfile, "const struct mrb_irep *mrb_preset_irep_%d_reps[] = { ", item->no);
+	fprintf(d->wfile, "PRESET_CONST struct mrb_irep *mrb_preset_irep_%d_reps[] = { ", item->no);
 
 	for (int i = 0; i < irep->rlen; i++) {
 		struct mrb_irep *rep = irep->reps[i];
@@ -1072,7 +1174,7 @@ print_each_irep_lvs(struct os_each_object_data *d, struct irep_list *item)
 	if (len <= 0)
 		return;
 
-	fprintf(d->wfile, "const struct mrb_locals mrb_preset_irep_%d_lvs[] = {\n", item->no);
+	fprintf(d->wfile, "PRESET_CONST struct mrb_locals mrb_preset_irep_%d_lvs[] = {\n", item->no);
 
 	for (int i = 0; i < len; i++) {
 		struct mrb_locals *lv = &irep->lv[i];
@@ -1094,7 +1196,7 @@ print_each_env_stacks(struct os_each_object_data *d, struct obj_list *item)
 	if (len <= 0)
 		return;
 
-	fprintf(d->wfile, "const mrb_value env_stacks_%d[] = {\n", item->no);
+	fprintf(d->wfile, "PRESET_CONST mrb_value mrb_preset_env_stacks_%d[] = {\n", item->no);
 
 	for (int i = 0; i < len; i++) {
 		mrb_value stack = env->stack[i];
@@ -1191,19 +1293,19 @@ print_each_iv_tbl(struct os_each_object_data *d, struct iv_tbl_list *item)
 {
 	kh_iv_t *iv = (kh_iv_t *)item->iv;
 
-	fprintf(d->wfile, "uint8_t mrb_preset_iv_tbl_%d_ed_flags[] = {\n", item->no);
+	fprintf(d->wfile, "PRESET_DATA uint8_t mrb_preset_iv_tbl_%d_ed_flags[] = {\n", item->no);
 
 	print_each_uint8(d, iv->ed_flags, iv->n_buckets / 4);
 
 	fprintf(d->wfile, "};\n");
 
-	fprintf(d->wfile, "mrb_sym mrb_preset_iv_tbl_%d_keys[] = {\n", item->no);
+	fprintf(d->wfile, "PRESET_DATA mrb_sym mrb_preset_iv_tbl_%d_keys[] = {\n", item->no);
 
 	print_each_sym(d, iv->keys, iv->n_buckets);
 
 	fprintf(d->wfile, "};\n");
 
-	fprintf(d->wfile, "mrb_value mrb_preset_iv_tbl_%d_vals[] = {\n", item->no);
+	fprintf(d->wfile, "PRESET_DATA mrb_value mrb_preset_iv_tbl_%d_vals[] = {\n", item->no);
 
 	for (int i = 0; i < iv->n_buckets; i++) {
 		mrb_value val = iv->vals[i];
@@ -1220,7 +1322,7 @@ print_each_iv_tbl(struct os_each_object_data *d, struct iv_tbl_list *item)
 
 	fprintf(d->wfile, "};\n");
 
-	fprintf(d->wfile, "kh_iv_t mrb_preset_iv_tbl_%d = { ", item->no);
+	fprintf(d->wfile, "PRESET_DATA kh_iv_t mrb_preset_iv_tbl_%d = { ", item->no);
 
 	fprintf(d->wfile, ".n_buckets = %u, ", iv->n_buckets);
 	fprintf(d->wfile, ".size = %u, ", iv->size);
@@ -1237,19 +1339,19 @@ print_each_kh_mt(struct os_each_object_data *d, struct kh_mt_list *item)
 {
 	kh_mt_t *mt = (kh_mt_t *)item->mt;
 
-	fprintf(d->wfile, "uint8_t mrb_preset_kh_mt_%d_ed_flags[] = {\n", item->no);
+	fprintf(d->wfile, "PRESET_DATA uint8_t mrb_preset_kh_mt_%d_ed_flags[] = {\n", item->no);
 
 	print_each_uint8(d, mt->ed_flags, mt->n_buckets / 4);
 
 	fprintf(d->wfile, "};\n");
 
-	fprintf(d->wfile, "mrb_sym mrb_preset_kh_mt_%d_keys[] = {\n", item->no);
+	fprintf(d->wfile, "PRESET_DATA mrb_sym mrb_preset_kh_mt_%d_keys[] = {\n", item->no);
 
 	print_each_sym(d, mt->keys, mt->n_buckets);
 
 	fprintf(d->wfile, "};\n");
 
-	fprintf(d->wfile, "mrb_method_t mrb_preset_kh_mt_%d_vals[] = {\n\t", item->no);
+	fprintf(d->wfile, "PRESET_DATA mrb_method_t mrb_preset_kh_mt_%d_vals[] = {\n\t", item->no);
 
 	for (int i = 0; i < mt->n_buckets; i++) {
 		mrb_method_t val = mt->vals[i];
@@ -1259,7 +1361,7 @@ print_each_kh_mt(struct os_each_object_data *d, struct kh_mt_list *item)
 
 			if (val.func == NULL)
 				fprintf(d->wfile, "{ .func_p = 1, .func = NULL }, ");
-			else if (si = search_symbol_item(d, OFFSET_FROM_IMAGE_BASE(val.func))) {
+			else if ((si = search_symbol_item(d, OFFSET_FROM_IMAGE_BASE(val.func))) != NULL) {
 				int offset = OFFSET_FROM_IMAGE_BASE(val.func) - si->addr;
 				si->func = 1;
 				if (offset == 0)
@@ -1283,7 +1385,7 @@ print_each_kh_mt(struct os_each_object_data *d, struct kh_mt_list *item)
 
 	fprintf(d->wfile, "\n};\n");
 
-	fprintf(d->wfile, "kh_mt_t mrb_preset_kh_mt_%d = { ", item->no);
+	fprintf(d->wfile, "PRESET_DATA kh_mt_t mrb_preset_kh_mt_%d = { ", item->no);
 
 	fprintf(d->wfile, ".n_buckets = %u, ", mt->n_buckets);
 	fprintf(d->wfile, ".size = %u, ", mt->size);
@@ -1296,26 +1398,158 @@ print_each_kh_mt(struct os_each_object_data *d, struct kh_mt_list *item)
 }
 
 static void
+print_each_stack(struct os_each_object_data *d, struct stack_list *item)
+{
+	fprintf(d->wfile, "PRESET_DATA mrb_value mrb_preset_stack_%d[] = { ", item->no);
+
+	for (mrb_value *val = item->base; val < item->end; val++) {
+		char temp[256], *tt = get_type_str(mrb_type(*val));
+
+		temp[0] = '\0';
+		sprint_value_str(d, temp, sizeof(temp), *val);
+
+		if (tt == NULL)
+			fprintf(d->wfile, "\t{ .value = { %s }, .tt = enum_mrb_vtype_%u },\n", temp, mrb_type(*val));
+		else
+			fprintf(d->wfile, "\t{ .value = { %s }, .tt = %s },\n", temp, tt);
+	}
+
+	fprintf(d->wfile, "};\n");
+}
+
+static void
+print_each_callinfo(struct os_each_object_data *d, struct callinfo_list *item)
+{
+	struct stack_list *st;
+
+	fprintf(d->wfile, "PRESET_DATA mrb_callinfo mrb_preset_callinfo_%d[] = {\n", item->no);
+
+	for (mrb_callinfo *ci = item->base; ci < item->end; ci++) {
+		int no;
+		struct symbol_list *si;
+
+		fprintf(d->wfile, "\t{ .mid = (mrb_sym)%d, ", ci->mid);
+		if (ci->proc == NULL)
+			fprintf(d->wfile, ".proc = NULL, ");
+		else if ((no = search_objno(d, ci->proc)) >= 0)
+			fprintf(d->wfile, ".proc = (struct RProc *)&mrb_preset_object_%d.proc, ", no);
+		else
+			fprintf(d->wfile, ".proc = (struct RProc *)0x%p, ", ci->proc);
+		st = search_stackno(d, ci->stackent);
+		if (ci->stackent == NULL)
+			fprintf(d->wfile, ".stackent = NULL, ");
+		else if (st != NULL)
+			fprintf(d->wfile, ".stackent = (mrb_value *)&mrb_preset_stack_%d[%d], ", st->no, ((intptr_t)ci->stackent - (intptr_t)st->base) / sizeof(mrb_value));
+		else
+			fprintf(d->wfile, ".stackent = (mrb_value *)0x%p, ", ci->stackent);
+		fprintf(d->wfile, ".stackent = (mrb_value *)0x%p, ", ci->stackent);
+		fprintf(d->wfile, ".nregs = %d, ", ci->nregs);
+		fprintf(d->wfile, ".ridx = %d, ", ci->ridx);
+		fprintf(d->wfile, ".epos = %d, ", ci->epos);
+		if (ci->env == NULL)
+			fprintf(d->wfile, ".env = NULL, ");
+		else if ((no = search_objno(d, ci->env)) >= 0)
+			fprintf(d->wfile, ".env = (struct REnv *)&mrb_preset_object_%d.env, ", no);
+		else
+			fprintf(d->wfile, ".env = (struct REnv *)0x%p, ", ci->env);
+		if (ci->pc == NULL)
+			fprintf(d->wfile, ".pc = NULL, ");
+		else if ((si = search_symbol_item(d, OFFSET_FROM_IMAGE_BASE(ci->pc))) != NULL) {
+			int offset = OFFSET_FROM_IMAGE_BASE(ci->pc) - si->addr;
+			si->data = 1;
+			if (offset == 0)
+				fprintf(d->wfile, ".pc = (mrb_code *)&%s, ", &si->name[1]);
+			else
+				fprintf(d->wfile, ".pc = (mrb_code *)&((uint8_t *)%s)[%d], ", &si->name[1], offset);
+		}
+		else
+			fprintf(d->wfile, ".pc = (mrb_code *)0x%p, ", OFFSET_FROM_IMAGE_BASE(ci->pc));
+		if (ci->err == NULL)
+			fprintf(d->wfile, ".err = NULL, ");
+		else if ((si = search_symbol_item(d, OFFSET_FROM_IMAGE_BASE(ci->err))) != NULL) {
+			int offset = OFFSET_FROM_IMAGE_BASE(ci->err) - si->addr;
+			si->data = 1;
+			if (offset == 0)
+				fprintf(d->wfile, ".err = (mrb_code *)&%s, ", &si->name[1]);
+			else
+				fprintf(d->wfile, ".err = (mrb_code *)&((uint8_t *)%s)[%d], ", &si->name[1], offset);
+		}
+		else
+			fprintf(d->wfile, ".err = (mrb_code *)0x%p, ", OFFSET_FROM_IMAGE_BASE(ci->err));
+		fprintf(d->wfile, ".argc = %d, ", ci->argc);
+		fprintf(d->wfile, ".acc = %d, ", ci->acc);
+		if (ci->target_class == NULL)
+			fprintf(d->wfile, ".target_class = NULL },\n");
+		else if ((no = search_objno(d, ci->target_class)) >= 0)
+			fprintf(d->wfile, ".target_class = (struct RClass *)&mrb_preset_object_%d.klass },\n", no);
+		else
+			fprintf(d->wfile, ".target_class = (struct RClass *)0x%p },\n", ci->target_class);
+	}
+
+	fprintf(d->wfile, "};\n");
+}
+
+static void
 print_each_context(struct os_each_object_data *d, struct context_list *item)
 {
 	struct mrb_context *ctx = (struct mrb_context *)item->context;
+	struct stack_list *st = search_stackno(d, ctx->stbase);
+	struct callinfo_list *ci = search_callinfono(d, ctx->cibase);
+	int no;
 
-	fprintf(d->wfile, "struct mrb_context mrb_preset_context_%d = { ", item->no);
+	fprintf(d->wfile, "PRESET_DATA struct mrb_context mrb_preset_context_%d = {\n", item->no);
 
-	fprintf(d->wfile, ".prev = (struct mrb_context *)0x%p, ", ctx->prev);
-	fprintf(d->wfile, ".stack = (mrb_value *)0x%p, ", ctx->stack);
-	fprintf(d->wfile, ".stend = (mrb_value *)0x%p, .stbase= (mrb_value *)0x%p, ", ctx->stend, ctx->stbase);
-	fprintf(d->wfile, ".ci = (mrb_callinfo *)0x%p, ", ctx->ci);
-	fprintf(d->wfile, ".ciend = (mrb_callinfo *)0x%p, .cibase = (mrb_callinfo *)0x%p, ", ctx->ciend, ctx->cibase);
-	fprintf(d->wfile, ".rescue = (mrb_code **)0x%p, ", ctx->rescue);
-	fprintf(d->wfile, ".rsize = %d, ", ctx->rsize);
-	fprintf(d->wfile, ".ensure = (struct RProc **)0x%p, ", ctx->ensure);
-	fprintf(d->wfile, ".eidx = %d, .esize = %d, ", ctx->eidx, ctx->esize);
-	fprintf(d->wfile, ".status = (enum mrb_fiber_state )0x%p, ", ctx->status);
-	fprintf(d->wfile, ".vmexec = (mrb_bool)%d, ", ctx->vmexec);
-	fprintf(d->wfile, ".fib = (struct RFiber *)0x%p, ", ctx->fib);
+	fprintf(d->wfile, "\t.prev = (struct mrb_context *)0x%p,\n", ctx->prev);
+	if (ctx->stack == NULL)
+		fprintf(d->wfile, "\t.stack = NULL,\n");
+	else if (st != NULL)
+		fprintf(d->wfile, "\t.stack = (mrb_value *)&mrb_preset_stack_%d[%d],\n", st->no, ((intptr_t)ctx->stack - (intptr_t)st->base) / sizeof(mrb_value));
+	else
+		fprintf(d->wfile, "\t.stack = (mrb_value *)0x%p,\n", ctx->stack);
+	if (ctx->stend == NULL)
+		fprintf(d->wfile, "\t.stend = NULL,\n");
+	else if (st != NULL)
+		fprintf(d->wfile, "\t.stend = (mrb_value *)&mrb_preset_stack_%d[%d],\n", st->no, ((intptr_t)ctx->stend - (intptr_t)st->base) / sizeof(mrb_value));
+	else
+		fprintf(d->wfile, "\t.stend = (mrb_value *)0x%p,\n", ctx->stend);
+	if (ctx->stbase == NULL)
+		fprintf(d->wfile, "\t.stbase = NULL,\n");
+	else if (st != NULL)
+		fprintf(d->wfile, "\t.stbase = (mrb_value *)mrb_preset_stack_%d,\n", st->no);
+	else
+		fprintf(d->wfile, "\t.stbase = (mrb_value *)0x%p,\n", ctx->stbase);
+	if (ctx->ci == NULL)
+		fprintf(d->wfile, "\t.ci = NULL,\n");
+	else if (ci != NULL)
+		fprintf(d->wfile, "\t.ci = (mrb_callinfo *)&mrb_preset_callinfo_%d[%d],\n", ci->no, ((intptr_t)ctx->ci - (intptr_t)ci->base) / sizeof(mrb_callinfo));
+	else
+		fprintf(d->wfile, "\t.ci = (mrb_callinfo *)0x%p,\n", ctx->ci);
+	if (ctx->ciend == NULL)
+		fprintf(d->wfile, "\t.ciend = NULL,\n");
+	else if (ci != NULL)
+		fprintf(d->wfile, "\t.ciend = (mrb_callinfo *)&mrb_preset_callinfo_%d[%d],\n", ci->no, ((intptr_t)ctx->ciend - (intptr_t)ci->base) / sizeof(mrb_callinfo));
+	else
+		fprintf(d->wfile, "\t.ciend = (mrb_callinfo *)0x%p,\n", ctx->ciend);
+	if (ctx->cibase == NULL)
+		fprintf(d->wfile, "\t.cibase = NULL,\n");
+	else if (ci != NULL)
+		fprintf(d->wfile, "\t.cibase = (mrb_callinfo *)mrb_preset_callinfo_%d,\n", ci->no);
+	else
+		fprintf(d->wfile, "\t.cibase = (mrb_callinfo *)0x%p,\n", ctx->cibase);
+	fprintf(d->wfile, "\t.rescue = (mrb_code **)0x%p,\n", ctx->rescue);
+	fprintf(d->wfile, "\t.rsize = %d,\n", ctx->rsize);
+	fprintf(d->wfile, "\t.ensure = (struct RProc **)0x%p,\n", ctx->ensure);
+	fprintf(d->wfile, "\t.eidx = %d, .esize = %d,\n", ctx->eidx, ctx->esize);
+	fprintf(d->wfile, "\t.status = (enum mrb_fiber_state)%d,\n", ctx->status);
+	fprintf(d->wfile, "\t.vmexec = (mrb_bool)%d,\n", ctx->vmexec);
+	if (ctx->fib == NULL)
+		fprintf(d->wfile, "\t.fib = NULL,\n");
+	else if ((no = search_objno(d, ctx->fib)) >= 0)
+		fprintf(d->wfile, "\t.fib = (struct RFiber *)&mrb_preset_object_%d.fiber,\n", no);
+	else
+		fprintf(d->wfile, "\t.fib = (struct RFiber *)0x%p,\n", ctx->fib);
 
-	fprintf(d->wfile, "};\n\n");
+	fprintf(d->wfile, "};\n");
 }
 
 static void
@@ -1339,7 +1573,7 @@ print_each_debug_info_line(struct os_each_object_data *d, struct debug_info_file
 	if (len == 0)
 		return;
 
-	fprintf(d->wfile, "const uint8_t mrb_preset_debug_info_lines_%d[] = {\n", item->no);
+	fprintf(d->wfile, "PRESET_CONST uint8_t mrb_preset_debug_info_lines_%d[] = {\n", item->no);
 
 	print_each_uint8(d, data, len);
 
@@ -1352,7 +1586,7 @@ print_each_debug_info_file(struct os_each_object_data *d, struct debug_info_file
 	mrb_irep_debug_info_file *debug_info_file = item->debug_info_file;
 	int no;
 
-	fprintf(d->wfile, "const mrb_irep_debug_info_file mrb_preset_debug_info_file_%d = { ", item->no);
+	fprintf(d->wfile, "PRESET_CONST mrb_irep_debug_info_file mrb_preset_debug_info_file_%d = { ", item->no);
 
 	fprintf(d->wfile, ".start_pos = %u, ", debug_info_file->start_pos);
 	if (debug_info_file->filename == NULL) {
@@ -1397,7 +1631,7 @@ print_each_debug_info_files(struct os_each_object_data *d, struct debug_info_lis
 {
 	mrb_irep_debug_info *debug_info = item->debug_info;
 
-	fprintf(d->wfile, "const mrb_irep_debug_info_file *const mrb_preset_debug_info_files_%d[] = { ", item->no);
+	fprintf(d->wfile, "PRESET_CONST mrb_irep_debug_info_file *const mrb_preset_debug_info_files_%d[] = { ", item->no);
 
 	for (int i = 0; i < debug_info->flen; i++) {
 		int no;
@@ -1417,7 +1651,7 @@ print_each_debug_info(struct os_each_object_data *d, struct debug_info_list *ite
 {
 	mrb_irep_debug_info *debug_info = item->debug_info;
 
-	fprintf(d->wfile, "const mrb_irep_debug_info mrb_preset_debug_info_%d = { ", item->no);
+	fprintf(d->wfile, "PRESET_CONST mrb_irep_debug_info mrb_preset_debug_info_%d = { ", item->no);
 
 	fprintf(d->wfile, ".pc_count = %u, ", debug_info->pc_count);
 	fprintf(d->wfile, ".flen = %u, ", debug_info->flen);
@@ -1434,7 +1668,7 @@ print_each_irep(struct os_each_object_data *d, struct irep_list *item)
 	mrb_irep *irep = item->irep;
 	int no;
 
-	fprintf(d->wfile, "const mrb_irep mrb_preset_irep_%d = {\n", item->no);
+	fprintf(d->wfile, "PRESET_CONST mrb_irep mrb_preset_irep_%d = {\n", item->no);
 
 	fprintf(d->wfile, "\t.nlocals = %u,\n", irep->nlocals);
 	fprintf(d->wfile, "\t.nregs = %u,\n", irep->nregs);
@@ -1444,7 +1678,7 @@ print_each_irep(struct os_each_object_data *d, struct irep_list *item)
 
 	if (irep->iseq == NULL)
 		fprintf(d->wfile, "\t.iseq = NULL,\n");
-	else if (si = search_symbol_item(d, OFFSET_FROM_IMAGE_BASE(irep->iseq))) {
+	else if ((si = search_symbol_item(d, OFFSET_FROM_IMAGE_BASE(irep->iseq))) != NULL) {
 		int offset = OFFSET_FROM_IMAGE_BASE(irep->iseq) - si->addr;
 		si->data = 1;
 		if (offset == 0)
@@ -1503,11 +1737,14 @@ print_each_object_cb(struct os_each_object_data *d, struct obj_list *item)
 	RVALUE *val = item->object;
 	struct RBasic *obj = &val->basic;
 	struct symbol_list *si;
+	struct stack_list *st;
 
-	if ((item->object->basic.tt != MRB_TT_DATA) && (item->object->basic.tt != MRB_TT_ISTRUCT))
-		fprintf(d->wfile, "const RVALUE mrb_preset_object_%d = { ", item->no);
+	if ((item->object->basic.tt != MRB_TT_DATA)
+		&& (item->object->basic.tt != MRB_TT_ENV)
+		&& (item->object->basic.tt != MRB_TT_ISTRUCT))
+		fprintf(d->wfile, "PRESET_CONST RVALUE mrb_preset_object_%d = { ", item->no);
 	else
-		fprintf(d->wfile, "RVALUE mrb_preset_object_%d = { ", item->no);
+		fprintf(d->wfile, "PRESET_DATA RVALUE mrb_preset_object_%d = { ", item->no);
 
 	/* tt */
 	switch (obj->tt) {
@@ -1660,7 +1897,7 @@ print_each_object_cb(struct os_each_object_data *d, struct obj_list *item)
 	case MRB_TT_PROC:
 		if (MRB_PROC_CFUNC_P(obj)) {
 			struct symbol_list *si;
-			if (si = search_symbol_item(d, OFFSET_FROM_IMAGE_BASE(val->proc.body.func))) {
+			if ((si = search_symbol_item(d, OFFSET_FROM_IMAGE_BASE(val->proc.body.func))) != NULL) {
 				int offset = OFFSET_FROM_IMAGE_BASE(val->proc.body.func) - si->addr;
 				si->func = 1;
 				if (offset == 0)
@@ -1760,7 +1997,14 @@ print_each_object_cb(struct os_each_object_data *d, struct obj_list *item)
 	case MRB_TT_FILE:
 		break;
 	case MRB_TT_ENV:
-		fprintf(d->wfile, ".stack = (mrb_value *)&env_stacks_%d, ", item->no);
+		st = search_stackno(d, val->env.stack);
+		if (val->env.stack == NULL)
+			fprintf(d->wfile, ".stack = NULL,\n");
+		else if (st != NULL)
+			fprintf(d->wfile, ".stack = (mrb_value *)&mrb_preset_stack_%d[%d],\n", st->no, ((intptr_t)val->env.stack - (intptr_t)st->base) / sizeof(mrb_value));
+		else
+			fprintf(d->wfile, ".stack = (mrb_value *)0x%p,\n", val->env.stack);
+		fprintf(d->wfile, ".stack = (mrb_value *)&mrb_preset_env_stacks_%d, ", item->no);
 		if (val->env.cxt == NULL)
 			fprintf(d->wfile, ".cxt = NULL, ");
 		else if ((no = search_contextno(d, val->env.cxt)) >= 0)
@@ -1776,7 +2020,7 @@ print_each_object_cb(struct os_each_object_data *d, struct obj_list *item)
 			fprintf(d->wfile, ".iv = (struct iv_tbl *)&mrb_preset_iv_tbl_%d, ", no);
 		else
 			fprintf(d->wfile, ".iv = (struct iv_tbl *)0x%p, ", OFFSET_FROM_IMAGE_BASE(val->data.iv));
-		if (si = search_symbol_item(d, OFFSET_FROM_IMAGE_BASE(val->data.type))) {
+		if ((si = search_symbol_item(d, OFFSET_FROM_IMAGE_BASE(val->data.type))) != NULL) {
 			int offset = OFFSET_FROM_IMAGE_BASE(val->data.type) - si->addr;
 			si->data = 1;
 			if (offset == 0)
@@ -1786,7 +2030,7 @@ print_each_object_cb(struct os_each_object_data *d, struct obj_list *item)
 		}
 		else
 			fprintf(d->wfile, ".type = (const mrb_data_type *)0x%p, ", OFFSET_FROM_IMAGE_BASE(val->data.type));
-		if (si = search_symbol_item(d, OFFSET_FROM_IMAGE_BASE(val->data.data))) {
+		if ((si = search_symbol_item(d, OFFSET_FROM_IMAGE_BASE(val->data.data))) != NULL) {
 			int offset = OFFSET_FROM_IMAGE_BASE(val->data.data) - si->addr;
 			si->data = 1;
 			if (offset == 0)
@@ -1900,6 +2144,8 @@ objdump_main(int argc, wchar_t **argv)
 	}
 
 	//mrb_objspace_each_objects(mrb, count_each_object_cb, &d);
+	mrb_full_gc(mrb);
+
 	/* class hierarchy */
 	add_obj(&d, (struct RBasic*)mrb->object_class);
 
@@ -1947,10 +2193,12 @@ objdump_main(int argc, wchar_t **argv)
 	if (objs != NULL) {
 		struct obj_list *first = objs->next, *item = first;
 		do {
-			if ((item->object->basic.tt != MRB_TT_DATA) && (item->object->basic.tt != MRB_TT_ISTRUCT))
-				fprintf(d.wfile, "extern const RVALUE mrb_preset_object_%d;\n", item->no);
+			if ((item->object->basic.tt != MRB_TT_DATA)
+				&& (item->object->basic.tt != MRB_TT_ENV)
+				&& (item->object->basic.tt != MRB_TT_ISTRUCT))
+				fprintf(d.wfile, "extern PRESET_CONST RVALUE mrb_preset_object_%d;\n", item->no);
 			else
-				fprintf(d.wfile, "extern RVALUE mrb_preset_object_%d;\n", item->no);
+				fprintf(d.wfile, "extern PRESET_DATA RVALUE mrb_preset_object_%d;\n", item->no);
 			item = item->next;
 		} while (item != first);
 	}
@@ -1960,7 +2208,7 @@ objdump_main(int argc, wchar_t **argv)
 	if (ireps != NULL) {
 		struct irep_list *first = ireps->next, *item = first;
 		do {
-			fprintf(d.wfile, "extern const mrb_irep mrb_preset_irep_%d;\n", item->no);
+			fprintf(d.wfile, "extern PRESET_CONST mrb_irep mrb_preset_irep_%d;\n", item->no);
 			item = item->next;
 		} while (item != first);
 	}
@@ -2121,6 +2369,28 @@ objdump_main(int argc, wchar_t **argv)
 
 	fprintf(d.wfile, "\n");
 
+	struct stack_list *stacks = d.stacks;
+	if (stacks != NULL) {
+		struct stack_list *first = stacks->next, *item = first;
+		do {
+			print_each_stack(&d, item);
+			item = item->next;
+		} while (item != first);
+	}
+
+	fprintf(d.wfile, "\n");
+
+	struct callinfo_list *callinfos = d.callinfos;
+	if (callinfos != NULL) {
+		struct callinfo_list *first = callinfos->next, *item = first;
+		do {
+			print_each_callinfo(&d, item);
+			item = item->next;
+		} while (item != first);
+	}
+
+	fprintf(d.wfile, "\n");
+
 	struct context_list *contexts = d.contexts;
 	if (contexts != NULL) {
 		struct context_list *first = contexts->next, *item = first;
@@ -2143,7 +2413,7 @@ objdump_main(int argc, wchar_t **argv)
 
 	fprintf(d.wfile, "\n");
 
-	fprintf(d.wfile, "struct mrb_state mrb_preset_state = {\n");
+	fprintf(d.wfile, "PRESET_DATA struct mrb_state mrb_preset_state = {\n");
 
 	print_preset_context(&d, "c", mrb->c);
 	print_preset_context(&d, "root_c", mrb->root_c);
@@ -2213,6 +2483,7 @@ objdump_main(int argc, wchar_t **argv)
 	clear_queue(&d.iv_tbls);
 	clear_queue(&d.kh_mts);
 	clear_queue(&d.contexts);
+	clear_queue(&d.callinfos);
 
 	mrbc_context_free(mrb, c);
 	if (mrb->exc) {

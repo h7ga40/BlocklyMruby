@@ -468,7 +468,7 @@ flo_rshift(mrb_state *mrb, mrb_value x)
  * As <code>flt</code> is already a float, returns +self+.
  */
 
-static mrb_value
+PRESET_REF mrb_value
 flo_to_f(mrb_state *mrb, mrb_value num)
 {
   return num;

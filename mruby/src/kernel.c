@@ -801,7 +801,7 @@ mrb_obj_methods_m(mrb_state *mrb, mrb_value self)
  *
  * Only the object <i>nil</i> responds <code>true</code> to <code>nil?</code>.
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_false(mrb_state *mrb, mrb_value self)
 {
   return mrb_false_value();

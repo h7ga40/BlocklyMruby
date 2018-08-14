@@ -55,7 +55,7 @@ mrb_default_allocf(mrb_state *mrb, void *p, size_t size, void *ud)
 {
   if (size == 0) {
 #ifdef MRB_USE_PRESET_SYMBOLS
-    if (mrb_is_preset_area(mrb, p))
+    if (mrb_is_preset_data(mrb, p))
       return NULL;
 #endif // DEBUG
     free(p);

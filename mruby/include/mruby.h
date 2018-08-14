@@ -199,7 +199,8 @@ typedef void (*mrb_atexit_func)(struct mrb_state*);
 #ifdef MRB_USE_PRESET_SYMBOLS
 extern const int mrb_preset_symbols_count;
 struct mrb_state* mrb_init(mrb_allocf f, void *ud);
-int mrb_is_preset_area(struct mrb_state *mrb, void *p);
+int mrb_is_preset_const(struct mrb_state *mrb, void *p);
+int mrb_is_preset_data(struct mrb_state *mrb, void *p);
 mrb_sym mrb_preset_sym_intern(struct mrb_state *mrb, const char *name, size_t len, mrb_bool lit);
 const char *mrb_preset_sym2name(mrb_sym sym, mrb_int *lenp);
 #define PRESET_REF
