@@ -186,38 +186,100 @@
     <None Include="..\..\mruby\mrbgems\mruby-toplevel-ext\mrblib\toplevel.rb">
       <Filter>Ruby ファイル</Filter>
     </None>
-    <None Include="..\..\mrbgems\mruby-blockly\mrblib\blockly.rb" />
-    <None Include="..\..\mruby\mrbgems\mruby-socket\test\udpsocket.rb" />
-    <None Include="..\..\mruby\mrbgems\mruby-socket\test\unix.rb" />
-    <None Include="..\..\mruby\mrbgems\mruby-socket\test\socket.rb" />
-    <None Include="..\..\mruby\mrbgems\mruby-socket\test\tcpsocket.rb" />
-    <None Include="..\..\mruby\mrbgems\mruby-socket\test\ipsocket.rb" />
-    <None Include="..\..\mruby\mrbgems\mruby-socket\test\addrinfo.rb" />
-    <None Include="..\..\mruby\mrbgems\mruby-socket\test\basicsocket.rb" />
-    <None Include="..\..\mruby\mrbgems\mruby-socket\src\gen.rb" />
     <None Include="..\..\mruby\mrbgems\mruby-socket\src\const.cstub" />
-    <None Include="..\..\mruby\mrbgems\mruby-socket\run_test.rb" />
-    <None Include="..\..\mruby\mrbgems\mruby-socket\mrblib\socket.rb" />
-    <None Include="..\..\mruby\mrbgems\mruby-range-ext\mrblib\range.rb" />
-    <None Include="..\..\mruby\mrbgems\mruby-pack\test\pack.rb" />
-    <None Include="..\..\mruby\mrbgems\mruby-pack\run_test.rb" />
-    <None Include="..\..\mruby\mrbgems\mruby-pack\packtest.rb" />
-    <None Include="..\..\mruby\mrbgems\mruby-method\test\method.rb" />
-    <None Include="..\..\mruby\mrbgems\mruby-method\mrblib\unbound_method.rb" />
-    <None Include="..\..\mruby\mrbgems\mruby-method\mrblib\method.rb" />
-    <None Include="..\..\mruby\mrbgems\mruby-method\mrblib\kernel.rb" />
-    <None Include="..\..\mruby\mrbgems\mruby-kernel-ext\mrblib\kernel.rb" />
-    <None Include="..\..\mruby\mrbgems\mruby-io\test\io.rb" />
-    <None Include="..\..\mruby\mrbgems\mruby-io\test\file.rb" />
-    <None Include="..\..\mruby\mrbgems\mruby-io\test\file_test.rb" />
-    <None Include="..\..\mruby\mrbgems\mruby-io\run_test.rb" />
-    <None Include="..\..\mruby\mrbgems\mruby-io\mrblib\kernel.rb" />
-    <None Include="..\..\mruby\mrbgems\mruby-io\mrblib\io.rb" />
-    <None Include="..\..\mruby\mrbgems\mruby-io\mrblib\file_constants.rb" />
-    <None Include="..\..\mruby\mrbgems\mruby-io\mrblib\file.rb" />
-    <None Include="..\..\mruby\mrbgems\mruby-inline-struct\test\inline.rb" />
-    <None Include="..\..\mruby\mrbgems\mruby-compar-ext\mrblib\compar.rb" />
-    <None Include="..\..\mruby\mrbgems\mruby-class-ext\test\module.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-socket\test\addrinfo.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-socket\test\basicsocket.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mrbgems\mruby-blockly\mrblib\blockly.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-compar-ext\mrblib\compar.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-io\test\file.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-io\mrblib\file.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-io\mrblib\file_constants.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-io\test\file_test.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-socket\src\gen.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-inline-struct\test\inline.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-io\mrblib\io.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-io\test\io.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-socket\test\ipsocket.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-method\mrblib\kernel.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-io\mrblib\kernel.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-kernel-ext\mrblib\kernel.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-method\test\method.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-method\mrblib\method.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-class-ext\test\module.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-pack\test\pack.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-pack\packtest.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-range-ext\mrblib\range.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-io\run_test.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-pack\run_test.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-socket\run_test.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-socket\test\socket.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-socket\mrblib\socket.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-socket\test\tcpsocket.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-socket\test\udpsocket.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-method\mrblib\unbound_method.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
+    <None Include="..\..\mruby\mrbgems\mruby-socket\test\unix.rb">
+      <Filter>Ruby ファイル</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\mruby\mrbgems\mruby-objectspace\src\mruby_objectspace.c">

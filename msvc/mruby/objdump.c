@@ -556,7 +556,7 @@ search_stackno(struct os_each_object_data *d, mrb_value *stack)
 
 	struct stack_list *first = stacks->next, *item = first;
 	do {
-		if ((stack >= item->base) && (stack < item->end))
+		if ((stack >= item->base) && (stack <= item->end))
 			return item;
 		item = item->next;
 	} while (item != first);
@@ -599,7 +599,7 @@ search_callinfono(struct os_each_object_data *d, mrb_callinfo *callinfo)
 
 	struct callinfo_list *first = callinfos->next, *item = first;
 	do {
-		if ((callinfo >= item->base) && (callinfo < item->end))
+		if ((callinfo >= item->base) && (callinfo <= item->end))
 			return item;
 		item = item->next;
 	} while (item != first);
@@ -1360,26 +1360,26 @@ print_each_kh_mt(struct os_each_object_data *d, struct kh_mt_list *item)
 			struct symbol_list *si;
 
 			if (val.func == NULL)
-				fprintf(d->wfile, "{ .func_p = 1, .func = NULL }, ");
+				fprintf(d->wfile, "{ .func_p = 1, { .func = NULL } }, ");
 			else if ((si = search_symbol_item(d, OFFSET_FROM_IMAGE_BASE(val.func))) != NULL) {
 				int offset = OFFSET_FROM_IMAGE_BASE(val.func) - si->addr;
 				si->func = 1;
 				if (offset == 0)
-					fprintf(d->wfile, "{ .func_p = 1, .func = (mrb_func_t)&%s }, ", &si->name[1]);
+					fprintf(d->wfile, "{ .func_p = 1, { .func = (mrb_func_t)&%s } }, ", &si->name[1]);
 				else
-					fprintf(d->wfile, "{ .func_p = 1, .func = (mrb_func_t)&((uint8_t *)%s)[%d] }, ", &si->name[1], offset);
+					fprintf(d->wfile, "{ .func_p = 1, { .func = (mrb_func_t)&((uint8_t *)%s)[%d] } }, ", &si->name[1], offset);
 			}
 			else
-				fprintf(d->wfile, "{ .func_p = 1, .func = (mrb_func_t)0x%p }, ", OFFSET_FROM_IMAGE_BASE(val.func));
+				fprintf(d->wfile, "{ .func_p = 1, { .func = (mrb_func_t)0x%p } }, ", OFFSET_FROM_IMAGE_BASE(val.func));
 		}
 		else {
 			int no;
 			if (val.proc == NULL)
-				fprintf(d->wfile, "{ .func_p = 0, .proc = NULL }, ");
+				fprintf(d->wfile, "{ .func_p = 0, { .proc = NULL } }, ");
 			else if ((no = search_objno(d, val.proc)) >= 0)
-				fprintf(d->wfile, "{ .func_p = 0, .proc = (struct RProc *)&mrb_preset_object_%d.proc }, ", no);
+				fprintf(d->wfile, "{ .func_p = 0, { .proc = (struct RProc *)&mrb_preset_object_%d.proc } }, ", no);
 			else
-				fprintf(d->wfile, "{ .func_p = 0, .proc = (struct RProc *)0x%p }, ", OFFSET_FROM_IMAGE_BASE(val.proc));
+				fprintf(d->wfile, "{ .func_p = 0, { .proc = (struct RProc *)0x%p } }, ", OFFSET_FROM_IMAGE_BASE(val.proc));
 		}
 	}
 
@@ -1392,7 +1392,7 @@ print_each_kh_mt(struct os_each_object_data *d, struct kh_mt_list *item)
 	fprintf(d->wfile, ".n_occupied = %u, ", mt->n_occupied);
 	fprintf(d->wfile, ".ed_flags = (uint8_t *)&mrb_preset_kh_mt_%d_ed_flags, ", item->no);
 	fprintf(d->wfile, ".keys = (mrb_sym *)&mrb_preset_kh_mt_%d_keys, ", item->no);
-	fprintf(d->wfile, ".vals = (struct RProc **)&mrb_preset_kh_mt_%d_vals ", item->no);
+	fprintf(d->wfile, ".vals = (mrb_method_t *)&mrb_preset_kh_mt_%d_vals ", item->no);
 
 	fprintf(d->wfile, "};\n\n");
 }
@@ -1442,7 +1442,6 @@ print_each_callinfo(struct os_each_object_data *d, struct callinfo_list *item)
 			fprintf(d->wfile, ".stackent = (mrb_value *)&mrb_preset_stack_%d[%d], ", st->no, ((intptr_t)ci->stackent - (intptr_t)st->base) / sizeof(mrb_value));
 		else
 			fprintf(d->wfile, ".stackent = (mrb_value *)0x%p, ", ci->stackent);
-		fprintf(d->wfile, ".stackent = (mrb_value *)0x%p, ", ci->stackent);
 		fprintf(d->wfile, ".nregs = %d, ", ci->nregs);
 		fprintf(d->wfile, ".ridx = %d, ", ci->ridx);
 		fprintf(d->wfile, ".epos = %d, ", ci->epos);
@@ -1506,40 +1505,40 @@ print_each_context(struct os_each_object_data *d, struct context_list *item)
 		fprintf(d->wfile, "\t.stack = (mrb_value *)&mrb_preset_stack_%d[%d],\n", st->no, ((intptr_t)ctx->stack - (intptr_t)st->base) / sizeof(mrb_value));
 	else
 		fprintf(d->wfile, "\t.stack = (mrb_value *)0x%p,\n", ctx->stack);
-	if (ctx->stend == NULL)
-		fprintf(d->wfile, "\t.stend = NULL,\n");
-	else if (st != NULL)
-		fprintf(d->wfile, "\t.stend = (mrb_value *)&mrb_preset_stack_%d[%d],\n", st->no, ((intptr_t)ctx->stend - (intptr_t)st->base) / sizeof(mrb_value));
-	else
-		fprintf(d->wfile, "\t.stend = (mrb_value *)0x%p,\n", ctx->stend);
 	if (ctx->stbase == NULL)
 		fprintf(d->wfile, "\t.stbase = NULL,\n");
 	else if (st != NULL)
 		fprintf(d->wfile, "\t.stbase = (mrb_value *)mrb_preset_stack_%d,\n", st->no);
 	else
 		fprintf(d->wfile, "\t.stbase = (mrb_value *)0x%p,\n", ctx->stbase);
+	if (ctx->stend == NULL)
+		fprintf(d->wfile, "\t.stend = NULL,\n");
+	else if (st != NULL)
+		fprintf(d->wfile, "\t.stend = (mrb_value *)&mrb_preset_stack_%d[%d],\n", st->no, ((intptr_t)ctx->stend - (intptr_t)st->base) / sizeof(mrb_value));
+	else
+		fprintf(d->wfile, "\t.stend = (mrb_value *)0x%p,\n", ctx->stend);
 	if (ctx->ci == NULL)
 		fprintf(d->wfile, "\t.ci = NULL,\n");
 	else if (ci != NULL)
 		fprintf(d->wfile, "\t.ci = (mrb_callinfo *)&mrb_preset_callinfo_%d[%d],\n", ci->no, ((intptr_t)ctx->ci - (intptr_t)ci->base) / sizeof(mrb_callinfo));
 	else
 		fprintf(d->wfile, "\t.ci = (mrb_callinfo *)0x%p,\n", ctx->ci);
-	if (ctx->ciend == NULL)
-		fprintf(d->wfile, "\t.ciend = NULL,\n");
-	else if (ci != NULL)
-		fprintf(d->wfile, "\t.ciend = (mrb_callinfo *)&mrb_preset_callinfo_%d[%d],\n", ci->no, ((intptr_t)ctx->ciend - (intptr_t)ci->base) / sizeof(mrb_callinfo));
-	else
-		fprintf(d->wfile, "\t.ciend = (mrb_callinfo *)0x%p,\n", ctx->ciend);
 	if (ctx->cibase == NULL)
 		fprintf(d->wfile, "\t.cibase = NULL,\n");
 	else if (ci != NULL)
 		fprintf(d->wfile, "\t.cibase = (mrb_callinfo *)mrb_preset_callinfo_%d,\n", ci->no);
 	else
 		fprintf(d->wfile, "\t.cibase = (mrb_callinfo *)0x%p,\n", ctx->cibase);
+	if (ctx->ciend == NULL)
+		fprintf(d->wfile, "\t.ciend = NULL,\n");
+	else if (ci != NULL)
+		fprintf(d->wfile, "\t.ciend = (mrb_callinfo *)&mrb_preset_callinfo_%d[%d],\n", ci->no, ((intptr_t)ctx->ciend - (intptr_t)ci->base) / sizeof(mrb_callinfo));
+	else
+		fprintf(d->wfile, "\t.ciend = (mrb_callinfo *)0x%p,\n", ctx->ciend);
 	fprintf(d->wfile, "\t.rescue = (mrb_code **)0x%p,\n", ctx->rescue);
 	fprintf(d->wfile, "\t.rsize = %d,\n", ctx->rsize);
 	fprintf(d->wfile, "\t.ensure = (struct RProc **)0x%p,\n", ctx->ensure);
-	fprintf(d->wfile, "\t.eidx = %d, .esize = %d,\n", ctx->eidx, ctx->esize);
+	fprintf(d->wfile, "\t.esize = %d, .eidx = %d,\n", ctx->esize, ctx->eidx);
 	fprintf(d->wfile, "\t.status = (enum mrb_fiber_state)%d,\n", ctx->status);
 	fprintf(d->wfile, "\t.vmexec = (mrb_bool)%d,\n", ctx->vmexec);
 	if (ctx->fib == NULL)
@@ -1705,6 +1704,7 @@ print_each_irep(struct os_each_object_data *d, struct irep_list *item)
 		fprintf(d->wfile, "\t.lv = NULL,\n", item->no);
 	else
 		fprintf(d->wfile, "\t.lv = (struct mrb_locals *)&mrb_preset_irep_%d_lvs,\n", item->no);
+	fprintf(d->wfile, "\t.own_filename = (mrb_bool)%d,\n", irep->own_filename);
 	if (irep->filename == NULL) {
 		fprintf(d->wfile, "\t.filename = NULL,\n");
 	}
@@ -1737,7 +1737,6 @@ print_each_object_cb(struct os_each_object_data *d, struct obj_list *item)
 	RVALUE *val = item->object;
 	struct RBasic *obj = &val->basic;
 	struct symbol_list *si;
-	struct stack_list *st;
 
 	if ((item->object->basic.tt != MRB_TT_DATA)
 		&& (item->object->basic.tt != MRB_TT_ENV)
@@ -1836,14 +1835,14 @@ print_each_object_cb(struct os_each_object_data *d, struct obj_list *item)
 		fprintf(d->wfile, ".c = (struct RClass *)&mrb_preset_object_%d.klass, ", no);
 	else
 		fprintf(d->wfile, ".c = (struct RClass *)0x%p, ", OFFSET_FROM_IMAGE_BASE(obj->c));
-#if 0
+
 	if (obj->gcnext == NULL)
 		fprintf(d->wfile, ".gcnext = NULL, ");
 	else if ((no = search_objno(d, obj->gcnext)) >= 0)
 		fprintf(d->wfile, ".gcnext = (struct RBasic *)&mrb_preset_object_%d.basic, ", no);
 	else
 		fprintf(d->wfile, ".gcnext = (struct RBasic *)0x%p, ", OFFSET_FROM_IMAGE_BASE(obj->gcnext));
-#endif
+
 	switch (obj->tt) {
 	case MRB_TT_FALSE:
 		break;
@@ -1997,13 +1996,6 @@ print_each_object_cb(struct os_each_object_data *d, struct obj_list *item)
 	case MRB_TT_FILE:
 		break;
 	case MRB_TT_ENV:
-		st = search_stackno(d, val->env.stack);
-		if (val->env.stack == NULL)
-			fprintf(d->wfile, ".stack = NULL,\n");
-		else if (st != NULL)
-			fprintf(d->wfile, ".stack = (mrb_value *)&mrb_preset_stack_%d[%d],\n", st->no, ((intptr_t)val->env.stack - (intptr_t)st->base) / sizeof(mrb_value));
-		else
-			fprintf(d->wfile, ".stack = (mrb_value *)0x%p,\n", val->env.stack);
 		fprintf(d->wfile, ".stack = (mrb_value *)&mrb_preset_env_stacks_%d, ", item->no);
 		if (val->env.cxt == NULL)
 			fprintf(d->wfile, ".cxt = NULL, ");
@@ -2414,18 +2406,20 @@ objdump_main(int argc, wchar_t **argv)
 	fprintf(d.wfile, "\n");
 
 	fprintf(d.wfile, "PRESET_DATA struct mrb_state mrb_preset_state = {\n");
+	fprintf(d.wfile, "\t.jmp = NULL,\n");
+	fprintf(d.wfile, "\t.flags = 0,\n");
+	fprintf(d.wfile, "\t.allocf = NULL,\n");
+	fprintf(d.wfile, "\t.allocf_ud = NULL,\n");
 
 	print_preset_context(&d, "c", mrb->c);
 	print_preset_context(&d, "root_c", mrb->root_c);
 
-	fprintf(d.wfile, "\t.symidx = (sizeof(mrb_preset_symbols) / sizeof(mrb_preset_symbols[0])),\n");
-
 	print_preset_iv(&d, "globals", mrb->globals);
 
-	/* class hierarchy */
-	print_preset_class(&d, "object_class", mrb->object_class);
+	print_preset_object(&d, "exc", mrb->exc);
 
-	/* built-in classes */
+	print_preset_object(&d, "top_self", mrb->top_self);
+	print_preset_class(&d, "object_class", mrb->object_class);
 	print_preset_class(&d, "class_class", mrb->class_class);
 	print_preset_class(&d, "module_class", mrb->module_class);
 	print_preset_class(&d, "proc_class", mrb->proc_class);
@@ -2444,19 +2438,41 @@ objdump_main(int argc, wchar_t **argv)
 	print_preset_class(&d, "symbol_class", mrb->symbol_class);
 	print_preset_class(&d, "kernel_module", mrb->kernel_module);
 
+	fprintf(d.wfile, "\t.mems = NULL,\n");
+	fprintf(d.wfile, "\t.gc = { 0 },\n");
+
+#ifdef MRB_METHOD_CACHE
+	fprintf(d.wfile, "\t.cache = { 0 },\n");
+#endif
+
+	fprintf(d.wfile, "\t.symidx = (sizeof(mrb_preset_symbols) / sizeof(mrb_preset_symbols[0])),\n");
+	fprintf(d.wfile, "\t.name2sym = NULL,\n");
+	fprintf(d.wfile, "\t.symtbl = NULL,\n");
+	fprintf(d.wfile, "\t.symcapa = 0,\n");
+
+#ifdef MRB_ENABLE_DEBUG_HOOK
+	fprintf(d.wfile, "\t.code_fetch_hook = NULL,\n");
+	fprintf(d.wfile, "\t.debug_op_hook = NULL,\n");
+#endif
+
+#ifdef MRB_BYTECODE_DECODE_OPTION
+	fprintf(d.wfile, "\t.bytecode_decoder = NULL,\n");
+#endif
+
 	print_preset_class(&d, "eException_class", mrb->eException_class);
 	print_preset_class(&d, "eStandardError_class", mrb->eStandardError_class);
-
-	/* top_self */
-	print_preset_object(&d, "top_self", mrb->top_self);
-	/* exception */
-	print_preset_object(&d, "exc", mrb->exc);
-	/* pre-allocated exception */
 	print_preset_object(&d, "nomem_err", mrb->nomem_err);
 	print_preset_object(&d, "stack_err", mrb->stack_err);
 #ifdef MRB_GC_FIXED_ARENA
 	print_preset_object(&d, "arena_err", mrb->arena_err);
 #endif
+	fprintf(d.wfile, "\t.ud = NULL,\n");
+#ifdef MRB_FIXED_STATE_ATEXIT_STACK
+	fprintf(d.wfile, "\t.atexit_stack = { 0 },\n");
+#else
+	fprintf(d.wfile, "\t.atexit_stack = NULL,\n");
+#endif
+	fprintf(d.wfile, "\t.atexit_stack_len = 0\n");
 	fprintf(d.wfile, "};\n\n");
 
 	struct symbol_list *symbols = d.symbols;

@@ -785,7 +785,7 @@ mrb_obj_methods(mrb_state *mrb, mrb_bool recur, mrb_value obj, mrb_method_flag_t
  *                        #    :methods, :extend, :__send__, :instance_eval]
  *     k.methods.length   #=> 42
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_obj_methods_m(mrb_state *mrb, mrb_value self)
 {
   mrb_bool recur = TRUE;

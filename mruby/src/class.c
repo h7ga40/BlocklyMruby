@@ -1292,7 +1292,7 @@ mrb_mod_instance_methods(mrb_state *mrb, mrb_value mod)
 /* implementation of module_eval/class_eval */
 mrb_value mrb_mod_module_eval(mrb_state*, mrb_value);
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_mod_dummy_visibility(mrb_state *mrb, mrb_value mod)
 {
   return mod;
