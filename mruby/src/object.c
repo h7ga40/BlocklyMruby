@@ -237,7 +237,7 @@ false_xor(mrb_state *mrb, mrb_value obj)
  *  <code>nil</code> or <code>false</code>; <code>true</code> otherwise.
  */
 
-static mrb_value
+PRESET_REF mrb_value
 false_or(mrb_state *mrb, mrb_value obj)
 {
   mrb_bool obj2;

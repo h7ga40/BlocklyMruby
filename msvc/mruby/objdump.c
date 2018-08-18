@@ -1293,6 +1293,10 @@ print_each_iv_tbl(struct os_each_object_data *d, struct iv_tbl_list *item)
 {
 	kh_iv_t *iv = (kh_iv_t *)item->iv;
 
+	if (iv == NULL) {
+		item->iv = iv = (kh_iv_t *)kh_init_iv_size(d->mrb, 8);
+	}
+
 	fprintf(d->wfile, "PRESET_DATA uint8_t mrb_preset_iv_tbl_%d_ed_flags[] = {\n", item->no);
 
 	print_each_uint8(d, iv->ed_flags, iv->n_buckets / 4);

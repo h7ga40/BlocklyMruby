@@ -21564,9 +21564,10 @@ PRESET_DATA struct mrb_state mrb_preset_state = {
 #include <../mrbgems/mruby-random/src/mt19937ar.h>
 
 extern mrb_value mrb_random_mt_srand(mrb_state *mrb, mt_state *t, mrb_value seed);
-extern void GENERATED_TMP_mrb_mruby_blockly_gem_init(mrb_state*);;
+extern void GENERATED_TMP_mrb_mruby_blockly_gem_init(mrb_state*);
 extern void mrb_init_symtbl(mrb_state*);
 extern struct mrb_io *mrb_io_alloc(mrb_state *mrb);
+extern void sym_validate_len(mrb_state *mrb, size_t len);
 
 mrb_state* mrb_init(mrb_allocf f, void *ud)
 {
@@ -21665,8 +21666,6 @@ kh_get_n2sp(mrb_state *mrb, const kh_n2sp_t *h, const char *name, size_t len)
 	}
 	return kh_end(h);
 }
-
-extern void sym_validate_len(mrb_state *mrb, size_t len);
 
 mrb_sym mrb_preset_sym_intern(mrb_state *mrb, const char *name, size_t len, mrb_bool lit)
 {
