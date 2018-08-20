@@ -71,6 +71,7 @@ struct string_list {
 
 struct obj_list {
 	struct obj_list *next;
+	struct obj_list *gcnext;
 	int no;
 	RVALUE *object;
 };
@@ -158,6 +159,7 @@ struct os_each_object_data {
 	struct context_list *contexts;
 	int callinfo_count;
 	struct callinfo_list *callinfos;
+	struct obj_list *toplevels;
 };
 
 extern int __ImageBase;
@@ -858,6 +860,20 @@ search_debug_info_file_no(struct os_each_object_data *d, const mrb_irep_debug_in
 }
 
 static void
+add_gcnext(struct os_each_object_data *d, struct obj_list *item)
+{
+	if (d->toplevels == NULL) {
+		d->toplevels = item;
+		item->gcnext = item;
+	}
+	else {
+		item->gcnext = d->toplevels->gcnext/*first*/;
+		d->toplevels->gcnext = item;
+		d->toplevels = item;
+	}
+}
+
+static void
 add_obj(struct os_each_object_data *d, struct RBasic *obj)
 {
 	struct obj_list *item;
@@ -871,6 +887,7 @@ add_obj(struct os_each_object_data *d, struct RBasic *obj)
 
 	item = malloc(sizeof(struct obj_list));
 	item->next = NULL;
+	item->gcnext = NULL;
 	item->object = obj;
 	item->no = d->obj_count;
 
@@ -915,10 +932,13 @@ add_obj(struct os_each_object_data *d, struct RBasic *obj)
 	case MRB_TT_HASH:
 	case MRB_TT_EXCEPTION:
 	case MRB_TT_DATA:
-		if (val->object.iv != NULL)
-			add_iv(d, val->object.iv);
+		if (val->object.iv == NULL) {
+			val->object.iv = (kh_iv_t *)kh_init_iv_size(d->mrb, KHASH_DEFAULT_SIZE);
+		}
+		add_iv(d, val->object.iv);
 		if (val->basic.c != NULL)
 			add_obj(d, val->basic.c);
+		add_gcnext(d, item);
 		break;
 	case MRB_TT_STRING:
 		if (!RSTR_EMBED_P(obj)
@@ -1151,7 +1171,7 @@ print_each_irep_reps(struct os_each_object_data *d, struct irep_list *item)
 	if (irep->rlen <= 0)
 		return;
 
-	fprintf(d->wfile, "PRESET_CONST struct mrb_irep *mrb_preset_irep_%d_reps[] = { ", item->no);
+	fprintf(d->wfile, "PRESET_CONST struct mrb_irep *const mrb_preset_irep_%d_reps[] = { ", item->no);
 
 	for (int i = 0; i < irep->rlen; i++) {
 		struct mrb_irep *rep = irep->reps[i];
@@ -1292,10 +1312,6 @@ static void
 print_each_iv_tbl(struct os_each_object_data *d, struct iv_tbl_list *item)
 {
 	kh_iv_t *iv = (kh_iv_t *)item->iv;
-
-	if (iv == NULL) {
-		item->iv = iv = (kh_iv_t *)kh_init_iv_size(d->mrb, 8);
-	}
 
 	fprintf(d->wfile, "PRESET_DATA uint8_t mrb_preset_iv_tbl_%d_ed_flags[] = {\n", item->no);
 
@@ -1839,14 +1855,21 @@ print_each_object_cb(struct os_each_object_data *d, struct obj_list *item)
 		fprintf(d->wfile, ".c = (struct RClass *)&mrb_preset_object_%d.klass, ", no);
 	else
 		fprintf(d->wfile, ".c = (struct RClass *)0x%p, ", OFFSET_FROM_IMAGE_BASE(obj->c));
-
+#if 0
 	if (obj->gcnext == NULL)
 		fprintf(d->wfile, ".gcnext = NULL, ");
 	else if ((no = search_objno(d, obj->gcnext)) >= 0)
 		fprintf(d->wfile, ".gcnext = (struct RBasic *)&mrb_preset_object_%d.basic, ", no);
 	else
 		fprintf(d->wfile, ".gcnext = (struct RBasic *)0x%p, ", OFFSET_FROM_IMAGE_BASE(obj->gcnext));
-
+#else
+	if ((item->gcnext == NULL) || (item->gcnext->no == 0))
+		fprintf(d->wfile, ".gcnext = NULL, ");
+	else if ((no = item->gcnext->no) >= 0)
+		fprintf(d->wfile, ".gcnext = (struct RBasic *)&mrb_preset_object_%d.basic, ", no);
+	else
+		fprintf(d->wfile, ".gcnext = (struct RBasic *)0x%p, ", OFFSET_FROM_IMAGE_BASE(item->gcnext));
+#endif
 	switch (obj->tt) {
 	case MRB_TT_FALSE:
 		break;
@@ -2181,7 +2204,9 @@ objdump_main(int argc, wchar_t **argv)
 	add_context(&d, mrb->c);
 	add_context(&d, mrb->root_c);
 
-	add_iv(&d, mrb->globals);
+	if (mrb->globals != NULL) {
+		add_iv(&d, mrb->globals);
+	}
 
 	fopen_s(&d.wfile, "objdump.c", "wb");
 

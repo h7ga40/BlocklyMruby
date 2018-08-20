@@ -545,6 +545,9 @@ add_gray_list(mrb_state *mrb, mrb_gc *gc, struct RBasic *obj)
     abort();
   }
 #endif
+#ifdef MRB_USE_PRESET_SYMBOLS
+  if (mrb_is_preset_const(mrb, obj) || mrb_is_preset_data(mrb, obj)) return;
+#endif
   paint_gray(obj);
   obj->gcnext = gc->gray_list;
   gc->gray_list = obj;
@@ -616,10 +619,19 @@ mark_context(mrb_state *mrb, struct mrb_context *c)
 static void
 gc_mark_children(mrb_state *mrb, mrb_gc *gc, struct RBasic *obj)
 {
+#ifndef MRB_USE_PRESET_SYMBOLS
   mrb_assert(is_gray(obj));
   paint_black(obj);
   gc->gray_list = obj->gcnext;
   mrb_gc_mark(mrb, (struct RBasic*)obj->c);
+#else
+  if (!mrb_is_preset_const(mrb, obj) && !mrb_is_preset_data(mrb, obj)) {
+    mrb_assert(is_gray(obj));
+    paint_black(obj);
+    gc->gray_list = obj->gcnext;
+    mrb_gc_mark(mrb, (struct RBasic*)obj->c);
+  }
+#endif
   switch (obj->tt) {
   case MRB_TT_ICLASS:
     {
@@ -904,6 +916,10 @@ root_scan_phase(mrb_state *mrb, mrb_gc *gc)
 #ifdef MRB_GC_FIXED_ARENA
   mrb_gc_mark(mrb, (struct RBasic*)mrb->arena_err);
 #endif
+#else
+  for (struct RBasic *obj = (struct RBasic *)mrb->object_class; obj != NULL; obj = obj->gcnext) {
+    gc_mark_children(mrb, gc, obj);
+  }
 #endif
 
   mark_context(mrb, mrb->c);
@@ -1317,7 +1333,7 @@ mrb_write_barrier(mrb_state *mrb, struct RBasic *obj)
 
   if (!is_black(obj)) return;
 #ifdef MRB_USE_PRESET_SYMBOLS
-  if (mrb_is_preset_const(mrb, obj)) return;
+  if (mrb_is_preset_const(mrb, obj) || mrb_is_preset_data(mrb, obj)) return;
 #endif
 
   mrb_assert(!is_dead(gc, obj));
