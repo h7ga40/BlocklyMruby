@@ -1,9 +1,9 @@
 #include "stdafx.h"
 
 #include "mruby.h"
-#include "mruby/compile.h"
-#include "mruby/dump.h"
-#include "mruby/proc.h"
+#include <mruby/compile.h>
+#include <mruby/dump.h>
+#include <mruby/proc.h>
 
 #define RITEBIN_EXT L".mrb"
 #define C_EXT       L".c"

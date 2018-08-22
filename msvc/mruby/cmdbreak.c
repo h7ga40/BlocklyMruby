@@ -5,10 +5,10 @@
 
 #include "stdafx.h"
 
-#include "mruby.h"
-#include "mruby/dump.h"
-#include "mruby/debug.h"
-#include "mruby/string.h"
+#include <mruby.h>
+#include <mruby/dump.h>
+#include <mruby/debug.h>
+#include <mruby/string.h>
 #include "mrdb.h"
 #include "mrdberror.h"
 #include "apibreak.h"
@@ -259,7 +259,8 @@ parse_breakcommand(mrdb_state *mrdb, const char **file, uint32_t *line, char **c
   if((body = strrchr(args, ':')) == NULL) {
     body = args;
     type = check_bptype(body);
-  } else {
+  }
+  else {
     if(body == args) {
       fprintf(stdout, BREAK_ERR_MSG_INVALIDSTR, args);
       return MRB_DEBUG_BPTYPE_NONE;
@@ -273,8 +274,9 @@ parse_breakcommand(mrdb_state *mrdb, const char **file, uint32_t *line, char **c
       STRTOUL(l, body);
       if( l <= 65535 ) {
         *line = l;
-        *file = (body == args)? mrb_debug_get_filename(dbg->irep, (uint32_t)(dbg->pc - dbg->irep->iseq)): args;
-      } else {
+        *file = (body == args)? mrb_debug_get_filename(dbg->irep, dbg->pc - dbg->irep->iseq): args;
+      }
+      else {
         puts(BREAK_ERR_MSG_RANGEOVER);
         type = MRB_DEBUG_BPTYPE_NONE;
       }
@@ -289,7 +291,8 @@ parse_breakcommand(mrdb_state *mrdb, const char **file, uint32_t *line, char **c
           fprintf(stdout, BREAK_ERR_MSG_INVALIDMETHOD, args);
           type = MRB_DEBUG_BPTYPE_NONE;
         }
-      } else {
+      }
+      else {
         if( ISUPPER(*args) ) {
           switch(*body) {
             case '@': case '$': case '?': case '.': case ',': case ':':
@@ -302,7 +305,8 @@ parse_breakcommand(mrdb_state *mrdb, const char **file, uint32_t *line, char **c
             *cname = args;
             break;
           }
-        } else {
+        }
+        else {
           fprintf(stdout, BREAK_ERR_MSG_INVALIDCLASS, args);
           type = MRB_DEBUG_BPTYPE_NONE;
         }
@@ -343,12 +347,15 @@ dbgcmd_break(mrb_state *mrb, mrdb_state *mrdb)
   if (ret >= 0) {
     if (type == MRB_DEBUG_BPTYPE_LINE) {
       fprintf(stdout, BREAK_SET_MSG_LINE, ret, file, line);
-    } else if ((type == MRB_DEBUG_BPTYPE_METHOD)&&(cname == NULL)) {
+    }
+    else if ((type == MRB_DEBUG_BPTYPE_METHOD)&&(cname == NULL)) {
       fprintf(stdout, BREAK_SET_MSG_METHOD, ret, method);
-    } else {
+    }
+    else {
       fprintf(stdout, BREAK_SET_MSG_CLASS_METHOD, ret, cname, method);
     }
-  } else {
+  }
+  else {
     switch (ret) {
       case MRB_DEBUG_BREAK_INVALID_LINENO:
         fprintf(stdout, BREAK_ERR_MSG_INVALIDLINENO, line, file);

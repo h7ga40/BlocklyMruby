@@ -1,6 +1,6 @@
-#include "mruby.h"
-#include "mruby/khash.h"
-#include "mruby/array.h"
+#include <mruby.h>
+#include <mruby/khash.h>
+#include <mruby/array.h>
 
 typedef struct symbol_name {
   size_t len;
@@ -22,7 +22,7 @@ typedef struct symbol_name {
  *                                     :Tms, :getwd, :$=, :ThreadGroup,
  *                                     :wait2, :$>]
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_sym_all_symbols(mrb_state *mrb, mrb_value self)
 {
   mrb_sym i, lim;
@@ -41,7 +41,7 @@ mrb_sym_all_symbols(mrb_state *mrb, mrb_value self)
  *
  * Same as <code>sym.to_s.length</code>.
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_sym_length(mrb_state *mrb, mrb_value self)
 {
   mrb_int len;

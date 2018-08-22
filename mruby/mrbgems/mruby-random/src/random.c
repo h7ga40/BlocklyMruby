@@ -4,23 +4,23 @@
 ** See Copyright Notice in mruby.h
 */
 
-#include "mruby.h"
-#include "mruby/variable.h"
-#include "mruby/class.h"
-#include "mruby/data.h"
-#include "mruby/array.h"
+#include <mruby.h>
+#include <mruby/variable.h>
+#include <mruby/class.h>
+#include <mruby/data.h>
+#include <mruby/array.h>
 #include "mt19937ar.h"
 
 #include <time.h>
 
 static char const MT_STATE_KEY[] = "$mrb_i_mt_state";
 
-static const struct mrb_data_type mt_state_type = {
+PRESET_REF const struct mrb_data_type mt_state_type = {
   MT_STATE_KEY, mrb_free,
 };
 
-static mrb_value mrb_random_rand(mrb_state *mrb, mrb_value self);
-static mrb_value mrb_random_srand(mrb_state *mrb, mrb_value self);
+PRESET_REF mrb_value mrb_random_rand(mrb_state *mrb, mrb_value self);
+PRESET_REF mrb_value mrb_random_srand(mrb_state *mrb, mrb_value self);
 
 static void
 mt_srand(mt_state *t, unsigned long seed)
@@ -40,7 +40,7 @@ mt_rand_real(mt_state *t)
   return mrb_random_genrand_real1(t);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_random_mt_srand(mrb_state *mrb, mt_state *t, mrb_value seed)
 {
   if (mrb_nil_p(seed)) {
@@ -79,10 +79,10 @@ get_opt(mrb_state* mrb)
   mrb_get_args(mrb, "|o", &arg);
 
   if (!mrb_nil_p(arg)) {
-    if (!mrb_fixnum_p(arg)) {
+    arg = mrb_check_convert_type(mrb, arg, MRB_TT_FIXNUM, "Fixnum", "to_int");
+    if (mrb_nil_p(arg)) {
       mrb_raise(mrb, E_ARGUMENT_ERROR, "invalid argument type");
     }
-    arg = mrb_check_convert_type(mrb, arg, MRB_TT_FIXNUM, "Fixnum", "to_int");
     if (mrb_fixnum(arg) < 0) {
       arg = mrb_fixnum_value(0 - mrb_fixnum(arg));
     }
@@ -104,25 +104,27 @@ get_random_state(mrb_state *mrb)
   return DATA_GET_PTR(mrb, random_val, &mt_state_type, mt_state);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_random_g_rand(mrb_state *mrb, mrb_value self)
 {
   mrb_value random = get_random(mrb);
   return mrb_random_rand(mrb, random);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_random_g_srand(mrb_state *mrb, mrb_value self)
 {
   mrb_value random = get_random(mrb);
   return mrb_random_srand(mrb, random);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_random_init(mrb_state *mrb, mrb_value self)
 {
   mrb_value seed;
   mt_state *t;
+
+  seed = get_opt(mrb);
 
   /* avoid memory leaks */
   t = (mt_state*)DATA_PTR(self);
@@ -134,7 +136,6 @@ mrb_random_init(mrb_state *mrb, mrb_value self)
   t = (mt_state *)mrb_malloc(mrb, sizeof(mt_state));
   t->mti = N + 1;
 
-  seed = get_opt(mrb);
   seed = mrb_random_mt_srand(mrb, t, seed);
   if (mrb_nil_p(seed)) {
     t->has_seed = FALSE;
@@ -158,7 +159,7 @@ mrb_random_rand_seed(mrb_state *mrb, mt_state *t)
   }
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_random_rand(mrb_state *mrb, mrb_value self)
 {
   mrb_value max;
@@ -169,7 +170,7 @@ mrb_random_rand(mrb_state *mrb, mrb_value self)
   return mrb_random_mt_rand(mrb, t, max);
 }
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_random_srand(mrb_state *mrb, mrb_value self)
 {
   mrb_value seed;
@@ -198,7 +199,7 @@ mrb_random_srand(mrb_state *mrb, mrb_value self)
  *  Shuffles elements in self in place.
  */
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_shuffle_bang(mrb_state *mrb, mrb_value ary)
 {
   mrb_int i;
@@ -216,13 +217,15 @@ mrb_ary_shuffle_bang(mrb_state *mrb, mrb_value ary)
 
     for (i = RARRAY_LEN(ary) - 1; i > 0; i--)  {
       mrb_int j;
+      mrb_value *ptr = RARRAY_PTR(ary);
       mrb_value tmp;
+      
 
       j = mrb_fixnum(mrb_random_mt_rand(mrb, random, mrb_fixnum_value(RARRAY_LEN(ary))));
 
-      tmp = RARRAY_PTR(ary)[i];
-      mrb_ary_ptr(ary)->ptr[i] = RARRAY_PTR(ary)[j];
-      mrb_ary_ptr(ary)->ptr[j] = tmp;
+      tmp = ptr[i];
+      ptr[i] = ptr[j];
+      ptr[j] = tmp;
     }
   }
 
@@ -236,7 +239,7 @@ mrb_ary_shuffle_bang(mrb_state *mrb, mrb_value ary)
  *  Returns a new array with elements of self shuffled.
  */
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_shuffle(mrb_state *mrb, mrb_value ary)
 {
   mrb_value new_ary = mrb_ary_new_from_values(mrb, RARRAY_LEN(ary), RARRAY_PTR(ary));
@@ -260,13 +263,13 @@ mrb_ary_shuffle(mrb_state *mrb, mrb_value ary)
  *  returns an empty array.
  */
 
-static mrb_value
+PRESET_REF mrb_value
 mrb_ary_sample(mrb_state *mrb, mrb_value ary)
 {
   mrb_int n = 0;
   mrb_bool given;
   mt_state *random = NULL;
-  mrb_int len = RARRAY_LEN(ary);
+  mrb_int len;
 
   mrb_get_args(mrb, "|i?d", &n, &given, &random, &mt_state_type);
   if (random == NULL) {
@@ -274,6 +277,7 @@ mrb_ary_sample(mrb_state *mrb, mrb_value ary)
   }
   mrb_random_rand_seed(mrb, random);
   mt_rand(random);
+  len = RARRAY_LEN(ary);
   if (!given) {                 /* pick one element */
     switch (len) {
     case 0:

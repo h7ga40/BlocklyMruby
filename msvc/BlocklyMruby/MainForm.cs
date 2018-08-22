@@ -588,5 +588,24 @@ namespace BlocklyMruby
 		{
 			_Mruby.WriteStdin("q\n");
 		}
+
+		private void ObjDump_Click(object sender, EventArgs e)
+		{
+			if (Collections.ClassWorkspaces.Length == 0)
+				return;
+
+			var rubyfiles = new JsArray<string>() { "objdump" };
+			string mrbfile;
+			GetCompileArgs(rubyfiles, out mrbfile);
+
+			SetRunningMode(RunningMode.Compile);
+
+			var run = _Mruby.run(rubyfiles, (exitCode) => {
+				BeginInvoke(new Action<string, int>(CompileDoneInDebugMode), mrbfile, exitCode);
+			});
+
+			if (!run)
+				SetRunningMode(RunningMode.None);
+		}
 	}
 }

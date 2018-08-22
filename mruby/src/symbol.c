@@ -6,10 +6,11 @@
 
 #include <limits.h>
 #include <string.h>
-#include "mruby.h"
-#include "mruby/khash.h"
-#include "mruby/string.h"
-#include "mruby/dump.h"
+#include <mruby.h>
+#include <mruby/khash.h>
+#include <mruby/string.h>
+#include <mruby/dump.h>
+#include <mruby/class.h>
 
 /* ------------------------------------------------------ */
 #ifdef __CA850__
@@ -24,7 +25,7 @@
 #endif // !__GNUC__
 
 typedef struct symbol_name {
-  uint16_t lit : 1;
+  mrb_bool lit : 1;
   uint16_t len : 15;
   const char *name;
 } __attribute__((packed)) symbol_name;
@@ -81,7 +82,7 @@ KHASH_DECLARE(n2s, mrb_sym, mrb_sym, FALSE)
 KHASH_DEFINE (n2s, mrb_sym, mrb_sym, FALSE, sym_hash_func, sym_hash_equal)
 /* ------------------------------------------------------ */
 
-static void
+PRESET_REF void
 sym_validate_len(mrb_state *mrb, size_t len)
 {
   if (len >= RITE_LV_NULL_MARK) {
@@ -99,7 +100,7 @@ sym_intern(mrb_state *mrb, const char *name, size_t len, mrb_bool lit)
   char *p;
 
 #ifdef MRB_USE_PRESET_SYMBOLS
-  sym = mrb_preset_sym_intern(name, len);
+  sym = mrb_preset_sym_intern(mrb, name, len, lit);
   if (sym != 0)
     return sym;
 #endif
@@ -125,7 +126,7 @@ sym_intern(mrb_state *mrb, const char *name, size_t len, mrb_bool lit)
 #else
   if (mrb->symcapa < sym) {
     if (mrb->symcapa == 0) mrb->symcapa = 100;
-    else mrb->symcapa = (size_t)(mrb->symcapa * 1.2);
+    else mrb->symcapa = (size_t)(mrb->symcapa * 6 / 5);
     mrb->symtbl = (symbol_name*)mrb_realloc(mrb, mrb->symtbl, sizeof(symbol_name)*(mrb->symcapa+1));
   }
   sname = &mrb->symtbl[sym];
@@ -248,9 +249,6 @@ mrb_free_symtbl(mrb_state *mrb)
 void
 mrb_init_symtbl(mrb_state *mrb)
 {
-#ifdef MRB_USE_PRESET_SYMBOLS
-  mrb->symidx = mrb_preset_symbols_count;
-#endif
   mrb->name2sym = kh_init(n2s, mrb);
 }
 
@@ -297,7 +295,7 @@ mrb_init_symtbl(mrb_state *mrb)
  *  symbol, returns <code>true</code>.
  */
 
-static mrb_value
+PRESET_REF mrb_value
 sym_equal(mrb_state *mrb, mrb_value sym1)
 {
   mrb_value sym2;
@@ -318,7 +316,7 @@ sym_equal(mrb_state *mrb, mrb_value sym1)
  *
  *     :fred.id2name   #=> "fred"
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_sym_to_s(mrb_state *mrb, mrb_value sym)
 {
   mrb_sym id = mrb_symbol(sym);
@@ -433,7 +431,9 @@ symname_p(const char *name)
       if (*++m == '*') ++m;
       break;
     case '!':
-      if (*++m == '=') ++m;
+      switch (*++m) {
+        case '=': case '~': ++m;
+      }
       break;
     case '+': case '-':
       if (*++m == '@') ++m;
@@ -470,7 +470,7 @@ id:
   return *m ? FALSE : TRUE;
 }
 
-static mrb_value
+PRESET_REF mrb_value
 sym_inspect(mrb_state *mrb, mrb_value sym)
 {
   mrb_value str;
@@ -522,7 +522,7 @@ mrb_sym2name(mrb_state *mrb, mrb_sym sym)
 
 #define lesser(a,b) (((a)>(b))?(b):(a))
 
-static mrb_value
+PRESET_REF mrb_value
 sym_cmp(mrb_state *mrb, mrb_value s1)
 {
   mrb_value s2;
@@ -558,6 +558,8 @@ mrb_init_symbol(mrb_state *mrb)
   struct RClass *sym;
 
   mrb->symbol_class = sym = mrb_define_class(mrb, "Symbol", mrb->object_class);                 /* 15.2.11 */
+  MRB_SET_INSTANCE_TT(sym, MRB_TT_SYMBOL);
+  mrb_undef_class_method(mrb,  sym, "new");
 
   mrb_define_method(mrb, sym, "===",             sym_equal,      MRB_ARGS_REQ(1));              /* 15.2.11.3.1  */
   mrb_define_method(mrb, sym, "id2name",         mrb_sym_to_s,   MRB_ARGS_NONE());              /* 15.2.11.3.2  */

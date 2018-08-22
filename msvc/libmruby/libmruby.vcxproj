@@ -28,6 +28,8 @@
     <None Include="..\..\mruby\mrbgems\mruby-bin-mirb\bintest\mirb.rb" />
     <None Include="..\..\mruby\mrbgems\mruby-bin-mruby\bintest\mruby.rb" />
     <None Include="..\..\mruby\mrbgems\mruby-bin-strip\bintest\mruby-strip.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-class-ext\test\module.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-compar-ext\mrblib\compar.rb" />
     <None Include="..\..\mruby\mrbgems\mruby-compiler\bintest\mrbc.rb" />
     <None Include="..\..\mruby\mrbgems\mruby-compiler\core\parse.y" />
     <None Include="..\..\mruby\mrbgems\mruby-enum-ext\mrblib\enum.rb" />
@@ -41,19 +43,48 @@
     <None Include="..\..\mruby\mrbgems\mruby-fiber\test\fiber.rb" />
     <None Include="..\..\mruby\mrbgems\mruby-hash-ext\mrblib\hash.rb" />
     <None Include="..\..\mruby\mrbgems\mruby-hash-ext\test\hash.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-inline-struct\test\inline.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-io\mrblib\file.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-io\mrblib\file_constants.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-io\mrblib\io.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-io\mrblib\kernel.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-io\run_test.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-io\test\file.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-io\test\file_test.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-io\test\io.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-kernel-ext\mrblib\kernel.rb" />
     <None Include="..\..\mruby\mrbgems\mruby-kernel-ext\test\kernel.rb" />
     <None Include="..\..\mruby\mrbgems\mruby-math\test\math.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-method\mrblib\kernel.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-method\mrblib\method.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-method\mrblib\unbound_method.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-method\test\method.rb" />
     <None Include="..\..\mruby\mrbgems\mruby-numeric-ext\mrblib\numeric_ext.rb" />
     <None Include="..\..\mruby\mrbgems\mruby-numeric-ext\test\numeric.rb" />
     <None Include="..\..\mruby\mrbgems\mruby-object-ext\mrblib\object.rb" />
     <None Include="..\..\mruby\mrbgems\mruby-object-ext\test\nil.rb" />
     <None Include="..\..\mruby\mrbgems\mruby-object-ext\test\object.rb" />
     <None Include="..\..\mruby\mrbgems\mruby-objectspace\test\objectspace.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-pack\packtest.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-pack\run_test.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-pack\test\pack.rb" />
     <None Include="..\..\mruby\mrbgems\mruby-print\mrblib\print.rb" />
     <None Include="..\..\mruby\mrbgems\mruby-proc-ext\mrblib\proc.rb" />
     <None Include="..\..\mruby\mrbgems\mruby-proc-ext\test\proc.rb" />
     <None Include="..\..\mruby\mrbgems\mruby-random\test\random.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-range-ext\mrblib\range.rb" />
     <None Include="..\..\mruby\mrbgems\mruby-range-ext\test\range.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-socket\mrblib\socket.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-socket\run_test.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-socket\src\const.cstub" />
+    <None Include="..\..\mruby\mrbgems\mruby-socket\src\gen.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-socket\test\addrinfo.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-socket\test\basicsocket.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-socket\test\ipsocket.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-socket\test\socket.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-socket\test\tcpsocket.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-socket\test\udpsocket.rb" />
+    <None Include="..\..\mruby\mrbgems\mruby-socket\test\unix.rb" />
     <None Include="..\..\mruby\mrbgems\mruby-sprintf\mrblib\string.rb" />
     <None Include="..\..\mruby\mrbgems\mruby-sprintf\test\sprintf.rb" />
     <None Include="..\..\mruby\mrbgems\mruby-string-ext\mrblib\string.rb" />
@@ -91,6 +122,7 @@
     <ClCompile Include="..\..\mruby\mrbgems\mruby-bin-mrbc\tools\mrbc\mrbc.c" />
     <ClCompile Include="..\..\mruby\mrbgems\mruby-bin-mruby\tools\mruby\mruby.c" />
     <ClCompile Include="..\..\mruby\mrbgems\mruby-bin-strip\tools\mruby-strip\mruby-strip.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-class-ext\src\class.c" />
     <ClCompile Include="..\..\mruby\mrbgems\mruby-compiler\core\codegen.c" />
     <ClCompile Include="..\..\mruby\mrbgems\mruby-error\src\exception.c" />
     <ClCompile Include="..\..\mruby\mrbgems\mruby-error\test\exception.c" />
@@ -98,17 +130,27 @@
     <ClCompile Include="..\..\mruby\mrbgems\mruby-exit\src\mruby-exit.c" />
     <ClCompile Include="..\..\mruby\mrbgems\mruby-fiber\src\fiber.c" />
     <ClCompile Include="..\..\mruby\mrbgems\mruby-hash-ext\src\hash-ext.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-inline-struct\test\inline.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-io\src\file.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-io\src\file_test.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-io\src\io.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-io\src\mruby_io_gem.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-io\test\mruby_io_test.c" />
     <ClCompile Include="..\..\mruby\mrbgems\mruby-kernel-ext\src\kernel.c" />
     <ClCompile Include="..\..\mruby\mrbgems\mruby-math\src\math.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-method\src\method.c" />
     <ClCompile Include="..\..\mruby\mrbgems\mruby-numeric-ext\src\numeric_ext.c" />
     <ClCompile Include="..\..\mruby\mrbgems\mruby-object-ext\src\object.c" />
     <ClCompile Include="..\..\mruby\mrbgems\mruby-objectspace\src\mruby_objectspace.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-pack\src\pack.c" />
     <ClCompile Include="..\..\mruby\mrbgems\mruby-print\src\print.c" />
     <ClCompile Include="..\..\mruby\mrbgems\mruby-proc-ext\src\proc.c" />
     <ClCompile Include="..\..\mruby\mrbgems\mruby-proc-ext\test\proc.c" />
     <ClCompile Include="..\..\mruby\mrbgems\mruby-random\src\mt19937ar.c" />
     <ClCompile Include="..\..\mruby\mrbgems\mruby-random\src\random.c" />
     <ClCompile Include="..\..\mruby\mrbgems\mruby-range-ext\src\range.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-socket\src\socket.c" />
+    <ClCompile Include="..\..\mruby\mrbgems\mruby-socket\test\sockettest.c" />
     <ClCompile Include="..\..\mruby\mrbgems\mruby-sprintf\src\kernel.c" />
     <ClCompile Include="..\..\mruby\mrbgems\mruby-sprintf\src\sprintf.c" />
     <ClCompile Include="..\..\mruby\mrbgems\mruby-string-ext\src\string.c" />
@@ -184,6 +226,7 @@
     <ClInclude Include="..\..\mruby\mrbgems\mruby-bin-debugger\tools\mrdb\mrdbconf.h" />
     <ClInclude Include="..\..\mruby\mrbgems\mruby-bin-debugger\tools\mrdb\mrdberror.h" />
     <ClInclude Include="..\..\mruby\mrbgems\mruby-compiler\core\node.h" />
+    <ClInclude Include="..\..\mruby\mrbgems\mruby-io\include\mruby\ext\io.h" />
     <ClInclude Include="..\..\mruby\mrbgems\mruby-random\src\mt19937ar.h" />
     <ClInclude Include="..\..\mruby\mrbgems\mruby-random\src\random.h" />
     <ClInclude Include="..\..\mruby\src\error.h" />
@@ -236,61 +279,99 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <NMakeBuildCommandLine>PATH=%PATH%;$(ProjectDir)..\tools\bin
+
 cd $(ProjectDir)..\..\mruby
+
 ruby minirake
+
 cd $(ProjectDir)
+
 if not exist $(Configuration) mkdir $(Configuration)
+
 copy /B /Y ..\..\mruby\build\host-debug\lib\$(TargetName).lib $(Configuration)\
+
 copy /B /Y ..\..\mruby\build\host-debug\vc140.pdb $(Configuration)\$(TargetName).pdb
+
 copy /B /Y ..\..\mruby\build\host-debug\vc140.idb $(Configuration)\$(TargetName).idb</NMakeBuildCommandLine>
     <NMakeOutput>$(Configuration)\libmruby.lib</NMakeOutput>
     <NMakeCleanCommandLine>PATH=%PATH%;$(ProjectDir)..\tools\bin
+
 cd $(ProjectDir)
+
 del $(Configuration)\$(TargetName).lib
+
 cd $(ProjectDir)..\..\mruby
-ruby minirake clean
-</NMakeCleanCommandLine>
+
+ruby minirake clean</NMakeCleanCommandLine>
     <NMakeReBuildCommandLine>PATH=%PATH%;$(ProjectDir)..\tools\bin
+
 cd $(ProjectDir)
+
 del $(Configuration)\$(TargetName).lib
+
 cd $(ProjectDir)..\..\mruby
+
 ruby minirake clean all
+
 cd $(ProjectDir)
+
 if not exist $(Configuration) mkdir $(Configuration)
+
 copy /B /Y ..\..\mruby\build\host-debug\lib\$(TargetName).lib $(Configuration)\
+
 copy /B /Y ..\..\mruby\build\host-debug\vc140.pdb $(Configuration)\$(TargetName).pdb
+
 copy /B /Y ..\..\mruby\build\host-debug\vc140.idb $(Configuration)\$(TargetName).idb</NMakeReBuildCommandLine>
-    <NMakePreprocessorDefinitions>WIN32;_DEBUG;ECHONET_CONTROLLER_EXTENTION;MRB_GC_STRESS;MRB_USE_PRESET_SYMBOLS;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+    <NMakePreprocessorDefinitions>WIN32;_DEBUG;ECHONET_CONTROLLER_EXTENTION;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <OutDir>$(ProjectDir)\</OutDir>
     <NMakeIncludeSearchPath>..\..\mruby\include;..\..\asp\arch;..\..\asp\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <NMakeBuildCommandLine>PATH=%PATH%;$(ProjectDir)..\tools\bin
+
 cd $(ProjectDir)..\..\mruby
+
 ruby minirake
+
 cd $(ProjectDir)
+
 if not exist $(Configuration) mkdir $(Configuration)
-copy /B /Y ..\..\mruby\build\host-debug\lib\$(TargetName).lib $(Configuration)\
-copy /B /Y ..\..\mruby\build\host-debug\vc140.pdb $(Configuration)\$(TargetName).pdb
-copy /B /Y ..\..\mruby\build\host-debug\vc140.idb $(Configuration)\$(TargetName).idb</NMakeBuildCommandLine>
+
+copy /B /Y ..\..\mruby\build\host\lib\$(TargetName).lib $(Configuration)\
+
+copy /B /Y ..\..\mruby\build\host\vc140.pdb $(Configuration)\$(TargetName).pdb
+
+copy /B /Y ..\..\mruby\build\host\vc140.idb $(Configuration)\$(TargetName).idb</NMakeBuildCommandLine>
     <NMakeOutput>$(Configuration)\libmruby.lib</NMakeOutput>
     <NMakeCleanCommandLine>PATH=%PATH%;$(ProjectDir)..\tools\bin
+
 cd $(ProjectDir)
+
 del $(Configuration)\$(TargetName).lib
+
 cd $(ProjectDir)..\..\mruby
-ruby minirake clean
-</NMakeCleanCommandLine>
+
+ruby minirake clean</NMakeCleanCommandLine>
     <NMakeReBuildCommandLine>PATH=%PATH%;$(ProjectDir)..\tools\bin
+
 cd $(ProjectDir)
+
 del $(Configuration)\$(TargetName).lib
+
 cd $(ProjectDir)..\..\mruby
+
 ruby minirake clean all
+
 cd $(ProjectDir)
+
 if not exist $(Configuration) mkdir $(Configuration)
-copy /B /Y ..\..\mruby\build\host-debug\lib\$(TargetName).lib $(Configuration)\
-copy /B /Y ..\..\mruby\build\host-debug\vc140.pdb $(Configuration)\$(TargetName).pdb
-copy /B /Y ..\..\mruby\build\host-debug\vc140.idb $(Configuration)\$(TargetName).idb</NMakeReBuildCommandLine>
-    <NMakePreprocessorDefinitions>WIN32;_DEBUG;ECHONET_CONTROLLER_EXTENTION;MRB_GC_STRESS;MRB_USE_PRESET_SYMBOLS;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+
+copy /B /Y ..\..\mruby\build\host\lib\$(TargetName).lib $(Configuration)\
+
+copy /B /Y ..\..\mruby\build\host\vc140.pdb $(Configuration)\$(TargetName).pdb
+
+copy /B /Y ..\..\mruby\build\host\vc140.idb $(Configuration)\$(TargetName).idb</NMakeReBuildCommandLine>
+    <NMakePreprocessorDefinitions>WIN32;_DEBUG;ECHONET_CONTROLLER_EXTENTION;MRB_GC_STRESS;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <OutDir>$(ProjectDir)\</OutDir>
     <NMakeIncludeSearchPath>..\..\mruby\include;..\..\asp\arch;..\..\asp\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
   </PropertyGroup>

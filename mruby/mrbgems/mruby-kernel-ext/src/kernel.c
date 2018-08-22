@@ -1,7 +1,65 @@
-#include "mruby.h"
-#include "mruby/error.h"
-#include "mruby/array.h"
-#include "mruby/hash.h"
+#include <mruby.h>
+#include <mruby/error.h>
+#include <mruby/array.h>
+#include <mruby/hash.h>
+#include <mruby/range.h>
+
+PRESET_REF mrb_value
+mrb_f_caller(mrb_state *mrb, mrb_value self)
+{
+  mrb_value bt, v, length;
+  mrb_int bt_len, argc, lev, n;
+
+  bt = mrb_get_backtrace(mrb);
+  bt_len = RARRAY_LEN(bt);
+  argc = mrb_get_args(mrb, "|oo", &v, &length);
+
+  switch (argc) {
+    case 0:
+      lev = 1;
+      n = bt_len - lev;
+      break;
+    case 1:
+      if (mrb_type(v) == MRB_TT_RANGE) {
+        mrb_int beg, len;
+        if (mrb_range_beg_len(mrb, v, &beg, &len, bt_len, TRUE) == 1) {
+          lev = beg;
+          n = len;
+        }
+        else {
+          return mrb_nil_value();
+        }
+      }
+      else {
+        v = mrb_to_int(mrb, v);
+        lev = mrb_fixnum(v);
+        if (lev < 0) {
+          mrb_raisef(mrb, E_ARGUMENT_ERROR, "negative level (%S)", v);
+        }
+        n = bt_len - lev;
+      }
+      break;
+    case 2:
+      lev = mrb_fixnum(mrb_to_int(mrb, v));
+      n = mrb_fixnum(mrb_to_int(mrb, length));
+      if (lev < 0) {
+        mrb_raisef(mrb, E_ARGUMENT_ERROR, "negative level (%S)", v);
+      }
+      if (n < 0) {
+        mrb_raisef(mrb, E_ARGUMENT_ERROR, "negative size (%S)", length);
+      }
+      break;
+    default:
+      lev = n = 0;
+      break;
+  }
+
+  if (n == 0) {
+    return mrb_ary_new(mrb);
+  }
+
+  return mrb_funcall(mrb, bt, "[]", 2, mrb_fixnum_value(lev), mrb_fixnum_value(n));
+}
 
 /*
  *  call-seq:
@@ -12,7 +70,7 @@
  *  If called outside of a method, it returns <code>nil</code>.
  *
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_f_method(mrb_state *mrb, mrb_value self)
 {
   mrb_callinfo *ci = mrb->c->ci;
@@ -46,7 +104,7 @@ mrb_f_method(mrb_state *mrb, mrb_value self)
  *     Integer("111", 2)   #=> 7
  *     Integer(nil)        #=> TypeError
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_f_integer(mrb_state *mrb, mrb_value self)
 {
   mrb_value arg;
@@ -56,19 +114,20 @@ mrb_f_integer(mrb_state *mrb, mrb_value self)
   return mrb_convert_to_integer(mrb, arg, base);
 }
 
+#ifndef MRB_WITHOUT_FLOAT
 /*
  *  call-seq:
  *     Float(arg)    -> float
  *
  *  Returns <i>arg</i> converted to a float. Numeric types are converted
- *  directly, the rest are converted using <i>arg</i>.to_f. 
+ *  directly, the rest are converted using <i>arg</i>.to_f.
  *
  *     Float(1)           #=> 1.0
  *     Float(123.456)     #=> 123.456
  *     Float("123.456")   #=> 123.456
  *     Float(nil)         #=> TypeError
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_f_float(mrb_state *mrb, mrb_value self)
 {
   mrb_value arg;
@@ -76,6 +135,7 @@ mrb_f_float(mrb_state *mrb, mrb_value self)
   mrb_get_args(mrb, "o", &arg);
   return mrb_Float(mrb, arg);
 }
+#endif
 
 /*
  *  call-seq:
@@ -89,7 +149,7 @@ mrb_f_float(mrb_state *mrb, mrb_value self)
  *     String(self.class)  #=> "Object"
  *     String(123456)      #=> "123456"
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_f_string(mrb_state *mrb, mrb_value self)
 {
   mrb_value arg, tmp;
@@ -113,7 +173,7 @@ mrb_f_string(mrb_state *mrb, mrb_value self)
  *     Array(1..5)   #=> [1, 2, 3, 4, 5]
  *
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_f_array(mrb_state *mrb, mrb_value self)
 {
   mrb_value arg, tmp;
@@ -144,7 +204,7 @@ mrb_f_array(mrb_state *mrb, mrb_value self)
  *      Hash([1, 2, 3])   #=> TypeError
  *
  */
-static mrb_value
+PRESET_REF mrb_value
 mrb_f_hash(mrb_state *mrb, mrb_value self)
 {
   mrb_value arg, tmp;
@@ -164,18 +224,38 @@ mrb_f_hash(mrb_state *mrb, mrb_value self)
   return tmp;
 }
 
+/*
+ *  call-seq:
+ *     obj.itself -> an_object
+ *
+ *  Returns <i>obj</i>.
+ *
+ *      string = 'my string' #=> "my string"
+ *      string.itself.object_id == string.object_id #=> true
+ *
+ */
+static mrb_value
+mrb_f_itself(mrb_state *mrb, mrb_value self)
+{
+  return self;
+}
+
 void
 mrb_mruby_kernel_ext_gem_init(mrb_state *mrb)
 {
   struct RClass *krn = mrb->kernel_module;
 
   mrb_define_module_function(mrb, krn, "fail", mrb_f_raise, MRB_ARGS_OPT(2));
+  mrb_define_module_function(mrb, krn, "caller", mrb_f_caller, MRB_ARGS_OPT(2));
   mrb_define_method(mrb, krn, "__method__", mrb_f_method, MRB_ARGS_NONE());
   mrb_define_module_function(mrb, krn, "Integer", mrb_f_integer, MRB_ARGS_ANY());
+#ifndef MRB_WITHOUT_FLOAT
   mrb_define_module_function(mrb, krn, "Float", mrb_f_float, MRB_ARGS_REQ(1));
+#endif
   mrb_define_module_function(mrb, krn, "String", mrb_f_string, MRB_ARGS_REQ(1));
   mrb_define_module_function(mrb, krn, "Array", mrb_f_array, MRB_ARGS_REQ(1));
   mrb_define_module_function(mrb, krn, "Hash", mrb_f_hash, MRB_ARGS_REQ(1));
+  mrb_define_module_function(mrb, krn, "itself", mrb_f_itself, MRB_ARGS_NONE());
 }
 
 void

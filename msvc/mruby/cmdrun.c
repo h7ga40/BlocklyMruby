@@ -5,7 +5,7 @@
 
 #include "stdafx.h"
 
-#include "mruby/opcode.h"
+#include <mruby/opcode.h>
 #include "mrdb.h"
 
 dbgcmd_state
@@ -15,7 +15,8 @@ dbgcmd_run(mrb_state *mrb, mrdb_state *mrdb)
 
   if( dbg->xm == DBG_INIT ){
     InterlockedExchange(&dbg->xm, DBG_RUN);
-  } else {
+  }
+  else {
     InterlockedExchange(&dbg->xm, DBG_QUIT);
     if( dbg->xphase == DBG_PHASE_RUNNING ){
       struct RClass *exc;
@@ -42,7 +43,8 @@ dbgcmd_continue(mrb_state *mrb, mrdb_state *mrdb)
   if( dbg->xphase == DBG_PHASE_AFTER_RUN ){
     puts("The program is not running.");
     InterlockedExchange(&dbg->xm, DBG_QUIT);
-  } else {
+  }
+  else {
     InterlockedExchange(&dbg->xm, DBG_RUN);
   }
   return DBGST_CONTINUE;
@@ -52,5 +54,13 @@ dbgcmd_state
 dbgcmd_step(mrb_state *mrb, mrdb_state *mrdb)
 {
   InterlockedExchange(&mrdb->dbg->xm, DBG_STEP);
+  return DBGST_CONTINUE;
+}
+
+dbgcmd_state
+dbgcmd_next(mrb_state *mrb, mrdb_state *mrdb)
+{
+  InterlockedExchange(&mrdb->dbg->xm, DBG_NEXT);
+  mrdb->dbg->prvci = mrb->c->ci;
   return DBGST_CONTINUE;
 }

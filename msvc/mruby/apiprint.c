@@ -6,12 +6,12 @@
 #include "stdafx.h"
 
 #include "mrdb.h"
-#include "mruby/value.h"
-#include "mruby/class.h"
-#include "mruby/compile.h"
-#include "mruby/error.h"
-#include "mruby/numeric.h"
-#include "mruby/string.h"
+#include <mruby/value.h>
+#include <mruby/class.h>
+#include <mruby/compile.h>
+#include <mruby/error.h>
+#include <mruby/numeric.h>
+#include <mruby/string.h>
 #include "apiprint.h"
 
 static void
@@ -22,7 +22,7 @@ mrdb_check_syntax(mrb_state *mrb, mrb_debug_context *dbg, const char *expr, size
   c = mrbc_context_new(mrb);
   c->no_exec = TRUE;
   c->capture_errors = TRUE;
-  c->filename = (char*)dbg->prvfile;
+  mrbc_filename(mrb, c, (const char*)dbg->prvfile);
   c->lineno = dbg->prvline;
 
   /* Load program */
@@ -41,8 +41,10 @@ mrb_debug_eval(mrb_state *mrb, mrb_debug_context *dbg, const char *expr, size_t 
   mrb_value recv;
 
   /* disable code_fetch_hook */
+#ifdef MRB_ENABLE_DEBUG_HOOK
   tmp = mrb->code_fetch_hook;
   mrb->code_fetch_hook = NULL;
+#endif
 
   mrdb_check_syntax(mrb, dbg, expr, len);
   if (mrb->exc) {
@@ -73,7 +75,8 @@ mrb_debug_eval(mrb_state *mrb, mrb_debug_context *dbg, const char *expr, size_t 
   s = mrb_funcall(mrb, v, "inspect", 0);
 
   /* enable code_fetch_hook */
+#ifdef MRB_ENABLE_DEBUG_HOOK
   mrb->code_fetch_hook = tmp;
-
+#endif
   return s;
 }

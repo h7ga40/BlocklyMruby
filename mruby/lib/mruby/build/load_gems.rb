@@ -38,7 +38,7 @@ module MRuby
       cxx_srcs = ['src', 'test', 'tools'].map do |subdir|
         Dir.glob("#{Gem.current.dir}/#{subdir}/*.{cpp,cxx,cc}")
       end.flatten
-      enable_cxx_abi unless cxx_srcs.empty?
+      enable_cxx_exception unless cxx_srcs.empty?
 
       Gem.current
     end
@@ -76,9 +76,6 @@ module MRuby
 
       if params[:core]
         gemdir = "#{root}/mrbgems/#{params[:core]}"
-      elsif params[:path]
-        require 'pathname'
-        gemdir = Pathname.new(params[:path]).absolute? ? params[:path] : "#{root}/#{params[:path]}"
       elsif params[:git]
         url = params[:git]
         gemdir = "#{gem_clone_dir}/#{url.match(/([-\w]+)(\.[-\w]+|)$/).to_a[1]}"
@@ -108,6 +105,11 @@ module MRuby
           # Jump to the top of the branch
           git.run_checkout gemdir, branch if $pull_gems
         end
+
+        gemdir << "/#{params[:path]}" if params[:path]
+      elsif params[:path]
+        require 'pathname'
+        gemdir = Pathname.new(params[:path]).absolute? ? params[:path] : "#{root}/#{params[:path]}"
       else
         fail "unknown gem option #{params}"
       end

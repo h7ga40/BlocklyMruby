@@ -37,6 +37,8 @@ namespace BlocklyMruby
 		extern static void set_func(clearerr_t pclearerr, feof_t pfeof, getc_t pgetc, fwrite_t pfwrite, fflush_t pfflush, abort_t pabort);
 		[DllImport("mruby.dll")]
 		extern static void clear_func();
+		[DllImport("mruby.dll")]
+		extern static int objdump_main(int argc, [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr, SizeParamIndex = 0), In]string[] argv);
 
 		clearerr_t _clearerr;
 		feof_t _feof;
@@ -85,6 +87,9 @@ namespace BlocklyMruby
 						break;
 					case "mrdb":
 						ret = mrdb_main(args.Length, args);
+						break;
+					case "objdump":
+						ret = objdump_main(args.Length, args);
 						break;
 					}
 				}

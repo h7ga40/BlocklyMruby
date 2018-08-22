@@ -77,5 +77,11 @@
     <ClCompile Include="stdafx.c">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="objdump.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="preset_symbols.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
