@@ -19,4 +19,5 @@
 * [Bison for Windows](http://gnuwin32.sourceforge.net/packages/bison.htm)
 
 ## ライセンス
-MIT
+上記のソフトウェアを含んでいます。それぞれのライセンスに従ってください。
+その他の部分は[MIT](LICENSE)です。
