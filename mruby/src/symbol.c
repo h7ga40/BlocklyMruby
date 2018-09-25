@@ -338,7 +338,7 @@ mrb_sym_to_s(mrb_state *mrb, mrb_value sym)
  * in this case.
  */
 
-static mrb_value
+PRESET_REF mrb_value
 sym_to_sym(mrb_state *mrb, mrb_value sym)
 {
   return sym;

@@ -62,6 +62,13 @@ mrb_default_allocf(mrb_state *mrb, void *p, size_t size, void *ud)
     return NULL;
   }
   else {
+#ifdef MRB_USE_PRESET_SYMBOLS
+    if (mrb_is_preset_data(mrb, p)) {
+      void *np = malloc(size);
+      memcpy(np, p, size);
+      return np;
+    }
+#endif // DEBUG
     return realloc(p, size);
   }
 }

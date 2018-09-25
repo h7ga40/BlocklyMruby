@@ -206,6 +206,8 @@ const char *mrb_preset_sym2name(mrb_sym sym, mrb_int *lenp);
 #define PRESET_REF
 #else
 #define PRESET_REF static
+#define mrb_is_preset_const(mrb, p) FALSE
+#define mrb_is_preset_data(mrb, p) FALSE
 #endif
 
 #define MRB_STATE_NO_REGEXP 1

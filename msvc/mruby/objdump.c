@@ -1313,19 +1313,19 @@ print_each_iv_tbl(struct os_each_object_data *d, struct iv_tbl_list *item)
 {
 	kh_iv_t *iv = (kh_iv_t *)item->iv;
 
-	fprintf(d->wfile, "PRESET_DATA uint8_t mrb_preset_iv_tbl_%d_ed_flags[] = {\n", item->no);
+	fprintf(d->wfile, "PRESET_CONST uint8_t mrb_preset_iv_tbl_%d_ed_flags[] = {\n", item->no);
 
 	print_each_uint8(d, iv->ed_flags, iv->n_buckets / 4);
 
 	fprintf(d->wfile, "};\n");
 
-	fprintf(d->wfile, "PRESET_DATA mrb_sym mrb_preset_iv_tbl_%d_keys[] = {\n", item->no);
+	fprintf(d->wfile, "PRESET_CONST mrb_sym mrb_preset_iv_tbl_%d_keys[] = {\n", item->no);
 
 	print_each_sym(d, iv->keys, iv->n_buckets);
 
 	fprintf(d->wfile, "};\n");
 
-	fprintf(d->wfile, "PRESET_DATA mrb_value mrb_preset_iv_tbl_%d_vals[] = {\n", item->no);
+	fprintf(d->wfile, "PRESET_CONST mrb_value mrb_preset_iv_tbl_%d_vals[] = {\n", item->no);
 
 	for (int i = 0; i < iv->n_buckets; i++) {
 		mrb_value val = iv->vals[i];
@@ -1359,19 +1359,19 @@ print_each_kh_mt(struct os_each_object_data *d, struct kh_mt_list *item)
 {
 	kh_mt_t *mt = (kh_mt_t *)item->mt;
 
-	fprintf(d->wfile, "PRESET_DATA uint8_t mrb_preset_kh_mt_%d_ed_flags[] = {\n", item->no);
+	fprintf(d->wfile, "PRESET_CONST uint8_t mrb_preset_kh_mt_%d_ed_flags[] = {\n", item->no);
 
 	print_each_uint8(d, mt->ed_flags, mt->n_buckets / 4);
 
 	fprintf(d->wfile, "};\n");
 
-	fprintf(d->wfile, "PRESET_DATA mrb_sym mrb_preset_kh_mt_%d_keys[] = {\n", item->no);
+	fprintf(d->wfile, "PRESET_CONST mrb_sym mrb_preset_kh_mt_%d_keys[] = {\n", item->no);
 
 	print_each_sym(d, mt->keys, mt->n_buckets);
 
 	fprintf(d->wfile, "};\n");
 
-	fprintf(d->wfile, "PRESET_DATA mrb_method_t mrb_preset_kh_mt_%d_vals[] = {\n\t", item->no);
+	fprintf(d->wfile, "PRESET_CONST mrb_method_t mrb_preset_kh_mt_%d_vals[] = {\n\t", item->no);
 
 	for (int i = 0; i < mt->n_buckets; i++) {
 		mrb_method_t val = mt->vals[i];

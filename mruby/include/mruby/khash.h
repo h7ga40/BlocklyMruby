@@ -121,8 +121,10 @@ kh_fill_flags(uint8_t *p, uint8_t c, size_t len)
   void kh_destroy_##name(mrb_state *mrb, kh_##name##_t *h)              \
   {                                                                     \
     if (h) {                                                            \
-      mrb_free(mrb, h->keys);                                           \
-      mrb_free(mrb, h);                                                 \
+      if (!mrb_is_preset_const(mrb, (void *)h->keys))                   \
+        mrb_free(mrb, h->keys);                                         \
+      if (!mrb_is_preset_data(mrb, (void *)h))                          \
+        mrb_free(mrb, h);                                               \
     }                                                                   \
   }                                                                     \
   void kh_clear_##name(mrb_state *mrb, kh_##name##_t *h)                \
@@ -168,7 +170,8 @@ kh_fill_flags(uint8_t *p, uint8_t c, size_t len)
       }                                                                 \
       /* copy hh to h */                                                \
       *h = hh;                                                          \
-      mrb_free(mrb, old_keys);                                          \
+      if (!mrb_is_preset_const(mrb, (void *)old_keys))                  \
+        mrb_free(mrb, old_keys);                                        \
     }                                                                   \
   }                                                                     \
   khint_t kh_put_##name(mrb_state *mrb, kh_##name##_t *h, khkey_t key, int *ret) \
@@ -176,6 +179,9 @@ kh_fill_flags(uint8_t *p, uint8_t c, size_t len)
     khint_t k, del_k, step = 0;                                         \
     if (h->n_occupied >= khash_upper_bound(h)) {                        \
       kh_resize_##name(mrb, h, h->n_buckets*2);                         \
+    }                                                                   \
+    else if (mrb_is_preset_const(mrb, (void *)h->keys)) {               \
+      kh_resize_##name(mrb, h, h->n_buckets);                           \
     }                                                                   \
     k = __hash_func(mrb,key) & khash_mask(h);                           \
     del_k = kh_end(h);                                                  \
@@ -211,7 +217,9 @@ kh_fill_flags(uint8_t *p, uint8_t c, size_t len)
   }                                                                     \
   void kh_del_##name(mrb_state *mrb, kh_##name##_t *h, khint_t x)       \
   {                                                                     \
-    (void)mrb;                                                          \
+    if (mrb_is_preset_const(mrb, (void *)h->keys)) {                    \
+      kh_resize_##name(mrb, h, h->n_buckets);                           \
+    }                                                                   \
     mrb_assert(x != h->n_buckets && !__ac_iseither(h->ed_flags, x));    \
     h->ed_flags[x/4] |= __m_del[x%4];                                   \
     h->size--;                                                          \
