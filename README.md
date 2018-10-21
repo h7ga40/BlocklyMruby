@@ -1,5 +1,5 @@
 # BlocklyMruby
-[Blockly](https://github.com/google/blockly)と[mruby](https://github.com/mruby/mruby)を[Visual Studio 2015](https://www.microsoft.com/ja-jp/dev/products/visual-studio-2015.aspx)で開発する環境
+[Blockly](https://github.com/google/blockly)と[mruby](https://github.com/mruby/mruby)を[Visual Studio 2017](https://docs.microsoft.com/ja-jp/visualstudio/?view=vs-2017)で開発する環境
 
 ## 参考にしているプロジェクト
 * [smalruby-editor](https://github.com/smalruby/smalruby-editor)
