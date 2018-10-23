@@ -8,7 +8,7 @@ MRuby::Build.new do |conf|
     toolchain :gcc
   end
 
-  enable_debug
+  #enable_debug
 
   # Use mrbgems
   # conf.gem 'examples/mrbgems/ruby_extension_example'
@@ -107,6 +107,69 @@ MRuby::Build.new('host-debug') do |conf|
   # Generate mruby debugger command (require mruby-eval)
   #conf.gem :core => "mruby-bin-debugger"
   conf.gem :core => "mruby-eval"
+
+  # bintest
+  # conf.enable_bintest
+end
+MRuby::Build.new('host-preset') do |conf|
+  # load specific toolchain settings
+
+  # Gets set by the VS command prompts.
+  if ENV['VisualStudioVersion'] || ENV['VSINSTALLDIR']
+    toolchain :visualcpp
+  else
+    toolchain :gcc
+  end
+
+  enable_debug
+
+  # include the default GEMs
+  #conf.gembox 'default'
+
+  conf.gem 'mrbgems/mruby-array-ext'
+  #conf.gem 'mrbgems/mruby-bin-debugger'
+  #conf.gem 'mrbgems/mruby-bin-mirb'
+  #conf.gem 'mrbgems/mruby-bin-mrbc'
+  #conf.gem 'mrbgems/mruby-bin-mruby'
+  #conf.gem 'mrbgems/mruby-bin-mruby-config'
+  #conf.gem 'mrbgems/mruby-bin-strip'
+  conf.gem 'mrbgems/mruby-class-ext'
+  conf.gem 'mrbgems/mruby-compar-ext'
+  conf.gem 'mrbgems/mruby-compiler'
+  conf.gem 'mrbgems/mruby-enumerator'
+  conf.gem 'mrbgems/mruby-enum-ext'
+  conf.gem 'mrbgems/mruby-enum-lazy'
+  conf.gem 'mrbgems/mruby-error'
+  conf.gem 'mrbgems/mruby-eval'
+  conf.gem 'mrbgems/mruby-exit'
+  conf.gem 'mrbgems/mruby-fiber'
+  conf.gem 'mrbgems/mruby-hash-ext'
+  conf.gem 'mrbgems/mruby-inline-struct'
+  conf.gem 'mrbgems/mruby-io'
+  conf.gem 'mrbgems/mruby-kernel-ext'
+  conf.gem 'mrbgems/mruby-math'
+  conf.gem 'mrbgems/mruby-method'
+  conf.gem 'mrbgems/mruby-numeric-ext'
+  conf.gem 'mrbgems/mruby-object-ext'
+  conf.gem 'mrbgems/mruby-objectspace'
+  conf.gem 'mrbgems/mruby-pack'
+  conf.gem 'mrbgems/mruby-print'
+  conf.gem 'mrbgems/mruby-proc-ext'
+  conf.gem 'mrbgems/mruby-random'
+  conf.gem 'mrbgems/mruby-range-ext'
+  conf.gem 'mrbgems/mruby-socket'
+  conf.gem 'mrbgems/mruby-sprintf'
+  conf.gem 'mrbgems/mruby-string-ext'
+  conf.gem 'mrbgems/mruby-struct'
+  conf.gem 'mrbgems/mruby-symbol-ext'
+  #conf.gem 'mrbgems/mruby-test'
+  conf.gem 'mrbgems/mruby-time'
+  conf.gem 'mrbgems/mruby-toplevel-ext'
+
+  conf.gem '../mrbgems/mruby-blockly'
+
+  # C compiler settings
+  conf.cc.defines = %w(MRB_ENABLE_DEBUG_HOOK MRB_USE_PRESET_SYMBOLS)
 
   # bintest
   # conf.enable_bintest

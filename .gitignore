@@ -303,3 +303,7 @@ $RECYCLE.BIN/
 *.lnk
 *.output
 *.trace
+/msvc/BlocklyMrubyRes/DebugPreset
+/msvc/DebugPreset
+/msvc/libmruby/DebugPreset
+/msvc/mruby/out/DebugPreset
