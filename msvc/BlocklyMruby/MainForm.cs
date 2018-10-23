@@ -594,14 +594,17 @@ namespace BlocklyMruby
 			if (Collections.ClassWorkspaces.Length == 0)
 				return;
 
-			var rubyfiles = new JsArray<string>() { "objdump" };
-			string mrbfile;
-			GetCompileArgs(rubyfiles, out mrbfile);
-
 			SetRunningMode(RunningMode.Compile);
 
-			var run = _Mruby.run(rubyfiles, (exitCode) => {
-				BeginInvoke(new Action<string, int>(CompileDoneInDebugMode), mrbfile, exitCode);
+			var run = _Mruby.run(new string[] { "objdump", "objdump.c" }, (exitCode) => {
+				BeginInvoke(new MethodInvoker(() => {
+					if (exitCode != 0) {
+						SetRunningMode(RunningMode.None);
+						return;
+					}
+
+					SetRunningMode(RunningMode.None);
+				}));
 			});
 
 			if (!run)
