@@ -343,7 +343,7 @@ read_symbol_file(struct os_each_object_data *d)
   intptr_t addr;
   char T, name[256];
 
-  ret = fopen_s(&rfile, "mruby.syms", "rb");
+  ret = fopen_s(&rfile, "mruby-dump.syms", "rb");
   if (ret != 0)
     return -1;
 
@@ -1938,7 +1938,6 @@ print_each_object_cb(struct os_each_object_data *d, struct obj_list *item)
     break;
   case MRB_TT_PROC:
     if (MRB_PROC_CFUNC_P(obj)) {
-      struct symbol_list *si;
       if ((si = search_symbol_item(d, OFFSET_FROM_IMAGE_BASE(val->proc.body.func))) != NULL) {
         int offset = OFFSET_FROM_IMAGE_BASE(val->proc.body.func) - si->addr;
         si->func = 1;
@@ -2148,7 +2147,7 @@ static int
 dump(const char *filename, struct dump_args *args)
 {
   mrb_state *mrb = mrb_open();
-  int n = -1;
+  int n = 0;
   mrbc_context *c;
   struct os_each_object_data d;
   struct obj_list *objs;
@@ -2166,7 +2165,7 @@ dump(const char *filename, struct dump_args *args)
 
   int ret = read_symbol_file(&d);
   if (ret != 0) {
-    fputs("open failed. mruby.syms file\n", stderr);
+    fputs("open failed. mruby-dump.syms file\n", stderr);
     return EXIT_FAILURE;
   }
 
@@ -2618,7 +2617,7 @@ main(int argc, char **argv)
     return EXIT_FAILURE;
   }
 
-  ret = dump(argv[0], &args);
+  ret = dump(argv[1], &args);
 
   return ret;
 }

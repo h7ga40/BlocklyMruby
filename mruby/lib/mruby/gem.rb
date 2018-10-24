@@ -42,6 +42,8 @@ module MRuby
 
       attr_block MRuby::Build::COMMANDS
 
+      attr_accessor :post_build_event, :current_target
+
       def initialize(name, &block)
         @name = name
         @initializer = block
@@ -49,6 +51,7 @@ module MRuby
         @mrblib_dir = "mrblib"
         @objs_dir = "src"
         MRuby::Gem.current = self
+        @post_build_event = nil
       end
 
       def setup
@@ -152,6 +155,12 @@ module MRuby
         MRuby::Build::COMPILERS.map do |c|
           instance_variable_get("@#{c}")
         end
+      end
+
+      def call_post_build_event(target)
+        @current_target = target
+        instance_eval(&@post_build_event) if @post_build_event
+        @current_target = nil
       end
 
       def define_gem_init_builder

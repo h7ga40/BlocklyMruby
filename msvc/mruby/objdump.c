@@ -1935,7 +1935,6 @@ print_each_object_cb(struct os_each_object_data *d, struct obj_list *item)
 		break;
 	case MRB_TT_PROC:
 		if (MRB_PROC_CFUNC_P(obj)) {
-			struct symbol_list *si;
 			if ((si = search_symbol_item(d, OFFSET_FROM_IMAGE_BASE(val->proc.body.func))) != NULL) {
 				int offset = OFFSET_FROM_IMAGE_BASE(val->proc.body.func) - si->addr;
 				si->func = 1;
@@ -2145,7 +2144,7 @@ static int
 dump(const wchar_t *filename, struct dump_args *args)
 {
 	mrb_state *mrb = mrb_open();
-	int n = -1;
+	int n = 0;
 	mrbc_context *c;
 	struct os_each_object_data d;
 	struct obj_list *objs;
@@ -2615,7 +2614,7 @@ objdump_main(int argc, wchar_t **argv)
 		return EXIT_FAILURE;
 	}
 
-	ret = dump(argv[0], &args);
+	ret = dump(argv[1], &args);
 
 	return ret;
 }
