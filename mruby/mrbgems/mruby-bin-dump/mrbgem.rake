@@ -4,7 +4,12 @@ MRuby::Gem::Specification.new('mruby-bin-dump') do |spec|
   spec.summary = 'object dump'
   spec.bins = %w(mruby-dump)
 
-  spec.linker.flags << "/MAP"
+  case spec.mruby.primary_toolchain.to_sym
+  #when :gcc
+  #  spec.linker.flags << "-Wl,-Map=#{build.build_dir}/bin/mruby-dump.map,--cref"
+  when :visualcpp
+    spec.linker.flags << "/MAP"
+  end
 
   def map_to_syms(infile, outfile)
     istrm = File.open(infile, "r");
@@ -45,15 +50,15 @@ MRuby::Gem::Specification.new('mruby-bin-dump') do |spec|
     case current_target.primary_toolchain.to_sym
     when :gcc
       sh "nm -n #{build.build_dir}/bin/mruby-dump > #{build.build_dir}/bin/mruby-dump.syms"
-      sh "#{build.build_dir}/bin/mruby-dump #{build.build_dir}/bin/objdump.c"
+      exe = "./mruby-dump"
     when :visualcpp
       map_to_syms "#{build.build_dir}/bin/mruby-dump.map", "#{build.build_dir}/bin/mruby-dump.syms"
-      wd = Dir.getwd
-      Dir.chdir "#{build.build_dir}/bin"
-      exe = "mruby-dump"
-      out = "preset_symbols.c"
-      sh exe + ' ' + out
-      Dir.chdir wd
+      exe = "mruby-dump.exe"
     end
+    wd = Dir.getwd
+    Dir.chdir "#{build.build_dir}/bin"
+    out = "preset_symbols.c"
+    sh exe + ' ' + out
+    Dir.chdir wd
   end
 end

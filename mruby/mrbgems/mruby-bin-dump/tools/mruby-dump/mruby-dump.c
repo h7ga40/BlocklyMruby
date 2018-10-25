@@ -19,6 +19,14 @@
 #include <mruby/debug.h>
 #include <mruby/istruct.h>
 
+#ifndef _MSC_VER
+#define sprintf_s(buf, len, ...) sprintf(buf, __VA_ARGS__)
+#define __ImageBase __executable_start
+#define IMAGE_BASE_NAME "__executable_start"
+#else
+#define IMAGE_BASE_NAME "___ImageBase"
+#endif
+
 struct dump_args {
   int argc_start;
   int argc;
@@ -69,7 +77,7 @@ struct symbol_list {
   char T;
   int func;
   int data;
-  char name[1];
+  char name[0];
 };
 
 struct string_list {
@@ -341,14 +349,33 @@ read_symbol_file(struct os_each_object_data *d)
   FILE *rfile;
   int ret;
   intptr_t addr;
+#ifndef _MSC_VER
+  char temp[20], T, name[256];
+#else
   char T, name[256];
+#endif
 
+#ifndef _MSC_VER
+  rfile = fopen("mruby-dump.syms", "rb");
+  if (rfile == NULL)
+    return -1;
+#else
   ret = fopen_s(&rfile, "mruby-dump.syms", "rb");
   if (ret != 0)
     return -1;
+#endif
 
   for (;;) {
+    addr = 0;
+    T = 0;
+    memset(name, 0, sizeof(name));
+#ifndef _MSC_VER
+    memset(temp, 0, sizeof(temp));
+    ret = fscanf(rfile, "%16s %c %256s", &temp, &T, &name);
+    addr = strtol(temp, NULL, 16);
+#else
     ret = fscanf_s(rfile, "%x %c %s", &addr, &T, 1, &name, sizeof(name));
+#endif
     if (ret == EOF)
       break;
     if (addr == 0)
@@ -363,7 +390,11 @@ read_symbol_file(struct os_each_object_data *d)
     item->name[0] = '\0';
     item->func = 0;
     item->data = 0;
-    strcpy_s(item->name, len + 1, name);
+#ifndef _MSC_VER
+    strcpy(item->name, name);
+#else
+    strcpy_s(item->name, len + 1, &name[1]);
+#endif
 
     if ((prev == NULL) || (prev == d->symbols))
       enqueue((struct queue_t **)&d->symbols, (struct queue_t *)item);
@@ -372,7 +403,7 @@ read_symbol_file(struct os_each_object_data *d)
       prev->next = item;
     }
 
-    if (strcmp(name, "___ImageBase") == 0) {
+    if (strcmp(name, IMAGE_BASE_NAME) == 0) {
       d->offset = addr;
     }
   }
@@ -1400,9 +1431,9 @@ print_each_kh_mt(struct os_each_object_data *d, struct kh_mt_list *item)
         int offset = OFFSET_FROM_IMAGE_BASE(val.func) - si->addr;
         si->func = 1;
         if (offset == 0)
-          fprintf(d->wfile, "{ .func_p = 1, { .func = (mrb_func_t)&%s } }, ", &si->name[1]);
+          fprintf(d->wfile, "{ .func_p = 1, { .func = (mrb_func_t)&%s } }, ", &si->name[0]);
         else
-          fprintf(d->wfile, "{ .func_p = 1, { .func = (mrb_func_t)&((uint8_t *)%s)[%d] } }, ", &si->name[1], offset);
+          fprintf(d->wfile, "{ .func_p = 1, { .func = (mrb_func_t)&((uint8_t *)%s)[%d] } }, ", &si->name[0], offset);
       }
       else
         fprintf(d->wfile, "{ .func_p = 1, { .func = (mrb_func_t)0x%p } }, ", OFFSET_FROM_IMAGE_BASE(val.func));
@@ -1493,9 +1524,9 @@ print_each_callinfo(struct os_each_object_data *d, struct callinfo_list *item)
       int offset = OFFSET_FROM_IMAGE_BASE(ci->pc) - si->addr;
       si->data = 1;
       if (offset == 0)
-        fprintf(d->wfile, ".pc = (mrb_code *)&%s, ", &si->name[1]);
+        fprintf(d->wfile, ".pc = (mrb_code *)&%s, ", &si->name[0]);
       else
-        fprintf(d->wfile, ".pc = (mrb_code *)&((uint8_t *)%s)[%d], ", &si->name[1], offset);
+        fprintf(d->wfile, ".pc = (mrb_code *)&((uint8_t *)%s)[%d], ", &si->name[0], offset);
     }
     else
       fprintf(d->wfile, ".pc = (mrb_code *)0x%p, ", OFFSET_FROM_IMAGE_BASE(ci->pc));
@@ -1505,9 +1536,9 @@ print_each_callinfo(struct os_each_object_data *d, struct callinfo_list *item)
       int offset = OFFSET_FROM_IMAGE_BASE(ci->err) - si->addr;
       si->data = 1;
       if (offset == 0)
-        fprintf(d->wfile, ".err = (mrb_code *)&%s, ", &si->name[1]);
+        fprintf(d->wfile, ".err = (mrb_code *)&%s, ", &si->name[0]);
       else
-        fprintf(d->wfile, ".err = (mrb_code *)&((uint8_t *)%s)[%d], ", &si->name[1], offset);
+        fprintf(d->wfile, ".err = (mrb_code *)&((uint8_t *)%s)[%d], ", &si->name[0], offset);
     }
     else
       fprintf(d->wfile, ".err = (mrb_code *)0x%p, ", OFFSET_FROM_IMAGE_BASE(ci->err));
@@ -1717,9 +1748,9 @@ print_each_irep(struct os_each_object_data *d, struct irep_list *item)
     int offset = OFFSET_FROM_IMAGE_BASE(irep->iseq) - si->addr;
     si->data = 1;
     if (offset == 0)
-      fprintf(d->wfile, "\t.iseq = (mrb_code *)&%s,\n", &si->name[1]);
+      fprintf(d->wfile, "\t.iseq = (mrb_code *)&%s,\n", &si->name[0]);
     else
-      fprintf(d->wfile, "\t.iseq = (mrb_code *)&((uint8_t *)%s)[%d],\n", &si->name[1], offset);
+      fprintf(d->wfile, "\t.iseq = (mrb_code *)&((uint8_t *)%s)[%d],\n", &si->name[0], offset);
   }
   else
     fprintf(d->wfile, "\t.iseq = (mrb_code *)0x%p,\n", OFFSET_FROM_IMAGE_BASE(irep->iseq));
@@ -1942,9 +1973,9 @@ print_each_object_cb(struct os_each_object_data *d, struct obj_list *item)
         int offset = OFFSET_FROM_IMAGE_BASE(val->proc.body.func) - si->addr;
         si->func = 1;
         if (offset == 0)
-          fprintf(d->wfile, ".body = { .func = (mrb_func_t)%s }, ", &si->name[1]);
+          fprintf(d->wfile, ".body = { .func = (mrb_func_t)%s }, ", &si->name[0]);
         else
-          fprintf(d->wfile, ".body = { .func = (mrb_func_t)&((uint8_t *)%s)[%d] }, ", &si->name[1], offset);
+          fprintf(d->wfile, ".body = { .func = (mrb_func_t)&((uint8_t *)%s)[%d] }, ", &si->name[0], offset);
       }
       else
         fprintf(d->wfile, ".body = { .func = (mrb_func_t)0x%p }, ", OFFSET_FROM_IMAGE_BASE(val->proc.body.func));
@@ -2058,9 +2089,9 @@ print_each_object_cb(struct os_each_object_data *d, struct obj_list *item)
       int offset = OFFSET_FROM_IMAGE_BASE(val->data.type) - si->addr;
       si->data = 1;
       if (offset == 0)
-        fprintf(d->wfile, ".type = (const mrb_data_type *)%s, ", &si->name[1]);
+        fprintf(d->wfile, ".type = (const mrb_data_type *)%s, ", &si->name[0]);
       else
-        fprintf(d->wfile, ".type = (const mrb_data_type *)&((uint8_t *)%s)[%d], ", &si->name[1], offset);
+        fprintf(d->wfile, ".type = (const mrb_data_type *)&((uint8_t *)%s)[%d], ", &si->name[0], offset);
     }
     else
       fprintf(d->wfile, ".type = (const mrb_data_type *)0x%p, ", OFFSET_FROM_IMAGE_BASE(val->data.type));
@@ -2068,9 +2099,9 @@ print_each_object_cb(struct os_each_object_data *d, struct obj_list *item)
       int offset = OFFSET_FROM_IMAGE_BASE(val->data.data) - si->addr;
       si->data = 1;
       if (offset == 0)
-        fprintf(d->wfile, ".data = (void *)%s, ", &si->name[1]);
+        fprintf(d->wfile, ".data = (void *)%s, ", &si->name[0]);
       else
-        fprintf(d->wfile, ".data = (void *)&((uint8_t *)%s)[%d], ", &si->name[1], offset);
+        fprintf(d->wfile, ".data = (void *)&((uint8_t *)%s)[%d], ", &si->name[0], offset);
     }
     else
       fprintf(d->wfile, ".data = (void *)0x%p, ", OFFSET_FROM_IMAGE_BASE(val->data.data));
@@ -2147,7 +2178,7 @@ static int
 dump(const char *filename, struct dump_args *args)
 {
   mrb_state *mrb = mrb_open();
-  int n = 0;
+  int ret = 0;
   mrbc_context *c;
   struct os_each_object_data d;
   struct obj_list *objs;
@@ -2163,7 +2194,7 @@ dump(const char *filename, struct dump_args *args)
   memset(&d, 0, sizeof(d));
   d.mrb = mrb;
 
-  int ret = read_symbol_file(&d);
+  ret = read_symbol_file(&d);
   if (ret != 0) {
     fputs("open failed. mruby-dump.syms file\n", stderr);
     return EXIT_FAILURE;
@@ -2223,7 +2254,17 @@ dump(const char *filename, struct dump_args *args)
     add_iv(&d, mrb->globals);
   }
 
-  fopen_s(&d.wfile, filename, "wb");
+#ifndef _MSC_VER
+  d.wfile = fopen(filename, "wb");
+  if (d.wfile == NULL)
+    return EXIT_FAILURE;
+#else
+  ret = fopen_s(&d.wfile, filename, "wb");
+  if (ret != 0) {
+    fprintf(stderr, "open failed. %s file\n", filename);
+    return EXIT_FAILURE;
+  }
+#endif
 
   objs = d.objs;
   if (objs != NULL) {
@@ -2524,9 +2565,9 @@ dump(const char *filename, struct dump_args *args)
     struct symbol_list *first = symbols->next, *item = first;
     do {
       if (item->data != 0)
-        fprintf(d.wfile, "extern uint8_t %s[];\n", &item->name[1]);
+        fprintf(d.wfile, "extern uint8_t %s[];\n", &item->name[0]);
       else if (item->func != 0)
-        fprintf(d.wfile, "extern mrb_value %s(mrb_state *mrb, mrb_value self);\n", &item->name[1]);
+        fprintf(d.wfile, "extern mrb_value %s(mrb_state *mrb, mrb_value self);\n", &item->name[0]);
       item = item->next;
     } while (item != first);
   }
@@ -2548,10 +2589,10 @@ dump(const char *filename, struct dump_args *args)
   mrbc_context_free(mrb, c);
   if (mrb->exc) {
     mrb_print_error(mrb);
-    n = -1;
+    ret = -1;
   }
 
-  return n == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
+  return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
 static void
