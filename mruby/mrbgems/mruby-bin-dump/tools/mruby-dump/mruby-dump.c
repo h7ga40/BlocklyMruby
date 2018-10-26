@@ -1,3 +1,4 @@
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,11 +21,25 @@
 #include <mruby/istruct.h>
 
 #ifndef _MSC_VER
+#include <libgen.h>
 #define sprintf_s(buf, len, ...) sprintf(buf, __VA_ARGS__)
 #define __ImageBase __executable_start
 #define IMAGE_BASE_NAME "__executable_start"
 #else
 #define IMAGE_BASE_NAME "___ImageBase"
+#define PATH_MAX 256
+#define getcwd _getcwd
+char *dirname(char *s)
+{
+  size_t i;
+  if (!s || !*s) return ".";
+  i = strlen(s)-1;
+  for (; s[i]=='\\'; i--) if (!i) return "\\";
+  for (; s[i]!='\\'; i--) if (!i) return ".";
+  for (; s[i]=='\\'; i--) if (!i) return "\\";
+  s[i+1] = 0;
+  return s;
+}
 #endif
 
 struct dump_args {
@@ -77,7 +92,7 @@ struct symbol_list {
   char T;
   int func;
   int data;
-  char name[0];
+  char name[1];
 };
 
 struct string_list {
@@ -343,6 +358,8 @@ search_symbol_item(struct os_each_object_data *d, intptr_t addr)
   return NULL;
 }
 
+char syms_path[PATH_MAX];
+
 static int
 read_symbol_file(struct os_each_object_data *d)
 {
@@ -352,17 +369,21 @@ read_symbol_file(struct os_each_object_data *d)
 #ifndef _MSC_VER
   char temp[20], T, name[256];
 #else
-  char T, name[256];
+  char T, name[PATH_MAX];
 #endif
 
 #ifndef _MSC_VER
-  rfile = fopen("mruby-dump.syms", "rb");
-  if (rfile == NULL)
+  rfile = fopen(syms_path, "rb");
+  if (rfile == NULL) {
+    fprintf(stderr, "open failed. %s file\n", syms_path);
     return -1;
+  }
 #else
-  ret = fopen_s(&rfile, "mruby-dump.syms", "rb");
-  if (ret != 0)
+  ret = fopen_s(&rfile, syms_path, "rb");
+  if (ret != 0) {
+    fprintf(stderr, "open failed. %s file\n", syms_path);
     return -1;
+  }
 #endif
 
   for (;;) {
@@ -2196,7 +2217,6 @@ dump(const char *filename, struct dump_args *args)
 
   ret = read_symbol_file(&d);
   if (ret != 0) {
-    fputs("open failed. mruby-dump.syms file\n", stderr);
     return EXIT_FAILURE;
   }
 
@@ -2639,12 +2659,40 @@ parse_args(int argc, char **argv, struct dump_args *args)
   return i;
 }
 
+void save_syms_path(char *cmd)
+{
+  syms_path[0] = '\0';
+
+#ifndef _MSC_VER
+  realpath(cmd, syms_path);
+#else
+  _fullpath(syms_path, cmd, sizeof(syms_path));
+#endif
+
+  for (int i = strlen(syms_path) - 1; i >= 0; i--) {
+    if (syms_path[i] == '.') {
+       syms_path[i] = '\0';
+       break;
+    }
+    if (syms_path[i] == '\\')
+      break;
+  }
+
+#ifndef _MSC_VER
+  strcat(syms_path, ".syms");
+#else
+  strcat_s(syms_path, sizeof(syms_path), ".syms");
+#endif
+}
+
 int
 main(int argc, char **argv)
 {
   struct dump_args args;
   int args_result;
   int ret;
+
+  save_syms_path(argv[0]);
 
   if (argc <= 1) {
     printf("no files to output file\n");

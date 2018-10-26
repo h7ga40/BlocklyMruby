@@ -50,15 +50,9 @@ MRuby::Gem::Specification.new('mruby-bin-dump') do |spec|
     case current_target.primary_toolchain.to_sym
     when :gcc
       sh "nm -n #{build.build_dir}/bin/mruby-dump > #{build.build_dir}/bin/mruby-dump.syms"
-      exe = "./mruby-dump"
     when :visualcpp
       map_to_syms "#{build.build_dir}/bin/mruby-dump.map", "#{build.build_dir}/bin/mruby-dump.syms"
-      exe = "mruby-dump.exe"
     end
-    wd = Dir.getwd
-    Dir.chdir "#{build.build_dir}/bin"
-    out = "preset_symbols.c"
-    sh exe + ' ' + out
-    Dir.chdir wd
+    sh "#{build.build_dir}/bin/mruby-dump #{build.build_dir}/src/preset_symbols.c"
   end
 end

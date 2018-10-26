@@ -16,6 +16,8 @@
 #include <mruby/debug.h>
 #include <mruby/istruct.h>
 
+#define PATH_MAX 256
+
 struct dump_args {
 	int argc_start;
 	int argc;
@@ -332,6 +334,8 @@ search_symbol_item(struct os_each_object_data *d, intptr_t addr)
 	return NULL;
 }
 
+wchar_t syms_path[PATH_MAX];
+
 static int
 read_symbol_file(struct os_each_object_data *d)
 {
@@ -340,11 +344,16 @@ read_symbol_file(struct os_each_object_data *d)
 	intptr_t addr;
 	char T, name[256];
 
-	ret = fopen_s(&rfile, "mruby.syms", "rb");
-	if (ret != 0)
+	ret = _wfopen_s(&rfile, syms_path, L"rb");
+	if (ret != 0) {
+		fprintf(stderr, "open failed. %s file\n", syms_path);
 		return -1;
+	}
 
 	for (;;) {
+		addr = 0;
+		T = 0;
+		memset(name, 0, sizeof(name));
 		ret = fscanf_s(rfile, "%x %c %s", &addr, &T, 1, &name, sizeof(name));
 		if (ret == EOF)
 			break;
@@ -2144,7 +2153,7 @@ static int
 dump(const wchar_t *filename, struct dump_args *args)
 {
 	mrb_state *mrb = mrb_open();
-	int n = 0;
+	int ret = 0;
 	mrbc_context *c;
 	struct os_each_object_data d;
 	struct obj_list *objs;
@@ -2160,9 +2169,8 @@ dump(const wchar_t *filename, struct dump_args *args)
 	memset(&d, 0, sizeof(d));
 	d.mrb = mrb;
 
-	int ret = read_symbol_file(&d);
+	ret = read_symbol_file(&d);
 	if (ret != 0) {
-		fputs("open failed. mruby.syms file\n", stderr);
 		return EXIT_FAILURE;
 	}
 
@@ -2220,7 +2228,11 @@ dump(const wchar_t *filename, struct dump_args *args)
 		add_iv(&d, mrb->globals);
 	}
 
-	_wfopen_s(&d.wfile, filename, L"wb");
+	ret = _wfopen_s(&d.wfile, filename, L"wb");
+	if (ret != 0) {
+		fprintf(stderr, "open failed. %s file\n", filename);
+		return EXIT_FAILURE;
+	}
 
 	objs = d.objs;
 	if (objs != NULL) {
@@ -2545,10 +2557,10 @@ dump(const wchar_t *filename, struct dump_args *args)
 	mrbc_context_free(mrb, c);
 	if (mrb->exc) {
 		mrb_print_error(mrb);
-		n = -1;
+		ret = -1;
 	}
 
-	return n == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
+	return ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
 static void
@@ -2595,12 +2607,32 @@ parse_args(int argc, char **argv, struct dump_args *args)
 	return i;
 }
 
+void save_syms_path(wchar_t *cmd)
+{
+	syms_path[0] = L'\0';
+
+	_wfullpath(syms_path, cmd, sizeof(syms_path));
+
+	for (int i = strlen(syms_path) - 1; i >= 0; i--) {
+		if (syms_path[i] == L'.') {
+			syms_path[i] == L'\0';
+			break;
+		}
+		if (syms_path[i] == L'\\')
+			break;
+	}
+
+	wcscat_s(syms_path, sizeof(syms_path) / sizeof(wchar_t), L".syms");
+}
+
 __declspec(dllexport) int _stdcall
 objdump_main(int argc, wchar_t **argv)
 {
 	struct dump_args args;
 	int args_result;
 	int ret;
+
+	save_syms_path(argv[0]);
 
 	if (argc <= 1) {
 		printf("no files to output file\n");
