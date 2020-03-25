@@ -106,6 +106,39 @@ module MRuby
         if toolchains.any? { |toolchain| toolchain == "gcc" }
           c.flags += %w(-g3 -O0)
         end
+        if toolchains.any? { |toolchain| toolchain == "visualcpp" }
+          c.flags = c.flags.collect{ |a| a.collect{ |f|
+            case f
+            when "/DNDEBUG"
+              "/D_DEBUG"
+            when "/MD"
+              "/MDd"
+            when "/O2"
+              "/Od"
+            when "/Zi"
+              "/ZI"
+            else
+               f
+            end
+          }.flatten }.flatten
+          c.flags += %w(/JMC /RTC1 /Gy)
+        end
+      end
+      if toolchains.any? { |toolchain| toolchain == "visualcpp" }
+        linker.flags = linker.flags.collect{ |a| a.collect{ |f|
+          case f
+          when "/OPT:REF"
+            ""
+          when "/OPT:ICF"
+            ""
+          when "/INCREMENTAL:NO"
+            "/INCREMENTAL"
+          when "/LTCG:incremental"
+            ""
+          else
+            f
+          end
+        }.flatten }.flatten
       end
       @mrbc.compile_options += ' -g'
     end

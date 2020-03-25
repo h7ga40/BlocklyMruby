@@ -1242,7 +1242,7 @@ print_each_irep_reps(struct os_each_object_data *d, struct irep_list *item)
     if (no >= 0)
       fprintf(d->wfile, "&mrb_preset_irep_%d, ", no);
     else
-      fprintf(d->wfile, "(mrb_irep *)0x%p, ", OFFSET_FROM_IMAGE_BASE(rep));
+      fprintf(d->wfile, "(mrb_irep *)0x%p, ", (void *)OFFSET_FROM_IMAGE_BASE(rep));
   }
 
   fprintf(d->wfile, "};\n");
@@ -1449,7 +1449,7 @@ print_each_kh_mt(struct os_each_object_data *d, struct kh_mt_list *item)
       if (val.func == NULL)
         fprintf(d->wfile, "{ .func_p = 1, { .func = NULL } }, ");
       else if ((si = search_symbol_item(d, OFFSET_FROM_IMAGE_BASE(val.func))) != NULL) {
-        int offset = OFFSET_FROM_IMAGE_BASE(val.func) - si->addr;
+        intptr_t offset = OFFSET_FROM_IMAGE_BASE(val.func) - si->addr;
         si->func = 1;
         if (offset == 0)
           fprintf(d->wfile, "{ .func_p = 1, { .func = (mrb_func_t)&%s } }, ", &si->name[0]);
@@ -1457,7 +1457,7 @@ print_each_kh_mt(struct os_each_object_data *d, struct kh_mt_list *item)
           fprintf(d->wfile, "{ .func_p = 1, { .func = (mrb_func_t)&((uint8_t *)%s)[%d] } }, ", &si->name[0], offset);
       }
       else
-        fprintf(d->wfile, "{ .func_p = 1, { .func = (mrb_func_t)0x%p } }, ", OFFSET_FROM_IMAGE_BASE(val.func));
+        fprintf(d->wfile, "{ .func_p = 1, { .func = (mrb_func_t)0x%p } }, ", (void *)OFFSET_FROM_IMAGE_BASE(val.func));
     }
     else {
       int no;
@@ -1466,7 +1466,7 @@ print_each_kh_mt(struct os_each_object_data *d, struct kh_mt_list *item)
       else if ((no = search_objno(d, (struct RBasic *)val.proc)) >= 0)
         fprintf(d->wfile, "{ .func_p = 0, { .proc = (struct RProc *)&mrb_preset_object_%d.proc } }, ", no);
       else
-        fprintf(d->wfile, "{ .func_p = 0, { .proc = (struct RProc *)0x%p } }, ", OFFSET_FROM_IMAGE_BASE(val.proc));
+        fprintf(d->wfile, "{ .func_p = 0, { .proc = (struct RProc *)0x%p } }, ", (void *)OFFSET_FROM_IMAGE_BASE(val.proc));
     }
   }
 
@@ -1550,7 +1550,7 @@ print_each_callinfo(struct os_each_object_data *d, struct callinfo_list *item)
         fprintf(d->wfile, ".pc = (mrb_code *)&((uint8_t *)%s)[%d], ", &si->name[0], offset);
     }
     else
-      fprintf(d->wfile, ".pc = (mrb_code *)0x%p, ", OFFSET_FROM_IMAGE_BASE(ci->pc));
+      fprintf(d->wfile, ".pc = (mrb_code *)0x%p, ", (void *)OFFSET_FROM_IMAGE_BASE(ci->pc));
     if (ci->err == NULL)
       fprintf(d->wfile, ".err = NULL, ");
     else if ((si = search_symbol_item(d, OFFSET_FROM_IMAGE_BASE(ci->err))) != NULL) {
@@ -1562,7 +1562,7 @@ print_each_callinfo(struct os_each_object_data *d, struct callinfo_list *item)
         fprintf(d->wfile, ".err = (mrb_code *)&((uint8_t *)%s)[%d], ", &si->name[0], offset);
     }
     else
-      fprintf(d->wfile, ".err = (mrb_code *)0x%p, ", OFFSET_FROM_IMAGE_BASE(ci->err));
+      fprintf(d->wfile, ".err = (mrb_code *)0x%p, ", (void *)OFFSET_FROM_IMAGE_BASE(ci->err));
     fprintf(d->wfile, ".argc = %d, ", ci->argc);
     fprintf(d->wfile, ".acc = %d, ", ci->acc);
     if (ci->target_class == NULL)
@@ -1727,7 +1727,7 @@ print_each_debug_info_files(struct os_each_object_data *d, struct debug_info_lis
     else if ((no = search_debug_info_file_no(d, debug_info->files[i])) >= 0)
       fprintf(d->wfile, "(mrb_irep_debug_info_file *)&mrb_preset_debug_info_file_%d, ", no);
     else
-      fprintf(d->wfile, "(mrb_irep_debug_info_file *)0x%p, ", OFFSET_FROM_IMAGE_BASE(debug_info->files[i]));
+      fprintf(d->wfile, "(mrb_irep_debug_info_file *)0x%p, ", (void *)OFFSET_FROM_IMAGE_BASE(debug_info->files[i]));
   }
 
   fprintf(d->wfile, "};\n");
@@ -1774,7 +1774,7 @@ print_each_irep(struct os_each_object_data *d, struct irep_list *item)
       fprintf(d->wfile, "\t.iseq = (mrb_code *)&((uint8_t *)%s)[%d],\n", &si->name[0], offset);
   }
   else
-    fprintf(d->wfile, "\t.iseq = (mrb_code *)0x%p,\n", OFFSET_FROM_IMAGE_BASE(irep->iseq));
+    fprintf(d->wfile, "\t.iseq = (mrb_code *)0x%p,\n", (void *)OFFSET_FROM_IMAGE_BASE(irep->iseq));
 
   if (irep->pool == NULL)
     fprintf(d->wfile, "\t.pool = NULL,\n");
@@ -1789,7 +1789,7 @@ print_each_irep(struct os_each_object_data *d, struct irep_list *item)
   else
     fprintf(d->wfile, "\t.reps = (struct mrb_irep **)&mrb_preset_irep_%d_reps,\n", item->no);
   if (irep->lv == NULL)
-    fprintf(d->wfile, "\t.lv = NULL,\n", item->no);
+    fprintf(d->wfile, "\t.lv = NULL,\n");
   else
     fprintf(d->wfile, "\t.lv = (struct mrb_locals *)&mrb_preset_irep_%d_lvs,\n", item->no);
   fprintf(d->wfile, "\t.own_filename = (mrb_bool)%d,\n", irep->own_filename);
@@ -1814,7 +1814,7 @@ print_each_irep(struct os_each_object_data *d, struct irep_list *item)
   else if ((no = search_debug_info_no(d, irep->debug_info)) >= 0)
     fprintf(d->wfile, "\t.debug_info = (struct mrb_irep_debug_info *)&mrb_preset_debug_info_%d,\n", no);
   else
-    fprintf(d->wfile, "\t.debug_info = (struct mrb_irep_debug_info *)0x%p,\n", OFFSET_FROM_IMAGE_BASE(irep->debug_info));
+    fprintf(d->wfile, "\t.debug_info = (struct mrb_irep_debug_info *)0x%p,\n", (void *)OFFSET_FROM_IMAGE_BASE(irep->debug_info));
   fprintf(d->wfile, "\t.ilen = %u, .plen = %u, .slen = %u, .rlen = %u, .refcnt = %u\n};\n",
     irep->ilen, irep->plen, irep->slen, irep->rlen, irep->refcnt);
 }
@@ -1922,7 +1922,7 @@ print_each_object_cb(struct os_each_object_data *d, struct obj_list *item)
   else if ((no = search_objno(d, (struct RBasic *)obj->c)) >= 0)
     fprintf(d->wfile, ".c = (struct RClass *)&mrb_preset_object_%d.klass, ", no);
   else
-    fprintf(d->wfile, ".c = (struct RClass *)0x%p, ", OFFSET_FROM_IMAGE_BASE(obj->c));
+    fprintf(d->wfile, ".c = (struct RClass *)0x%p, ", (void *)OFFSET_FROM_IMAGE_BASE(obj->c));
 #if 0
   if (obj->gcnext == NULL)
     fprintf(d->wfile, ".gcnext = NULL, ");
@@ -1936,7 +1936,7 @@ print_each_object_cb(struct os_each_object_data *d, struct obj_list *item)
   else if ((no = item->gcnext->no) >= 0)
     fprintf(d->wfile, ".gcnext = (struct RBasic *)&mrb_preset_object_%d.basic, ", no);
   else
-    fprintf(d->wfile, ".gcnext = (struct RBasic *)0x%p, ", OFFSET_FROM_IMAGE_BASE(item->gcnext));
+    fprintf(d->wfile, ".gcnext = (struct RBasic *)0x%p, ", (void *)OFFSET_FROM_IMAGE_BASE(item->gcnext));
 #endif
   switch (obj->tt) {
   case MRB_TT_FALSE:
@@ -1955,7 +1955,7 @@ print_each_object_cb(struct os_each_object_data *d, struct obj_list *item)
     fprintf(d->wfile, ".f = %.16e, ", val->floatv.f);
     break;
   case MRB_TT_CPTR:
-    fprintf(d->wfile, ".p = (void *)0x%p, ", OFFSET_FROM_IMAGE_BASE(val->cptr.p));
+    fprintf(d->wfile, ".p = (void *)0x%p, ", (void *)OFFSET_FROM_IMAGE_BASE(val->cptr.p));
     break;
   case MRB_TT_OBJECT:
     if (val->object.iv == NULL)
@@ -1963,7 +1963,7 @@ print_each_object_cb(struct os_each_object_data *d, struct obj_list *item)
     else if ((no = search_iv_tblno(d, val->object.iv)) >= 0)
       fprintf(d->wfile, ".iv = (struct iv_tbl *)&mrb_preset_iv_tbl_%d, ", no);
     else
-      fprintf(d->wfile, ".iv = (struct iv_tbl *)0x%p, ", OFFSET_FROM_IMAGE_BASE(val->object.iv));
+      fprintf(d->wfile, ".iv = (struct iv_tbl *)0x%p, ", (void *)OFFSET_FROM_IMAGE_BASE(val->object.iv));
     break;
   case MRB_TT_CLASS:
   case MRB_TT_MODULE:
@@ -1974,19 +1974,19 @@ print_each_object_cb(struct os_each_object_data *d, struct obj_list *item)
     else if ((no = search_iv_tblno(d, val->klass.iv)) >= 0)
       fprintf(d->wfile, ".iv = (struct iv_tbl *)&mrb_preset_iv_tbl_%d, ", no);
     else
-      fprintf(d->wfile, ".iv = (struct iv_tbl *)0x%p, ", OFFSET_FROM_IMAGE_BASE(val->klass.iv));
+      fprintf(d->wfile, ".iv = (struct iv_tbl *)0x%p, ", (void *)OFFSET_FROM_IMAGE_BASE(val->klass.iv));
     if (val->klass.mt == NULL)
       fprintf(d->wfile, ".mt = NULL, ");
     else if ((no = search_kh_mtno(d, val->klass.mt)) >= 0)
       fprintf(d->wfile, ".mt = (struct kh_mt *)&mrb_preset_kh_mt_%d, ", no);
     else
-      fprintf(d->wfile, ".mt = (struct kh_mt *)0x%p, ", OFFSET_FROM_IMAGE_BASE(val->klass.mt));
+      fprintf(d->wfile, ".mt = (struct kh_mt *)0x%p, ", (void *)OFFSET_FROM_IMAGE_BASE(val->klass.mt));
     if (val->klass.super == NULL)
       fprintf(d->wfile, ".super = NULL, ");
     else if ((no = search_objno(d, (struct RBasic *)val->klass.super)) >= 0)
       fprintf(d->wfile, ".super = (struct RClass *)&mrb_preset_object_%d.klass, ", no);
     else
-      fprintf(d->wfile, ".super = (struct RClass *)0x%p, ", OFFSET_FROM_IMAGE_BASE(val->klass.super));
+      fprintf(d->wfile, ".super = (struct RClass *)0x%p, ", (void *)OFFSET_FROM_IMAGE_BASE(val->klass.super));
     break;
   case MRB_TT_PROC:
     if (MRB_PROC_CFUNC_P(obj)) {
@@ -1999,40 +1999,40 @@ print_each_object_cb(struct os_each_object_data *d, struct obj_list *item)
           fprintf(d->wfile, ".body = { .func = (mrb_func_t)&((uint8_t *)%s)[%d] }, ", &si->name[0], offset);
       }
       else
-        fprintf(d->wfile, ".body = { .func = (mrb_func_t)0x%p }, ", OFFSET_FROM_IMAGE_BASE(val->proc.body.func));
+        fprintf(d->wfile, ".body = { .func = (mrb_func_t)0x%p }, ", (void *)OFFSET_FROM_IMAGE_BASE(val->proc.body.func));
     }
     else {
       no = search_irepno(d, val->proc.body.irep);
       if (no >= 0)
         fprintf(d->wfile, ".body = { .irep = (mrb_irep *)&mrb_preset_irep_%d }, ", no);
       else
-        fprintf(d->wfile, ".body = { .irep = (mrb_irep *)0x%p }, ", OFFSET_FROM_IMAGE_BASE(val->proc.body.irep));
+        fprintf(d->wfile, ".body = { .irep = (mrb_irep *)0x%p }, ", (void *)OFFSET_FROM_IMAGE_BASE(val->proc.body.irep));
     }
     if (val->proc.upper == NULL)
       fprintf(d->wfile, ".upper = NULL, ");
     else if ((no = search_objno(d, (struct RBasic *)val->proc.e.env)) >= 0)
       fprintf(d->wfile, ".upper = (struct RProc *)&mrb_preset_object_%d.proc, ", no);
     else
-      fprintf(d->wfile, ".upper = (struct RProc *)0x%p, ", OFFSET_FROM_IMAGE_BASE(val->proc.e.env));
+      fprintf(d->wfile, ".upper = (struct RProc *)0x%p, ", (void *)OFFSET_FROM_IMAGE_BASE(val->proc.e.env));
     if (val->proc.e.target_class == NULL)
       fprintf(d->wfile, ".e = { .target_class = NULL }, ");
     else if (val->proc.e.target_class->tt != MRB_TT_ENV) {
       if ((no = search_objno(d, (struct RBasic *)val->proc.e.target_class)) >= 0)
         fprintf(d->wfile, ".e = { .target_class = (struct RClass *)&mrb_preset_object_%d.klass }, ", no);
       else
-        fprintf(d->wfile, ".e = { .target_class = (struct RClass *)0x%p }, ", OFFSET_FROM_IMAGE_BASE(val->proc.e.target_class));
+        fprintf(d->wfile, ".e = { .target_class = (struct RClass *)0x%p }, ", (void *)OFFSET_FROM_IMAGE_BASE(val->proc.e.target_class));
     }
     else {
       if ((no = search_objno(d, (struct RBasic *)val->proc.e.env)) >= 0)
         fprintf(d->wfile, ".e = { .env = (struct REnv *)&mrb_preset_object_%d.env }, ", no);
       else
-        fprintf(d->wfile, ".e = { .env = (struct REnv *)0x%p }, ", OFFSET_FROM_IMAGE_BASE(val->proc.e.target_class));
+        fprintf(d->wfile, ".e = { .env = (struct REnv *)0x%p }, ", (void *)OFFSET_FROM_IMAGE_BASE(val->proc.e.target_class));
     }
     break;
   case MRB_TT_ARRAY:
     fprintf(d->wfile, ".as = { .heap = { .len = %d } }, ", val->array.as.heap.len);
     if (ARY_SHARED_P(obj))
-      fprintf(d->wfile, ".as = { .heap = { .aux = { .shared = (mrb_shared_array *)0x%p } } } }, ", OFFSET_FROM_IMAGE_BASE(val->array.as.heap.aux.shared));
+      fprintf(d->wfile, ".as = { .heap = { .aux = { .shared = (mrb_shared_array *)0x%p } } } }, ", (void *)OFFSET_FROM_IMAGE_BASE(val->array.as.heap.aux.shared));
     else
       fprintf(d->wfile, "{ .capa = %d }, ", val->array.as.heap.aux.capa);
     if (val->array.as.heap.ptr == NULL)
@@ -2040,7 +2040,7 @@ print_each_object_cb(struct os_each_object_data *d, struct obj_list *item)
     else if ((no = search_arrayno(d, &val->array)) >= 0)
       fprintf(d->wfile, ".as = { .heap = { .ptr = (mrb_value *)&array_datas_%d } }, ", no);
     else
-      fprintf(d->wfile, ".as = { .heap = { .ptr = (mrb_value *)0x%p } }, ", OFFSET_FROM_IMAGE_BASE(val->array.as.heap.ptr));
+      fprintf(d->wfile, ".as = { .heap = { .ptr = (mrb_value *)0x%p } }, ", (void *)OFFSET_FROM_IMAGE_BASE(val->array.as.heap.ptr));
     break;
   case MRB_TT_HASH:
     if (val->hash.iv == NULL)
@@ -2048,8 +2048,8 @@ print_each_object_cb(struct os_each_object_data *d, struct obj_list *item)
     else if ((no = search_iv_tblno(d, val->hash.iv)) >= 0)
       fprintf(d->wfile, ".iv = &mrb_preset_iv_tbl_%d, ", no);
     else
-      fprintf(d->wfile, ".iv = (struct iv_tbl *)0x%p, ", OFFSET_FROM_IMAGE_BASE(val->hash.iv));
-    fprintf(d->wfile, ".ht = (struct kh_ht *)0x%p, ", OFFSET_FROM_IMAGE_BASE(val->hash.ht));
+      fprintf(d->wfile, ".iv = (struct iv_tbl *)0x%p, ", (void *)OFFSET_FROM_IMAGE_BASE(val->hash.iv));
+    fprintf(d->wfile, ".ht = (struct kh_ht *)0x%p, ", (void *)OFFSET_FROM_IMAGE_BASE(val->hash.ht));
     break;
   case MRB_TT_STRING:
     if (RSTR_EMBED_P(obj)) {
@@ -2060,7 +2060,7 @@ print_each_object_cb(struct os_each_object_data *d, struct obj_list *item)
     else {
       fprintf(d->wfile, ".as = { .heap = { .len = %d,", val->string.as.heap.len);
       if (RSTR_SHARED_P(obj))
-        fprintf(d->wfile, ".aux = { .shared = (struct mrb_shared_string *)0x%p }, ", OFFSET_FROM_IMAGE_BASE(val->string.as.heap.aux.shared));
+        fprintf(d->wfile, ".aux = { .shared = (struct mrb_shared_string *)0x%p }, ", (void *)OFFSET_FROM_IMAGE_BASE(val->string.as.heap.aux.shared));
       else
         fprintf(d->wfile, ".aux = { .capa = %d }, ", val->string.as.heap.aux.capa);
       if ((val->string.as.heap.ptr == NULL) || (val->string.as.heap.len <= 0)) {
@@ -2077,7 +2077,7 @@ print_each_object_cb(struct os_each_object_data *d, struct obj_list *item)
     }
     break;
   case MRB_TT_RANGE:
-    fprintf(d->wfile, ".edges = (mrb_range_edges *)0x%p, .excl = %d, ", OFFSET_FROM_IMAGE_BASE(val->range.edges), val->range.excl);
+    fprintf(d->wfile, ".edges = (mrb_range_edges *)0x%p, .excl = %d, ", (void *)OFFSET_FROM_IMAGE_BASE(val->range.edges), val->range.excl);
     break;
   case MRB_TT_EXCEPTION:
     if (val->exc.iv == NULL)
@@ -2085,7 +2085,7 @@ print_each_object_cb(struct os_each_object_data *d, struct obj_list *item)
     else if ((no = search_iv_tblno(d, val->exc.iv)) >= 0)
       fprintf(d->wfile, ".iv = (struct iv_tbl *)&mrb_preset_iv_tbl_%d, ", no);
     else
-      fprintf(d->wfile, ".iv = (struct iv_tbl *)0x%p, ", OFFSET_FROM_IMAGE_BASE(val->exc.iv));
+      fprintf(d->wfile, ".iv = (struct iv_tbl *)0x%p, ", (void *)OFFSET_FROM_IMAGE_BASE(val->exc.iv));
     break;
   case MRB_TT_FILE:
     break;
@@ -2105,7 +2105,7 @@ print_each_object_cb(struct os_each_object_data *d, struct obj_list *item)
     else if ((no = search_iv_tblno(d, val->data.iv)) >= 0)
       fprintf(d->wfile, ".iv = (struct iv_tbl *)&mrb_preset_iv_tbl_%d, ", no);
     else
-      fprintf(d->wfile, ".iv = (struct iv_tbl *)0x%p, ", OFFSET_FROM_IMAGE_BASE(val->data.iv));
+      fprintf(d->wfile, ".iv = (struct iv_tbl *)0x%p, ", (void *)OFFSET_FROM_IMAGE_BASE(val->data.iv));
     if ((si = search_symbol_item(d, OFFSET_FROM_IMAGE_BASE(val->data.type))) != NULL) {
       int offset = OFFSET_FROM_IMAGE_BASE(val->data.type) - si->addr;
       si->data = 1;
@@ -2115,7 +2115,7 @@ print_each_object_cb(struct os_each_object_data *d, struct obj_list *item)
         fprintf(d->wfile, ".type = (const mrb_data_type *)&((uint8_t *)%s)[%d], ", &si->name[0], offset);
     }
     else
-      fprintf(d->wfile, ".type = (const mrb_data_type *)0x%p, ", OFFSET_FROM_IMAGE_BASE(val->data.type));
+      fprintf(d->wfile, ".type = (const mrb_data_type *)0x%p, ", (void *)OFFSET_FROM_IMAGE_BASE(val->data.type));
     if ((si = search_symbol_item(d, OFFSET_FROM_IMAGE_BASE(val->data.data))) != NULL) {
       int offset = OFFSET_FROM_IMAGE_BASE(val->data.data) - si->addr;
       si->data = 1;
@@ -2125,7 +2125,7 @@ print_each_object_cb(struct os_each_object_data *d, struct obj_list *item)
         fprintf(d->wfile, ".data = (void *)&((uint8_t *)%s)[%d], ", &si->name[0], offset);
     }
     else
-      fprintf(d->wfile, ".data = (void *)0x%p, ", OFFSET_FROM_IMAGE_BASE(val->data.data));
+      fprintf(d->wfile, ".data = (void *)0x%p, ", (void *)OFFSET_FROM_IMAGE_BASE(val->data.data));
     break;
   case MRB_TT_FIBER:
     val->fiber;
@@ -2156,7 +2156,7 @@ print_preset_object(struct os_each_object_data *d, const char *name, struct RObj
   else if ((no = search_objno(d, (struct RBasic *)obj)) >= 0)
     fprintf(d->wfile, "\t.%s = (struct RObject *)&mrb_preset_object_%d.object,\n", name, no);
   else
-    fprintf(d->wfile, "\t.%s = (struct RObject *)0x%p,\n", name, OFFSET_FROM_IMAGE_BASE(obj));
+    fprintf(d->wfile, "\t.%s = (struct RObject *)0x%p,\n", name, (void *)OFFSET_FROM_IMAGE_BASE(obj));
 }
 
 static void
@@ -2168,7 +2168,7 @@ print_preset_class(struct os_each_object_data *d, const char *name, struct RClas
   else if ((no = search_objno(d, (struct RBasic *)obj)) >= 0)
     fprintf(d->wfile, "\t.%s = (struct RClass *)&mrb_preset_object_%d.klass,\n", name, no);
   else
-    fprintf(d->wfile, "\t.%s = (struct RClass *)0x%p,\n", name, OFFSET_FROM_IMAGE_BASE(obj));
+    fprintf(d->wfile, "\t.%s = (struct RClass *)0x%p,\n", name, (void *)OFFSET_FROM_IMAGE_BASE(obj));
 }
 
 static void
@@ -2180,7 +2180,7 @@ print_preset_context(struct os_each_object_data *d, const char *name, struct mrb
   else if ((no = search_contextno(d, ctx)) >= 0)
     fprintf(d->wfile, "\t.%s = (struct mrb_context *)&mrb_preset_context_%d,\n", name, no);
   else
-    fprintf(d->wfile, "\t.%s = (struct mrb_context *)0x%p,\n", name, OFFSET_FROM_IMAGE_BASE(ctx));
+    fprintf(d->wfile, "\t.%s = (struct mrb_context *)0x%p,\n", name, (void *)OFFSET_FROM_IMAGE_BASE(ctx));
 }
 
 static void
@@ -2192,7 +2192,7 @@ print_preset_iv(struct os_each_object_data *d, const char *name, struct iv_tbl *
   else if ((no = search_iv_tblno(d, iv)) >= 0)
     fprintf(d->wfile, "\t.%s = (struct iv_tbl *)&mrb_preset_iv_tbl_%d,\n", name, no);
   else
-    fprintf(d->wfile, "\t.%s = (struct iv_tbl *)0x%p,\n", name, OFFSET_FROM_IMAGE_BASE(iv));
+    fprintf(d->wfile, "\t.%s = (struct iv_tbl *)0x%p,\n", name, (void *)OFFSET_FROM_IMAGE_BASE(iv));
 }
 
 static int
@@ -2533,9 +2533,11 @@ dump(const char *filename, struct dump_args *args)
   print_preset_class(&d, "hash_class", mrb->hash_class);
   print_preset_class(&d, "range_class", mrb->range_class);
 
+  fprintf(d.wfile, "#ifndef MRB_WITHOUT_FLOAT\n");
 #ifndef MRB_WITHOUT_FLOAT
   print_preset_class(&d, "float_class", mrb->float_class);
 #endif
+  fprintf(d.wfile, "#endif\n");
   print_preset_class(&d, "fixnum_class", mrb->fixnum_class);
   print_preset_class(&d, "true_class", mrb->true_class);
   print_preset_class(&d, "false_class", mrb->false_class);
@@ -2546,37 +2548,56 @@ dump(const char *filename, struct dump_args *args)
   fprintf(d.wfile, "\t.mems = NULL,\n");
   fprintf(d.wfile, "\t.gc = { 0 },\n");
 
+  fprintf(d.wfile, "#ifdef MRB_METHOD_CACHE\n");
 #ifdef MRB_METHOD_CACHE
   fprintf(d.wfile, "\t.cache = { 0 },\n");
+#else
+  fprintf(d.wfile, "\t.cache = { 0 },\n");
 #endif
+  fprintf(d.wfile, "#endif\n");
 
   fprintf(d.wfile, "\t.symidx = (sizeof(mrb_preset_symbols) / sizeof(mrb_preset_symbols[0])),\n");
   fprintf(d.wfile, "\t.name2sym = NULL,\n");
   fprintf(d.wfile, "\t.symtbl = NULL,\n");
   fprintf(d.wfile, "\t.symcapa = 0,\n");
 
+  fprintf(d.wfile, "#ifdef MRB_ENABLE_DEBUG_HOOK\n");
 #ifdef MRB_ENABLE_DEBUG_HOOK
   fprintf(d.wfile, "\t.code_fetch_hook = NULL,\n");
   fprintf(d.wfile, "\t.debug_op_hook = NULL,\n");
+#else
+  fprintf(d.wfile, "\t.code_fetch_hook = NULL,\n");
+  fprintf(d.wfile, "\t.debug_op_hook = NULL,\n");
 #endif
+  fprintf(d.wfile, "#endif\n");
 
+  fprintf(d.wfile, "#ifdef MRB_BYTECODE_DECODE_OPTION\n");
 #ifdef MRB_BYTECODE_DECODE_OPTION
   fprintf(d.wfile, "\t.bytecode_decoder = NULL,\n");
+#else
+  fprintf(d.wfile, "\t.bytecode_decoder = NULL,\n");
 #endif
+  fprintf(d.wfile, "#endif\n");
 
   print_preset_class(&d, "eException_class", mrb->eException_class);
   print_preset_class(&d, "eStandardError_class", mrb->eStandardError_class);
   print_preset_object(&d, "nomem_err", mrb->nomem_err);
   print_preset_object(&d, "stack_err", mrb->stack_err);
+  fprintf(d.wfile, "#ifdef MRB_GC_FIXED_ARENA\n");
 #ifdef MRB_GC_FIXED_ARENA
   print_preset_object(&d, "arena_err", mrb->arena_err);
+#else
+  fprintf(d.wfile, "\t.arena_err = NULL,\n");
 #endif
+  fprintf(d.wfile, "#endif\n");
   fprintf(d.wfile, "\t.ud = NULL,\n");
+  fprintf(d.wfile, "#ifdef MRB_FIXED_STATE_ATEXIT_STACK\n");
 #ifdef MRB_FIXED_STATE_ATEXIT_STACK
   fprintf(d.wfile, "\t.atexit_stack = { 0 },\n");
 #else
   fprintf(d.wfile, "\t.atexit_stack = NULL,\n");
 #endif
+  fprintf(d.wfile, "#endif\n");
   fprintf(d.wfile, "\t.atexit_stack_len = 0\n");
   fprintf(d.wfile, "};\n\n");
 

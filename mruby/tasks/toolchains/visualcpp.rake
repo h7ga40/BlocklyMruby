@@ -1,11 +1,13 @@
 MRuby::Toolchain.new(:visualcpp) do |conf, _params|
+  conf.file_separator = '\\'
+
   conf.cc do |cc|
     cc.command = ENV['CC'] || 'cl.exe'
-    cc.flags = [ENV['CFLAGS'] || %w(/c /nologo /W4 /GS /analyze- /Zc:wchar_t /ZI /Gm /Od /Zc:inline /fp:precise /errorReport:prompt /WX- /Zc:forScope /RTC1 /Gd /Oy- /MDd /EHsc /DWIN32 /D_DEBUG /D_CONSOLE /D_CRT_SECURE_NO_WARNINGS)]
+    cc.flags = [ENV['CFLAGS'] || %w(/c /nologo /utf-8 /W4 /GS /analyze- /Zc:wchar_t /Zi /O2 /Zc:inline /fp:precise /errorReport:prompt /WX- /Zc:forScope /Gd /Oy- /MD /EHsc /DWIN32 /DNDEBUG /D_CONSOLE /D_CRT_SECURE_NO_WARNINGS)]
     cc.flags << %w(/we4002 /we4003 /we4005 /we4007 /we4010 /we4013 /we4015 /we4020 /we4022 /we4024 /we4028 /we4029 /we4031 /we4033 /we4034 /we4042 /we4047 /we4048 /we4049 /we4056 /we4067 /we4074 /we4079 /we4083 /we4088 /we4089 /we4090 /we4091 /we4094 /we4096 /we4098 /we4099 /we4113 /we4133 /we4715 /we4716)
     cc.flags << %w(/wd4214 /wd4100 /wd4996)
-    cc.flags << "/Fd\"#{conf.build_dir}\\vc140.pdb\""
-    cc.flags << "/Fp\"%{outdir}\\%{outfilebase}.pch\""
+    cc.flags << ["/Fd\"#{conf.build_dir.gsub('/', conf.file_separator)}\\vc142.pdb\""]
+    cc.flags << ["/Fp\"%{outdir}\\%{outfilebase}.pch\""]
     cc.defines = %w(DISABLE_GEMS MRB_STACK_EXTEND_DOUBLING)
     cc.option_include_path = '/I%s'
     cc.option_define = '/D%s'
@@ -16,11 +18,11 @@ MRuby::Toolchain.new(:visualcpp) do |conf, _params|
 
   conf.cxx do |cxx|
     cxx.command = ENV['CXX'] || 'cl.exe'
-    cxx.flags = [ENV['CXXFLAGS'] || ENV['CFLAGS'] || %w(/c /nologo /W4 /GS /analyze- /Zc:wchar_t /ZI /Gm /Od /Zc:inline /fp:precise /errorReport:prompt /WX- /Zc:forScope /RTC1 /Gd /Oy- /MDd /EHsc /DWIN32 /D_DEBUG /D_CONSOLE /D_CRT_SECURE_NO_WARNINGS)]
+    cxx.flags = [ENV['CXXFLAGS'] || ENV['CFLAGS'] || %w(/c /nologo /utf-8 /W4 /GS /analyze- /Zc:wchar_t /Zi /O2 /Zc:inline /fp:precise /errorReport:prompt /WX- /Zc:forScope /Gd /Oy- /MD /EHsc /DWIN32 /DNDEBUG /D_CONSOLE /D_CRT_SECURE_NO_WARNINGS)]
     cxx.flags << %w(/we4002 /we4003 /we4005 /we4007 /we4010 /we4013 /we4015 /we4020 /we4022 /we4024 /we4028 /we4029 /we4031 /we4033 /we4034 /we4042 /we4047 /we4048 /we4049 /we4056 /we4067 /we4074 /we4079 /we4083 /we4088 /we4089 /we4090 /we4091 /we4094 /we4096 /we4098 /we4099 /we4113 /we4133 /we4715 /we4716)
     cxx.flags << %w(/wd4214 /wd4100 /wd4996)
-    cxx.flags << "/Fd\"#{conf.build_dir}\\vc140.pdb\""
-    cxx.flags << "/Fp\"%{outdir}\\%{outfilebase}.pch\""
+    cxx.flags << ["/Fd\"#{conf.build_dir.gsub('/', conf.file_separator)}\\vc142.pdb\""]
+    cxx.flags << ["/Fp\"%{outdir}\\%{outfilebase}.pch\""]
     cxx.defines = %w(DISABLE_GEMS MRB_STACK_EXTEND_DOUBLING)
     cxx.option_include_path = '/I%s'
     cxx.option_define = '/D%s'
@@ -31,10 +33,11 @@ MRuby::Toolchain.new(:visualcpp) do |conf, _params|
 
   conf.linker do |linker|
     linker.command = ENV['LD'] || 'link.exe'
-    linker.flags = [ENV['LDFLAGS'] || %w(/MANIFEST /NXCOMPAT /DYNAMICBASE /MACHINE:X86 /INCREMENTAL /SUBSYSTEM:CONSOLE /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /ERRORREPORT:PROMPT /NOLOGO /TLBID:1)]
-    linker.flags << "/PDB:\"#{conf.build_dir}\\vc140.pdb\""
-    #linker.flags << "/PGD:\"%{outdir}\\%{outfilebase}.pgd\""
-    linker.flags << "/ManifestFile:\"%{outdir}\\%{outfilebase}.exe.intermediate.manifest\""
+    linker.flags = [ENV['LDFLAGS'] || %w(/MANIFEST /NXCOMPAT /DYNAMICBASE /DEBUG /OPT:REF /INCREMENTAL:NO /SUBSYSTEM:CONSOLE /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /OPT:ICF /ERRORREPORT:PROMPT /NOLOGO /TLBID:1)]
+    #linker.flags = [ENV['LDFLAGS'] || %w(/MANIFEST /LTCG:incremental /NXCOMPAT /DYNAMICBASE /DEBUG /OPT:REF /INCREMENTAL:NO /SUBSYSTEM:CONSOLE /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /OPT:ICF /ERRORREPORT:PROMPT /NOLOGO /TLBID:1)]
+    #linker.flags << ["/PGD:\"%{outdir}\\%{outfilebase}.pgd\""]
+    linker.flags << ["/PDB:\"#{conf.build_dir.gsub('/', conf.file_separator)}\\vc142.pdb\""]
+    linker.flags << ["/ManifestFile:\"%{outdir}\\%{outfilebase}.exe.intermediate.manifest\""]
     linker.libraries = %w()
     linker.library_paths = %w()
     linker.option_library = '%s.lib'
@@ -62,8 +65,6 @@ MRuby::Toolchain.new(:visualcpp) do |conf, _params|
     exts.executable = '.exe'
     exts.library = '.lib'
   end
-
-  conf.file_separator = '\\'
 
   # Unreliable detection and will result in invalid encoding errors for localized versions of Visual C++
   # if require 'open3'

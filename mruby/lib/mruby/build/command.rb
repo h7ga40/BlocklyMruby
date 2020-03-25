@@ -147,6 +147,7 @@ module MRuby
 
     def initialize(build)
       super
+      @build = build
       @command = ENV['LD'] || 'ld'
       @flags = (ENV['LDFLAGS'] || [])
       @flags_before_libraries, @flags_after_libraries = [], []
@@ -183,14 +184,14 @@ module MRuby
                              :flags_before_libraries => [flags_before_libraries, _flags_before_libraries].flatten.join(' '),
                              :flags_after_libraries => [flags_after_libraries, _flags_after_libraries].flatten.join(' '),
                              :libs => library_flags.join(' '),
-                             :outdir => File.dirname(outfile), :outfilebase => File.basename(outfile, ".*") }
+                             :outdir => File.dirname(outfile).gsub('/', @build.file_separator), :outfilebase => File.basename(outfile, ".*") }
       else
         _run link_options, { :flags => all_flags(_library_paths, _flags),
                              :outfile => filename(outfile) , :objs => filename(objfiles).join(' '),
                              :flags_before_libraries => [flags_before_libraries, _flags_before_libraries].flatten.join(' '),
                              :flags_after_libraries => [flags_after_libraries, _flags_after_libraries].flatten.join(' '),
                              :libs => library_flags.join(' '),
-                             :outdir => File.dirname(outfile), :outfilebase => File.basename(outfile, ".*") }
+                             :outdir => File.dirname(outfile).gsub('/', @build.file_separator), :outfilebase => File.basename(outfile, ".*") }
       end
     end
   end

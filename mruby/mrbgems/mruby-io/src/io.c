@@ -1001,10 +1001,10 @@ mrb_io_read_data_pending(mrb_state *mrb, mrb_value io)
   return 0;
 }
 
-#ifndef _WIN32
 static mrb_value
 mrb_io_s_pipe(mrb_state *mrb, mrb_value klass)
 {
+#ifndef _WIN32
   mrb_value r = mrb_nil_value();
   mrb_value w = mrb_nil_value();
   struct mrb_io *fptr_r;
@@ -1036,8 +1036,10 @@ mrb_io_s_pipe(mrb_state *mrb, mrb_value klass)
   DATA_PTR(w)  = fptr_w;
 
   return mrb_assoc_new(mrb, r, w);
-}
+#else
+  return mrb_nil_value();
 #endif
+}
 
 PRESET_REF mrb_value
 mrb_io_s_select(mrb_state *mrb, mrb_value klass)
@@ -1303,9 +1305,7 @@ mrb_init_io(mrb_state *mrb)
   mrb_define_class_method(mrb, io, "for_fd",  mrb_io_s_for_fd,   MRB_ARGS_ANY());
   mrb_define_class_method(mrb, io, "select",  mrb_io_s_select,  MRB_ARGS_ANY());
   mrb_define_class_method(mrb, io, "sysopen", mrb_io_s_sysopen, MRB_ARGS_ANY());
-#ifndef _WIN32
   mrb_define_class_method(mrb, io, "_pipe", mrb_io_s_pipe, MRB_ARGS_NONE());
-#endif
 
   mrb_define_method(mrb, io, "initialize", mrb_io_initialize, MRB_ARGS_ANY());    /* 15.2.20.5.21 (x)*/
   mrb_define_method(mrb, io, "initialize_copy", mrb_io_initialize_copy, MRB_ARGS_REQ(1));

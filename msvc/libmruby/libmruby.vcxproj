@@ -244,38 +244,38 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{D4378089-A3B4-4F64-980B-BF69015E30B8}</ProjectGuid>
     <Keyword>MakeFileProj</Keyword>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Makefile</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugPreset|Win32'" Label="Configuration">
     <ConfigurationType>Makefile</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Makefile</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugPreset|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -303,147 +303,87 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <NMakeBuildCommandLine>PATH=%PATH%;$(ProjectDir)..\tools\bin
-
 cd $(ProjectDir)..\..\mruby
-
 ruby minirake
-
 cd $(ProjectDir)
-
 if not exist $(Configuration) mkdir $(Configuration)
-
 copy /B /Y ..\..\mruby\build\host-debug\lib\$(TargetName).lib $(Configuration)\
-
-copy /B /Y ..\..\mruby\build\host-debug\vc140.pdb $(Configuration)\$(TargetName).pdb
-
-copy /B /Y ..\..\mruby\build\host-debug\vc140.idb $(Configuration)\$(TargetName).idb</NMakeBuildCommandLine>
+copy /B /Y ..\..\mruby\build\host-debug\vc142.pdb $(Configuration)\$(TargetName).pdb
+copy /B /Y ..\..\mruby\build\host-debug\vc142.idb $(Configuration)\$(TargetName).idb</NMakeBuildCommandLine>
     <NMakeOutput>$(Configuration)\libmruby.lib</NMakeOutput>
     <NMakeCleanCommandLine>PATH=%PATH%;$(ProjectDir)..\tools\bin
-
 cd $(ProjectDir)
-
 del $(Configuration)\$(TargetName).lib
-
 cd $(ProjectDir)..\..\mruby
-
 ruby minirake clean</NMakeCleanCommandLine>
     <NMakeReBuildCommandLine>PATH=%PATH%;$(ProjectDir)..\tools\bin
-
 cd $(ProjectDir)
-
 del $(Configuration)\$(TargetName).lib
-
 cd $(ProjectDir)..\..\mruby
-
 ruby minirake clean all
-
 cd $(ProjectDir)
-
 if not exist $(Configuration) mkdir $(Configuration)
-
 copy /B /Y ..\..\mruby\build\host-debug\lib\$(TargetName).lib $(Configuration)\
-
-copy /B /Y ..\..\mruby\build\host-debug\vc140.pdb $(Configuration)\$(TargetName).pdb
-
-copy /B /Y ..\..\mruby\build\host-debug\vc140.idb $(Configuration)\$(TargetName).idb</NMakeReBuildCommandLine>
+copy /B /Y ..\..\mruby\build\host-debug\vc142.pdb $(Configuration)\$(TargetName).pdb
+copy /B /Y ..\..\mruby\build\host-debug\vc142.idb $(Configuration)\$(TargetName).idb</NMakeReBuildCommandLine>
     <NMakePreprocessorDefinitions>WIN32;_DEBUG;MRB_ENABLE_DEBUG_HOOK;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <OutDir>$(ProjectDir)\</OutDir>
     <NMakeIncludeSearchPath>..\..\mruby\include;..\..\asp\arch;..\..\asp\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugPreset|Win32'">
     <NMakeBuildCommandLine>PATH=%PATH%;$(ProjectDir)..\tools\bin
-
 cd $(ProjectDir)..\..\mruby
-
 ruby minirake
-
 cd $(ProjectDir)
-
 if not exist $(Configuration) mkdir $(Configuration)
-
 copy /B /Y ..\..\mruby\build\host-preset\lib\$(TargetName).lib $(Configuration)\
-
-copy /B /Y ..\..\mruby\build\host-preset\vc140.pdb $(Configuration)\$(TargetName).pdb
-
-copy /B /Y ..\..\mruby\build\host-preset\vc140.idb $(Configuration)\$(TargetName).idb</NMakeBuildCommandLine>
+copy /B /Y ..\..\mruby\build\host-preset\vc142.pdb $(Configuration)\$(TargetName).pdb
+copy /B /Y ..\..\mruby\build\host-preset\vc142.idb $(Configuration)\$(TargetName).idb</NMakeBuildCommandLine>
     <NMakeOutput>$(Configuration)\libmruby.lib</NMakeOutput>
     <NMakeCleanCommandLine>PATH=%PATH%;$(ProjectDir)..\tools\bin
-
 cd $(ProjectDir)
-
 del $(Configuration)\$(TargetName).lib
-
 cd $(ProjectDir)..\..\mruby
-
 ruby minirake clean</NMakeCleanCommandLine>
     <NMakeReBuildCommandLine>PATH=%PATH%;$(ProjectDir)..\tools\bin
-
 cd $(ProjectDir)
-
 del $(Configuration)\$(TargetName).lib
-
 cd $(ProjectDir)..\..\mruby
-
 ruby minirake clean all
-
 cd $(ProjectDir)
-
 if not exist $(Configuration) mkdir $(Configuration)
-
 copy /B /Y ..\..\mruby\build\host-preset\lib\$(TargetName).lib $(Configuration)\
-
-copy /B /Y ..\..\mruby\build\host-preset\vc140.pdb $(Configuration)\$(TargetName).pdb
-
-copy /B /Y ..\..\mruby\build\host-preset\vc140.idb $(Configuration)\$(TargetName).idb</NMakeReBuildCommandLine>
+copy /B /Y ..\..\mruby\build\host-preset\vc142.pdb $(Configuration)\$(TargetName).pdb
+copy /B /Y ..\..\mruby\build\host-preset\vc142.idb $(Configuration)\$(TargetName).idb</NMakeReBuildCommandLine>
     <NMakePreprocessorDefinitions>WIN32;_DEBUG;MRB_ENABLE_DEBUG_HOOK;MRB_USE_PRESET_SYMBOLS;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <OutDir>$(ProjectDir)\</OutDir>
     <NMakeIncludeSearchPath>..\..\mruby\include;..\..\asp\arch;..\..\asp\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <NMakeBuildCommandLine>PATH=%PATH%;$(ProjectDir)..\tools\bin
-
 cd $(ProjectDir)..\..\mruby
-
 ruby minirake
-
 cd $(ProjectDir)
-
 if not exist $(Configuration) mkdir $(Configuration)
-
 copy /B /Y ..\..\mruby\build\host\lib\$(TargetName).lib $(Configuration)\
-
-copy /B /Y ..\..\mruby\build\host\vc140.pdb $(Configuration)\$(TargetName).pdb
-
-copy /B /Y ..\..\mruby\build\host\vc140.idb $(Configuration)\$(TargetName).idb</NMakeBuildCommandLine>
+copy /B /Y ..\..\mruby\build\host\vc142.pdb $(Configuration)\$(TargetName).pdb
+copy /B /Y ..\..\mruby\build\host\vc142.idb $(Configuration)\$(TargetName).idb</NMakeBuildCommandLine>
     <NMakeOutput>$(Configuration)\libmruby.lib</NMakeOutput>
     <NMakeCleanCommandLine>PATH=%PATH%;$(ProjectDir)..\tools\bin
-
 cd $(ProjectDir)
-
 del $(Configuration)\$(TargetName).lib
-
 cd $(ProjectDir)..\..\mruby
-
 ruby minirake clean</NMakeCleanCommandLine>
     <NMakeReBuildCommandLine>PATH=%PATH%;$(ProjectDir)..\tools\bin
-
 cd $(ProjectDir)
-
 del $(Configuration)\$(TargetName).lib
-
 cd $(ProjectDir)..\..\mruby
-
 ruby minirake clean all
-
 cd $(ProjectDir)
-
 if not exist $(Configuration) mkdir $(Configuration)
-
 copy /B /Y ..\..\mruby\build\host\lib\$(TargetName).lib $(Configuration)\
-
-copy /B /Y ..\..\mruby\build\host\vc140.pdb $(Configuration)\$(TargetName).pdb
-
-copy /B /Y ..\..\mruby\build\host\vc140.idb $(Configuration)\$(TargetName).idb</NMakeReBuildCommandLine>
+copy /B /Y ..\..\mruby\build\host\vc142.pdb $(Configuration)\$(TargetName).pdb
+copy /B /Y ..\..\mruby\build\host\vc142.idb $(Configuration)\$(TargetName).idb</NMakeReBuildCommandLine>
     <NMakePreprocessorDefinitions>WIN32;_DEBUG;MRB_GC_STRESS;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
     <OutDir>$(ProjectDir)\</OutDir>
     <NMakeIncludeSearchPath>..\..\mruby\include;..\..\asp\arch;..\..\asp\include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
